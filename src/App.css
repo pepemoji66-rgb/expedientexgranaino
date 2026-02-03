@@ -1,0 +1,203 @@
+/* RESET PARA QUE NADA SOBRE */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    overflow-x: hidden;
+    height: 100%;
+}
+
+/* CONTENEDOR PRINCIPAL CON LA ALHAMBRA */
+.App {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    /* La imagen se carga desde el App.js, aquí solo damos estilo */
+}
+
+/* BOTÓN HAMBURGUESA ARRIBA A LA DERECHA */
+.hamburger {
+    position: fixed;
+    top: 20px;
+    right: 20px; /* Movido a la derecha como pediste */
+    z-index: 1000;
+    background: #00ff41;
+    color: black;
+    border: none;
+    font-size: 24px;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.6);
+    transition: 0.3s;
+}
+
+.hamburger:hover {
+    transform: scale(1.1);
+    background: white;
+}
+
+/* MENÚ LATERAL QUE SE DESPLIEGA */
+.sidebar {
+    position: fixed;
+    right: -300px; /* Escondido a la derecha */
+    width: 280px;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border-left: 2px solid #00ff41;
+    transition: 0.4s ease-in-out;
+    z-index: 999;
+    padding-top: 80px;
+}
+
+.sidebar.open {
+    right: 0; /* Aparece por la derecha */
+}
+
+.nav-links {
+    list-style: none;
+    padding: 0 30px;
+}
+
+.nav-links li {
+    margin-bottom: 25px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.nav-links a:hover {
+    color: #00ff41;
+}
+
+/* AJUSTE PARA QUE TODO QUEPE EN UNA PANTALLA */
+.home-layout {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ocupa justo el alto de la pantalla */
+    text-align: center;
+}
+
+/* REUTILIZO TUS BOTONES DE CIERRE QUE ME HAS PASADO */
+.btn-logout-usuario {
+    background: transparent;
+    border: 1px solid #00ff41;
+    color: #00ff41;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+.btn-logout-usuario:hover {
+    background: #00ff41;
+    color: black;
+}
+
+/* TABLAS Y ADMIN (Para cuando entres al panel) */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+    margin-top: 10px;
+}
+
+.admin-table th, .admin-table td {
+    padding: 12px;
+    border: 1px solid #333;
+    text-align: left;
+}
+
+.admin-table th {
+    background: rgba(0, 255, 65, 0.1);
+    color: #00ff41;
+}
+
+.btn-delete {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    transition: 0.3s;
+}
+
+.btn-delete:hover {
+    background: #b30000;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+    /* --- BLOQUE DE UNIFICACIÓN DE ATMÓSFERA --- */
+
+:root {
+  --color-principal: #00ff41; /* Color por defecto */
+}
+
+/* Forzamos a que los textos y títulos sigan el tema */
+.neon-text-green, 
+.central-titulo, 
+.tabla-expedientes,
+.btn-abrir,
+h1, h2, th {
+  color: var(--color-principal) !important;
+  border-color: var(--color-principal) !important;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Unificamos los bordes neón */
+.neon-border, 
+table, 
+thead tr {
+  border-color: var(--color-principal) !important;
+}
+
+/* Estilo para los botones de la tabla de expedientes */
+.btn-abrir, 
+.forms-btn-home {
+  color: var(--color-principal) !important;
+  border: 1px solid var(--color-principal) !important;
+  background: transparent !important;
+  cursor: pointer;
+}
+
+.btn-abrir:hover, 
+.forms-btn-home:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 0 10px var(--color-principal) !important;
+}
+
+/* CORRECCIÓN DEL ERROR DE BORRADO (btn-delete) */
+.btn-delete { 
+    background: #ff4444 !important; 
+    color: white !important;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-delete:hover {
+    background: #cc0000 !important;
+}
+
+/* --- FIN DEL ARCHIVO --- */

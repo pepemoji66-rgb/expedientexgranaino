@@ -1,0 +1,131 @@
+.registro-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    width: 100%;
+    position: relative;
+}
+
+.formulario-contenedor {
+    background: rgba(18, 18, 18, 0.95);
+    border: 1px solid #00ff41;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 500px;
+    padding: 0;
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+    overflow: hidden;
+}
+
+.tabs-registro {
+    display: flex;
+    background: #0d0d0d;
+}
+
+.tabs-registro button {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    background: none;
+    color: #444;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.tabs-registro button.active {
+    background: #1a1a1a;
+    color: #00ff41;
+    border-bottom: 2px solid #00ff41;
+}
+
+.form-bunker {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.titulo-form {
+    color: #00ff41;
+    text-align: center;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.sub-form {
+    color: #888;
+    text-align: center;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+}
+
+.form-bunker input {
+    background: #050505;
+    border: 1px solid #222;
+    padding: 12px;
+    color: white;
+    border-radius: 5px;
+}
+
+.form-bunker input:focus {
+    border-color: #00ff41;
+    outline: none;
+}
+
+.btn-ejecutar {
+    background: #00ff41;
+    color: black;
+    border: none;
+    padding: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.btn-ejecutar span {
+    font-size: 0.7rem;
+    margin-top: 3px;
+}
+
+/* BRÚJULAS DE RELLENO */
+.decoracion-brujula {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    border-radius: 50%;
+}
+
+.left { left: 10%; top: 20%; }
+.right { right: 10%; bottom: 20%; }
+
+.radar-line {
+    width: 50%;
+    height: 2px;
+    background: #00ff41;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: left;
+    animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+    .decoracion-brujula { display: none; }
+}

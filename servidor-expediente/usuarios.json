@@ -1,0 +1,17 @@
+{
+  "usuarios": [],
+  "historias": [{
+  "usuarios": [
+    { "nombre": "Jose Jefe", "email": "admin@admin.com" }
+  ],
+  "historias": [
+    {
+      "id": 1,
+      "titulo": "Expediente de Prueba",
+      "contenido": "Si ves esto, es que el búnker está conectado.",
+      "usuario": "Jose",
+      "estado": "pendiente"
+    }
+  ]
+}]
+}

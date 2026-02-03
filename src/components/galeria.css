@@ -1,0 +1,203 @@
+.galeria-page {
+    padding: 100px 20px 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #fff;
+}
+
+.galeria-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.titulo-neon {
+    font-size: 3rem;
+    color: var(--color-principal);
+    text-shadow: 0 0 10px var(--color-principal);
+    letter-spacing: 5px;
+}
+
+/* Formulario */
+.form-subida-img {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border: 1px solid var(--color-principal);
+    margin-bottom: 50px;
+    border-radius: 5px;
+}
+
+.form-subida-img input,
+.form-subida-img textarea {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 12px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+.btn-envio-img {
+    background: var(--color-principal);
+    color: #000;
+    border: none;
+    padding: 15px 30px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.3s;
+}
+
+/* Grid */
+.galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.card-imagen {
+    background: #000;
+    border: 1px solid #222;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+}
+
+.card-imagen:hover {
+    border-color: var(--color-principal);
+    transform: translateY(-5px);
+}
+
+.contenedor-img img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    filter: grayscale(40%);
+    transition: 0.5s;
+}
+
+.card-imagen:hover img {
+    filter: grayscale(0%);
+}
+
+.info-img {
+    padding: 15px;
+}
+
+.info-img h3 {
+    font-size: 1.1rem;
+    color: var(--color-principal);
+}
+
+.agente-tag {
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+/* Modal */
+.modal-galeria {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.modal-content-img {
+    max-width: 80%;
+    max-height: 90vh;
+    border: 2px solid var(--color-principal);
+    position: relative;
+    background: #000;
+}
+
+.modal-content-img img {
+    max-width: 100%;
+    max-height: 70vh;
+}
+
+.modal-text {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Paginación */
+.paginacion-galeria {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 40px;
+}
+
+.paginacion-galeria button {
+    background: none;
+    border: 1px solid var(--color-principal);
+    color: var(--color-principal);
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+.paginacion-galeria button.active {
+    background: var(--color-principal);
+    color: #000;
+}
+
+/* Estilos para el visor de fotos grandes */
+.modal-galeria-abierta {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.contenido-foto-grande {
+    position: relative;
+    max-width: 900px;
+    width: 100%;
+    background: #111;
+    border: 2px solid var(--color-principal);
+    box-shadow: 0 0 30px var(--color-principal);
+}
+
+.contenido-foto-grande img {
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    display: block;
+    border-bottom: 1px solid #333;
+}
+
+.texto-foto-grande {
+    padding: 20px;
+    color: #fff;
+}
+
+.cerrar-modal {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 40px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.cerrar-modal:hover {
+    color: var(--color-principal);
+    transform: scale(1.2);
+}
