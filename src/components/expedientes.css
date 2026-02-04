@@ -1,7 +1,6 @@
 /* CONTENEDOR PRINCIPAL */
-.experiencias-page {
+.expedientes-page {
     padding: 100px 5% 50px;
-    /* Reducido el lateral para móviles */
     color: white;
     font-family: 'Courier New', monospace;
     min-height: 100vh;
@@ -22,6 +21,7 @@
     letter-spacing: 4px;
     text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
     text-align: center;
+    text-transform: uppercase;
 }
 
 /* BOTONES DE NAVEGACIÓN SUPERIOR */
@@ -43,6 +43,7 @@
     transition: 0.3s;
     min-width: 220px;
     text-transform: uppercase;
+    font-family: 'Courier New', monospace;
 }
 
 .btn-main.admin-main {
@@ -57,54 +58,20 @@
     background: #000;
 }
 
-/* RADAR GIRATORIO */
-.radar-decorativo {
-    width: 60px;
-    height: 60px;
-    border: 2px solid #00ff41;
-    border-radius: 50%;
-    margin: 0 auto 30px;
-    position: relative;
-    background: radial-gradient(circle, #003300 0%, #000 70%);
-}
-
-.radar-line {
-    width: 50%;
-    height: 2px;
-    background: #00ff41;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform-origin: left center;
-    animation: rotate-radar 3s linear infinite;
-}
-
-@keyframes rotate-radar {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* TABLA PRO */
+/* TABLA PRO (EL BÚNKER DE DATOS) */
 .tabla-container-pro {
     max-width: 1000px;
     margin: 20px auto;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.85); /* Un poco más de opacidad para leer mejor */
     border: 1px solid #00ff41;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
     overflow-x: auto;
-    /* Para móviles */
 }
 
 .tabla-container-pro.admin-border {
     border-color: #ff00ff !important;
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
 }
 
 .tabla-pro {
@@ -115,43 +82,41 @@
 .tabla-pro th {
     padding: 15px;
     text-align: left;
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid #00ff41;
     color: #00ff41;
     text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 .tabla-pro td {
-    padding: 12px;
+    padding: 15px;
     border-bottom: 1px solid #222;
+    color: #ffffff; /* Texto en blanco puro para que se vea bien */
+    text-shadow: 1px 1px 2px #000; /* Sombra para que no se pierda con el fondo */
+    font-size: 1.05rem;
 }
 
-/* PAGINACIÓN */
-.paginacion-pro {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.paginacion-pro button {
+/* BOTÓN ABRIR DENTRO DE LA TABLA */
+.btn-leer-pro {
     background: transparent;
-    border: 1px solid #00ff41;
     color: #00ff41;
-    padding: 5px 15px;
+    border: 1px solid #00ff41;
+    padding: 8px 15px;
     cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    transition: 0.3s;
 }
 
-.btn-hormiga {
-    display: none !important;
+.btn-leer-pro:hover {
+    background: #00ff41;
+    color: #000;
+    box-shadow: 0 0 10px #00ff41;
 }
 
-/* Adiós hormiga */
-
-/* FORMULARIO DE ENVÍO (MÁS ESTRECHO Y CENTRADO) */
+/* FORMULARIO DE ENVÍO */
 .contenedor-envio-expediente {
     max-width: 700px;
-    /* <--- Esto lo hace elegante */
     margin: 50px auto;
     padding: 30px;
     border: 1px solid #00ff41;
@@ -160,34 +125,23 @@
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
 }
 
-.titulo-neon-p {
-    color: #00ff41;
-    text-shadow: 0 0 5px #00ff41;
-    margin-bottom: 25px;
-    font-size: 1.3rem;
-    text-align: center;
-}
-
-.form-expediente {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
 .form-expediente input,
 .form-expediente textarea {
     background: #000;
-    border: 1px solid #00ff41;
+    border: 1px solid #333; /* Borde más sutil de inicio */
     color: #00ff41;
     padding: 12px;
     font-family: 'Courier New', monospace;
     width: 100%;
     box-sizing: border-box;
+    margin-bottom: 10px;
 }
 
-.form-expediente textarea {
-    min-height: 120px;
-    resize: none;
+.form-expediente input:focus,
+.form-expediente textarea:focus {
+    border-color: #00ff41;
+    outline: none;
+    box-shadow: 0 0 5px #00ff41;
 }
 
 .btn-enviar-expediente {
@@ -199,7 +153,6 @@
     cursor: pointer;
     text-transform: uppercase;
     transition: 0.3s;
-    margin-top: 10px;
 }
 
 .btn-enviar-expediente:hover {
@@ -207,18 +160,19 @@
     transform: translateY(-2px);
 }
 
-/* LECTOR MODAL */
+/* LECTOR MODAL (EL ARCHIVO ABIERTO) */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.95);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 3000;
+    backdrop-filter: blur(5px); /* Efecto borroso detrás del modal */
 }
 
 .modal-content {
@@ -226,7 +180,8 @@
     padding: 40px;
     max-width: 650px;
     width: 90%;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+    border: 1px solid #00ff41; /* Borde neón en el modal */
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
 }
 
 .btn-main-modal {
@@ -234,8 +189,15 @@
     width: 100%;
     padding: 12px;
     background: transparent;
-    color: #fff;
-    border: 1px solid #fff;
+    color: #ff4444; /* Rojo para cerrar */
+    border: 1px solid #ff4444;
     cursor: pointer;
     font-family: 'Courier New', monospace;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-main-modal:hover {
+    background: #ff4444;
+    color: #fff;
 }

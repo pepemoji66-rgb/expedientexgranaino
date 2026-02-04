@@ -11,27 +11,27 @@ const LoginUsuario = ({ setAuth }) => {
         if (e) e.preventDefault();
         
         try {
-            // 1. LLAMADA AL SERVIDOR
-            const res = await axios.post('http://localhost:5000/login-agente', datos);
+            // 1. LLAMADA AL SERVIDOR (Ruta unificada a /login-usuario)
+            const res = await axios.post('http://localhost:5000/login-usuario', datos);
             
-            // 2. EXTRAEMOS AL AGENTE
-            const agenteLogueado = res.data.usuario;
+            // 2. EXTRAEMOS AL USUARIO
+            const usuarioLogueado = res.data.usuario;
             
-            alert("✅ ACCESO AUTORIZADO: BIENVENIDO AGENTE " + agenteLogueado.nombre.toUpperCase());
+            alert("✅ ACCESO AUTORIZADO: BIENVENIDO AL BÚNKER, " + usuarioLogueado.nombre.toUpperCase());
 
-            // 3. PERSISTENCIA: Guardamos en el baúl del navegador para que el Header lo vea
-            localStorage.setItem('agente_sesion', JSON.stringify(agenteLogueado));
+            // 3. PERSISTENCIA: Guardamos con el nuevo nombre unificado
+            localStorage.setItem('usuario_sesion', JSON.stringify(usuarioLogueado));
 
-            // 4. ACTUALIZAMOS EL ESTADO GLOBAL (Para que el Header cambie los botones)
+            // 4. ACTUALIZAMOS EL ESTADO GLOBAL
             if (setAuth) {
-                setAuth(agenteLogueado);
+                setAuth(usuarioLogueado);
             }
             
             // 5. LIMPIEZA Y NAVEGACIÓN
             setDatos({ email: '', password: '' });
             
-            // Redirigimos al inicio o al panel según prefieras (aquí he puesto inicio como tenías)
-            navigate('/inicio'); 
+            // Redirigimos al panel de administración directamente
+            navigate('/admin'); 
 
         } catch (err) {
             console.error("Error de login:", err);
@@ -42,7 +42,7 @@ const LoginUsuario = ({ setAuth }) => {
     return (
         <div className="login-bunker-wrapper fade-in">
             <Forms 
-                title="IDENTIFICACIÓN DE AGENTE" 
+                title="IDENTIFICACIÓN DE USUARIO" 
                 onSubmit={enviarLogin}
                 onClear={() => setDatos({ email: '', password: '' })}
             >

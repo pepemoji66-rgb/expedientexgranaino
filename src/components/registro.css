@@ -5,6 +5,7 @@
     min-height: 80vh;
     width: 100%;
     position: relative;
+    gap: 40px; /* Espacio para que respiren los laterales */
 }
 
 .formulario-contenedor {
@@ -16,8 +17,82 @@
     padding: 0;
     box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
     overflow: hidden;
+    z-index: 2; /* Por encima de la decoración si se solapa */
 }
 
+/* --- RADARES MEJORADOS (Tus Brújulas) --- */
+.decoracion-brujula {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 255, 65, 0.05) 0%, transparent 70%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left { left: 5%; top: 50%; transform: translateY(-50%); }
+.right { right: 5%; top: 50%; transform: translateY(-50%); }
+
+.radar-line {
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #00ff41);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: left;
+    animation: rotate 4s linear infinite;
+}
+
+/* Círculos internos para el radar */
+.decoracion-brujula::before {
+    content: '';
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    border: 1px dashed rgba(0, 255, 65, 0.2);
+    border-radius: 50%;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* --- INSTRUCCIONES LATERALES --- */
+.instrucciones-bunker {
+    max-width: 200px;
+    color: #00ff41;
+    font-family: monospace;
+    font-size: 0.75rem;
+    padding: 15px;
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    background: rgba(0, 20, 0, 0.4);
+    text-align: left;
+}
+
+.instrucciones-bunker h3 {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #00ff41;
+    display: inline-block;
+}
+
+.instrucciones-bunker ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.instrucciones-bunker li {
+    margin-bottom: 8px;
+    color: #88ff88;
+}
+
+/* --- ESTILOS DE TU FORMULARIO (Mantenidos) --- */
 .tabs-registro {
     display: flex;
     background: #0d0d0d;
@@ -61,11 +136,6 @@
     margin-bottom: 20px;
 }
 
-.input-row {
-    display: flex;
-    gap: 10px;
-}
-
 .form-bunker input {
     background: #050505;
     border: 1px solid #222;
@@ -91,41 +161,14 @@
     flex-direction: column;
     align-items: center;
     border-radius: 5px;
+    transition: 0.3s;
 }
 
-.btn-ejecutar span {
-    font-size: 0.7rem;
-    margin-top: 3px;
+.btn-ejecutar:hover {
+    box-shadow: 0 0 20px #00ff41;
+    transform: scale(1.02);
 }
 
-/* BRÚJULAS DE RELLENO */
-.decoracion-brujula {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    border: 1px solid rgba(0, 255, 65, 0.2);
-    border-radius: 50%;
-}
-
-.left { left: 10%; top: 20%; }
-.right { right: 10%; bottom: 20%; }
-
-.radar-line {
-    width: 50%;
-    height: 2px;
-    background: #00ff41;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform-origin: left;
-    animation: rotate 4s linear infinite;
-}
-
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-@media (max-width: 900px) {
-    .decoracion-brujula { display: none; }
+@media (max-width: 1100px) {
+    .decoracion-brujula, .instrucciones-bunker { display: none; }
 }

@@ -1,10 +1,10 @@
 {
   "usuarios": [],
-  "historias": [{
+  "expedientes": [{
   "usuarios": [
     { "nombre": "Jose Jefe", "email": "admin@admin.com" }
   ],
-  "historias": [
+  "expedientes": [
     {
       "id": 1,
       "titulo": "Expediente de Prueba",

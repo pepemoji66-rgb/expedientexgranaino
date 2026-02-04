@@ -7,175 +7,153 @@ const PanelAdmin = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [videos, setVideos] = useState([]);
     const [expedientes, setExpedientes] = useState([]);
-
-    // Estado para el lector modal
+    const [imagenes, setImagenes] = useState([]);
     const [expedienteParaLeer, setExpedienteParaLeer] = useState(null);
 
-    const [paginaActual, setPaginaActual] = useState(1);
-    const itemsPorPagina = 5;
-
     useEffect(() => {
-        cargarTodo();
+        cargarDatos();
     }, []);
 
-    const cargarTodo = async () => {
+    const cargarDatos = async () => {
         try {
-            const resUser = await axios.get('http://localhost:5000/usuarios');
-            const resVid = await axios.get('http://localhost:5000/admin/todos-los-videos');
-            const resExp = await axios.get('http://localhost:5000/historias');
+            const resU = await axios.get('http://localhost:5000/usuarios');
+            const resV = await axios.get('http://localhost:5000/admin/todos-los-videos');
+            const resE = await axios.get('http://localhost:5000/expedientes');
+            const resI = await axios.get('http://localhost:5000/admin/todas-las-imagenes');
 
-            setUsuarios(resUser.data);
-            setVideos(resVid.data);
-            setExpedientes(resExp.data);
-        } catch (err) {
-            console.error("❌ ERROR DE CONEXIÓN AL BÚNKER:", err);
+            setUsuarios(resU.data || []);
+            setVideos(resV.data || []);
+            setExpedientes(resE.data || []);
+            setImagenes(resI.data || []);
+        } catch (err) { 
+            console.error("❌ Error cargando búnker", err); 
         }
     };
 
-    const gestionarAccion = async (id, accion, tipo) => {
-        const mensaje = accion === 'aprobar' ? `¿Dar el visto bueno a este ${tipo}?` : `¿Eliminar permanentemente este ${tipo}?`;
-        if (!window.confirm(mensaje)) return;
-
+    const gestionar = async (id, accion, tipo) => {
+        if (!window.confirm(`¿Confirmar ${accion} en ${tipo}?`)) return;
         try {
+            let url = `http://localhost:5000/`;
+            
             if (tipo === 'usuario') {
-                await axios.delete(`http://localhost:5000/usuarios/${id}`);
-            }
-            else if (tipo === 'video') {
-                if (accion === 'aprobar') {
-                    await axios.put(`http://localhost:5000/aprobar-video/${id}`);
-                } else {
-                    await axios.delete(`http://localhost:5000/borrar-video/${id}`);
-                }
-            }
-            else if (tipo === 'expediente') {
-                if (accion === 'aprobar') {
-                    // Ruta corregida para aprobar historias
-                    await axios.put(`http://localhost:5000/aprobar-historia/${id}`);
-                } else {
-                    await axios.delete(`http://localhost:5000/historias/${id}`);
-                }
+                url += `usuarios/${id}`;
+            } else if (tipo === 'expediente') {
+                url += accion === 'aprobar' ? `aprobar-expediente/${id}` : `expedientes/${id}`;
+            } else if (tipo === 'video') {
+                url += accion === 'aprobar' ? `aprobar-video/${id}` : `borrar-video/${id}`;
+            } else if (tipo === 'imagen') {
+                url += accion === 'aprobar' ? `aprobar-imagen/${id}` : `borrar-imagen/${id}`;
             }
 
-            alert("CENTRAL ACTUALIZADA: Archivo modificado con éxito.");
-            cargarTodo();
-        } catch (err) {
-            alert("❌ Error: La base de datos no responde a la orden.");
+            if (accion === 'aprobar') {
+                await axios.put(url);
+            } else {
+                await axios.delete(url);
+            }
+
+            alert("⚡ REGISTRO ACTUALIZADO EN LA CENTRAL");
+            cargarDatos(); // Recarga automática para que el botón desaparezca
+        } catch (err) { 
+            alert("❌ Error en la operación de búnker. Revisa que el servidor esté encendido."); 
         }
     };
-
-    const obtenerDatosTab = () => {
-        if (tab === 'usuarios') return usuarios;
-        if (tab === 'videos') return videos;
-        return expedientes;
-    };
-
-    const datosAMostrar = obtenerDatosTab();
-    const ultimoItem = paginaActual * itemsPorPagina;
-    const primerItem = ultimoItem - itemsPorPagina;
-    const itemsActuales = datosAMostrar.slice(primerItem, ultimoItem);
-    const totalPaginas = Math.ceil(datosAMostrar.length / itemsPorPagina);
 
     return (
-        <div className="panel-admin-container">
-            <h2 className="titulo-neon">SISTEMA DE CONTROL TOTAL</h2>
-
+        <div className="panel-admin-container fade-in">
+            <h2 className="titulo-neon">CONTROL DE MANDO UNIFICADO</h2>
+            
             <div className="tabs-admin">
-                <button className={tab === 'usuarios' ? 'active' : ''} onClick={() => { setTab('usuarios'); setPaginaActual(1); }}>
-                    AGENTES ({usuarios.length})
+                <button className={tab === 'usuarios' ? 'active' : ''} onClick={() => setTab('usuarios')}>
+                    USUARIOS ({usuarios.length})
                 </button>
-                <button className={tab === 'videos' ? 'active' : ''} onClick={() => { setTab('videos'); setPaginaActual(1); }}>
-                    VIGILANCIA VÍDEO ({videos.length})
+                <button className={tab === 'videos' ? 'active' : ''} onClick={() => setTab('videos')}>
+                    VÍDEOS ({videos.length})
                 </button>
-                <button className={tab === 'expedientes' ? 'active' : ''} onClick={() => { setTab('expedientes'); setPaginaActual(1); }}>
+                <button className={tab === 'expedientes' ? 'active' : ''} onClick={() => setTab('expedientes')}>
                     EXPEDIENTES ({expedientes.length})
+                </button>
+                <button className={tab === 'imagenes' ? 'active' : ''} onClick={() => setTab('imagenes')}>
+                    IMÁGENES ({imagenes.length})
                 </button>
             </div>
 
             <div className="table-responsive">
                 <table className="tabla-admin">
                     <thead>
-                        {tab === 'usuarios' && (
-                            <tr><th>ID</th><th>NOMBRE</th><th>EMAIL</th><th>CIUDAD</th><th>ACCIÓN</th></tr>
-                        )}
-                        {tab === 'videos' && (
-                            <tr><th>ESTADO</th><th>TÍTULO</th><th>PRUEBA</th><th>GESTIÓN</th></tr>
-                        )}
-                        {tab === 'expedientes' && (
-                            <tr><th>ESTADO</th><th>TÍTULO</th><th>AUTOR</th><th>GESTIÓN</th></tr>
-                        )}
+                        <tr>
+                            <th>ESTADO / ID</th>
+                            <th>TÍTULO / NOMBRE</th>
+                            <th>AUTOR / INFO</th>
+                            <th>GESTIÓN</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        {itemsActuales.length > 0 ? itemsActuales.map(item => (
-                            <tr key={item.id}>
-                                {tab === 'usuarios' && (
-                                    <>
-                                        <td>#{item.id}</td>
-                                        <td>{item.nombre}</td>
-                                        <td>{item.email}</td>
-                                        <td>{item.ciudad}</td>
-                                        <td>
-                                            <button className="btn-del" onClick={() => gestionarAccion(item.id, 'borrar', 'usuario')}>BAJA</button>
-                                        </td>
-                                    </>
-                                )}
-                                {tab === 'videos' && (
-                                    <>
-                                        <td><span className={`status-pill ${item.estado}`}>{item.estado === 'aprobado' ? '✅ OK' : '⏳ PEND'}</span></td>
-                                        <td>{item.titulo}</td>
-                                        <td><a href={item.url} target="_blank" rel="noreferrer" className="link-video">VER VÍDEO 📽️</a></td>
-                                        <td>
-                                            <div className="botones-accion-row">
-                                                {item.estado === 'pendiente' && (
-                                                    <button className="btn-ok" onClick={() => gestionarAccion(item.id, 'aprobar', 'video')}>APROBAR</button>
-                                                )}
-                                                <button className="btn-del" onClick={() => gestionarAccion(item.id, 'eliminar', 'video')}>X</button>
-                                            </div>
-                                        </td>
-                                    </>
-                                )}
-                                {tab === 'expedientes' && (
-                                    <>
-                                        <td><span className={`status-pill ${item.estado}`}>{item.estado === 'pendiente' ? '⏳ PEND' : '📜 OK'}</span></td>
-                                        <td>{item.titulo}</td>
-                                        <td>{item.agente}</td>
-                                        <td>
-                                            <div className="botones-accion-row">
-                                                {/* CAMBIO CLAVE: Ahora no te vas de la página, abres el modal */}
-                                                <button className="btn-leer" onClick={() => setExpedienteParaLeer(item)}>LEER</button>
-
-                                                {item.estado === 'pendiente' && (
-                                                    <button className="btn-ok" onClick={() => gestionarAccion(item.id, 'aprobar', 'expediente')}>APROBAR</button>
-                                                )}
-                                                <button className="btn-del" onClick={() => gestionarAccion(item.id, 'borrar', 'expediente')}>X</button>
-                                            </div>
-                                        </td>
-                                    </>
-                                )}
+                        {tab === 'usuarios' && usuarios.map(u => (
+                            <tr key={u.id}>
+                                <td>#{u.id}</td>
+                                <td>{u.nombre}</td>
+                                <td>{u.ciudad || u.email}</td>
+                                <td>
+                                    <button className="btn-del" onClick={() => gestionar(u.id, 'borrar', 'usuario')}>EXPULSAR</button>
+                                </td>
                             </tr>
-                        )) : <tr><td colSpan="5" style={{ textAlign: 'center' }}>CENTRAL VACÍA</td></tr>}
+                        ))}
+
+                        {tab === 'expedientes' && expedientes.map(e => (
+                            <tr key={e.id}>
+                                <td className={e.estado === 'publicado' ? 'status-ok' : 'status-pending'}>
+                                    {e.estado ? e.estado.toUpperCase() : 'S/E'}
+                                </td>
+                                <td>{e.titulo}</td>
+                                <td>{e.usuario_nombre || 'AGENTE'}</td>
+                                <td>
+                                    <button className="btn-leer" onClick={() => setExpedienteParaLeer(e)}>LEER</button>
+                                    {/* CAMBIO CLAVE: Comparamos con 'publicado' */}
+                                    {e.estado !== 'publicado' && (
+                                        <button className="btn-ok" onClick={() => gestionar(e.id, 'aprobar', 'expediente')}>APROBAR</button>
+                                    )}
+                                    <button className="btn-del" onClick={() => gestionar(e.id, 'borrar', 'expediente')}>ELIMINAR</button>
+                                </td>
+                            </tr>
+                        ))}
+
+                        {tab === 'videos' && videos.map(v => (
+                            <tr key={v.id}>
+                                <td>{v.estado.toUpperCase()}</td>
+                                <td>{v.titulo}</td>
+                                <td><a href={v.url} target="_blank" rel="noreferrer" className="link-ver">VER PRUEBA</a></td>
+                                <td>
+                                    {v.estado !== 'aprobado' && <button className="btn-ok" onClick={() => gestionar(v.id, 'aprobar', 'video')}>APROBAR</button>}
+                                    <button className="btn-del" onClick={() => gestionar(v.id, 'borrar', 'video')}>ELIMINAR</button>
+                                </td>
+                            </tr>
+                        ))}
+
+                        {tab === 'imagenes' && imagenes.map(i => (
+                            <tr key={i.id}>
+                                <td>{i.estado.toUpperCase()}</td>
+                                <td>{i.titulo}</td>
+                                <td>{i.usuario_nombre || 'AGENTE'}</td>
+                                <td>
+                                    {i.estado !== 'publica' && <button className="btn-ok" onClick={() => gestionar(i.id, 'aprobar', 'imagen')}>APROBAR</button>}
+                                    <button className="btn-del" onClick={() => gestionar(i.id, 'borrar', 'imagen')}>ELIMINAR</button>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
 
-            {totalPaginas > 1 && (
-                <div className="paginacion-bunker">
-                    <button disabled={paginaActual === 1} onClick={() => setPaginaActual(paginaActual - 1)}>ANTERIOR</button>
-                    <span>{paginaActual} / {totalPaginas}</span>
-                    <button disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(paginaActual + 1)}>SIGUIENTE</button>
-                </div>
-            )}
-
-            {/* LECTOR MODAL PARA EL ADMIN */}
             {expedienteParaLeer && (
                 <div className="modal-admin-overlay" onClick={() => setExpedienteParaLeer(null)}>
                     <div className="modal-admin-content" onClick={e => e.stopPropagation()}>
-                        <h3>REVISANDO: {expedienteParaLeer.titulo}</h3>
-                        <p className="meta-info">Enviado por: {expedienteParaLeer.agente}</p>
+                        <h3 style={{color: '#00ff41'}}>{expedienteParaLeer.titulo}</h3>
+                        <p style={{fontSize: '0.8rem', color: '#888'}}>Agente: {expedienteParaLeer.usuario_nombre}</p>
                         <hr />
-                        <div className="cuerpo-relato">
+                        <div className="cuerpo-expediente" style={{whiteSpace: 'pre-wrap', padding: '10px 0'}}>
                             {expedienteParaLeer.contenido}
                         </div>
-                        <button className="btn-cerrar-lector" onClick={() => setExpedienteParaLeer(null)}>CERRAR REVISIÓN</button>
+                        <button className="btn-cerrar-modal" onClick={() => setExpedienteParaLeer(null)}>CERRAR ARCHIVO</button>
                     </div>
                 </div>
             )}

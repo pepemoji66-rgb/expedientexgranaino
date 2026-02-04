@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const RevisarHistorias = () => {
+const Revisarexpedientes = () => {
   const [pendientes, setPendientes] = useState([]);
 
-  // 1. CARGAR HISTORIAS (Memorizamos la función para evitar Warnings)
+  // 1. CARGAR expedientes (Memorizamos la función para evitar Warnings)
   const cargarPendientes = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/historias-pendientes');
+      const res = await axios.get('http://localhost:5000/expedientes-pendientes');
       setPendientes(res.data);
     } catch (error) {
-      console.error("Error al pescar historias:", error);
+      console.error("Error al pescar expedientes:", error);
     }
   }, []);
 
@@ -98,4 +98,4 @@ const RevisarHistorias = () => {
   );
 };
 
-export default RevisarHistorias;
+export default Revisarexpedientes;

@@ -6,13 +6,13 @@ const GestionUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
     const navigate = useNavigate();
 
-    // Cargar la lista de agentes
+    // Cargar la lista de usuarios
     const obtenerUsuarios = async () => {
         try {
             const res = await axios.get('http://localhost:5000/usuarios');
             setUsuarios(res.data);
         } catch (err) {
-            console.error("Error al obtener los agentes:", err);
+            console.error("Error al obtener los usuarios:", err);
         }
     };
 
@@ -44,10 +44,10 @@ const GestionUsuarios = () => {
                 </button>
             </div>
 
-            <h2 className="neon-text-green" style={{ marginBottom: '20px' }}>PANEL DE CONTROL DE AGENTES</h2>
+            <h2 className="neon-text-green" style={{ marginBottom: '20px' }}>PANEL DE CONTROL DE usuarios</h2>
             
             <div className="tabla-responsive">
-                <table className="tabla-agentes" style={{ width: '100%', borderCollapse: 'collapse', background: 'rgba(0,0,0,0.8)', color: '#00ff41' }}>
+                <table className="tabla-usuarios" style={{ width: '100%', borderCollapse: 'collapse', background: 'rgba(0,0,0,0.8)', color: '#00ff41' }}>
                     <thead>
                         <tr style={{ borderBottom: '2px solid #00ff41' }}>
                             <th style={{ padding: '15px' }}>ID</th>

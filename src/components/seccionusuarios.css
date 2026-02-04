@@ -1,4 +1,4 @@
-.agentes-container {
+.usuarios-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -6,7 +6,7 @@
     padding: 20px;
 }
 
-.glass-card-agentes {
+.glass-card-usuarios {
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(8px);
     border: 1px solid #00ff41;
@@ -25,7 +25,7 @@
     letter-spacing: 2px;
 }
 
-.agentes-form {
+.usuarios-form {
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -88,7 +88,7 @@
 
 /* Responsive total */
 @media (max-width: 480px) {
-    .glass-card-agentes {
+    .glass-card-usuarios {
         padding: 20px;
     }
 }

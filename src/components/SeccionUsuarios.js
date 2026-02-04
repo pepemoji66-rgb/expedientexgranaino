@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Forms from './Forms';
 
-const SeccionAgentes = ({ setAuth }) => {
+const Seccionusuarios = ({ setAuth }) => {
     const [esLogin, setEsLogin] = useState(true);
     const [datos, setDatos] = useState({ nombre: '', email: '', password: '', ciudad: '', edad: '' });
     const navigate = useNavigate();
@@ -34,7 +34,7 @@ const SeccionAgentes = ({ setAuth }) => {
     };
 
     return (
-        <div className="seccion-agentes fade-in">
+        <div className="seccion-usuarios fade-in">
             <Forms 
                 title={esLogin ? "IDENTIFICACIÓN DE AGENTE" : "ALTA EN EL SISTEMA"} 
                 subtitle={esLogin ? "Introduzca sus credenciales de acceso" : "Cree una nueva ficha de agente"}
@@ -64,4 +64,4 @@ const SeccionAgentes = ({ setAuth }) => {
     );
 };
 
-export default SeccionAgentes;
+export default Seccionusuarios;

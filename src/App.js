@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Indice from './components/Indice';
 import Hero from './components/Hero';
-import SeccionAgentes from './components/SeccionAgentes';
-import Experiencias from './components/Experiencias';
+import SeccionUsuarios from './components/SeccionUsuarios'; 
+import Expedientes from './components/Expedientes'; // CORREGIDO: Import con Mayúscula
 import PanelAdmin from './components/PanelAdmin';
 import LecturaHistoria from './components/LecturaHistoria';
 import Footer from './components/Footer';
@@ -22,26 +22,26 @@ function App() {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // 1. CARGA DE SESIÓN (Se ejecuta solo una vez al inicio)
+  // 1. CARGA DE SESIÓN
   useEffect(() => {
-    const sesionGuardada = localStorage.getItem('agente_sesion');
-    if (sesionGuardada && !userAuth) { // Solo actualiza si no hay userAuth ya puesto
+    const sesionGuardada = localStorage.getItem('usuario_sesion');
+    if (sesionGuardada && !userAuth) {
       try {
         setUserAuth(JSON.parse(sesionGuardada));
       } catch (e) {
-        console.error("Error sesión");
+        console.error("Error al recuperar sesión");
       }
     }
-  }, []); // Corchetes vacíos aquí también
+  }, [userAuth]);
 
-  // 2. CONTROL DE ATMÓSFERA (Solo cambia cuando el tema cambia)
+  // 2. CONTROL DE ATMÓSFERA
   useEffect(() => {
     document.documentElement.style.setProperty('--color-principal', tema);
   }, [tema]);
 
   const actualizarAuth = (datos) => {
     if (datos) {
-      localStorage.setItem('agente_sesion', JSON.stringify(datos));
+      localStorage.setItem('usuario_sesion', JSON.stringify(datos));
       setUserAuth(datos);
     }
   };
@@ -59,9 +59,10 @@ function App() {
 
   const cerrarSesion = () => {
     if (window.confirm("¿FINALIZAR TURNO DE GUARDIA?")) {
-      localStorage.removeItem('agente_sesion');
+      localStorage.removeItem('usuario_sesion');
       setUserAuth(null);
       setIsOpen(false);
+      window.location.href = '/'; 
     }
   };
 
@@ -73,7 +74,8 @@ function App() {
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
         minHeight: '100vh',
-        display: 'flex', flexDirection: 'column'
+        display: 'flex', 
+        flexDirection: 'column'
       }}>
 
         {/* BOTÓN HAMBURGUESA */}
@@ -98,7 +100,7 @@ function App() {
             {userAuth && (
               <li style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,255,65,0.2)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--color-principal)', display: 'block' }}>
-                  AGENTE: {userAuth.nombre.toUpperCase()}
+                  USUARIO: {userAuth.nombre.toUpperCase()}
                 </span>
                 <button onClick={cerrarSesion} style={{
                   background: 'none', border: 'none', color: '#ff4444',
@@ -110,7 +112,7 @@ function App() {
               </li>
             )}
 
-            <li><Link to="/experiencias" onClick={toggleMenu}>EXPEDIENTES</Link></li>
+            <li><Link to="/expedientes" onClick={toggleMenu}>EXPEDIENTES</Link></li>
             <li><Link to="/videos" onClick={toggleMenu}>VIDEOS</Link></li>
             <li><Link to="/galeria" onClick={toggleMenu}>GALERÍA</Link></li>
 
@@ -138,33 +140,21 @@ function App() {
                 <option value="#00d4ff">AZUL ESPECTRO</option>
               </select>
             </li>
-
-            {!userAuth && (
-              <li style={{ marginTop: '50px' }}>
-                <button onClick={accesoMaestro} style={{ opacity: 0, cursor: 'default' }}>.</button>
-              </li>
-            )}
           </ul>
         </nav>
 
         {/* CONTENIDO PRINCIPAL */}
         <main style={{ flex: 1 }}>
-          <main style={{ flex: 1 }}>
-            <main style={{ flex: 1 }}>
-              <Routes>
-                <Route path="/" element={<div className="home-layout"><Indice /><Hero /></div>} />
-                <Route path="/acceso" element={<SeccionAgentes setAuth={actualizarAuth} />} />
-
-                {/* HEMOS QUITADO EL "userAuth ?" PARA CORTAR EL BUCLE */}
-                <Route path="/panel-mando" element={<PanelAdmin />} />
-                <Route path="/experiencias" element={<Experiencias />} />
-                <Route path="/videos" element={<Videos userAuth={userAuth} />} />
-                <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
-
-                <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
-              </Routes>
-            </main>
-          </main>
+          <Routes>
+            <Route path="/" element={<div className="home-layout"><Indice /><Hero /></div>} />
+            <Route path="/acceso" element={<SeccionUsuarios setAuth={actualizarAuth} />} />
+            <Route path="/panel-mando" element={<PanelAdmin />} />
+            {/* CORREGIDO: El componente debe ir en Mayúscula y pasar userAuth si lo necesita */}
+            <Route path="/expedientes" element={<Expedientes userAuth={userAuth} />} /> 
+            <Route path="/videos" element={<Videos userAuth={userAuth} />} />
+            <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
+            <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
+          </Routes>
         </main>
 
         <Footer />
