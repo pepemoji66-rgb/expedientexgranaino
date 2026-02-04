@@ -45,18 +45,41 @@ function loginFunc(req, res) {
         }
     });
 }
+/// =========================================================================
+// --- GESTIÓN DE USUARIOS (SÓLO CAMPOS EXISTENTES) ---
+// =========================================================================
 
+// RUTA DE REGISTRO
+app.post('/registro', (req, res) => {
+    const { nombre, email, password } = req.body;
+    
+    // Solo insertamos los 3 campos que tienes en la tabla
+    const sql = "INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)";
+    
+    db.query(sql, [nombre, email, password], (err, result) => {
+        if (err) {
+            console.error("❌ Error en el registro:", err);
+            return res.status(500).json({ error: "Error al guardar en la base de datos" });
+        }
+        res.json({ mensaje: "Agente reclutado con éxito", id: result.insertId });
+    });
+});
+
+// LISTAR TODOS LOS USUARIOS
 app.get('/usuarios', (req, res) => {
-    db.query("SELECT * FROM usuarios ORDER BY id DESC", (err, result) => {
+    const sql = "SELECT id, nombre, email FROM usuarios ORDER BY id DESC";
+    db.query(sql, (err, result) => {
         if (err) return res.status(500).json(err);
         res.json(result);
     });
 });
 
+// ELIMINAR USUARIO
 app.delete('/usuarios/:id', (req, res) => {
-    db.query("DELETE FROM usuarios WHERE id = ?", [req.params.id], (err) => {
+    const { id } = req.params;
+    db.query("DELETE FROM usuarios WHERE id = ?", [id], (err) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Usuario eliminado" });
+        res.json({ mensaje: "Usuario borrado del sistema" });
     });
 });
 
