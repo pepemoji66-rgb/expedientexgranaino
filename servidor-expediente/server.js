@@ -3,104 +3,79 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// --- 1. RECURSOS ESTÁTICOS ---
+// --- 1. CONFIGURACIÓN DE ALMACENAMIENTO ---
+const dirLugares = path.join(__dirname, '../public/lugares');
+if (!fs.existsSync(dirLugares)) { fs.mkdirSync(dirLugares, { recursive: true }); }
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => { cb(null, dirLugares); },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, "_"));
+    }
+});
+const upload = multer({ storage: storage });
+
+// --- 2. RECURSOS ESTÁTICOS ---
 app.use('/imagenes', express.static(path.join(__dirname, 'public/imagenes')));
 app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
+app.use('/lugares', express.static(dirLugares));
 
-// --- 2. CONEXIÓN (Puerto 3307) ---
+// --- 3. CONEXIÓN (Puerto 3307) ---
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'expedientex',
-    port: 3307
+    host: 'localhost', user: 'root', password: '', database: 'expedientex', port: 3307
 });
 
 db.connect(err => {
     if (err) console.error("❌ ERROR MySQL:", err.message);
-    else console.log("✅ SISTEMA UNIFICADO: Conectado a 'expedientex' en puerto 3307");
+    else console.log("✅ SISTEMA RESTAURADO: Conectado a 'expedientex' (3307)");
 });
 
 // =========================================================================
-// --- 3. LOGIN Y USUARIOS ---
+// --- 4. LOGIN Y USUARIOS (RESTAURADO) ---
 // =========================================================================
-
+function loginFunc(req, res) {
+    const { email, password } = req.body;
+    db.query("SELECT * FROM usuarios WHERE email = ? AND password = ?", [email, password], (err, result) => {
+        if (err) return res.status(500).json(err);
+        if (result.length > 0) res.json({ mensaje: "Acceso concedido", usuario: result[0] });
+        else res.status(401).json({ mensaje: "Credenciales incorrectas" });
+    });
+}
 app.post('/login-usuario', loginFunc);
 app.post('/login-agente', loginFunc);
 
-function loginFunc(req, res) {
-    const { email, password } = req.body;
-    console.log("Intentando login con:", email);
-    db.query("SELECT * FROM usuarios WHERE email = ? AND password = ?", [email, password], (err, result) => {
-        if (err) return res.status(500).json(err);
-        if (result.length > 0) {
-            res.json({ mensaje: "Acceso concedido", usuario: result[0] });
-        } else {
-            res.status(401).json({ mensaje: "Credenciales incorrectas" });
-        }
-    });
-}
-/// =========================================================================
-// --- GESTIÓN DE USUARIOS (SÓLO CAMPOS EXISTENTES) ---
-// =========================================================================
-
-// RUTA DE REGISTRO
 app.post('/registro', (req, res) => {
     const { nombre, email, password } = req.body;
-    
-    // Solo insertamos los 3 campos que tienes en la tabla
-    const sql = "INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)";
-    
-    db.query(sql, [nombre, email, password], (err, result) => {
-        if (err) {
-            console.error("❌ Error en el registro:", err);
-            return res.status(500).json({ error: "Error al guardar en la base de datos" });
-        }
-        res.json({ mensaje: "Agente reclutado con éxito", id: result.insertId });
+    db.query("INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)", [nombre, email, password], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en registro" });
+        res.json({ mensaje: "Agente reclutado", id: result.insertId });
     });
 });
 
-// LISTAR TODOS LOS USUARIOS
 app.get('/usuarios', (req, res) => {
-    const sql = "SELECT id, nombre, email FROM usuarios ORDER BY id DESC";
-    db.query(sql, (err, result) => {
+    db.query("SELECT id, nombre, email FROM usuarios ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
-        res.json(result);
+        res.json(result); // El panel admin necesita esto para listar usuarios
     });
 });
 
-// ELIMINAR USUARIO
 app.delete('/usuarios/:id', (req, res) => {
-    const { id } = req.params;
-    db.query("DELETE FROM usuarios WHERE id = ?", [id], (err) => {
+    db.query("DELETE FROM usuarios WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Usuario borrado del sistema" });
+        res.json({ mensaje: "Usuario borrado" });
     });
 });
 
-/// =========================================================================
-// --- 4. GESTIÓN DE EXPEDIENTES (UNIFICADO Y CORREGIDO) ---
 // =========================================================================
-
-// OBTENER EXPEDIENTES PARA LA SECCIÓN PÚBLICA
-app.get('/expedientes-publicos', (req, res) => {
-    // CORRECCIÓN: Buscamos 'publicado', NO 'aprobado', para que coincida con el UPDATE de abajo
-    const sql = "SELECT id, usuario_nombre, titulo, contenido FROM expedientes WHERE estado = 'publicado' ORDER BY id DESC";
-    db.query(sql, (err, result) => {
-        if (err) {
-            console.error("❌ Error al obtener públicos:", err);
-            return res.status(500).json(err);
-        }
-        res.json(result);
-    });
-});
-
-// OBTENER TODOS PARA EL PANEL DE ADMIN
+// --- 5. GESTIÓN DE EXPEDIENTES (RESTAURADO) ---
+// =========================================================================
 app.get('/expedientes', (req, res) => {
     db.query("SELECT * FROM expedientes ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -108,20 +83,28 @@ app.get('/expedientes', (req, res) => {
     });
 });
 
-// ACCIÓN DE APROBAR (CAMBIAR ESTADO A PUBLICADO)
-app.put('/aprobar-expediente/:id', (req, res) => {
-    const { id } = req.params;
-    // IMPORTANTE: Usamos 'publicado' porque tu columna ENUM de la DB así lo pide
-    db.query("UPDATE expedientes SET estado = 'publicado' WHERE id = ?", [id], (err) => {
-        if (err) {
-            console.error("❌ Error al aprobar:", err);
-            return res.status(500).json(err);
-        }
-        res.json({ mensaje: "Expediente publicado con éxito" });
+app.get('/expedientes-publicos', (req, res) => {
+    db.query("SELECT id, usuario_nombre, titulo, contenido FROM expedientes WHERE estado = 'publicado' ORDER BY id DESC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
     });
 });
 
-// ELIMINAR EXPEDIENTE
+app.post('/subir-expediente', (req, res) => {
+    const { titulo, contenido, usuario_nombre } = req.body;
+    db.query("INSERT INTO expedientes (titulo, contenido, usuario_nombre, estado) VALUES (?, ?, ?, 'pendiente')", [titulo, contenido, usuario_nombre], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Expediente enviado" });
+    });
+});
+
+app.put('/aprobar-expediente/:id', (req, res) => {
+    db.query("UPDATE expedientes SET estado = 'publicado' WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Expediente publicado" });
+    });
+});
+
 app.delete('/expedientes/:id', (req, res) => {
     db.query("DELETE FROM expedientes WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
@@ -129,33 +112,45 @@ app.delete('/expedientes/:id', (req, res) => {
     });
 });
 
-// SUBIR NUEVO (ENTRA COMO PENDIENTE)
-app.post('/subir-expediente', (req, res) => {
-    const { titulo, contenido, usuario_nombre } = req.body;
-    const sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, estado) VALUES (?, ?, ?, 'pendiente')";
-    db.query(sql, [titulo, contenido, usuario_nombre], (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Expediente enviado" });
-    });
-});
-
 // =========================================================================
-// --- 5. RELATOS ADMINISTRADOR (NUEVA TABLA) ---
+// --- 6. RADAR TÁCTICO (LUGARES CON SUBIDA) ---
 // =========================================================================
-
-app.get('/relatos-administrador', (req, res) => {
-    // Usamos comillas invertidas porque la tabla tiene un espacio
-    const sql = "SELECT * FROM `relatos administrador` ORDER BY id DESC";
-    db.query(sql, (err, result) => {
+app.get('/lugares', (req, res) => {
+    db.query("SELECT * FROM lugares ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
         res.json(result);
     });
 });
 
+app.post('/lugares', upload.single('foto'), (req, res) => {
+    const { nombre, descripcion, latitud, longitud, ubicacion } = req.body;
+    const imagen_url = req.file ? `/lugares/${req.file.filename}` : '/lugares/default.jpg';
+    const sql = "INSERT INTO lugares (nombre, descripcion, latitud, longitud, imagen_url, ubicacion, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')";
+    db.query(sql, [nombre, descripcion, latitud, longitud, imagen_url, ubicacion], (err, result) => {
+        if (err) return res.status(500).send(err);
+        res.send("📍 Reporte recibido.");
+    });
+});
+
+app.put('/aprobar-lugar/:id', (req, res) => {
+    db.query("UPDATE lugares SET estado = 'aprobado' WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Lugar aprobado" });
+    });
+});
+
+app.delete('/lugares/:id', (req, res) => {
+    db.query("DELETE FROM lugares WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Lugar eliminado" });
+    });
+});
+
 // =========================================================================
-// --- 6. VÍDEOS Y IMÁGENES ---
+// --- 7. VÍDEOS, IMÁGENES Y RELATOS (VUELTA A LA VIDA) ---
 // =========================================================================
 
+// VÍDEOS
 app.get('/videos-publicos', (req, res) => {
     db.query("SELECT * FROM videos WHERE estado = 'aprobado' ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -170,6 +165,14 @@ app.get('/admin/todos-los-videos', (req, res) => {
     });
 });
 
+app.post('/subir-video', (req, res) => {
+    const { titulo, url, usuario } = req.body;
+    db.query("INSERT INTO videos (titulo, url, usuario, estado) VALUES (?, ?, ?, 'pendiente')", [titulo, url, usuario], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Vídeo enviado" });
+    });
+});
+
 app.put('/aprobar-video/:id', (req, res) => {
     db.query("UPDATE videos SET estado = 'aprobado' WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
@@ -177,16 +180,14 @@ app.put('/aprobar-video/:id', (req, res) => {
     });
 });
 
-app.post('/subir-video', (req, res) => {
-    const { titulo, url, usuario } = req.body;
-    const sql = "INSERT INTO videos (titulo, url, usuario, estado) VALUES (?, ?, ?, 'pendiente')";
-    db.query(sql, [titulo, url, usuario], (err) => {
+app.delete('/borrar-video/:id', (req, res) => {
+    db.query("DELETE FROM videos WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Vídeo enviado" });
+        res.json({ mensaje: "Vídeo borrado" });
     });
 });
 
-// --- RUTA PARA IMÁGENES ---
+// IMÁGENES
 app.get('/admin/todas-las-imagenes', (req, res) => {
     db.query("SELECT * FROM imagenes ORDER BY id DESC", (err, results) => {
         if (err) return res.status(500).json(err);
@@ -201,4 +202,20 @@ app.put('/aprobar-imagen/:id', (req, res) => {
     });
 });
 
-app.listen(5000, () => console.log(`🚀 SERVIDOR UNIFICADO EN PUERTO 5000`));
+app.delete('/borrar-imagen/:id', (req, res) => {
+    db.query("DELETE FROM imagenes WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Imagen borrada" });
+    });
+});
+
+// RELATOS
+app.get('/relatos-administrador', (req, res) => {
+    db.query("SELECT * FROM `relatos administrador` ORDER BY id DESC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+// --- FINAL ---
+app.listen(5000, () => console.log(`🚀 BÚNKER 100% OPERATIVO EN PUERTO 5000`));

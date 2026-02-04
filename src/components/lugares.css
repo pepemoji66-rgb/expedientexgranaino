@@ -1,0 +1,49 @@
+/* Contenedor principal de la sección */
+.seccion-lugares {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8); /* Fondo oscuro estilo búnker */
+    border-radius: 15px;
+    border: 1px solid #00ff88;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+/* Título de la sección */
+.titulo-lugares {
+    color: #00ff88;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Contenedor del mapa */
+.mapa-contenedor {
+    height: 550px;
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #333;
+    overflow: hidden;
+}
+
+/* Estilo para las imágenes dentro del Popup del mapa */
+.popup-imagen {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 10px;
+    border: 1px solid #00ff88;
+}
+
+/* Estilo para el texto dentro del Popup */
+.leaflet-popup-content-wrapper {
+    background: #1a1a1a !important; /* Fondo oscuro para el popup */
+    color: #ffffff !important;
+    border: 1px solid #00ff88;
+}
+
+.leaflet-popup-tip {
+    background: #1a1a1a !important;
+}

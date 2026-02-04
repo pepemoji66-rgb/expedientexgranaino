@@ -9,9 +9,12 @@ import LecturaHistoria from './components/LecturaHistoria';
 import Footer from './components/Footer';
 import Videos from './components/Videos';
 import Galeria from './components/Galeria';
-import './App.css';
+// --- PIEZA 1: IMPORT DE LUGARES ---
+import Lugares from './components/Lugares'; 
 
+import './App.css';
 import fondoAlhambra from './alhambra.jpg';
+
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -113,6 +116,10 @@ function App() {
             )}
 
             <li><Link to="/expedientes" onClick={toggleMenu}>EXPEDIENTES</Link></li>
+            
+            {/* --- PIEZA 2: LINK AL MAPA --- */}
+            <li><Link to="/lugares" onClick={toggleMenu}>MAPA LUGARES</Link></li>
+            
             <li><Link to="/videos" onClick={toggleMenu}>VIDEOS</Link></li>
             <li><Link to="/galeria" onClick={toggleMenu}>GALERÍA</Link></li>
 
@@ -149,8 +156,11 @@ function App() {
             <Route path="/" element={<div className="home-layout"><Indice /><Hero /></div>} />
             <Route path="/acceso" element={<SeccionUsuarios setAuth={actualizarAuth} />} />
             <Route path="/panel-mando" element={<PanelAdmin />} />
-            {/* CORREGIDO: El componente debe ir en Mayúscula y pasar userAuth si lo necesita */}
             <Route path="/expedientes" element={<Expedientes userAuth={userAuth} />} /> 
+            
+            {/* --- PIEZA 3: RUTA DEL MAPA --- */}
+            <Route path="/lugares" element={<Lugares />} />
+
             <Route path="/videos" element={<Videos userAuth={userAuth} />} />
             <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
             <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
