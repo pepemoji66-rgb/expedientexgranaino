@@ -75,3 +75,36 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
+.aviso-seguridad-radar {
+    margin-top: 20px;
+    padding: 10px;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff4444;
+    color: #ff4444;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+}
+
+.blink-rojo {
+    animation: parpadeo-alerta 1s infinite;
+    font-weight: bold;
+}
+
+@keyframes parpadeo-alerta {
+    0% { opacity: 1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 1; }
+}.aviso-seguridad-radar {
+    position: relative; /* Para que se asegure de estar visible */
+    z-index: 10;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 0, 0, 0.2);
+    border: 2px solid #ff4444;
+    color: #ff4444 !important; /* El !important fuerza el color */
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}

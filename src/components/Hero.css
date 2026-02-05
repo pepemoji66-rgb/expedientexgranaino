@@ -1,41 +1,68 @@
 .hero-container {
-    padding: 10px;
-    max-width: 700px;
+    padding: 20px 10px;
+    max-width: 650px;
     margin: 0 auto;
     color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    text-align: center;
 }
 
+/* El nombre y la bio sutiles */
 .hero-nombre {
-    color: #00ff41;
-    font-size: 1.4rem;
+    color: var(--color-principal);
+    font-size: 1.2rem;
     margin-bottom: 5px;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
+    font-family: monospace;
 }
 
 .hero-bio {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     line-height: 1.3;
-    margin-bottom: 15px;
-    font-style: italic;
-    color: #ccc;
+    margin-bottom: 20px;
+    color: #aaa;
 }
 
-.hero-poema {
-    background: rgba(0, 0, 0, 0.6);
+/* El contenedor del poema más recogido */
+.poema-container {
+    background: rgba(0, 0, 0, 0.4);
     padding: 15px;
-    border-left: 3px solid #00ff41;
-    border-radius: 5px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--color-principal);
+    border-left: 2px solid var(--color-principal);
 }
 
-.hero-poema h3 {
-    color: #00ff41;
-    font-size: 1.1rem;
+.poema-linea {
+    margin: 5px 0;
+    font-style: italic;
+}
+
+/* La sección informativa discreta (la que sustituye al cartelón) */
+.seccion-informativa {
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.texto-serio {
+    color: #999;
+    font-size: 0.85rem;
+    line-height: 1.4;
     margin-bottom: 8px;
 }
 
-.hero-poema p {
-    font-size: 1rem;
-    line-height: 1.4;
-    font-family: 'Georgia', serif;
+.texto-serio strong {
+    color: #ccc;
+    font-weight: 600;
+}
+
+/* Estado de sesión iniciada */
+.estado-sesion {
+    color: var(--color-principal);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    opacity: 0.7;
 }

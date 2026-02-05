@@ -5,16 +5,16 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
-
-// --- 0. IMPORTACIÓN DE SOCKET.IO ---
 const http = require('http');
 const { Server } = require('socket.io');
 
 const app = express();
-const server = http.createServer(app); // Necesario para que Socket trabaje con Express
+const server = http.createServer(app); 
+
+// --- CONFIGURACIÓN DE SOCKET.IO ---
 const io = new Server(server, {
     cors: {
-        origin: "*", // En producción cambiaremos esto por tu dominio
+        origin: "http://localhost:3000", 
         methods: ["GET", "POST"]
     }
 });
@@ -39,64 +39,50 @@ app.use('/imagenes', express.static(path.join(__dirname, 'public/imagenes')));
 app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
 app.use('/lugares', express.static(dirLugares));
 
-// --- 3. CONEXIÓN (Puerto 3307) ---
-const db = mysql.createConnection({
-    host: 'localhost', user: 'root', password: '', database: 'expedientex', port: 3307
+// --- 3. CONEXIÓN BASE DE DATOS (Puerto 3307) ---
+const db = mysql.createPool({ 
+    host: 'localhost', user: 'root', password: '', database: 'expedientex', port: 3307,
+    waitForConnections: true, connectionLimit: 10, queueLimit: 0
 });
 
-db.connect(err => {
-    if (err) console.error("❌ ERROR MySQL:", err.message);
-    else console.log("✅ SISTEMA 100% OPERATIVO: Conectado a 'expedientex' (3307)");
+db.getConnection((err, connection) => {
+    if (err) console.error("❌ ERROR CONEXIÓN DB:", err.message);
+    else {
+        console.log("✅ SISTEMA 100% OPERATIVO: Conectado a 'expedientex' (3307)");
+        connection.release();
+    }
 });
 
-// =========================================================================
 // --- 4. LÓGICA DEL CHAT EN TIEMPO REAL (SOCKET.IO) ---
-// =========================================================================
-
 io.on('connection', (socket) => {
     console.log('📡 Usuario conectado al canal de comunicación');
-    // Dentro de io.on('connection', (socket) => { ...
 
     socket.on('limpiar_chat_servidor', () => {
-        // Borramos todo de la tabla
         db.query("DELETE FROM chat_mensajes", (err) => {
             if (err) return console.error(err);
-            // Avisamos a todos los clientes que el chat se ha vaciado
             io.emit('chat_limpiado');
         });
     });
 
-// ... })
-
-    // Escuchar cuando un usuario envía un mensaje
     socket.on('enviar_mensaje', (data) => {
         const { nombre_usuario, mensaje, rol_usuario, tipo, destinatario } = data;
-
-        // Guardar en la DB
         const sqlInsert = "INSERT INTO chat_mensajes (nombre_usuario, mensaje, rol_usuario, tipo, destinatario) VALUES (?, ?, ?, ?, ?)";
         db.query(sqlInsert, [nombre_usuario, mensaje, rol_usuario, tipo, destinatario], (err, result) => {
             if (err) return console.error("Error guardando mensaje:", err);
-
-            // EMITIR EL MENSAJE A TODOS (Si es público)
             io.emit('recibir_mensaje', {
                 id: result.insertId,
                 ...data,
                 fecha: new Date()
             });
-
-            // 🧹 AUTO-LIMPIEZA: Mantener solo los últimos 100 mensajes
             db.query("DELETE FROM chat_mensajes WHERE id NOT IN (SELECT id FROM (SELECT id FROM chat_mensajes ORDER BY id DESC LIMIT 100) as temp)", (err) => {
                 if (err) console.error("Error en auto-limpieza:", err);
             });
         });
     });
 
-    socket.on('disconnect', () => {
-        console.log('🔌 Usuario desconectado');
-    });
+    socket.on('disconnect', () => { console.log('🔌 Usuario desconectado'); });
 });
 
-// Ruta para cargar el historial inicial del chat
 app.get('/chat-historial', (req, res) => {
     db.query("SELECT * FROM chat_mensajes ORDER BY id ASC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -104,34 +90,46 @@ app.get('/chat-historial', (req, res) => {
     });
 });
 
-// =========================================================================
-// --- 5. RUTAS DE ESTADÍSTICAS ---
-// =========================================================================
+// --- 5. RUTA DE LA IA (MODO RESISTENCIA TOTAL) ---
+app.post('/chat-ia', (req, res) => {
+    const { pregunta } = req.body;
+    console.log("📩 Pregunta para el Archivero:", pregunta);
+
+    const respuestasBunker = [
+        "Hermano, el radar está detectando actividad paranormal intensa. Servidores en mantenimiento.",
+        "Esa información está guardada bajo llave en el nivel 4 del búnker.",
+        "Interferencias en la zona. Habla con otros agentes en el chat general.",
+        "El Archivero está consultando los libros antiguos de Granada...",
+        "¡Cuidado! Las paredes tienen oídos. Sistema en modo local."
+    ];
+
+    const respuestaLocal = respuestasBunker[Math.floor(Math.random() * respuestasBunker.length)];
+    console.log("✅ Respuesta enviada");
+    res.json({ respuesta: `(Búnker) ${respuestaLocal}` });
+});
+
+// --- 6. ESTADÍSTICAS ---
 app.get('/admin/conteo-total', (req, res) => {
-    const sql = `
-        SELECT 
+    const sql = `SELECT 
             (SELECT COUNT(*) FROM usuarios) as usuarios,
             (SELECT COUNT(*) FROM videos) as videos,
             (SELECT COUNT(*) FROM expedientes) as expedientes,
-            (SELECT COUNT(*) FROM lugares) as lugares
-    `;
+            (SELECT COUNT(*) FROM lugares) as lugares`;
     db.query(sql, (err, result) => {
         if (err) return res.status(500).json(err);
         res.json(result[0]);
     });
 });
 
-// =========================================================================
-// --- 6. LOGIN Y USUARIOS ---
-// =========================================================================
-function loginFunc(req, res) {
+// --- 7. LOGIN Y USUARIOS ---
+const loginFunc = (req, res) => {
     const { email, password } = req.body;
     db.query("SELECT * FROM usuarios WHERE email = ? AND password = ?", [email, password], (err, result) => {
         if (err) return res.status(500).json(err);
         if (result.length > 0) res.json({ mensaje: "Acceso concedido", usuario: result[0] });
         else res.status(401).json({ mensaje: "Credenciales incorrectas" });
     });
-}
+};
 app.post('/login-usuario', loginFunc);
 app.post('/login-agente', loginFunc);
 
@@ -157,9 +155,7 @@ app.delete('/usuarios/:id', (req, res) => {
     });
 });
 
-// =========================================================================
-// --- 7. GESTIÓN DE EXPEDIENTES ---
-// =========================================================================
+// --- 8. EXPEDIENTES ---
 app.get('/expedientes', (req, res) => {
     db.query("SELECT * FROM expedientes ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -196,9 +192,7 @@ app.delete('/expedientes/:id', (req, res) => {
     });
 });
 
-// =========================================================================
-// --- 8. RADAR TÁCTICO (LUGARES) ---
-// =========================================================================
+// --- 9. LUGARES ---
 app.get('/lugares', (req, res) => {
     db.query("SELECT * FROM lugares ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -210,7 +204,7 @@ app.post('/lugares', upload.single('foto'), (req, res) => {
     const { nombre, descripcion, latitud, longitud, ubicacion } = req.body;
     const imagen_url = req.file ? `/lugares/${req.file.filename}` : '/lugares/default.jpg';
     const sql = "INSERT INTO lugares (nombre, descripcion, latitud, longitud, imagen_url, ubicacion, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')";
-    db.query(sql, [nombre, descripcion, latitud, longitud, imagen_url, ubicacion], (err, result) => {
+    db.query(sql, [nombre, descripcion, latitud, longitud, imagen_url, ubicacion], (err) => {
         if (err) return res.status(500).send(err);
         res.send("📍 Reporte recibido.");
     });
@@ -230,9 +224,7 @@ app.delete('/lugares/:id', (req, res) => {
     });
 });
 
-// =========================================================================
-// --- 9. VÍDEOS ---
-// =========================================================================
+// --- 10. VÍDEOS ---
 app.get('/videos-publicos', (req, res) => {
     db.query("SELECT * FROM videos WHERE estado = 'aprobado' ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -269,9 +261,7 @@ app.delete('/borrar-video/:id', (req, res) => {
     });
 });
 
-// =========================================================================
-// --- 10. IMÁGENES Y RELATOS ---
-// =========================================================================
+// --- 11. IMÁGENES Y RELATOS ---
 app.get('/admin/todas-las-imagenes', (req, res) => {
     db.query("SELECT * FROM imagenes ORDER BY id DESC", (err, results) => {
         if (err) return res.status(500).json(err);
@@ -300,5 +290,8 @@ app.get('/relatos-administrador', (req, res) => {
     });
 });
 
-// --- FINAL: USAMOS server.listen EN VEZ DE app.listen PARA SOCKET ---
-server.listen(5000, () => console.log(`🚀 BÚNKER CON CHAT OPERATIVO EN PUERTO 5000`));
+// --- MOTOR ---
+const PORT = 5000;
+server.listen(PORT, () => {
+    console.log(`🚀 BÚNKER TOTALMENTE OPERATIVO EN PUERTO ${PORT}`);
+});

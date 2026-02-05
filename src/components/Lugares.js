@@ -4,7 +4,6 @@ import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 
-// 1. ICONOS TÁCTICOS
 const iconoMisterio = new L.Icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', 
     iconSize: [35, 35],
@@ -19,7 +18,6 @@ const iconoResaltado = new L.Icon({
     popupAnchor: [0, -45],
 });
 
-// Componente auxiliar para mover la cámara
 const ActualizadorMapa = ({ centro }) => {
     const map = useMap();
     useEffect(() => {
@@ -38,41 +36,66 @@ const Lugares = () => {
     const [centroMapa, setCentroMapa] = useState([37.1773, -3.5986]);
     
     const [formData, setFormData] = useState({ 
-        nombre: '', 
-        descripcion: '', 
-        archivoFoto: null, 
-        barrio: '' 
+        nombre: '', descripcion: '', archivoFoto: null, barrio: '' 
     });
-
-    useEffect(() => {
-        cargarDatos();
-    }, []);
 
     const cargarDatos = async () => {
         try {
             const res = await axios.get('http://localhost:5000/lugares');
-            const aprobados = res.data.filter(p => p.estado === 'aprobado');
-            setPuntos(aprobados);
+            let aprobados = res.data.filter(p => p.estado === 'aprobado');
 
-            const buscadoId = localStorage.getItem('lugar_a_resaltar');
-            if (buscadoId) {
-                const puntoEncontrado = aprobados.find(p => p.id === parseInt(buscadoId));
-                if (puntoEncontrado) {
-                    setIdResaltado(puntoEncontrado.id);
-                    setCentroMapa([parseFloat(puntoEncontrado.latitud), parseFloat(puntoEncontrado.longitud)]);
-                    localStorage.removeItem('lugar_a_resaltar');
+            const itemGuardado = localStorage.getItem('lugar_a_resaltar');
+            
+            if (itemGuardado) {
+                // Intentamos parsear por si es el objeto de la galería
+                try {
+                    const data = JSON.parse(itemGuardado);
+                    
+                    if (data.esDeGaleria) {
+                        // Es una imagen de la galería con coordenadas nuevas
+                        const puntoTemporal = {
+                            id: 'gal-' + data.id,
+                            nombre: data.nombre,
+                            latitud: data.latitud,
+                            longitud: data.longitud,
+                            imagen_url: '/imagenes/' + data.imagen_url,
+                            descripcion: data.descripcion,
+                            ubicacion: 'ARCHIVO GALERÍA'
+                        };
+                        aprobados.push(puntoTemporal);
+                        setIdResaltado(puntoTemporal.id);
+                        setCentroMapa([parseFloat(data.latitud), parseFloat(data.longitud)]);
+                    } else {
+                        // Es un ID de lugar normal (por si acaso)
+                        const p = aprobados.find(x => x.id === parseInt(data));
+                        if (p) {
+                            setIdResaltado(p.id);
+                            setCentroMapa([parseFloat(p.latitud), parseFloat(p.longitud)]);
+                        }
+                    }
+                } catch (e) {
+                    // Si no es JSON, es un ID normal de la tabla lugares
+                    const p = aprobados.find(x => x.id === parseInt(itemGuardado));
+                    if (p) {
+                        setIdResaltado(p.id);
+                        setCentroMapa([parseFloat(p.latitud), parseFloat(p.longitud)]);
+                    }
                 }
+                localStorage.removeItem('lugar_a_resaltar');
             }
+            setPuntos(aprobados);
         } catch (err) {
             console.error("Error al cargar puntos:", err);
         }
     };
 
+    useEffect(() => {
+        cargarDatos();
+    }, []);
+
     const DetectorClics = () => {
         useMapEvents({
-            click(e) {
-                if (modoReporte) setNuevoLugar(e.latlng);
-            },
+            click(e) { if (modoReporte) setNuevoLugar(e.latlng); },
         });
         return null;
     };
@@ -89,19 +112,15 @@ const Lugares = () => {
 
         try {
             await axios.post('http://localhost:5000/lugares', dataEnvio);
-            alert("🚀 REPORTE ENVIADO AL BÚNKER.");
-            setNuevoLugar(null);
-            setModoReporte(false);
-            setFormData({ nombre: '', descripcion: '', archivoFoto: null, barrio: '' });
+            alert("🚀 REPORTE ENVIADO.");
+            setNuevoLugar(null); setModoReporte(false);
             cargarDatos(); 
-        } catch (err) {
-            alert("❌ Error en la transmisión.");
-        }
+        } catch (err) { alert("❌ Error en la transmisión."); }
     };
 
     return (
-        <section className="seccion-lugares" style={{ padding: '20px', backgroundColor: '#1a1a1a', minHeight: '100vh' }}>
-            <h2 className="titulo-lugares" style={{ color: '#00d4ff', textAlign: 'center', fontFamily: 'Orbitron', textShadow: '0 0 10px #00d4ff', marginBottom: '20px' }}>
+        <section className="seccion-lugares" style={{ padding: '20px', backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
+            <h2 style={{ color: '#00ff41', textAlign: 'center', fontFamily: 'Orbitron', textShadow: '0 0 10px #00ff41' }}>
                 📍 RADAR TÁCTICO DE GRANADA
             </h2>
 
@@ -111,23 +130,20 @@ const Lugares = () => {
                         ➕ REGISTRAR HALLAZGO
                     </button>
                 ) : (
-                    <div style={{ color: '#00ff41', fontWeight: 'bold' }}>
-                        {nuevoLugar ? "🎯 OBJETIVO FIJADO" : "📡 SELECCIONA EL PUNTO EN EL MAPA"}
-                    </div>
+                    <div style={{ color: '#00ff41', fontWeight: 'bold' }}>🎯 SELECCIONA EL PUNTO EN EL MAPA</div>
                 )}
             </div>
 
             <div className="contenedor-flex-mapa" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {nuevoLugar && (
-                    <div className="formulario-lugar" style={{ background: '#222', padding: '20px', borderRadius: '15px', border: '2px solid #00ff41', width: '350px', color: '#fff' }}>
+                    <div className="formulario-lugar" style={{ background: '#111', padding: '20px', borderRadius: '15px', border: '2px solid #00ff41', width: '350px', color: '#fff' }}>
                         <h3 style={{ color: '#00ff41' }}>📂 REPORTE DE CAMPO</h3>
                         <form onSubmit={manejarEnvio}>
-                            <input type="text" placeholder="TÍTULO..." required style={{width:'100%', marginBottom:'10px', padding:'10px', background: '#333', color: '#fff', border: '1px solid #444'}} onChange={e=>setFormData({...formData, nombre: e.target.value})} />
-                            <textarea placeholder="DESCRIPCIÓN..." required style={{width:'100%', marginBottom:'10px', padding:'10px', background: '#333', color: '#fff', border: '1px solid #444', height: '80px'}} onChange={e=>setFormData({...formData, descripcion: e.target.value})} />
-                            <input type="file" accept="image/*" required style={{width:'100%', marginBottom:'15px', color: '#00ff41'}} onChange={e => setFormData({...formData, archivoFoto: e.target.files[0]})} />
-                            <input type="text" placeholder="BARRIO..." required style={{width:'100%', marginBottom:'20px', padding:'10px', background: '#333', color: '#fff', border: '1px solid #444'}} onChange={e=>setFormData({...formData, barrio: e.target.value})} />
-                            <button type="submit" style={{width:'100%', padding:'12px', background:'#00ff41', color: '#000', fontWeight:'bold', border:'none', borderRadius:'5px', cursor:'pointer'}}>SUBIR AL RADAR</button>
-                            <button type="button" onClick={() => {setNuevoLugar(null); setModoReporte(false);}} style={{width:'100%', marginTop:'10px', background:'none', color:'red', border:'1px solid red', cursor:'pointer'}}>ABORTAR</button>
+                            <input type="text" placeholder="TÍTULO..." required style={{width:'100%', marginBottom:'10px', background:'#222', color:'#fff', border:'1px solid #444', padding:'8px'}} onChange={e=>setFormData({...formData, nombre: e.target.value})} />
+                            <textarea placeholder="DESCRIPCIÓN..." required style={{width:'100%', marginBottom:'10px', background:'#222', color:'#fff', border:'1px solid #444', padding:'8px', height:'80px'}} onChange={e=>setFormData({...formData, descripcion: e.target.value})} />
+                            <input type="file" accept="image/*" required style={{width:'100%', marginBottom:'15px', color:'#00ff41'}} onChange={e => setFormData({...formData, archivoFoto: e.target.files[0]})} />
+                            <input type="text" placeholder="BARRIO..." required style={{width:'100%', marginBottom:'20px', background:'#222', color:'#fff', border:'1px solid #444', padding:'8px'}} onChange={e=>setFormData({...formData, barrio: e.target.value})} />
+                            <button type="submit" style={{width:'100%', padding:'12px', background:'#00ff41', color:'#000', fontWeight:'bold', border:'none', borderRadius:'5px', cursor:'pointer'}}>SUBIR AL RADAR</button>
                         </form>
                     </div>
                 )}
@@ -149,26 +165,19 @@ const Lugares = () => {
                             >
                                 <Popup>
                                     <div style={{ textAlign: 'center', width: '200px' }}>
-                                        <h3 style={{ margin: '5px 0', color: lugar.id === idResaltado ? '#00d4ff' : '#ff4d4d' }}>{lugar.nombre}</h3>
-                                        
-                                        {/* 🛠️ RUTA CORREGIDA: Usa directamente lo que hay en public/lugares/ */}
+                                        <h3 style={{ margin: '5px 0' }}>{lugar.nombre}</h3>
                                         <img 
-                                            src={lugar.imagen_url} 
+                                            src={lugar.imagen_url.startsWith('http') || lugar.imagen_url.startsWith('/imagenes/') ? lugar.imagen_url : `http://localhost:5000${lugar.imagen_url}`} 
                                             alt={lugar.nombre} 
-                                            style={{ width: '100%', borderRadius: '8px', display: 'block', margin: '10px 0' }} 
+                                            style={{ width: '100%', borderRadius: '8px', margin: '10px 0' }} 
                                             onError={(e) => {
                                                 e.target.onerror = null;
-                                                // Intento de rescate si falta la barra inicial
-                                                if(!lugar.imagen_url.startsWith('/')) {
-                                                    e.target.src = '/' + lugar.imagen_url;
-                                                } else {
-                                                    e.target.src = 'https://via.placeholder.com/200x150?text=IMAGEN+NO+ENCONTRADA';
-                                                }
+                                                e.target.src = 'https://via.placeholder.com/200x150?text=ARCHIVO+NO+ENCONTRADO';
                                             }}
                                         />
-                                        
-                                        <p style={{ fontSize: '0.85rem', color: '#333' }}>{lugar.descripcion}</p>
-                                        <strong style={{ fontSize: '0.7rem', color: '#000' }}>📍 {lugar.ubicacion}</strong>
+                                        <p style={{ fontSize: '0.85rem' }}>{lugar.descripcion}</p>
+                                        <strong style={{ fontSize: '0.7rem' }}>📍 {lugar.ubicacion}</strong>
+                                        <div style={{ color: 'red', fontWeight: 'bold', fontSize: '0.6rem', marginTop: '5px' }}>QSL CONTACT VERIFIED</div>
                                     </div>
                                 </Popup>
                             </Marker>

@@ -9,20 +9,22 @@ const Chat = ({ usuarioActivo }) => {
     const [historial, setHistorial] = useState([]);
     const scrollRef = useRef();
 
-    // Comprobamos si eres el gran jefe
     const esAdmin = usuarioActivo?.email === 'expedientexpepe@moreno.com' || usuarioActivo?.rol === 'admin';
 
-    useEffect(() => {
+    const cargarHistorial = () => {
         fetch('http://localhost:5000/chat-historial')
             .then(res => res.json())
             .then(data => setHistorial(data))
             .catch(err => console.error("Error cargando chat:", err));
+    };
+
+    useEffect(() => {
+        cargarHistorial();
 
         socket.on('recibir_mensaje', (nuevoMsg) => {
             setHistorial((prev) => [...prev, nuevoMsg]);
         });
 
-        // Escuchar evento de limpieza global
         socket.on('chat_limpiado', () => {
             setHistorial([]);
         });
@@ -55,7 +57,6 @@ const Chat = ({ usuarioActivo }) => {
         setMensaje('');
     };
 
-    // FUNCIÓN SOLO PARA ADMIN: Limpiar toda la tabla
     const limpiarChatTotal = () => {
         if (window.confirm("¿BORRAR TODO EL HISTORIAL DE LA FRECUENCIA?")) {
             socket.emit('limpiar_chat_servidor');
@@ -70,24 +71,27 @@ const Chat = ({ usuarioActivo }) => {
                     <span>FRECUENCIA: {esAdmin ? 'COMANDANCIA' : 'USUARIOS'}</span>
                 </div>
                 
-                {/* SOLO EL ADMIN VE ESTE BOTÓN */}
                 {esAdmin && (
                     <button onClick={limpiarChatTotal} className="btn-reset-chat">
-                        🗑️ REINICIAR CANAL
+                        🗑️ REINICIAR
                     </button>
                 )}
             </div>
 
             <div className="chat-messages-area" ref={scrollRef}>
                 {historial.map((m, idx) => (
-                    <div key={idx} className={`chat-line ${m.rol_usuario === 'admin' ? 'line-admin' : ''}`}>
-                        <span className="chat-user">
-                            {m.rol_usuario === 'admin' ? '⭐ [ADMIN] ' : ''}[{m.nombre_usuario}]:
-                        </span>
-                        <span className="chat-text">{m.mensaje}</span>
-                        <span className="chat-time">
-                            {new Date(m.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                    <div key={idx} className={`mensaje-wrapper ${m.nombre_usuario === usuarioActivo?.nombre ? 'propio' : 'ajeno'} ${m.rol_usuario === 'admin' ? 'es-admin' : ''}`}>
+                        <div className="mensaje-burbuja">
+                            <div className="mensaje-info">
+                                <span className="mensaje-autor">
+                                    {m.rol_usuario === 'admin' ? '⭐ ' : ''}{m.nombre_usuario}
+                                </span>
+                                <span className="mensaje-hora">
+                                    {new Date(m.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+                            <p className="mensaje-texto">{m.mensaje}</p>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -99,7 +103,14 @@ const Chat = ({ usuarioActivo }) => {
                     value={mensaje}
                     onChange={(e) => setMensaje(e.target.value)}
                 />
-                <button type="submit">{esAdmin ? 'EMITIR' : 'TRANSMITIR'}</button>
+                <div className="grupo-botones-chat">
+                    <button type="button" className="btn-refrescar-chat" onClick={cargarHistorial} title="Refrescar señal">
+                        🔄
+                    </button>
+                    <button type="submit" className="btn-enviar-chat">
+                        {esAdmin ? 'EMITIR' : 'TRANSMITIR'}
+                    </button>
+                </div>
             </form>
         </div>
     );

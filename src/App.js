@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Indice from './components/Indice';
 import Hero from './components/Hero';
@@ -10,11 +10,50 @@ import Footer from './components/Footer';
 import Videos from './components/Videos';
 import Galeria from './components/Galeria';
 import Lugares from './components/Lugares'; 
-// CORREGIDO: Asegúrate de que la carpeta sea 'components' y el archivo 'Chat'
 import Chat from './components/Chat'; 
+import ChatIA from './components/ChatIA';
 
 import './App.css';
 import fondoAlhambra from './alhambra.jpg';
+
+// --- 1. COMPONENTE DE MÚSICA ---
+const ControlMusica = () => {
+  const [sonando, setSonando] = useState(false);
+  const audioRef = useRef(new Audio('/audio/misterio.mp3'));
+
+  useEffect(() => {
+    audioRef.current.volume = 0.2; 
+    audioRef.current.loop = true;
+  }, []);
+
+  const toggleMusica = () => {
+    if (sonando) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(e => console.log("Interacción necesaria para audio."));
+    }
+    setSonando(!sonando);
+  };
+
+  return (
+    <button 
+      onClick={toggleMusica} 
+      style={{
+        background: 'transparent',
+        color: 'var(--color-principal)',
+        border: '1px solid var(--color-principal)',
+        padding: '8px 12px',
+        cursor: 'pointer',
+        fontFamily: 'monospace',
+        fontSize: '0.7rem',
+        textTransform: 'uppercase',
+        width: '100%'
+      }}
+    >
+      {sonando ? '🔈 AMBIENTE ON' : '🔊 MÚSICA OFF'}
+    </button>
+  );
+};
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +64,6 @@ function App() {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // 1. CARGA DE SESIÓN
   useEffect(() => {
     const sesionGuardada = localStorage.getItem('usuario_sesion');
     if (sesionGuardada) {
@@ -33,13 +71,11 @@ function App() {
         const datos = JSON.parse(sesionGuardada);
         setUserAuth(datos);
       } catch (e) {
-        console.error("Error al recuperar sesión");
         localStorage.removeItem('usuario_sesion');
       }
     }
   }, []);
 
-  // 2. CONTROL DE ATMÓSFERA
   useEffect(() => {
     document.documentElement.style.setProperty('--color-principal', tema);
   }, [tema]);
@@ -73,80 +109,79 @@ function App() {
       }}>
 
         {/* BOTÓN HAMBURGUESA */}
-        <button className={`hamburger-fix ${isOpen ? 'active' : ''}`} onClick={toggleMenu} style={{
+        <button onClick={toggleMenu} style={{
           position: 'fixed', top: '20px', right: '20px', zIndex: '2000',
           background: 'rgba(0,0,0,0.8)', border: '1px solid var(--color-principal)',
           color: 'var(--color-principal)', width: '50px', height: '50px', cursor: 'pointer',
-          borderRadius: '5px', fontSize: '1.5rem'
+          borderRadius: '5px', fontSize: '20px'
         }}>
           {isOpen ? '✕' : '☰'}
         </button>
 
-        {/* MENÚ LATERAL */}
-        <nav className={`sidebar-right ${isOpen ? 'open' : ''}`} style={{
+        {/* BARRA LATERAL (SIDEBAR) */}
+        <nav style={{
           position: 'fixed', top: 0, right: isOpen ? '0' : '-300px',
           width: '300px', height: '100vh', background: 'rgba(0,0,0,0.95)',
-          zIndex: '1500', transition: '0.4s', borderLeft: '2px solid var(--color-principal)'
+          zIndex: '1500', transition: '0.4s', borderLeft: '2px solid var(--color-principal)',
+          display: 'flex', flexDirection: 'column'
         }}>
-          <ul className="nav-links" style={{ listStyle: 'none', padding: '80px 20px' }}>
-            <li><Link to="/" onClick={toggleMenu}>INICIO</Link></li>
-            
-            {!userAuth ? (
-               <li><Link to="/acceso" onClick={toggleMenu}>ACCESO AGENTES</Link></li>
-            ) : (
-              <li style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,255,65,0.2)' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-principal)', display: 'block' }}>
-                  AGENTE: {userAuth.nombre.toUpperCase()}
-                </span>
-                <button onClick={cerrarSesion} style={{
-                  background: 'none', border: 'none', color: '#ff4444',
-                  cursor: 'pointer', display: 'block', padding: '5px 0',
-                  font: 'inherit', fontSize: '0.8rem', fontWeight: 'bold'
-                }}>
-                  ( DESCONECTAR )
-                </button>
-              </li>
+          
+          {/* ENLACES SUPERIORES */}
+          <div style={{ flexGrow: 1, paddingTop: '80px', paddingLeft: '30px' }}>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              <li style={{ marginBottom: '20px' }}><Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Inicio</Link></li>
+              <li style={{ marginBottom: '20px' }}><Link to="/galeria" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Galería</Link></li>
+              <li style={{ marginBottom: '20px' }}><Link to="/videos" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Vídeos</Link></li>
+              <li style={{ marginBottom: '20px' }}><Link to="/expedientes" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Expedientes</Link></li>
+              <li style={{ marginBottom: '20px' }}><Link to="/lugares" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Mapa Lugares</Link></li>
+              <li style={{ marginBottom: '20px' }}><Link to="/chat" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>💬 Chat Táctico</Link></li>
+              <li style={{ marginBottom: '20px' }}><Link to="/chat-ia" onClick={toggleMenu} style={{ color: '#00d4ff', textDecoration: 'none', fontWeight: 'bold', textTransform: 'uppercase' }}>🤖 Archivero IA</Link></li>
+              
+              {userAuth && (userAuth.email === ADMIN_EMAIL || userAuth.rol === 'admin') && (
+                <li>
+                  <Link to="/panel-mando" onClick={toggleMenu} style={{
+                    color: '#ffd700', border: '1px dashed #ffd700', padding: '10px',
+                    display: 'block', textAlign: 'center', background: 'rgba(255,215,0,0.1)',
+                    fontWeight: 'bold', marginTop: '10px', textDecoration: 'none'
+                  }}>
+                    ⚡ PANEL DE MANDO
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </div>
+
+          {/* PIE DEL MENÚ (CONFIGURACIÓN) */}
+          <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5px' }}>
+              <div onClick={() => setTema('#00ff41')} style={{background:'#00ff41', width:'22px', height:'22px', borderRadius:'50%', cursor:'pointer', border:'2px solid white'}}></div>
+              <div onClick={() => setTema('#ff4444')} style={{background:'#ff4444', width:'22px', height:'22px', borderRadius:'50%', cursor:'pointer', border:'2px solid white'}}></div>
+              <div onClick={() => setTema('#ffb100')} style={{background:'#ffb100', width:'22px', height:'22px', borderRadius:'50%', cursor:'pointer', border:'2px solid white'}}></div>
+              <div onClick={() => setTema('#00d4ff')} style={{background:'#00d4ff', width:'22px', height:'22px', borderRadius:'50%', cursor:'pointer', border:'2px solid white'}}></div>
+            </div>
+
+            <ControlMusica />
+
+            {userAuth && (
+              <button onClick={cerrarSesion} style={{
+                background: 'transparent', border: '1px solid #ff4444', color: '#ff4444',
+                padding: '8px', cursor: 'pointer', fontFamily: 'monospace', textTransform: 'uppercase'
+              }}>
+                Finalizar Turno
+              </button>
             )}
-
-            <li><Link to="/expedientes" onClick={toggleMenu}>EXPEDIENTES</Link></li>
-            <li><Link to="/lugares" onClick={toggleMenu}>MAPA LUGARES</Link></li>
-            <li><Link to="/videos" onClick={toggleMenu}>VÍDEOS</Link></li>
-            <li><Link to="/galeria" onClick={toggleMenu}>GALERÍA</Link></li>
-            
-            {/* LINK AL CHAT AÑADIDO AL MENÚ */}
-            <li><Link to="/chat" onClick={toggleMenu} style={{ color: 'var(--color-principal)', fontWeight: 'bold' }}>💬 CHAT TÁCTICO</Link></li>
-
-            <li style={{ margin: '20px 0' }}><hr style={{ opacity: 0.2, borderColor: 'var(--color-principal)' }} /></li>
-
-            {/* PANEL DE MANDO SEGURO */}
-            {userAuth && (userAuth.email === ADMIN_EMAIL || userAuth.rol === 'admin') && (
-              <li>
-                <Link to="/panel-mando" onClick={toggleMenu} style={{
-                  color: '#ffd700', border: '1px dashed #ffd700',
-                  padding: '10px', display: 'block', textAlign: 'center',
-                  background: 'rgba(255,215,0,0.1)', fontWeight: 'bold'
-                }}>
-                  ⚡ PANEL DE MANDO
-                </Link>
-              </li>
-            )}
-
-            <li style={{ marginTop: '10px' }}>
-              <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>ATMÓSFERA:</label>
-              <select onChange={(e) => setTema(e.target.value)} value={tema} style={{ width: '100%', background: '#000', color: 'var(--color-principal)', border: '1px solid var(--color-principal)' }}>
-                <option value="#00ff41">VERDE MATRIX</option>
-                <option value="#ff4444">ROJO ALERTA</option>
-                <option value="#ffb100">ÁMBAR ARCHIVO</option>
-                <option value="#00d4ff">AZUL ESPECTRO</option>
-              </select>
-            </li>
-          </ul>
+          </div>
         </nav>
 
-        {/* CONTENIDO PRINCIPAL */}
+        {/* CUERPO DE LA WEB */}
         <main style={{ flex: 1 }}>
           <Routes>
-            <Route path="/" element={<div className="home-layout"><Indice /><Hero /></div>} />
+            <Route path="/" element={
+              <div className="home-layout">
+                <Indice userAuth={userAuth} />
+                <Hero userAuth={userAuth} />
+              </div>
+            } />
             <Route path="/acceso" element={<SeccionUsuarios setAuth={actualizarAuth} />} />
             <Route path="/panel-mando" element={<PanelAdmin />} />
             <Route path="/expedientes" element={<Expedientes userAuth={userAuth} />} /> 
@@ -154,8 +189,8 @@ function App() {
             <Route path="/videos" element={<Videos userAuth={userAuth} />} />
             <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
             <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
-            {/* CORREGIDO: usuarioActivo recibe userAuth */}
             <Route path="/chat" element={<Chat usuarioActivo={userAuth} />} />
+            <Route path="/chat-ia" element={<ChatIA />} />
           </Routes>
         </main>
 

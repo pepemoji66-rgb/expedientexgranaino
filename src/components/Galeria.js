@@ -17,7 +17,8 @@ const Galeria = ({ userAuth }) => {
 
     const cargarImagenes = useCallback(async () => {
         try {
-            const isAdmin = userAuth?.rol === 'admin' || userAuth?.email === 'expedientexpepe@moreno.com';
+            const isAdmin = userAuth && (userAuth.rol === 'admin' || userAuth.email === 'expedientexpepe@moreno.com');
+            
             const endpoint = isAdmin
                 ? 'http://localhost:5000/admin/todas-las-imagenes'
                 : 'http://localhost:5000/imagenes-publicas';
@@ -26,6 +27,7 @@ const Galeria = ({ userAuth }) => {
             setImagenes(res.data);
         } catch (err) {
             console.error("❌ Error cargando el archivo:", err);
+            setImagenes([]);
         }
     }, [userAuth]);
 
@@ -35,14 +37,19 @@ const Galeria = ({ userAuth }) => {
 
     const subirImagen = async (e) => {
         e.preventDefault();
+        if (!userAuth) {
+            alert("Acceso denegado. Registre sus credenciales.");
+            return;
+        }
+
         try {
             await axios.post('http://localhost:5000/subir-imagen', {
                 titulo: nuevoTitulo,
                 url: nuevaUrl,
                 descripcion: nuevaDesc,
-                agente: userAuth?.nombre || 'Agente Anónimo'
+                agente: userAuth.nombre || 'Agente Anónimo'
             });
-            alert("🚀 EVIDENCIA ENVIADA AL BÚNKER.");
+            alert("🚀 EVIDENCIA ENVIADA.");
             setNuevoTitulo(''); setNuevaUrl(''); setNuevaDesc('');
             cargarImagenes();
         } catch (err) {
@@ -50,8 +57,18 @@ const Galeria = ({ userAuth }) => {
         }
     };
 
-    const verEnMapa = (idLugar) => {
-        localStorage.setItem('lugar_a_resaltar', idLugar);
+    // --- FUNCIÓN CORREGIDA PARA ENVIAR DATOS AL MAPA ---
+    const verEnMapa = (img) => {
+        const payload = {
+            id: img.id,
+            nombre: img.titulo,
+            latitud: img.latitud,
+            longitud: img.longitud,
+            imagen_url: img.url_imagen, // Usamos el campo de la tabla imagenes
+            descripcion: img.descripcion,
+            esDeGaleria: true
+        };
+        localStorage.setItem('lugar_a_resaltar', JSON.stringify(payload));
         navigate('/lugares');
     };
 
@@ -66,7 +83,7 @@ const Galeria = ({ userAuth }) => {
                 <p className="subtitle">GRANADA PARANORMAL - SECTOR ALHAMBRA</p>
             </header>
 
-            {userAuth && (
+            {userAuth ? (
                 <section className="form-subida-img" style={{ maxWidth: '600px', margin: '0 auto 40px' }}>
                     <h2 className="titulo-form">REGISTRAR HALLAZGO</h2>
                     <form onSubmit={subirImagen}>
@@ -75,32 +92,39 @@ const Galeria = ({ userAuth }) => {
                             <input type="text" placeholder="ARCHIVO (ej: fantasma.jpg)..." value={nuevaUrl} onChange={e => setNuevaUrl(e.target.value)} required />
                         </div>
                         <textarea placeholder="DESCRIPCIÓN DE LA EVIDENCIA..." value={nuevaDesc} onChange={e => setNuevaDesc(e.target.value)} required></textarea>
-                        <button type="submit" className="btn-neon-img">SUBIR AL BÚNKER</button>
+                        <button type="submit" className="btn-neon-img">SUBIR AL ARCHIVO</button>
                     </form>
                 </section>
+            ) : (
+                <div style={{ textAlign: 'center', marginBottom: '30px', color: '#888' }}>
+                    <p>ℹ️ Iniciando visor en modo lectura. Identifíquese para aportar evidencias.</p>
+                </div>
             )}
 
             <div className="galeria-grid">
-                {imagenesActuales.map((img) => (
-                    <div key={img.id} className="card-imagen" onClick={() => setFotoExpandida(img)}>
-                        <div className="contenedor-img">
-                            <img
-                                /* VOLVEMOS A LA RUTA DEL PROFE: Carpeta public/imagenes */
-                                src={`/imagenes/${img.url_imagen}`}
-                                alt={img.titulo}
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = 'https://via.placeholder.com/400x300?text=ARCHIVO+NO+ENCONTRADO';
-                                }}
-                            />
-                            {img.estado === 'pendiente' && <span className="badge-pendiente">EN REVISIÓN</span>}
+                {imagenesActuales.length > 0 ? (
+                    imagenesActuales.map((img) => (
+                        <div key={img.id} className="card-imagen" onClick={() => setFotoExpandida(img)}>
+                            <div className="contenedor-img">
+                                <img
+                                    src={`/imagenes/${img.url_imagen}`}
+                                    alt={img.titulo}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = 'https://via.placeholder.com/400x300?text=ARCHIVO+NO+ENCONTRADO';
+                                    }}
+                                />
+                                {img.estado === 'pendiente' && <span className="badge-pendiente">EN REVISIÓN</span>}
+                            </div>
+                            <div className="info-img">
+                                <h3>{img.titulo}</h3>
+                                <p className="agente-tag">FUENTE: {img.agente || 'Desconocido'}</p>
+                            </div>
                         </div>
-                        <div className="info-img">
-                            <h3>{img.titulo}</h3>
-                            <p className="agente-tag">FUENTE: {img.agente || 'Desconocido'}</p>
-                        </div>
-                    </div>
-                ))}
+                    ))
+                ) : (
+                    <p style={{ gridColumn: '1/-1', textAlign: 'center' }}>Cargando registros visuales...</p>
+                )}
             </div>
 
             <div className="paginacion">
@@ -116,7 +140,6 @@ const Galeria = ({ userAuth }) => {
                     <div className="contenido-foto-grande" onClick={e => e.stopPropagation()}>
                         <button className="cerrar-modal" onClick={() => setFotoExpandida(null)}>×</button>
                         
-                        {/* ARREGLADO AQUÍ TAMBIÉN: Ruta relativa */}
                         <img 
                             src={`/imagenes/${fotoExpandida.url_imagen}`} 
                             alt={fotoExpandida.titulo} 
@@ -134,9 +157,9 @@ const Galeria = ({ userAuth }) => {
                                 <span className="fecha-modal">📅 {new Date(fotoExpandida.fecha).toLocaleDateString()}</span>
                                 <button 
                                     className="btn-ver-mapa"
-                                    onClick={() => verEnMapa(fotoExpandida.lugar_id || fotoExpandida.id)}
+                                    onClick={() => verEnMapa(fotoExpandida)}
                                 >
-                                    📍 VER EN EL RADAR
+                                    📍 VER POSICIÓN EN RADAR
                                 </button>
                             </div>
                         </div>

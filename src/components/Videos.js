@@ -14,6 +14,7 @@ const Videos = ({ userAuth }) => {
 
     const cargarVideos = async () => {
         try {
+            // Cargamos siempre los vídeos públicos para todos
             const res = await axios.get('http://localhost:5000/videos-publicos');
             setVideos(res.data); 
         } catch (err) {
@@ -29,18 +30,19 @@ const Videos = ({ userAuth }) => {
                 url: nuevaUrl,
                 usuario: userAuth?.nombre || 'ANÓNIMO'
             });
-            alert("🛸 MATERIAL ENVIADO: El Jefe revisará el hallazgo.");
+            alert("Vídeo enviado correctamente para revisión.");
             setNuevaUrl('');
             setTitulo('');
             cargarVideos(); 
         } catch (err) {
-            alert("❌ Fallo en la transmisión");
+            alert("❌ Error al subir el contenido");
         }
     };
 
     return (
         <div className="videos-container fade-in">
-            <h1 className="titulo-seccion">SISTEMA DE VIGILANCIA</h1>
+            {/* Título más serio y profesional */}
+            <h1 className="titulo-seccion">ARCHIVO AUDIOVISUAL</h1>
 
             <div className="grid-videos">
                 {videos && videos.length > 0 ? (
@@ -48,14 +50,12 @@ const Videos = ({ userAuth }) => {
                         <div key={vid.id} className="video-card">
                             <div className="video-wrapper">
                                 {vid.url && !vid.url.includes('http') ? (
-                                    /* VÍDEO LOCAL: Siguiendo la técnica del profe */
                                     <video controls className="video-elemento" key={vid.url}>
                                         <source src={`/videos/${vid.url}.mp4`} type="video/mp4" />
                                         <source src={`/videos/${vid.url}`} type="video/mp4" />
                                         Tu navegador no soporta el formato de vídeo.
                                     </video>
                                 ) : (
-                                    /* VÍDEO YOUTUBE */
                                     <iframe
                                         src={vid.url ? vid.url.replace("watch?v=", "embed/").split("&")[0] : ""}
                                         title={vid.titulo}
@@ -66,39 +66,49 @@ const Videos = ({ userAuth }) => {
                             </div>
                             <div className="video-info">
                                 <span className="agente-tag">
-                                    FUENTE: {vid.usuario || vid.agente || 'DESCONOCIDO'}
+                                    PUBLICADO POR: {vid.usuario || vid.agente || 'ARCHIVO'}
                                 </span>
-                                <h3>{vid.titulo ? vid.titulo.toUpperCase() : 'AVISTAMIENTO SIN NOMBRE'}</h3>
+                                <h3>{vid.titulo ? vid.titulo.toUpperCase() : 'VÍDEO SIN TÍTULO'}</h3>
                             </div>
                         </div>
                     ))
                 ) : (
-                    <div className="texto-vacio" style={{textAlign: 'center', width: '100%', color: '#ff4d4d'}}>
-                        <p>📡 BUSCANDO SEÑAL... No hay vídeos aprobados.</p>
+                    <div className="texto-vacio" style={{textAlign: 'center', width: '100%', color: '#888'}}>
+                        <p>No hay vídeos disponibles en este momento.</p>
                     </div>
                 )}
             </div>
 
-            {userAuth && (
-                <div className="subir-video-seccion">
-                    <Forms title="REPORTAR AVISTAMIENTO" onSubmit={handleSubirVideo}>
-                        <input 
-                            type="text" 
-                            placeholder="TÍTULO DEL HALLAZGO" 
-                            value={titulo} 
-                            onChange={(e) => setTitulo(e.target.value)} 
-                            required 
-                        />
-                        <input 
-                            type="text" 
-                            placeholder="URL DE YOUTUBE O NOMBRE DEL ARCHIVO" 
-                            value={nuevaUrl} 
-                            onChange={(e) => setNuevaUrl(e.target.value)} 
-                            required 
-                        />
-                    </Forms>
-                </div>
-            )}
+            {/* Lógica de registro para aportar material */}
+            <div className="seccion-aportaciones" style={{ marginTop: '40px', textAlign: 'center' }}>
+                {userAuth ? (
+                    <div className="subir-video-seccion">
+                        <Forms title="COMPARTIR VÍDEO" onSubmit={handleSubirVideo}>
+                            <input 
+                                type="text" 
+                                placeholder="TÍTULO DEL VÍDEO" 
+                                value={titulo} 
+                                onChange={(e) => setTitulo(e.target.value)} 
+                                required 
+                            />
+                            <input 
+                                type="text" 
+                                placeholder="URL DE YOUTUBE O NOMBRE DEL ARCHIVO" 
+                                value={nuevaUrl} 
+                                onChange={(e) => setNuevaUrl(e.target.value)} 
+                                required 
+                            />
+                        </Forms>
+                    </div>
+                ) : (
+                    <div className="aviso-registro-videos" style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                        <p style={{ color: '#aaa', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                            Para aportar su propio material audiovisual a esta colección, 
+                            por favor <strong style={{color: 'var(--color-principal)'}}>inicie sesión</strong> o regístrese.
+                        </p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

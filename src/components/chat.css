@@ -1,21 +1,30 @@
 .chat-container-root {
     background: #050505;
-    border: 1px solid var(--color-principal);
+    border: 2px solid var(--color-principal);
     display: flex;
     flex-direction: column;
-    height: 450px;
+    height: 550px; /* Un poco más alto para que luzcan las burbujas */
     width: 100%;
-    max-width: 500px;
+    max-width: 600px;
     margin: 20px auto;
     font-family: 'Courier New', Courier, monospace;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
 }
 
 .chat-header-tactico {
     background: #111;
-    padding: 10px;
+    padding: 12px;
     border-bottom: 1px solid var(--color-principal);
     color: var(--color-principal);
     font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-info {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -30,65 +39,144 @@
     animation: blink-chat 1.5s infinite;
 }
 
+/* ÁREA DE MENSAJES CON BURBUJAS */
 .chat-messages-area {
     flex: 1;
     overflow-y: auto;
-    padding: 10px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+    background-image: linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
-.chat-line {
-    font-size: 0.9rem;
-    border-bottom: 1px solid #111;
-    padding-bottom: 4px;
+.mensaje-wrapper {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
 }
 
-.line-admin {
+.mensaje-wrapper.propio { align-items: flex-end; }
+.mensaje-wrapper.ajeno { align-items: flex-start; }
+
+.mensaje-burbuja {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 15px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(20, 20, 20, 0.8);
+}
+
+/* Diferencia entre tú y los demás */
+.mensaje-wrapper.propio .mensaje-burbuja {
+    border-color: var(--color-principal);
     background: rgba(0, 255, 65, 0.05);
-    border-left: 2px solid var(--color-principal);
-    padding-left: 5px;
+    border-bottom-right-radius: 2px;
 }
 
-.chat-user {
+.mensaje-wrapper.ajeno .mensaje-burbuja {
+    border-color: #444;
+    border-bottom-left-radius: 2px;
+}
+
+/* Si el mensaje es de Admin (Dorado) */
+.mensaje-wrapper.es-admin .mensaje-burbuja {
+    border-color: #ffd700;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+
+.mensaje-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 4px;
+    font-size: 0.7rem;
+}
+
+.mensaje-autor {
     color: var(--color-principal);
-    margin-right: 8px;
     font-weight: bold;
 }
 
-.chat-text {
+.mensaje-wrapper.es-admin .mensaje-autor {
+    color: #ffd700;
+}
+
+.mensaje-hora {
+    color: #555;
+}
+
+.mensaje-texto {
     color: #ccc;
+    margin: 0;
+    line-height: 1.3;
+    word-break: break-word;
 }
 
-.chat-time {
-    float: right;
-    font-size: 0.7rem;
-    color: #444;
-}
-
+/* PANEL DE INPUT Y BOTONES */
 .chat-input-form {
     display: flex;
     border-top: 1px solid #222;
+    background: #000;
+    padding: 5px;
 }
 
 .chat-input-form input {
     flex: 1;
-    background: #000;
+    background: transparent;
     border: none;
-    color: #00ff41;
+    color: var(--color-principal);
     padding: 12px;
     outline: none;
 }
 
-.chat-input-form button {
+.grupo-botones-chat {
+    display: flex;
+    gap: 5px;
+    padding-right: 5px;
+}
+
+.btn-refrescar-chat {
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 0 10px;
+    transition: 0.3s;
+}
+
+.btn-refrescar-chat:hover {
+    border-color: var(--color-principal);
+    color: var(--color-principal);
+}
+
+.btn-enviar-chat {
     background: var(--color-principal);
     color: #000;
     border: none;
     padding: 0 15px;
     font-weight: bold;
     cursor: pointer;
+    border-radius: 4px;
     font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+}
+
+/* Botón de reset de Admin */
+.btn-reset-chat {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    border-radius: 3px;
 }
 
 @keyframes blink-chat {
@@ -97,31 +185,6 @@
     100% { opacity: 1; }
 }
 
-/* Scrollbar */
+/* Scrollbar táctica */
 .chat-messages-area::-webkit-scrollbar { width: 4px; }
 .chat-messages-area::-webkit-scrollbar-thumb { background: var(--color-principal); }
-.btn-reset-chat {
-    background: #ff4444;
-    color: white;
-    border: none;
-    padding: 3px 8px;
-    font-size: 0.6rem;
-    cursor: pointer;
-    font-family: 'Orbitron', sans-serif;
-    border-radius: 3px;
-}
-
-.btn-reset-chat:hover {
-    background: #cc0000;
-}
-
-.line-admin .chat-user {
-    color: #ffd700 !important; /* Dorado para el jefe */
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-}
-
-.header-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
