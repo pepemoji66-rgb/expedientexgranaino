@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // Para viajar al mapa
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './galeria.css';
 
@@ -7,7 +7,7 @@ const Galeria = ({ userAuth }) => {
     const [imagenes, setImagenes] = useState([]);
     const [paginaActual, setPaginaActual] = useState(1);
     const [fotoExpandida, setFotoExpandida] = useState(null);
-    const navigate = useNavigate(); // El radar para movernos por la web
+    const navigate = useNavigate();
 
     const [nuevoTitulo, setNuevoTitulo] = useState('');
     const [nuevaUrl, setNuevaUrl] = useState('');
@@ -51,9 +51,7 @@ const Galeria = ({ userAuth }) => {
     };
 
     const verEnMapa = (idLugar) => {
-        // Guardamos en el almacenamiento local qué lugar queremos resaltar
         localStorage.setItem('lugar_a_resaltar', idLugar);
-        // Navegamos a la sección de lugares (mapa)
         navigate('/lugares');
     };
 
@@ -86,13 +84,13 @@ const Galeria = ({ userAuth }) => {
                 {imagenesActuales.map((img) => (
                     <div key={img.id} className="card-imagen" onClick={() => setFotoExpandida(img)}>
                         <div className="contenedor-img">
-                            {/* RUTA SEGURA: Directo a /imagenes/ en public */}
                             <img
+                                /* VOLVEMOS A LA RUTA DEL PROFE: Carpeta public/imagenes */
                                 src={`/imagenes/${img.url_imagen}`}
                                 alt={img.titulo}
                                 onError={(e) => {
                                     e.target.onerror = null;
-                                    e.target.src = 'https://via.placeholder.com/400x300?text=ARCHIVO+CORRUPTO';
+                                    e.target.src = 'https://via.placeholder.com/400x300?text=ARCHIVO+NO+ENCONTRADO';
                                 }}
                             />
                             {img.estado === 'pendiente' && <span className="badge-pendiente">EN REVISIÓN</span>}
@@ -113,13 +111,20 @@ const Galeria = ({ userAuth }) => {
                 ))}
             </div>
 
-            {/* VISOR MODAL CON CONEXIÓN AL MAPA */}
             {fotoExpandida && (
                 <div className="modal-galeria-abierta" onClick={() => setFotoExpandida(null)}>
                     <div className="contenido-foto-grande" onClick={e => e.stopPropagation()}>
                         <button className="cerrar-modal" onClick={() => setFotoExpandida(null)}>×</button>
                         
-                        <img src={`/imagenes/${fotoExpandida.url_imagen}`} alt={fotoExpandida.titulo} />
+                        {/* ARREGLADO AQUÍ TAMBIÉN: Ruta relativa */}
+                        <img 
+                            src={`/imagenes/${fotoExpandida.url_imagen}`} 
+                            alt={fotoExpandida.titulo} 
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://via.placeholder.com/600x400?text=ERROR+AL+CARGAR';
+                            }}
+                        />
                         
                         <div className="texto-foto-grande">
                             <h2 className="neon-text-blue">{fotoExpandida.titulo.toUpperCase()}</h2>
@@ -127,8 +132,6 @@ const Galeria = ({ userAuth }) => {
                             
                             <div className="footer-modal-img">
                                 <span className="fecha-modal">📅 {new Date(fotoExpandida.fecha).toLocaleDateString()}</span>
-                                
-                                {/* BOTÓN PARA IR AL MAPA */}
                                 <button 
                                     className="btn-ver-mapa"
                                     onClick={() => verEnMapa(fotoExpandida.lugar_id || fotoExpandida.id)}

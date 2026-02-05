@@ -15,8 +15,6 @@ const Videos = ({ userAuth }) => {
     const cargarVideos = async () => {
         try {
             const res = await axios.get('http://localhost:5000/videos-publicos');
-            console.log("📺 DATOS RECUPERADOS:", res.data);
-            // Aseguramos que el estado se actualice correctamente
             setVideos(res.data); 
         } catch (err) {
             console.error("❌ Error al conectar con el servidor");
@@ -50,9 +48,10 @@ const Videos = ({ userAuth }) => {
                         <div key={vid.id} className="video-card">
                             <div className="video-wrapper">
                                 {vid.url && !vid.url.includes('http') ? (
-                                    /* VÍDEO LOCAL */
-                                    <video controls className="video-elemento">
+                                    /* VÍDEO LOCAL: Siguiendo la técnica del profe */
+                                    <video controls className="video-elemento" key={vid.url}>
                                         <source src={`/videos/${vid.url}.mp4`} type="video/mp4" />
+                                        <source src={`/videos/${vid.url}`} type="video/mp4" />
                                         Tu navegador no soporta el formato de vídeo.
                                     </video>
                                 ) : (
@@ -75,8 +74,7 @@ const Videos = ({ userAuth }) => {
                     ))
                 ) : (
                     <div className="texto-vacio" style={{textAlign: 'center', width: '100%', color: '#ff4d4d'}}>
-                        <p>📡 BUSCANDO SEÑAL... No hay vídeos aprobados en el sector.</p>
-                        <small>Asegúrate de que el Administrador haya aprobado los vídeos en el panel.</small>
+                        <p>📡 BUSCANDO SEÑAL... No hay vídeos aprobados.</p>
                     </div>
                 )}
             </div>

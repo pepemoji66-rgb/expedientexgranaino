@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
@@ -6,15 +6,15 @@ import 'leaflet/dist/leaflet.css';
 
 // 1. ICONOS TÁCTICOS
 const iconoMisterio = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // Rojo estándar
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', 
     iconSize: [35, 35],
     iconAnchor: [17, 35],
     popupAnchor: [0, -35],
 });
 
 const iconoResaltado = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/5693/5693831.png', // Cyan/Azul Neón
-    iconSize: [45, 45], // Un poco más grande para que destaque
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/5693/5693831.png', 
+    iconSize: [45, 45],
     iconAnchor: [22, 45],
     popupAnchor: [0, -45],
 });
@@ -54,14 +54,12 @@ const Lugares = () => {
             const aprobados = res.data.filter(p => p.estado === 'aprobado');
             setPuntos(aprobados);
 
-            // ESCÁNER DE GALERÍA: ¿Venimos buscando algo?
             const buscadoId = localStorage.getItem('lugar_a_resaltar');
             if (buscadoId) {
                 const puntoEncontrado = aprobados.find(p => p.id === parseInt(buscadoId));
                 if (puntoEncontrado) {
                     setIdResaltado(puntoEncontrado.id);
                     setCentroMapa([parseFloat(puntoEncontrado.latitud), parseFloat(puntoEncontrado.longitud)]);
-                    // Limpiamos el rastro para la próxima vez
                     localStorage.removeItem('lugar_a_resaltar');
                 }
             }
@@ -152,9 +150,25 @@ const Lugares = () => {
                                 <Popup>
                                     <div style={{ textAlign: 'center', width: '200px' }}>
                                         <h3 style={{ margin: '5px 0', color: lugar.id === idResaltado ? '#00d4ff' : '#ff4d4d' }}>{lugar.nombre}</h3>
-                                        <img src={`http://localhost:5000${lugar.imagen_url}`} alt={lugar.nombre} style={{ width: '100%', borderRadius: '8px' }} />
-                                        <p style={{ fontSize: '0.85rem' }}>{lugar.descripcion}</p>
-                                        <strong style={{ fontSize: '0.7rem' }}>📍 {lugar.ubicacion}</strong>
+                                        
+                                        {/* 🛠️ RUTA CORREGIDA: Usa directamente lo que hay en public/lugares/ */}
+                                        <img 
+                                            src={lugar.imagen_url} 
+                                            alt={lugar.nombre} 
+                                            style={{ width: '100%', borderRadius: '8px', display: 'block', margin: '10px 0' }} 
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                // Intento de rescate si falta la barra inicial
+                                                if(!lugar.imagen_url.startsWith('/')) {
+                                                    e.target.src = '/' + lugar.imagen_url;
+                                                } else {
+                                                    e.target.src = 'https://via.placeholder.com/200x150?text=IMAGEN+NO+ENCONTRADA';
+                                                }
+                                            }}
+                                        />
+                                        
+                                        <p style={{ fontSize: '0.85rem', color: '#333' }}>{lugar.descripcion}</p>
+                                        <strong style={{ fontSize: '0.7rem', color: '#000' }}>📍 {lugar.ubicacion}</strong>
                                     </div>
                                 </Popup>
                             </Marker>
