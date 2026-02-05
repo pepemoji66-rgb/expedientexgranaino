@@ -15,6 +15,7 @@
     color: var(--color-principal);
     text-shadow: 0 0 10px var(--color-principal);
     letter-spacing: 5px;
+    font-family: 'Orbitron', sans-serif;
 }
 
 /* Formulario */
@@ -37,17 +38,6 @@
     font-family: 'Courier New', monospace;
 }
 
-.btn-envio-img {
-    background: var(--color-principal);
-    color: #000;
-    border: none;
-    padding: 15px 30px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-    transition: 0.3s;
-}
-
 /* Grid */
 .galeria-grid {
     display: grid;
@@ -67,6 +57,7 @@
 .card-imagen:hover {
     border-color: var(--color-principal);
     transform: translateY(-5px);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
 }
 
 .contenedor-img img {
@@ -88,6 +79,7 @@
 .info-img h3 {
     font-size: 1.1rem;
     color: var(--color-principal);
+    font-family: 'Orbitron', sans-serif;
 }
 
 .agente-tag {
@@ -95,100 +87,121 @@
     opacity: 0.6;
 }
 
-/* Modal */
-.modal-galeria {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3000;
-}
+/* --- SECCIÓN MODAL / VISOR (EL CORAZÓN DE GODZILLA) --- */
 
-.modal-content-img {
-    max-width: 80%;
-    max-height: 90vh;
-    border: 2px solid var(--color-principal);
-    position: relative;
-    background: #000;
-}
-
-.modal-content-img img {
-    max-width: 100%;
-    max-height: 70vh;
-}
-
-.modal-text {
-    padding: 20px;
-    text-align: center;
-}
-
-/* Paginación */
-.paginacion-galeria {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 40px;
-}
-
-.paginacion-galeria button {
-    background: none;
-    border: 1px solid var(--color-principal);
-    color: var(--color-principal);
-    padding: 8px 15px;
-    cursor: pointer;
-}
-
-.paginacion-galeria button.active {
-    background: var(--color-principal);
-    color: #000;
-}
-
-/* Estilos para el visor de fotos grandes */
 .modal-galeria-abierta {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95);
     z-index: 3000;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
+    backdrop-filter: blur(5px);
 }
 
 .contenido-foto-grande {
     position: relative;
     max-width: 900px;
     width: 100%;
-    background: #111;
+    background: #050505;
     border: 2px solid var(--color-principal);
-    box-shadow: 0 0 30px var(--color-principal);
+    box-shadow: 0 0 40px rgba(0, 255, 65, 0.3);
 }
 
 .contenido-foto-grande img {
     width: 100%;
-    max-height: 70vh;
+    max-height: 65vh;
     object-fit: contain;
     display: block;
-    border-bottom: 1px solid #333;
+    border-bottom: 2px solid var(--color-principal);
 }
 
+/* Estilización del texto y el botón de Radar */
 .texto-foto-grande {
-    padding: 20px;
-    color: #fff;
+    padding: 25px;
+    background: linear-gradient(180deg, rgba(10,10,10,1) 0%, rgba(0,0,0,1) 100%);
+}
+
+.texto-foto-grande h2 {
+    color: var(--color-principal);
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 15px;
+    text-shadow: 0 0 8px var(--color-principal);
+}
+
+.desc-galeria {
+    color: #e0e0e0;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    font-family: 'Courier New', monospace;
+    border-left: 2px solid var(--color-principal);
+    padding-left: 15px;
+}
+
+.footer-modal-img {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #222;
+    padding-top: 20px;
+}
+
+.fecha-modal {
+    font-size: 0.85rem;
+    color: #666;
+    font-family: 'Courier New', monospace;
+}
+
+/* BOTÓN DE RADAR CON EFECTO PULSO */
+.btn-ver-mapa {
+    background: transparent;
+    color: var(--color-principal);
+    border: 1px solid var(--color-principal);
+    padding: 10px 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ver-mapa:hover {
+    background: var(--color-principal);
+    color: #000;
+    box-shadow: 0 0 20px var(--color-principal);
+}
+
+/* Efecto de onda de radar */
+.btn-ver-mapa::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 2px;
+    background: var(--color-principal);
+    opacity: 0;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse-radar 2s infinite;
+}
+
+@keyframes pulse-radar {
+    0% { width: 0; height: 0; opacity: 0.5; }
+    100% { width: 200px; height: 200px; opacity: 0; }
 }
 
 .cerrar-modal {
     position: absolute;
-    top: -40px;
-    right: 0;
+    top: -45px;
+    right: -10px;
     background: none;
     border: none;
     color: #fff;
@@ -198,6 +211,27 @@
 }
 
 .cerrar-modal:hover {
+    color: #ff4444;
+}
+
+/* Paginación */
+.paginacion {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 40px;
+}
+
+.paginacion button {
+    background: #000;
+    border: 1px solid var(--color-principal);
     color: var(--color-principal);
-    transform: scale(1.2);
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.paginacion button.active {
+    background: var(--color-principal);
+    color: #000;
 }

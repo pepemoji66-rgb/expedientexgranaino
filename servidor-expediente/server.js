@@ -34,11 +34,28 @@ const db = mysql.createConnection({
 
 db.connect(err => {
     if (err) console.error("❌ ERROR MySQL:", err.message);
-    else console.log("✅ SISTEMA RESTAURADO: Conectado a 'expedientex' (3307)");
+    else console.log("✅ SISTEMA 100% OPERATIVO: Conectado a 'expedientex' (3307)");
 });
 
 // =========================================================================
-// --- 4. LOGIN Y USUARIOS (RESTAURADO) ---
+// --- 4. RUTAS DE ESTADÍSTICAS (Para el Panel de Mando) ---
+// =========================================================================
+app.get('/admin/conteo-total', (req, res) => {
+    const sql = `
+        SELECT 
+            (SELECT COUNT(*) FROM usuarios) as usuarios,
+            (SELECT COUNT(*) FROM videos) as videos,
+            (SELECT COUNT(*) FROM expedientes) as expedientes,
+            (SELECT COUNT(*) FROM lugares) as lugares
+    `;
+    db.query(sql, (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result[0]); // Devuelve {usuarios: X, videos: Y, ...}
+    });
+});
+
+// =========================================================================
+// --- 5. LOGIN Y USUARIOS ---
 // =========================================================================
 function loginFunc(req, res) {
     const { email, password } = req.body;
@@ -62,7 +79,7 @@ app.post('/registro', (req, res) => {
 app.get('/usuarios', (req, res) => {
     db.query("SELECT id, nombre, email FROM usuarios ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
-        res.json(result); // El panel admin necesita esto para listar usuarios
+        res.json(result);
     });
 });
 
@@ -74,7 +91,7 @@ app.delete('/usuarios/:id', (req, res) => {
 });
 
 // =========================================================================
-// --- 5. GESTIÓN DE EXPEDIENTES (RESTAURADO) ---
+// --- 6. GESTIÓN DE EXPEDIENTES ---
 // =========================================================================
 app.get('/expedientes', (req, res) => {
     db.query("SELECT * FROM expedientes ORDER BY id DESC", (err, result) => {
@@ -113,7 +130,7 @@ app.delete('/expedientes/:id', (req, res) => {
 });
 
 // =========================================================================
-// --- 6. RADAR TÁCTICO (LUGARES CON SUBIDA) ---
+// --- 7. RADAR TÁCTICO (LUGARES) ---
 // =========================================================================
 app.get('/lugares', (req, res) => {
     db.query("SELECT * FROM lugares ORDER BY id DESC", (err, result) => {
@@ -147,10 +164,8 @@ app.delete('/lugares/:id', (req, res) => {
 });
 
 // =========================================================================
-// --- 7. VÍDEOS, IMÁGENES Y RELATOS (VUELTA A LA VIDA) ---
+// --- 8. VÍDEOS ---
 // =========================================================================
-
-// VÍDEOS
 app.get('/videos-publicos', (req, res) => {
     db.query("SELECT * FROM videos WHERE estado = 'aprobado' ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -187,7 +202,9 @@ app.delete('/borrar-video/:id', (req, res) => {
     });
 });
 
-// IMÁGENES
+// =========================================================================
+// --- 9. IMÁGENES Y RELATOS ---
+// =========================================================================
 app.get('/admin/todas-las-imagenes', (req, res) => {
     db.query("SELECT * FROM imagenes ORDER BY id DESC", (err, results) => {
         if (err) return res.status(500).json(err);
@@ -209,7 +226,6 @@ app.delete('/borrar-imagen/:id', (req, res) => {
     });
 });
 
-// RELATOS
 app.get('/relatos-administrador', (req, res) => {
     db.query("SELECT * FROM `relatos administrador` ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);

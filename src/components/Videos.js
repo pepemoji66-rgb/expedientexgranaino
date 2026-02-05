@@ -14,30 +14,29 @@ const Videos = ({ userAuth }) => {
 
     const cargarVideos = async () => {
         try {
-            // RUTA ACTUALIZADA: Ahora pedimos solo los aprobados
             const res = await axios.get('http://localhost:5000/videos-publicos');
-            setVideos(res.data);
+            console.log("📺 DATOS RECUPERADOS:", res.data);
+            // Aseguramos que el estado se actualice correctamente
+            setVideos(res.data); 
         } catch (err) {
-            console.error("Error al conectar con la base de datos");
+            console.error("❌ Error al conectar con el servidor");
         }
     };
 
     const handleSubirVideo = async (e) => {
         e.preventDefault();
         try {
-            // RUTA ACTUALIZADA: Enviamos al búnker para revisión
             await axios.post('http://localhost:5000/subir-video', {
                 titulo: titulo,
                 url: nuevaUrl,
-                usuario: userAuth?.nombre || 'ANÓNIMO', // Cambiado agente por usuario
-                estado: 'pendiente'
+                usuario: userAuth?.nombre || 'ANÓNIMO'
             });
-            alert("🛸 MATERIAL ENVIADO: En revisión por el Administrador.");
+            alert("🛸 MATERIAL ENVIADO: El Jefe revisará el hallazgo.");
             setNuevaUrl('');
             setTitulo('');
-            cargarVideos(); // Recargamos por si acaso
+            cargarVideos(); 
         } catch (err) {
-            alert("❌ Error en la transmisión");
+            alert("❌ Fallo en la transmisión");
         }
     };
 
@@ -46,31 +45,40 @@ const Videos = ({ userAuth }) => {
             <h1 className="titulo-seccion">SISTEMA DE VIGILANCIA</h1>
 
             <div className="grid-videos">
-                {videos.length > 0 ? videos.map((vid) => (
-                    <div key={vid.id} className={`video-card ${vid.usuario === 'ADMIN' ? 'admin-video' : ''}`}>
-                        <div className="video-wrapper">
-                            {!vid.url.includes('http') ? (
-                                <video controls className="video-elemento">
-                                    {/* Ajuste de ruta estática al servidor */}
-                                    <source src={`http://localhost:5000/videos/${vid.url}.mp4`} type="video/mp4" />
-                                </video>
-                            ) : (
-                                <iframe
-                                    src={vid.url.replace("watch?v=", "embed/")}
-                                    title={vid.titulo}
-                                    frameBorder="0"
-                                    allowFullScreen
-                                ></iframe>
-                            )}
+                {videos && videos.length > 0 ? (
+                    videos.map((vid) => (
+                        <div key={vid.id} className="video-card">
+                            <div className="video-wrapper">
+                                {vid.url && !vid.url.includes('http') ? (
+                                    /* VÍDEO LOCAL */
+                                    <video controls className="video-elemento">
+                                        <source src={`/videos/${vid.url}.mp4`} type="video/mp4" />
+                                        Tu navegador no soporta el formato de vídeo.
+                                    </video>
+                                ) : (
+                                    /* VÍDEO YOUTUBE */
+                                    <iframe
+                                        src={vid.url ? vid.url.replace("watch?v=", "embed/").split("&")[0] : ""}
+                                        title={vid.titulo}
+                                        frameBorder="0"
+                                        allowFullScreen
+                                    ></iframe>
+                                )}
+                            </div>
+                            <div className="video-info">
+                                <span className="agente-tag">
+                                    FUENTE: {vid.usuario || vid.agente || 'DESCONOCIDO'}
+                                </span>
+                                <h3>{vid.titulo ? vid.titulo.toUpperCase() : 'AVISTAMIENTO SIN NOMBRE'}</h3>
+                            </div>
                         </div>
-                        <div className="video-info">
-                            <span className="agente-tag">
-                                {vid.usuario === 'ADMIN' ? 'JEFE' : `USUARIO: ${vid.usuario || vid.agente}`}
-                            </span>
-                            <h3>{vid.titulo.toUpperCase()}</h3>
-                        </div>
+                    ))
+                ) : (
+                    <div className="texto-vacio" style={{textAlign: 'center', width: '100%', color: '#ff4d4d'}}>
+                        <p>📡 BUSCANDO SEÑAL... No hay vídeos aprobados en el sector.</p>
+                        <small>Asegúrate de que el Administrador haya aprobado los vídeos en el panel.</small>
                     </div>
-                )) : <p className="texto-vacio">No hay registros de video aprobados en el sistema.</p>}
+                )}
             </div>
 
             {userAuth && (

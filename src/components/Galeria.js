@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom'; // Para viajar al mapa
 import axios from 'axios';
 import './galeria.css';
 
@@ -6,6 +7,7 @@ const Galeria = ({ userAuth }) => {
     const [imagenes, setImagenes] = useState([]);
     const [paginaActual, setPaginaActual] = useState(1);
     const [fotoExpandida, setFotoExpandida] = useState(null);
+    const navigate = useNavigate(); // El radar para movernos por la web
 
     const [nuevoTitulo, setNuevoTitulo] = useState('');
     const [nuevaUrl, setNuevaUrl] = useState('');
@@ -40,12 +42,19 @@ const Galeria = ({ userAuth }) => {
                 descripcion: nuevaDesc,
                 agente: userAuth?.nombre || 'Agente Anónimo'
             });
-            alert("🚀 EVIDENCIA ENVIADA.");
+            alert("🚀 EVIDENCIA ENVIADA AL BÚNKER.");
             setNuevoTitulo(''); setNuevaUrl(''); setNuevaDesc('');
             cargarImagenes();
         } catch (err) {
             alert("❌ FALLO EN LA CONEXIÓN.");
         }
+    };
+
+    const verEnMapa = (idLugar) => {
+        // Guardamos en el almacenamiento local qué lugar queremos resaltar
+        localStorage.setItem('lugar_a_resaltar', idLugar);
+        // Navegamos a la sección de lugares (mapa)
+        navigate('/lugares');
     };
 
     const indiceUltima = paginaActual * imagenesPorPagina;
@@ -65,9 +74,9 @@ const Galeria = ({ userAuth }) => {
                     <form onSubmit={subirImagen}>
                         <div className="input-group-galeria">
                             <input type="text" placeholder="TÍTULO..." value={nuevoTitulo} onChange={e => setNuevoTitulo(e.target.value)} required />
-                            <input type="text" placeholder="ARCHIVO (ej: 1.jpg)..." value={nuevaUrl} onChange={e => setNuevaUrl(e.target.value)} required />
+                            <input type="text" placeholder="ARCHIVO (ej: fantasma.jpg)..." value={nuevaUrl} onChange={e => setNuevaUrl(e.target.value)} required />
                         </div>
-                        <textarea placeholder="DESCRIPCIÓN..." value={nuevaDesc} onChange={e => setNuevaDesc(e.target.value)} required></textarea>
+                        <textarea placeholder="DESCRIPCIÓN DE LA EVIDENCIA..." value={nuevaDesc} onChange={e => setNuevaDesc(e.target.value)} required></textarea>
                         <button type="submit" className="btn-neon-img">SUBIR AL BÚNKER</button>
                     </form>
                 </section>
@@ -77,20 +86,20 @@ const Galeria = ({ userAuth }) => {
                 {imagenesActuales.map((img) => (
                     <div key={img.id} className="card-imagen" onClick={() => setFotoExpandida(img)}>
                         <div className="contenedor-img">
-                            {/* Ajustamos la ruta a /imagenes/ que es donde están según tu VSCode */}
+                            {/* RUTA SEGURA: Directo a /imagenes/ en public */}
                             <img
                                 src={`/imagenes/${img.url_imagen}`}
                                 alt={img.titulo}
                                 onError={(e) => {
                                     e.target.onerror = null;
-                                    e.target.src = 'https://via.placeholder.com/400x300?text=SIN+IMAGEN';
+                                    e.target.src = 'https://via.placeholder.com/400x300?text=ARCHIVO+CORRUPTO';
                                 }}
                             />
-                            {img.estado === 'pendiente' && <span className="badge-pendiente">PENDIENTE</span>}
+                            {img.estado === 'pendiente' && <span className="badge-pendiente">EN REVISIÓN</span>}
                         </div>
                         <div className="info-img">
                             <h3>{img.titulo}</h3>
-                            <p className="agente-tag">AGENTE: {img.agente || 'Desconocido'}</p>
+                            <p className="agente-tag">FUENTE: {img.agente || 'Desconocido'}</p>
                         </div>
                     </div>
                 ))}
@@ -104,16 +113,29 @@ const Galeria = ({ userAuth }) => {
                 ))}
             </div>
 
-            {/* EL VISOR (MODAL) */}
+            {/* VISOR MODAL CON CONEXIÓN AL MAPA */}
             {fotoExpandida && (
                 <div className="modal-galeria-abierta" onClick={() => setFotoExpandida(null)}>
                     <div className="contenido-foto-grande" onClick={e => e.stopPropagation()}>
                         <button className="cerrar-modal" onClick={() => setFotoExpandida(null)}>×</button>
+                        
                         <img src={`/imagenes/${fotoExpandida.url_imagen}`} alt={fotoExpandida.titulo} />
+                        
                         <div className="texto-foto-grande">
-                            <h2>{fotoExpandida.titulo.toUpperCase()}</h2>
-                            <p>{fotoExpandida.descripcion}</p>
-                            <span className="fecha-modal">REGISTRO: {new Date(fotoExpandida.fecha).toLocaleDateString()}</span>
+                            <h2 className="neon-text-blue">{fotoExpandida.titulo.toUpperCase()}</h2>
+                            <p className="desc-galeria">{fotoExpandida.descripcion}</p>
+                            
+                            <div className="footer-modal-img">
+                                <span className="fecha-modal">📅 {new Date(fotoExpandida.fecha).toLocaleDateString()}</span>
+                                
+                                {/* BOTÓN PARA IR AL MAPA */}
+                                <button 
+                                    className="btn-ver-mapa"
+                                    onClick={() => verEnMapa(fotoExpandida.lugar_id || fotoExpandida.id)}
+                                >
+                                    📍 VER EN EL RADAR
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

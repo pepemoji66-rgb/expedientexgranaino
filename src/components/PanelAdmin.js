@@ -11,7 +11,6 @@ const PanelAdmin = () => {
     const [lugares, setLugares] = useState([]);
     const [expedienteParaLeer, setExpedienteParaLeer] = useState(null);
 
-    // LÓGICA DE PAGINACIÓN
     const [paginaActual, setPaginaActual] = useState(1);
     const itemsPorPagina = 8; 
 
@@ -21,11 +20,14 @@ const PanelAdmin = () => {
 
     const cargarDatos = async () => {
         try {
-            const resU = await axios.get('http://localhost:5000/usuarios');
-            const resV = await axios.get('http://localhost:5000/admin/todos-los-videos');
-            const resE = await axios.get('http://localhost:5000/expedientes');
-            const resI = await axios.get('http://localhost:5000/admin/todas-las-imagenes');
-            const resL = await axios.get('http://localhost:5000/lugares');
+            // Usamos Promise.all para que todos los datos lleguen a la vez y no haya parpadeos
+            const [resU, resV, resE, resI, resL] = await Promise.all([
+                axios.get('http://localhost:5000/usuarios'),
+                axios.get('http://localhost:5000/admin/todos-los-videos'),
+                axios.get('http://localhost:5000/expedientes'),
+                axios.get('http://localhost:5000/admin/todas-las-imagenes'),
+                axios.get('http://localhost:5000/lugares')
+            ]);
 
             setUsuarios(resU.data || []);
             setVideos(resV.data || []);
@@ -51,17 +53,26 @@ const PanelAdmin = () => {
             else await axios.delete(url);
 
             alert("⚡ REGISTRO ACTUALIZADO EN LA CENTRAL");
-            cargarDatos();
+            await cargarDatos(); // Recargamos todo para actualizar contadores
         } catch (err) { 
             alert("❌ Error en la operación. Revisa el servidor."); 
         }
     };
 
-    const obtenerItemsPaginados = (lista) => {
-        const ultimoItem = paginaActual * itemsPorPagina;
-        const primerItem = ultimoItem - itemsPorPagina;
-        return lista.slice(primerItem, ultimoItem);
+    // --- Lógica de Paginación Mejorada ---
+    const obtenerListaActiva = () => {
+        if (tab === 'usuarios') return usuarios;
+        if (tab === 'videos') return videos;
+        if (tab === 'expedientes') return expedientes;
+        if (tab === 'imagenes') return imagenes;
+        if (tab === 'lugares') return lugares;
+        return [];
     };
+
+    const listaActiva = obtenerListaActiva();
+    const ultimoItem = paginaActual * itemsPorPagina;
+    const primerItem = ultimoItem - itemsPorPagina;
+    const itemsPaginados = listaActiva.slice(primerItem, ultimoItem);
 
     const cambiarTab = (t) => {
         setTab(t);
@@ -91,91 +102,82 @@ const PanelAdmin = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {tab === 'usuarios' && obtenerItemsPaginados(usuarios).map(u => (
-                            <tr key={u.id}>
-                                <td>#{u.id}</td>
-                                <td>{u.nombre}</td>
-                                <td>{u.ciudad || u.email}</td>
-                                <td><button className="btn-del" onClick={() => gestionar(u.id, 'borrar', 'usuario')}>EXPULSAR</button></td>
-                            </tr>
-                        ))}
-
-                        {tab === 'expedientes' && obtenerItemsPaginados(expedientes).map(e => (
-                            <tr key={e.id}>
-                                <td className={e.estado === 'publicado' ? 'status-ok' : 'status-pending'}>{e.estado?.toUpperCase()}</td>
-                                <td>{e.titulo}</td>
-                                <td>{e.usuario_nombre || 'AGENTE'}</td>
-                                <td>
-                                    <button className="btn-leer" onClick={() => setExpedienteParaLeer(e)}>LEER</button>
-                                    {e.estado !== 'publicado' && <button className="btn-ok" onClick={() => gestionar(e.id, 'aprobar', 'expediente')}>APROBAR</button>}
-                                    <button className="btn-del" onClick={() => gestionar(e.id, 'borrar', 'expediente')}>ELIMINAR</button>
-                                </td>
-                            </tr>
-                        ))}
-
-                        {tab === 'videos' && obtenerItemsPaginados(videos).map(v => (
-                            <tr key={v.id}>
-                                <td className={v.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{v.estado.toUpperCase()}</td>
-                                <td>{v.titulo}</td>
-                                <td><a href={v.url} target="_blank" rel="noreferrer" className="link-ver">VER PRUEBA</a></td>
-                                <td>
-                                    {v.estado !== 'aprobado' && <button className="btn-ok" onClick={() => gestionar(v.id, 'aprobar', 'video')}>APROBAR</button>}
-                                    <button className="btn-del" onClick={() => gestionar(v.id, 'borrar', 'video')}>ELIMINAR</button>
-                                </td>
-                            </tr>
-                        ))}
-
-                        {tab === 'imagenes' && obtenerItemsPaginados(imagenes).map(i => (
-                            <tr key={i.id}>
-                                <td className={i.estado === 'publica' ? 'status-ok' : 'status-pending'}>{i.estado.toUpperCase()}</td>
-                                <td>{i.titulo}</td>
-                                <td>{i.usuario_nombre || 'AGENTE'}</td>
-                                <td>
-                                    {i.estado !== 'publica' && <button className="btn-ok" onClick={() => gestionar(i.id, 'aprobar', 'imagen')}>APROBAR</button>}
-                                    <button className="btn-del" onClick={() => gestionar(i.id, 'borrar', 'imagen')}>ELIMINAR</button>
-                                </td>
-                            </tr>
-                        ))}
-
-                        {tab === 'lugares' && obtenerItemsPaginados(lugares).map(l => (
-                            <tr key={l.id}>
-                                <td>
-                                    <span className={l.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>
-                                        {l.estado ? l.estado.toUpperCase() : 'PENDIENTE'}
-                                    </span>
-                                </td>
-                                <td>{l.nombre}</td>
-                                <td>
-                                    <img src={`http://localhost:5000${l.imagen_url}`} alt="pico" style={{width:'40px', borderRadius:'4px'}} onError={(e)=>e.target.style.display='none'}/>
-                                    <br/><small>{l.ubicacion}</small>
-                                </td>
-                                <td>
-                                    {l.estado !== 'aprobado' && <button className="btn-ok" onClick={() => gestionar(l.id, 'aprobar', 'lugar')}>APROBAR</button>}
-                                    <button className="btn-del" onClick={() => gestionar(l.id, 'borrar', 'lugar')}>ELIMINAR</button>
-                                </td>
+                        {itemsPaginados.map(item => (
+                            <tr key={item.id}>
+                                {tab === 'usuarios' && (
+                                    <>
+                                        <td>#{item.id}</td>
+                                        <td>{item.nombre}</td>
+                                        <td>{item.email}</td>
+                                        <td><button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'usuario')}>EXPULSAR</button></td>
+                                    </>
+                                )}
+                                {tab === 'expedientes' && (
+                                    <>
+                                        <td className={item.estado === 'publicado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
+                                        <td>{item.titulo}</td>
+                                        <td>{item.usuario_nombre || 'AGENTE'}</td>
+                                        <td>
+                                            <button className="btn-leer" onClick={() => setExpedienteParaLeer(item)}>LEER</button>
+                                            {item.estado !== 'publicado' && <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'expediente')}>APROBAR</button>}
+                                            <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'expediente')}>ELIMINAR</button>
+                                        </td>
+                                    </>
+                                )}
+                                {tab === 'videos' && (
+                                    <>
+                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
+                                        <td>{item.titulo}</td>
+                                        <td><a href={item.url} target="_blank" rel="noreferrer" className="link-ver">VER PRUEBA</a></td>
+                                        <td>
+                                            {item.estado !== 'aprobado' && <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'video')}>APROBAR</button>}
+                                            <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'video')}>ELIMINAR</button>
+                                        </td>
+                                    </>
+                                )}
+                                {tab === 'imagenes' && (
+                                    <>
+                                        <td className={item.estado === 'publica' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
+                                        <td>{item.titulo}</td>
+                                        <td>{item.usuario_nombre || 'AGENTE'}</td>
+                                        <td>
+                                            {item.estado !== 'publica' && <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'imagen')}>APROBAR</button>}
+                                            <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'imagen')}>ELIMINAR</button>
+                                        </td>
+                                    </>
+                                )}
+                                {tab === 'lugares' && (
+                                    <>
+                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
+                                        <td>{item.nombre}</td>
+                                        <td>{item.ubicacion}</td>
+                                        <td>
+                                            {item.estado !== 'aprobado' && <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'lugar')}>APROBAR</button>}
+                                            <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'lugar')}>ELIMINAR</button>
+                                        </td>
+                                    </>
+                                )}
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
 
-            <div className="paginacion-admin" style={{textAlign: 'center', marginTop: '20px'}}>
+            <div className="paginacion-admin">
                 <button disabled={paginaActual === 1} onClick={() => setPaginaActual(p => p - 1)} className="btn-pagi">◀</button>
-                <span style={{margin: '0 15px', color: '#00ff41'}}>PÁGINA {paginaActual}</span>
+                <span className="pagi-info">PÁGINA {paginaActual}</span>
                 <button 
-                    disabled={obtenerItemsPaginados(tab==='usuarios'?usuarios:tab==='videos'?videos:tab==='expedientes'?expedientes:tab==='imagenes'?imagenes:lugares).length < itemsPorPagina} 
+                    disabled={ultimoItem >= listaActiva.length} 
                     onClick={() => setPaginaActual(p => p + 1)} className="btn-pagi">▶</button>
             </div>
 
             {expedienteParaLeer && (
                 <div className="modal-admin-overlay" onClick={() => setExpedienteParaLeer(null)}>
                     <div className="modal-admin-content" onClick={e => e.stopPropagation()}>
-                        <h3 style={{color: '#00ff41'}}>{expedienteParaLeer.titulo}</h3>
-                        <p style={{fontSize: '0.8rem', color: '#888'}}>Agente: {expedienteParaLeer.usuario_nombre}</p>
-                        <hr />
-                        <div className="cuerpo-expediente" style={{whiteSpace: 'pre-wrap', padding: '10px 0'}}>
-                            {expedienteParaLeer.contenido}
-                        </div>
+                        <h3 className="modal-titulo">{expedienteParaLeer.titulo}</h3>
+                        <p className="modal-agente">Agente: {expedienteParaLeer.usuario_nombre}</p>
+                        <hr className="modal-hr" />
+                        <div className="cuerpo-expediente">{expedienteParaLeer.contenido}</div>
                         <button className="btn-cerrar-modal" onClick={() => setExpedienteParaLeer(null)}>CERRAR</button>
                     </div>
                 </div>
