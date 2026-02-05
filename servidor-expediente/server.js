@@ -6,7 +6,19 @@ const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 
+// --- 0. IMPORTACIÓN DE SOCKET.IO ---
+const http = require('http');
+const { Server } = require('socket.io');
+
 const app = express();
+const server = http.createServer(app); // Necesario para que Socket trabaje con Express
+const io = new Server(server, {
+    cors: {
+        origin: "*", // En producción cambiaremos esto por tu dominio
+        methods: ["GET", "POST"]
+    }
+});
+
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -38,7 +50,62 @@ db.connect(err => {
 });
 
 // =========================================================================
-// --- 4. RUTAS DE ESTADÍSTICAS (Para el Panel de Mando) ---
+// --- 4. LÓGICA DEL CHAT EN TIEMPO REAL (SOCKET.IO) ---
+// =========================================================================
+
+io.on('connection', (socket) => {
+    console.log('📡 Usuario conectado al canal de comunicación');
+    // Dentro de io.on('connection', (socket) => { ...
+
+    socket.on('limpiar_chat_servidor', () => {
+        // Borramos todo de la tabla
+        db.query("DELETE FROM chat_mensajes", (err) => {
+            if (err) return console.error(err);
+            // Avisamos a todos los clientes que el chat se ha vaciado
+            io.emit('chat_limpiado');
+        });
+    });
+
+// ... })
+
+    // Escuchar cuando un usuario envía un mensaje
+    socket.on('enviar_mensaje', (data) => {
+        const { nombre_usuario, mensaje, rol_usuario, tipo, destinatario } = data;
+
+        // Guardar en la DB
+        const sqlInsert = "INSERT INTO chat_mensajes (nombre_usuario, mensaje, rol_usuario, tipo, destinatario) VALUES (?, ?, ?, ?, ?)";
+        db.query(sqlInsert, [nombre_usuario, mensaje, rol_usuario, tipo, destinatario], (err, result) => {
+            if (err) return console.error("Error guardando mensaje:", err);
+
+            // EMITIR EL MENSAJE A TODOS (Si es público)
+            io.emit('recibir_mensaje', {
+                id: result.insertId,
+                ...data,
+                fecha: new Date()
+            });
+
+            // 🧹 AUTO-LIMPIEZA: Mantener solo los últimos 100 mensajes
+            db.query("DELETE FROM chat_mensajes WHERE id NOT IN (SELECT id FROM (SELECT id FROM chat_mensajes ORDER BY id DESC LIMIT 100) as temp)", (err) => {
+                if (err) console.error("Error en auto-limpieza:", err);
+            });
+        });
+    });
+
+    socket.on('disconnect', () => {
+        console.log('🔌 Usuario desconectado');
+    });
+});
+
+// Ruta para cargar el historial inicial del chat
+app.get('/chat-historial', (req, res) => {
+    db.query("SELECT * FROM chat_mensajes ORDER BY id ASC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+// =========================================================================
+// --- 5. RUTAS DE ESTADÍSTICAS ---
 // =========================================================================
 app.get('/admin/conteo-total', (req, res) => {
     const sql = `
@@ -50,12 +117,12 @@ app.get('/admin/conteo-total', (req, res) => {
     `;
     db.query(sql, (err, result) => {
         if (err) return res.status(500).json(err);
-        res.json(result[0]); // Devuelve {usuarios: X, videos: Y, ...}
+        res.json(result[0]);
     });
 });
 
 // =========================================================================
-// --- 5. LOGIN Y USUARIOS ---
+// --- 6. LOGIN Y USUARIOS ---
 // =========================================================================
 function loginFunc(req, res) {
     const { email, password } = req.body;
@@ -72,7 +139,7 @@ app.post('/registro', (req, res) => {
     const { nombre, email, password } = req.body;
     db.query("INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)", [nombre, email, password], (err, result) => {
         if (err) return res.status(500).json({ error: "Error en registro" });
-        res.json({ mensaje: "Agente reclutado", id: result.insertId });
+        res.json({ mensaje: "Usuario registrado", id: result.insertId });
     });
 });
 
@@ -91,7 +158,7 @@ app.delete('/usuarios/:id', (req, res) => {
 });
 
 // =========================================================================
-// --- 6. GESTIÓN DE EXPEDIENTES ---
+// --- 7. GESTIÓN DE EXPEDIENTES ---
 // =========================================================================
 app.get('/expedientes', (req, res) => {
     db.query("SELECT * FROM expedientes ORDER BY id DESC", (err, result) => {
@@ -130,7 +197,7 @@ app.delete('/expedientes/:id', (req, res) => {
 });
 
 // =========================================================================
-// --- 7. RADAR TÁCTICO (LUGARES) ---
+// --- 8. RADAR TÁCTICO (LUGARES) ---
 // =========================================================================
 app.get('/lugares', (req, res) => {
     db.query("SELECT * FROM lugares ORDER BY id DESC", (err, result) => {
@@ -164,7 +231,7 @@ app.delete('/lugares/:id', (req, res) => {
 });
 
 // =========================================================================
-// --- 8. VÍDEOS ---
+// --- 9. VÍDEOS ---
 // =========================================================================
 app.get('/videos-publicos', (req, res) => {
     db.query("SELECT * FROM videos WHERE estado = 'aprobado' ORDER BY id DESC", (err, result) => {
@@ -203,7 +270,7 @@ app.delete('/borrar-video/:id', (req, res) => {
 });
 
 // =========================================================================
-// --- 9. IMÁGENES Y RELATOS ---
+// --- 10. IMÁGENES Y RELATOS ---
 // =========================================================================
 app.get('/admin/todas-las-imagenes', (req, res) => {
     db.query("SELECT * FROM imagenes ORDER BY id DESC", (err, results) => {
@@ -233,5 +300,5 @@ app.get('/relatos-administrador', (req, res) => {
     });
 });
 
-// --- FINAL ---
-app.listen(5000, () => console.log(`🚀 BÚNKER 100% OPERATIVO EN PUERTO 5000`));
+// --- FINAL: USAMOS server.listen EN VEZ DE app.listen PARA SOCKET ---
+server.listen(5000, () => console.log(`🚀 BÚNKER CON CHAT OPERATIVO EN PUERTO 5000`));

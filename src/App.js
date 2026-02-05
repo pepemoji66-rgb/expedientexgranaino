@@ -10,6 +10,8 @@ import Footer from './components/Footer';
 import Videos from './components/Videos';
 import Galeria from './components/Galeria';
 import Lugares from './components/Lugares'; 
+// CORREGIDO: Asegúrate de que la carpeta sea 'components' y el archivo 'Chat'
+import Chat from './components/Chat'; 
 
 import './App.css';
 import fondoAlhambra from './alhambra.jpg';
@@ -23,7 +25,7 @@ function App() {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // 1. CARGA DE SESIÓN (Mejorada para evitar bucles)
+  // 1. CARGA DE SESIÓN
   useEffect(() => {
     const sesionGuardada = localStorage.getItem('usuario_sesion');
     if (sesionGuardada) {
@@ -35,7 +37,7 @@ function App() {
         localStorage.removeItem('usuario_sesion');
       }
     }
-  }, []); // Solo se ejecuta una vez al montar
+  }, []);
 
   // 2. CONTROL DE ATMÓSFERA
   useEffect(() => {
@@ -110,6 +112,9 @@ function App() {
             <li><Link to="/lugares" onClick={toggleMenu}>MAPA LUGARES</Link></li>
             <li><Link to="/videos" onClick={toggleMenu}>VÍDEOS</Link></li>
             <li><Link to="/galeria" onClick={toggleMenu}>GALERÍA</Link></li>
+            
+            {/* LINK AL CHAT AÑADIDO AL MENÚ */}
+            <li><Link to="/chat" onClick={toggleMenu} style={{ color: 'var(--color-principal)', fontWeight: 'bold' }}>💬 CHAT TÁCTICO</Link></li>
 
             <li style={{ margin: '20px 0' }}><hr style={{ opacity: 0.2, borderColor: 'var(--color-principal)' }} /></li>
 
@@ -149,6 +154,8 @@ function App() {
             <Route path="/videos" element={<Videos userAuth={userAuth} />} />
             <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
             <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
+            {/* CORREGIDO: usuarioActivo recibe userAuth */}
+            <Route path="/chat" element={<Chat usuarioActivo={userAuth} />} />
           </Routes>
         </main>
 

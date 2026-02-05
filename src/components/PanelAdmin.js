@@ -9,6 +9,7 @@ const PanelAdmin = () => {
     const [expedientes, setExpedientes] = useState([]);
     const [imagenes, setImagenes] = useState([]);
     const [lugares, setLugares] = useState([]);
+    const [mensajes, setMensajes] = useState([]); // <-- NUEVO: Estado para el chat
     const [expedienteParaLeer, setExpedienteParaLeer] = useState(null);
 
     const [paginaActual, setPaginaActual] = useState(1);
@@ -20,13 +21,13 @@ const PanelAdmin = () => {
 
     const cargarDatos = async () => {
         try {
-            // Usamos Promise.all para que todos los datos lleguen a la vez y no haya parpadeos
-            const [resU, resV, resE, resI, resL] = await Promise.all([
+            const [resU, resV, resE, resI, resL, resC] = await Promise.all([
                 axios.get('http://localhost:5000/usuarios'),
                 axios.get('http://localhost:5000/admin/todos-los-videos'),
                 axios.get('http://localhost:5000/expedientes'),
                 axios.get('http://localhost:5000/admin/todas-las-imagenes'),
-                axios.get('http://localhost:5000/lugares')
+                axios.get('http://localhost:5000/lugares'),
+                axios.get('http://localhost:5000/chat-historial') // <-- NUEVO: Cargar chat
             ]);
 
             setUsuarios(resU.data || []);
@@ -34,6 +35,7 @@ const PanelAdmin = () => {
             setExpedientes(resE.data || []);
             setImagenes(resI.data || []);
             setLugares(resL.data || []);
+            setMensajes(resC.data.reverse() || []); // Revertimos para ver lo último primero
         } catch (err) { 
             console.error("❌ Error cargando búnker", err); 
         }
@@ -48,24 +50,25 @@ const PanelAdmin = () => {
             else if (tipo === 'video') url += accion === 'aprobar' ? `aprobar-video/${id}` : `borrar-video/${id}`;
             else if (tipo === 'imagen') url += accion === 'aprobar' ? `aprobar-imagen/${id}` : `borrar-imagen/${id}`;
             else if (tipo === 'lugar') url += accion === 'aprobar' ? `aprobar-lugar/${id}` : `lugares/${id}`;
+            else if (tipo === 'chat') url += `borrar-mensaje/${id}`; // <-- NUEVO: Borrar mensaje
 
             if (accion === 'aprobar') await axios.put(url);
             else await axios.delete(url);
 
             alert("⚡ REGISTRO ACTUALIZADO EN LA CENTRAL");
-            await cargarDatos(); // Recargamos todo para actualizar contadores
+            await cargarDatos(); 
         } catch (err) { 
             alert("❌ Error en la operación. Revisa el servidor."); 
         }
     };
 
-    // --- Lógica de Paginación Mejorada ---
     const obtenerListaActiva = () => {
         if (tab === 'usuarios') return usuarios;
         if (tab === 'videos') return videos;
         if (tab === 'expedientes') return expedientes;
         if (tab === 'imagenes') return imagenes;
         if (tab === 'lugares') return lugares;
+        if (tab === 'chat') return mensajes; // <-- NUEVO: Pestaña chat
         return [];
     };
 
@@ -89,6 +92,7 @@ const PanelAdmin = () => {
                 <button className={tab === 'expedientes' ? 'active' : ''} onClick={() => cambiarTab('expedientes')}>EXPEDIENTES ({expedientes.length})</button>
                 <button className={tab === 'imagenes' ? 'active' : ''} onClick={() => cambiarTab('imagenes')}>IMÁGENES ({imagenes.length})</button>
                 <button className={tab === 'lugares' ? 'active' : ''} onClick={() => cambiarTab('lugares')}>MAPA ({lugares.length})</button>
+                <button className={tab === 'chat' ? 'active' : ''} onClick={() => cambiarTab('chat')}>CHAT ({mensajes.length})</button>
             </div>
 
             <div className="table-responsive">
@@ -154,6 +158,16 @@ const PanelAdmin = () => {
                                         <td>
                                             {item.estado !== 'aprobado' && <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'lugar')}>APROBAR</button>}
                                             <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'lugar')}>ELIMINAR</button>
+                                        </td>
+                                    </>
+                                )}
+                                {tab === 'chat' && (
+                                    <>
+                                        <td>#{item.id}</td>
+                                        <td>{item.mensaje.substring(0, 30)}...</td>
+                                        <td style={{color: '#ffd700'}}>{item.nombre_usuario}</td>
+                                        <td>
+                                            <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'chat')}>BORRAR MSG</button>
                                         </td>
                                     </>
                                 )}
