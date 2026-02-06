@@ -74,6 +74,7 @@ io.on('connection', (socket) => {
                 ...data,
                 fecha: new Date()
             });
+            // Auto-limpieza de seguridad (solo los últimos 100 mensajes)
             db.query("DELETE FROM chat_mensajes WHERE id NOT IN (SELECT id FROM (SELECT id FROM chat_mensajes ORDER BY id DESC LIMIT 100) as temp)", (err) => {
                 if (err) console.error("Error en auto-limpieza:", err);
             });
@@ -90,38 +91,35 @@ app.get('/chat-historial', (req, res) => {
     });
 });
 
-// --- 5. RUTA DE LA IA (MODO RESISTENCIA TOTAL) ---
+// --- 5. RUTA DE LA IA ---
 app.post('/chat-ia', (req, res) => {
     const { pregunta } = req.body;
-    console.log("📩 Pregunta para el Archivero:", pregunta);
-
     const respuestasBunker = [
-        "Hermano, el radar está detectando actividad paranormal intensa. Servidores en mantenimiento.",
-        "Esa información está guardada bajo llave en el nivel 4 del búnker.",
-        "Interferencias en la zona. Habla con otros agentes en el chat general.",
-        "El Archivero está consultando los libros antiguos de Granada...",
-        "¡Cuidado! Las paredes tienen oídos. Sistema en modo local."
+        "Hermano, el radar detecta actividad paranormal. Servidores en guardia.",
+        "Esa información está en el nivel 4 del búnker.",
+        "Interferencias detectadas. Consulta al resto de agentes.",
+        "El Archivero está analizando los pergaminos de Granada...",
+        "¡Silencio! Las sombras acechan. Sistema en modo búnker."
     ];
-
     const respuestaLocal = respuestasBunker[Math.floor(Math.random() * respuestasBunker.length)];
-    console.log("✅ Respuesta enviada");
     res.json({ respuesta: `(Búnker) ${respuestaLocal}` });
 });
 
-// --- 6. ESTADÍSTICAS ---
+// --- 6. ESTADÍSTICAS (LOS CONTADORES TACTICOS) ---
 app.get('/admin/conteo-total', (req, res) => {
     const sql = `SELECT 
             (SELECT COUNT(*) FROM usuarios) as usuarios,
             (SELECT COUNT(*) FROM videos) as videos,
             (SELECT COUNT(*) FROM expedientes) as expedientes,
-            (SELECT COUNT(*) FROM lugares) as lugares`;
+            (SELECT COUNT(*) FROM lugares) as lugares,
+            (SELECT COUNT(*) FROM noticias) as noticias`;
     db.query(sql, (err, result) => {
         if (err) return res.status(500).json(err);
         res.json(result[0]);
     });
 });
 
-// --- 7. LOGIN Y USUARIOS ---
+// --- 7. LOGIN Y REGISTRO ---
 const loginFunc = (req, res) => {
     const { email, password } = req.body;
     db.query("SELECT * FROM usuarios WHERE email = ? AND password = ?", [email, password], (err, result) => {
@@ -192,7 +190,7 @@ app.delete('/expedientes/:id', (req, res) => {
     });
 });
 
-// --- 9. LUGARES ---
+// --- 9. LUGARES (RADAR) ---
 app.get('/lugares', (req, res) => {
     db.query("SELECT * FROM lugares ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -283,15 +281,48 @@ app.delete('/borrar-imagen/:id', (req, res) => {
     });
 });
 
-app.get('/relatos-administrador', (req, res) => {
-    db.query("SELECT * FROM `relatos administrador` ORDER BY id DESC", (err, result) => {
+// --- 12. NOTICIAS (GEOLOCALIZADAS) ---
+app.get('/admin/todas-noticias', (req, res) => {
+    db.query("SELECT * FROM noticias ORDER BY fecha DESC", (err, result) => {
         if (err) return res.status(500).json(err);
         res.json(result);
+    });
+});
+
+app.get('/noticias-publicas', (req, res) => {
+    db.query("SELECT * FROM noticias WHERE estado = 'aprobado' ORDER BY fecha DESC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+app.put('/admin/aprobar-noticia/:id', (req, res) => {
+    db.query("UPDATE noticias SET estado = 'aprobado' WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Noticia aprobada" });
+    });
+});
+
+app.post('/proponer-noticia', (req, res) => {
+    const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud } = req.body;
+    // Guardamos como pendiente para moderación del Agente
+    const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')";
+    db.query(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null], (err, result) => {
+        if (err) return res.status(500).json({ error: "Fallo en DB" });
+        res.json({ mensaje: "Noticia recibida", id: result.insertId });
+    });
+});
+
+app.delete('/borrar-noticia/:id', (req, res) => {
+    db.query("DELETE FROM noticias WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Noticia eliminada" });
     });
 });
 
 // --- MOTOR ---
 const PORT = 5000;
 server.listen(PORT, () => {
-    console.log(`🚀 BÚNKER TOTALMENTE OPERATIVO EN PUERTO ${PORT}`);
+    console.log(`🚀 BÚNKER OPERATIVO EN PUERTO ${PORT}`);
+    console.log(`📡 SECTOR NOTICIAS Y RADAR ACTIVADOS`);
 });

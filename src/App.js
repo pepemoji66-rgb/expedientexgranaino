@@ -12,11 +12,11 @@ import Galeria from './components/Galeria';
 import Lugares from './components/Lugares'; 
 import Chat from './components/Chat'; 
 import ChatIA from './components/ChatIA';
+import Noticias from './components/Noticias'; 
 
 import './App.css';
 import fondoAlhambra from './alhambra.jpg';
 
-// --- 1. COMPONENTE DE MÚSICA ---
 const ControlMusica = () => {
   const [sonando, setSonando] = useState(false);
   const audioRef = useRef(new Audio('/audio/misterio.mp3'));
@@ -30,26 +30,17 @@ const ControlMusica = () => {
     if (sonando) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play().catch(e => console.log("Interacción necesaria para audio."));
+      audioRef.current.play().catch(e => console.log("Interacción necesaria."));
     }
     setSonando(!sonando);
   };
 
   return (
-    <button 
-      onClick={toggleMusica} 
-      style={{
-        background: 'transparent',
-        color: 'var(--color-principal)',
-        border: '1px solid var(--color-principal)',
-        padding: '8px 12px',
-        cursor: 'pointer',
-        fontFamily: 'monospace',
-        fontSize: '0.7rem',
-        textTransform: 'uppercase',
-        width: '100%'
-      }}
-    >
+    <button onClick={toggleMusica} style={{
+        background: 'transparent', color: 'var(--color-principal)',
+        border: '1px solid var(--color-principal)', padding: '8px',
+        cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.7rem', width: '100%'
+      }}>
       {sonando ? '🔈 AMBIENTE ON' : '🔊 MÚSICA OFF'}
     </button>
   );
@@ -61,7 +52,6 @@ function App() {
   const [tema, setTema] = useState('#00ff41');
 
   const ADMIN_EMAIL = 'expedientexpepe@moreno.com';
-
   const toggleMenu = () => setIsOpen(!isOpen);
 
   useEffect(() => {
@@ -100,49 +90,52 @@ function App() {
     <Router>
       <div className="App" style={{
         backgroundImage: `url(${fondoAlhambra})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        minHeight: '100vh',
-        display: 'flex', 
-        flexDirection: 'column'
+        backgroundSize: 'cover', backgroundPosition: 'center',
+        backgroundAttachment: 'fixed', minHeight: '100vh',
+        display: 'flex', flexDirection: 'column'
       }}>
 
-        {/* BOTÓN HAMBURGUESA */}
+        {/* --- BOTÓN HAMBURGUESA (RESTAURADO CON ESTILOS FIJOS) --- */}
         <button onClick={toggleMenu} style={{
-          position: 'fixed', top: '20px', right: '20px', zIndex: '2000',
-          background: 'rgba(0,0,0,0.8)', border: '1px solid var(--color-principal)',
+          position: 'fixed', top: '20px', right: '20px', zIndex: '2500',
+          background: 'rgba(0,0,0,0.9)', border: '1px solid var(--color-principal)',
           color: 'var(--color-principal)', width: '50px', height: '50px', cursor: 'pointer',
-          borderRadius: '5px', fontSize: '20px'
+          borderRadius: '5px', fontSize: '24px', display: 'flex', 
+          alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 10px rgba(0,0,0,0.5)'
         }}>
           {isOpen ? '✕' : '☰'}
         </button>
 
         {/* BARRA LATERAL (SIDEBAR) */}
         <nav style={{
-          position: 'fixed', top: 0, right: isOpen ? '0' : '-300px',
-          width: '300px', height: '100vh', background: 'rgba(0,0,0,0.95)',
-          zIndex: '1500', transition: '0.4s', borderLeft: '2px solid var(--color-principal)',
-          display: 'flex', flexDirection: 'column'
+          position: 'fixed', top: 0, right: isOpen ? '0' : '-320px',
+          width: '300px', height: '100vh', background: 'rgba(0,0,0,0.98)',
+          zIndex: '2000', transition: '0.4s ease-in-out', borderLeft: '2px solid var(--color-principal)',
+          display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 20px rgba(0,0,0,0.8)'
         }}>
           
-          {/* ENLACES SUPERIORES */}
           <div style={{ flexGrow: 1, paddingTop: '80px', paddingLeft: '30px' }}>
             <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ marginBottom: '20px' }}><Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Inicio</Link></li>
-              <li style={{ marginBottom: '20px' }}><Link to="/galeria" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Galería</Link></li>
-              <li style={{ marginBottom: '20px' }}><Link to="/videos" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Vídeos</Link></li>
-              <li style={{ marginBottom: '20px' }}><Link to="/expedientes" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Expedientes</Link></li>
-              <li style={{ marginBottom: '20px' }}><Link to="/lugares" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>Mapa Lugares</Link></li>
-              <li style={{ marginBottom: '20px' }}><Link to="/chat" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none', textTransform: 'uppercase' }}>💬 Chat Táctico</Link></li>
-              <li style={{ marginBottom: '20px' }}><Link to="/chat-ia" onClick={toggleMenu} style={{ color: '#00d4ff', textDecoration: 'none', fontWeight: 'bold', textTransform: 'uppercase' }}>🤖 Archivero IA</Link></li>
+              {["/", "/galeria", "/videos", "/expedientes", "/lugares", "/noticias", "/chat", "/chat-ia"].map((path, index) => {
+                const labels = ["Inicio", "Galería", "Vídeos", "Expedientes", "Mapa", "Noticias", "Chat Táctico", "Archivero IA"];
+                return (
+                  <li key={path} style={{ marginBottom: '18px' }}>
+                    <Link to={path} onClick={toggleMenu} style={{ 
+                      color: 'white', textDecoration: 'none', textTransform: 'uppercase', 
+                      fontSize: '0.9rem', fontFamily: 'monospace', letterSpacing: '1px'
+                    }}>
+                      [ {labels[index]} ]
+                    </Link>
+                  </li>
+                );
+              })}
               
               {userAuth && (userAuth.email === ADMIN_EMAIL || userAuth.rol === 'admin') && (
-                <li>
+                <li style={{ marginTop: '25px', paddingRight: '30px' }}>
                   <Link to="/panel-mando" onClick={toggleMenu} style={{
-                    color: '#ffd700', border: '1px dashed #ffd700', padding: '10px',
-                    display: 'block', textAlign: 'center', background: 'rgba(255,215,0,0.1)',
-                    fontWeight: 'bold', marginTop: '10px', textDecoration: 'none'
+                    color: 'var(--color-principal)', border: '1px solid var(--color-principal)',
+                    padding: '12px', display: 'block', textAlign: 'center',
+                    background: 'rgba(0,255,65,0.1)', fontWeight: 'bold', textDecoration: 'none'
                   }}>
                     ⚡ PANEL DE MANDO
                   </Link>
@@ -151,21 +144,20 @@ function App() {
             </ul>
           </div>
 
-          {/* PIE DEL MENÚ (CONFIGURACIÓN) */}
-          <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5px' }}>
-              <div onClick={() => setTema('#00ff41')} style={{background:'#00ff41', width:'22px', height:'22px', borderRadius:'50%', cursor:'pointer', border:'2px solid white'}}></div>
-              <div onClick={() => setTema('#ff4444')} style={{background:'#ff4444', width:'22px', height:'22px', borderRadius:'50%', cursor:'pointer', border:'2px solid white'}}></div>
-              <div onClick={() => setTema('#ffb100')} style={{background:'#ffb100', width:'22px', height:'22px', borderRadius:'50%', cursor:'pointer', border:'2px solid white'}}></div>
-              <div onClick={() => setTema('#00d4ff')} style={{background:'#00d4ff', width:'22px', height:'22px', borderRadius:'50%', cursor:'pointer', border:'2px solid white'}}></div>
+          <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+              {['#00ff41', '#ff4444', '#ffb100', '#00d4ff'].map(c => (
+                <div key={c} onClick={() => setTema(c)} style={{
+                  background: c, width: '22px', height: '22px', borderRadius: '50%', 
+                  cursor: 'pointer', border: '2px solid white'
+                }}></div>
+              ))}
             </div>
-
             <ControlMusica />
-
             {userAuth && (
               <button onClick={cerrarSesion} style={{
                 background: 'transparent', border: '1px solid #ff4444', color: '#ff4444',
-                padding: '8px', cursor: 'pointer', fontFamily: 'monospace', textTransform: 'uppercase'
+                padding: '10px', cursor: 'pointer', textTransform: 'uppercase', fontFamily: 'monospace'
               }}>
                 Finalizar Turno
               </button>
@@ -173,15 +165,9 @@ function App() {
           </div>
         </nav>
 
-        {/* CUERPO DE LA WEB */}
         <main style={{ flex: 1 }}>
           <Routes>
-            <Route path="/" element={
-              <div className="home-layout">
-                <Indice userAuth={userAuth} />
-                <Hero userAuth={userAuth} />
-              </div>
-            } />
+            <Route path="/" element={<div className="home-layout"><Indice userAuth={userAuth} /><Hero userAuth={userAuth} /></div>} />
             <Route path="/acceso" element={<SeccionUsuarios setAuth={actualizarAuth} />} />
             <Route path="/panel-mando" element={<PanelAdmin />} />
             <Route path="/expedientes" element={<Expedientes userAuth={userAuth} />} /> 
@@ -191,9 +177,9 @@ function App() {
             <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
             <Route path="/chat" element={<Chat usuarioActivo={userAuth} />} />
             <Route path="/chat-ia" element={<ChatIA />} />
+            <Route path="/noticias" element={<Noticias userAuth={userAuth} />} />
           </Routes>
         </main>
-
         <Footer />
       </div>
     </Router>

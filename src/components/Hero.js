@@ -7,7 +7,7 @@ const Hero = ({ userAuth }) => {
         <section className="hero-container">
             <div className="hero-content">
                 
-                {/* POEMA PRINCIPAL */}
+                {/* POEMA PRINCIPAL - EL ALMA DEL SECTOR X */}
                 <div className="poema-container">
                     <p className="poema-linea">Bajo el embrujo de una noche sin fin,</p>
                     <p className="poema-linea">donde las sombras bailan en el Albaicín,</p>
@@ -46,9 +46,10 @@ const Hero = ({ userAuth }) => {
                         <div className="estado-sesion" style={{
                             border: '1px solid var(--color-principal)',
                             padding: '15px',
-                            background: 'rgba(0, 255, 65, 0.05)'
+                            background: 'rgba(0, 255, 65, 0.05)',
+                            borderRadius: '10px'
                         }}>
-                            <p>Sesión activa: <strong style={{color: 'var(--color-principal)'}}>{userAuth.nombre}</strong></p>
+                            <p>IDENTIDAD VERIFICADA: <strong style={{color: 'var(--color-principal)', textTransform: 'uppercase'}}>{userAuth.nombre}</strong></p>
                         </div>
                     )}
                 </div>

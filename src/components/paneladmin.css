@@ -5,10 +5,11 @@
     --color-principal: #00ff41;
     --color-leer: #00d4ff;
     --color-borrar: #ff4444;
+    --color-pendiente: #ffb100;
 }
 
 .panel-admin-container {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 30px auto;
     padding: 25px;
     background: rgba(0, 0, 0, 0.9);
@@ -33,20 +34,21 @@
    ============================================================ */
 .tabs-admin {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 25px;
     border-bottom: 1px solid rgba(0, 255, 65, 0.2);
-    padding-bottom: 10px;
+    padding-bottom: 15px;
 }
 
 .tabs-admin button {
     background: transparent;
     border: 1px solid var(--color-principal);
     color: var(--color-principal);
-    padding: 10px 20px;
+    padding: 10px 15px;
     cursor: pointer;
     font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     transition: 0.3s;
     text-transform: uppercase;
 }
@@ -58,18 +60,23 @@
     font-weight: bold;
 }
 
+.tabs-admin button:hover:not(.active) {
+    background: rgba(0, 255, 65, 0.1);
+}
+
 /* ============================================================
    TABLA DE GESTIÓN
    ============================================================ */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .tabla-admin {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .tabla-admin th {
@@ -87,137 +94,134 @@
     vertical-align: middle;
 }
 
-/* FILAS DE ACCIÓN */
-.botones-accion-row {
-    display: flex;
-    gap: 10px;
-}
-
-/* BOTÓN LEER (Azul) */
-.btn-leer {
-    background: var(--color-leer);
-    color: #000;
-    border: none;
-    padding: 8px 15px;
-    font-size: 0.75rem;
+/* BOTONES DE ACCIÓN */
+.btn-leer, .btn-ok, .btn-del, .btn-pagi {
+    font-family: 'Courier New', monospace;
     font-weight: bold;
     cursor: pointer;
-    font-family: 'Courier New', monospace;
     transition: 0.2s;
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.7rem;
+    margin-right: 5px;
 }
 
-/* BOTÓN APROBAR (Verde) */
-.btn-ok {
-    background: var(--color-principal);
-    color: #000;
-    border: none;
-    padding: 8px 15px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
-    transition: 0.2s;
-}
-
-/* BOTÓN ELIMINAR (Rojo) */
-.btn-del {
-    background: var(--color-borrar);
-    color: #fff;
-    border: none;
-    padding: 8px 15px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
-    transition: 0.2s;
-}
+.btn-leer { background: var(--color-leer); color: #000; }
+.btn-ok { background: var(--color-principal); color: #000; }
+.btn-del { background: var(--color-borrar); color: #fff; }
 
 .btn-leer:hover, .btn-ok:hover, .btn-del:hover {
     filter: brightness(1.3);
     transform: scale(1.05);
 }
 
-/* ESTADOS */
-.status-pill {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    text-transform: uppercase;
+/* ESTADOS DE REGISTRO */
+.status-ok {
+    color: var(--color-principal);
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--color-principal);
 }
-.status-pill.aprobado { color: var(--color-principal); border: 1px solid var(--color-principal); }
-.status-pill.pendiente { color: #ffb100; border: 1px solid #ffb100; }
+
+.status-pending {
+    color: var(--color-pendiente);
+    font-weight: bold;
+}
+
+.link-ver {
+    color: var(--color-leer);
+    text-decoration: underline;
+}
 
 /* ============================================================
-   MODAL LECTOR
+   MODAL LECTOR ADMIN
    ============================================================ */
 .modal-admin-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.95);
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10000;
+    z-index: 3000;
+    padding: 20px;
 }
 
 .modal-admin-content {
-    background: #0a0a0a;
+    background: #050505;
     border: 2px solid var(--color-principal);
-    padding: 40px;
-    max-width: 700px;
-    width: 90%;
-    max-height: 85vh;
+    padding: 30px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
     overflow-y: auto;
-    position: relative;
-    box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 40px rgba(0, 255, 65, 0.3);
 }
 
-.cuerpo-relato {
-    margin: 25px 0;
-    line-height: 1.8;
+.modal-titulo {
+    color: var(--color-principal);
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.modal-agente {
+    color: #888;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+}
+
+.modal-hr {
+    border: 0;
+    border-top: 1px solid rgba(0, 255, 65, 0.3);
+    margin: 15px 0;
+}
+
+.cuerpo-expediente {
+    line-height: 1.6;
+    color: #ccc;
     white-space: pre-wrap;
-    color: #ddd;
-    font-size: 1.1rem;
     text-align: justify;
+    margin-bottom: 25px;
 }
 
 .btn-cerrar-modal {
-    background: transparent;
-    border: 1px solid var(--color-borrar);
-    color: var(--color-borrar);
-    padding: 10px 25px;
+    background: var(--color-borrar);
+    color: white;
+    border: none;
+    padding: 10px 20px;
     cursor: pointer;
     width: 100%;
-    font-family: 'Courier New', monospace;
     font-weight: bold;
-    margin-top: 20px;
-}
-
-.btn-cerrar-modal:hover {
-    background: var(--color-borrar);
-    color: #fff;
+    text-transform: uppercase;
 }
 
 /* ============================================================
    PAGINACIÓN
    ============================================================ */
-.paginacion-bunker {
+.paginacion-admin {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 20px;
-    margin-top: 30px;
+    margin-top: 25px;
 }
 
-.paginacion-bunker button {
+.btn-pagi {
     background: transparent;
     border: 1px solid var(--color-principal);
     color: var(--color-principal);
-    padding: 8px 20px;
-    cursor: pointer;
+    padding: 5px 15px;
 }
 
-.paginacion-bunker button:disabled { opacity: 0.3; }
+.btn-pagi:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pagi-info {
+    font-size: 0.8rem;
+    color: var(--color-principal);
+}
