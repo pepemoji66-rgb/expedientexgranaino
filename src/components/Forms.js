@@ -1,39 +1,40 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import './forms.css';
+import './forms.css'; // Aquí es donde tienes el CSS que me acabas de mandar
 
 const Forms = ({ title, subtitle, children, onSubmit, onClear }) => {
-  const navigate = useNavigate();
+    return (
+        <div className="forms-overlay fade-in">
+            <div className="forms-container">
+                {/* Cabecera usando tus clases */}
+                <h2 className="forms-title">{title}</h2>
+                {subtitle && <p className="forms-subtitle">{subtitle}</p>}
 
-  return (
-    <div className="forms-overlay">
-      <div className="forms-container">
-        <h2 className="forms-title">{title}</h2>
-        {subtitle && <p className="forms-subtitle">{subtitle}</p>}
-        
-        <form onSubmit={onSubmit} autoComplete="off">
-          {children}
-          
-          <div className="forms-actions">
-            <button type="submit" className="forms-btn-submit">
-              EJECUTAR ACCIÓN
-            </button>
-            
-            <div className="forms-row">
-              {onClear && (
-                <button type="button" onClick={onClear} className="forms-btn-clear">
-                  LIMPIAR
-                </button>
-              )}
-              <button type="button" onClick={() => navigate('/')} className="forms-btn-home">
-                INICIO
-              </button>
+                {/* Formulario que acepta imágenes */}
+                <form onSubmit={onSubmit} encType="multipart/form-data">
+                    
+                    {/* Aquí caen los inputs de Noticias, Login, etc. */}
+                    {children}
+                    
+                    {/* Botonera usando tus nombres de clase */}
+                    <div className="forms-actions">
+                        <button type="submit" className="forms-btn-submit">
+                            ENVIAR SEÑAL
+                        </button>
+                        
+                        <div className="forms-row">
+                            <button type="button" className="forms-btn-clear" onClick={onClear}>
+                                ABORTAR
+                            </button>
+                            {/* He añadido el botón home por si lo necesitas, si no, se puede quitar */}
+                            <button type="button" className="forms-btn-home" onClick={() => window.location.href='/'}>
+                                INICIO
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default Forms;

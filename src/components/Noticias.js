@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Forms from './Forms'; 
 import './noticias.css';
 
 const Noticias = ({ userAuth }) => {
@@ -9,6 +10,10 @@ const Noticias = ({ userAuth }) => {
     const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
     const navigate = useNavigate();
     
+    // --- LÓGICA DE PAGINACIÓN ---
+    const [paginaActual, setPaginaActual] = useState(1);
+    const noticiasPorPagina = 6; 
+
     const [nuevaNoticia, setNuevaNoticia] = useState({ 
         titulo: '', 
         cuerpo: '', 
@@ -18,13 +23,10 @@ const Noticias = ({ userAuth }) => {
         longitud: null
     });
 
+    const [imagen, setImagen] = useState(null); 
     const [buscandoLoc, setBuscandoLoc] = useState(false);
 
-    useEffect(() => {
-        obtenerNoticias();
-    }, [userAuth]);
-
-    const obtenerNoticias = async () => {
+    const obtenerNoticias = useCallback(async () => {
         try {
             const res = await axios.get('http://localhost:5000/noticias-publicas');
             setNoticias(res.data || []);
@@ -33,11 +35,26 @@ const Noticias = ({ userAuth }) => {
             console.error("❌ ERROR AL CARGAR TELETIPO:", err);
             setCargando(false);
         }
+    }, []);
+
+    useEffect(() => {
+        obtenerNoticias();
+    }, [obtenerNoticias, userAuth]);
+
+    // --- CÁLCULOS DE PAGINACIÓN ---
+    const indiceUltimoItem = paginaActual * noticiasPorPagina;
+    const indicePrimerItem = indiceUltimoItem - noticiasPorPagina;
+    const noticiasPaginadas = noticias.slice(indicePrimerItem, indiceUltimoItem);
+    const totalPaginas = Math.ceil(noticias.length / noticiasPorPagina);
+
+    const cambiarPagina = (numero) => {
+        setPaginaActual(numero);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // --- FUNCIONES DE LÓGICA ORIGINALES ---
     const buscarDireccion = async (texto) => {
         setNuevaNoticia({ ...nuevaNoticia, ubicacion: texto });
-        
         if (texto.length > 4) {
             setBuscandoLoc(true);
             try {
@@ -46,13 +63,8 @@ const Noticias = ({ userAuth }) => {
                     { headers: { 'User-Agent': 'ExpedienteX_Bunker' } }
                 );
                 const data = await response.json();
-                
                 if (data && data.length > 0) {
-                    setNuevaNoticia(prev => ({
-                        ...prev,
-                        latitud: data[0].lat,
-                        longitud: data[0].lon
-                    }));
+                    setNuevaNoticia(prev => ({ ...prev, latitud: data[0].lat, longitud: data[0].lon }));
                 }
             } catch (error) {
                 console.warn("⚠️ Error satélite:", error);
@@ -63,39 +75,44 @@ const Noticias = ({ userAuth }) => {
     };
 
     const verEnMapa = (item) => {
-        console.log("🚀 ENVIANDO AL MAPA:", { lat: item.latitud, lng: item.longitud });
-        
         if (!item.latitud || !item.longitud) {
-            // Si no hay coordenadas grabadas en la DB, el mapa buscará por texto
             navigate('/lugares', { state: { buscarUbicacion: item.ubicacion } });
         } else {
-            // Convertimos a número por si acaso vienen como texto de la DB
             navigate('/lugares', { 
-                state: { 
-                    lat: parseFloat(item.latitud), 
-                    lng: parseFloat(item.longitud), 
-                    nombre: item.titulo 
-                } 
+                state: { lat: parseFloat(item.latitud), lng: parseFloat(item.longitud), nombre: item.titulo } 
             });
         }
     };
 
     const enviarPropuesta = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+        const formData = new FormData();
+        formData.append('titulo', nuevaNoticia.titulo);
+        formData.append('cuerpo', nuevaNoticia.cuerpo);
+        formData.append('nivel_alerta', nuevaNoticia.nivel_alerta);
+        formData.append('ubicacion', nuevaNoticia.ubicacion);
+        formData.append('latitud', nuevaNoticia.latitud || '');
+        formData.append('longitud', nuevaNoticia.longitud || '');
+        formData.append('usuario_id', userAuth?.id || 0);
+        if (imagen) formData.append('imagen', imagen);
+
         try {
-            await axios.post('http://localhost:5000/proponer-noticia', {
-                ...nuevaNoticia,
-                usuario_id: userAuth?.id || 0
+            await axios.post('http://localhost:5000/proponer-noticia', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("📡 REPORTE RECIBIDO. Procesando en el búnker...");
-            setNuevaNoticia({ 
-                titulo: '', cuerpo: '', nivel_alerta: 'Bajo', 
-                ubicacion: '', latitud: null, longitud: null 
-            });
+            alert("📡 REPORTE RECIBIDO");
+            limpiarFormulario();
             obtenerNoticias();
         } catch (err) {
             alert("❌ Error en la transmisión.");
         }
+    };
+
+    const limpiarFormulario = () => {
+        setNuevaNoticia({ titulo: '', cuerpo: '', nivel_alerta: 'Bajo', ubicacion: '', latitud: null, longitud: null });
+        setImagen(null);
+        const inputImg = document.getElementById('input-imagen-noticia');
+        if (inputImg) inputImg.value = "";
     };
 
     if (cargando) return <div className="cargando-bunker">SINTONIZANDO FRECUENCIAS...</div>;
@@ -107,9 +124,15 @@ const Noticias = ({ userAuth }) => {
                 <div className="linea-decorativa"></div>
             </header>
             
+            {/* GRID DE NOTICIAS: Solo renderiza 1 vez */}
             <div className="noticias-grid">
-                {noticias.length > 0 ? noticias.map((item) => (
-                    <div key={item.id} className="card-noticia">
+                {noticiasPaginadas.map((item) => (
+                    <div key={item.id} className="card-noticia fade-in">
+                        {item.imagen && (
+                            <div className="noticia-img-container">
+                                <img src={`http://localhost:5000/imagenes/${item.imagen}`} alt={item.titulo} className="noticia-miniatura" />
+                            </div>
+                        )}
                         <div className="card-header">
                             <span className={`alerta-tag ${item.nivel_alerta === 'CRÍTICO' ? 'alerta-critica' : ''}`}>
                                 [{item.nivel_alerta.toUpperCase()}]
@@ -118,76 +141,63 @@ const Noticias = ({ userAuth }) => {
                         </div>
                         <h2 className="noticia-titulo">{item.titulo}</h2>
                         {item.ubicacion && <div className="noticia-loc-badge">📍 {item.ubicacion}</div>}
-                        <p className="noticia-resumen">{item.cuerpo.substring(0, 120)}...</p>
-                        <div className="noticia-footer-btns" style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                            <button className="btn-leer-noticia" onClick={() => setNoticiaSeleccionada(item)} style={{ flex: 1 }}>👁️ INFORME</button>
-                            {item.ubicacion && (
-                                <button className="btn-ver-mapa" onClick={() => verEnMapa(item)} style={{ flex: 1 }}>📍 MAPA</button>
-                            )}
+                        <p className="noticia-resumen">{item.cuerpo.substring(0, 100)}...</p>
+                        <div className="noticia-footer-btns">
+                            <button className="btn-leer-noticia" onClick={() => setNoticiaSeleccionada(item)}>👁️ INFORME</button>
+                            {item.ubicacion && <button className="btn-ver-mapa" onClick={() => verEnMapa(item)}>📍 MAPA</button>}
                         </div>
                     </div>
-                )) : (
-                    <p className="sin-noticias">No hay alertas activas en este sector.</p>
-                )}
+                ))}
             </div>
 
-            {userAuth ? (
-                <div className="contenedor-form-noticia">
-                    <div className="form-noticia-card">
-                        <h3>📢 {userAuth.rol === 'admin' ? 'CREAR COMUNICADO OFICIAL' : 'INFORMAR DE UN SUCESO'}</h3>
-                        <form onSubmit={enviarPropuesta} className="grid-form">
-                            <input 
-                                type="text" 
-                                placeholder="TITULAR" 
-                                value={nuevaNoticia.titulo} 
-                                onChange={e => setNuevaNoticia({...nuevaNoticia, titulo: e.target.value})} 
-                                required 
-                            />
-
-                            <div className="grupo-input-geo" style={{ position: 'relative' }}>
-                                <input 
-                                    type="text" 
-                                    placeholder="DIRECCIÓN (Ej: Calle Real, Albolote)" 
-                                    value={nuevaNoticia.ubicacion} 
-                                    onChange={e => buscarDireccion(e.target.value)} 
-                                    required
-                                />
-                                {buscandoLoc && <span className="loader-geo">🛰️</span>}
-                                {nuevaNoticia.latitud && !buscandoLoc && (
-                                    <span style={{ color: '#00ff41', fontSize: '0.7rem', display: 'block', marginTop: '5px' }}>
-                                        ✅ COORDENADAS: {String(nuevaNoticia.latitud).substring(0,7)}, {String(nuevaNoticia.longitud).substring(0,7)}
-                                    </span>
-                                )}
-                            </div>
-
-                            <select 
-                                value={nuevaNoticia.nivel_alerta} 
-                                onChange={e => setNuevaNoticia({...nuevaNoticia, nivel_alerta: e.target.value})}
-                            >
-                                <option value="Bajo">Nivel: BAJO</option>
-                                <option value="Medio">Nivel: MEDIO</option>
-                                <option value="Alto">Nivel: ALTO</option>
-                                <option value="CRÍTICO">Nivel: CRÍTICO</option>
-                            </select>
-
-                            <textarea 
-                                placeholder="CONTENIDO..." 
-                                value={nuevaNoticia.cuerpo} 
-                                onChange={e => setNuevaNoticia({...nuevaNoticia, cuerpo: e.target.value})} 
-                                required 
-                            />
-                            <button type="submit" className="btn-enviar-noticia">PUBLICAR</button>
-                        </form>
-                    </div>
+            {/* BOTONES PAGINACIÓN */}
+            {totalPaginas > 1 && (
+                <div className="paginacion-bunker" style={{ textAlign: 'center', margin: '30px 0' }}>
+                    <button disabled={paginaActual === 1} onClick={() => cambiarPagina(paginaActual - 1)}>ATRÁS</button>
+                    <span style={{ color: '#00ff41', margin: '0 15px' }}>{paginaActual} / {totalPaginas}</span>
+                    <button disabled={paginaActual === totalPaginas} onClick={() => cambiarPagina(paginaActual + 1)}>SIGUIENTE</button>
                 </div>
-            ) : null}
+            )}
 
+            {/* FORMULARIO RECUPERADO */}
+            {userAuth && (
+                <div className="contenedor-form-noticia" style={{ marginTop: '50px' }}>
+                    <Forms 
+                        title={userAuth.rol === 'admin' ? 'COMUNICADO OFICIAL' : 'REPORTAR SUCESO'}
+                        onSubmit={enviarPropuesta}
+                        onClear={limpiarFormulario}
+                    >
+                        <input type="text" placeholder="TITULAR" value={nuevaNoticia.titulo} onChange={e => setNuevaNoticia({...nuevaNoticia, titulo: e.target.value})} required />
+                        
+                        <div style={{ position: 'relative' }}>
+                            <input type="text" placeholder="UBICACIÓN" value={nuevaNoticia.ubicacion} onChange={e => buscarDireccion(e.target.value)} required />
+                            {buscandoLoc && <span style={{ position: 'absolute', right: '10px', top: '10px' }}>🛰️</span>}
+                        </div>
+
+                        <select value={nuevaNoticia.nivel_alerta} onChange={e => setNuevaNoticia({...nuevaNoticia, nivel_alerta: e.target.value})}>
+                            <option value="Bajo">Nivel: BAJO</option>
+                            <option value="Medio">Nivel: MEDIO</option>
+                            <option value="Alto">Nivel: ALTO</option>
+                            <option value="CRÍTICO">Nivel: CRÍTICO</option>
+                        </select>
+
+                        <div className="input-file-bunker" style={{ border: '1px solid #00ff41', padding: '10px', margin: '10px 0' }}>
+                            <label style={{ color: '#00ff41', fontSize: '12px', display: 'block' }}>📷 IMAGEN:</label>
+                            <input id="input-imagen-noticia" type="file" accept="image/*" onChange={e => setImagen(e.target.files[0])} />
+                        </div>
+
+                        <textarea placeholder="DESCRIPCIÓN..." value={nuevaNoticia.cuerpo} onChange={e => setNuevaNoticia({...nuevaNoticia, cuerpo: e.target.value})} required />
+                    </Forms>
+                </div>
+            )}
+
+            {/* MODAL */}
             {noticiaSeleccionada && (
                 <div className="modal-noticia-overlay" onClick={() => setNoticiaSeleccionada(null)}>
                     <div className="modal-noticia-content" onClick={e => e.stopPropagation()}>
                         <h2>{noticiaSeleccionada.titulo}</h2>
-                        <hr />
-                        <div className="modal-cuerpo">{noticiaSeleccionada.cuerpo}</div>
+                        {noticiaSeleccionada.imagen && <img src={`http://localhost:5000/imagenes/${noticiaSeleccionada.imagen}`} alt="Evidencia" style={{ width: '100%' }} />}
+                        <div className="modal-cuerpo" style={{ whiteSpace: 'pre-wrap', marginTop: '15px' }}>{noticiaSeleccionada.cuerpo}</div>
                         <button className="btn-cerrar-archivo" onClick={() => setNoticiaSeleccionada(null)}>CERRAR</button>
                     </div>
                 </div>

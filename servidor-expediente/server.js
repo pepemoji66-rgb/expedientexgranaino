@@ -24,8 +24,12 @@ app.use(bodyParser.json());
 
 // --- 1. CONFIGURACIÓN DE ALMACENAMIENTO ---
 const dirLugares = path.join(__dirname, '../public/lugares');
-if (!fs.existsSync(dirLugares)) { fs.mkdirSync(dirLugares, { recursive: true }); }
+const dirNoticias = path.join(__dirname, 'public/imagenes'); // Carpeta para las fotos de noticias
 
+if (!fs.existsSync(dirLugares)) { fs.mkdirSync(dirLugares, { recursive: true }); }
+if (!fs.existsSync(dirNoticias)) { fs.mkdirSync(dirNoticias, { recursive: true }); }
+
+// Multer para Radar (Lugares)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => { cb(null, dirLugares); },
     filename: (req, file, cb) => {
@@ -33,6 +37,15 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage: storage });
+
+// Multer para NOTICIAS (Añadido para que no dé error al arrancar)
+const storageNoticias = multer.diskStorage({
+    destination: (req, file, cb) => { cb(null, dirNoticias); },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-noticia-' + file.originalname.replace(/\s/g, "_"));
+    }
+});
+const uploadNoticia = multer({ storage: storageNoticias });
 
 // --- 2. RECURSOS ESTÁTICOS ---
 app.use('/imagenes', express.static(path.join(__dirname, 'public/imagenes')));
@@ -303,12 +316,18 @@ app.put('/admin/aprobar-noticia/:id', (req, res) => {
     });
 });
 
-app.post('/proponer-noticia', (req, res) => {
+// RUTA REPARADA: Usamos imagen_url para coincidir con tu SQL
+app.post('/proponer-noticia', uploadNoticia.single('imagen'), (req, res) => {
     const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud } = req.body;
-    // Guardamos como pendiente para moderación del Agente
-    const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')";
-    db.query(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null], (err, result) => {
-        if (err) return res.status(500).json({ error: "Fallo en DB" });
+    const imagen = req.file ? req.file.filename : null;
+
+    const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, imagen_url, estado) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')";
+    
+    db.query(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null, imagen], (err, result) => {
+        if (err) {
+            console.error("Fallo en DB:", err);
+            return res.status(500).json({ error: "Fallo en DB" });
+        }
         res.json({ mensaje: "Noticia recibida", id: result.insertId });
     });
 });

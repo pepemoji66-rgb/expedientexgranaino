@@ -57,14 +57,14 @@ const Galeria = ({ userAuth }) => {
         }
     };
 
-    // --- FUNCIÓN CORREGIDA PARA ENVIAR DATOS AL MAPA ---
+    // --- FUNCIÓN PARA ENVIAR DATOS AL MAPA ---
     const verEnMapa = (img) => {
         const payload = {
             id: img.id,
             nombre: img.titulo,
             latitud: img.latitud,
             longitud: img.longitud,
-            imagen_url: img.url_imagen, // Usamos el campo de la tabla imagenes
+            imagen_url: img.url_imagen, 
             descripcion: img.descripcion,
             esDeGaleria: true
         };
@@ -107,7 +107,8 @@ const Galeria = ({ userAuth }) => {
                         <div key={img.id} className="card-imagen" onClick={() => setFotoExpandida(img)}>
                             <div className="contenedor-img">
                                 <img
-                                    src={`/imagenes/${img.url_imagen}`}
+                                    /* AJUSTE: Apuntamos a la carpeta de imágenes del servidor */
+                                    src={`http://localhost:5000/imagenes/${img.url_imagen}`}
                                     alt={img.titulo}
                                     onError={(e) => {
                                         e.target.onerror = null;
@@ -141,7 +142,8 @@ const Galeria = ({ userAuth }) => {
                         <button className="cerrar-modal" onClick={() => setFotoExpandida(null)}>×</button>
                         
                         <img 
-                            src={`/imagenes/${fotoExpandida.url_imagen}`} 
+                            /* AJUSTE: Apuntamos a la carpeta de imágenes del servidor */
+                            src={`http://localhost:5000/imagenes/${fotoExpandida.url_imagen}`} 
                             alt={fotoExpandida.titulo} 
                             onError={(e) => {
                                 e.target.onerror = null;

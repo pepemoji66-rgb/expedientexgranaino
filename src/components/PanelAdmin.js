@@ -19,38 +19,49 @@ const PanelAdmin = () => {
 
     useEffect(() => {
         cargarDatos();
-        // Sincronización automática cada 30 segundos por si el radar detecta algo nuevo
-        const intervalo = setInterval(cargarDatos, 30000);
+        // Aumentamos el intervalo a 60 segundos para no saturar el tráfico del búnker
+        const intervalo = setInterval(cargarDatos, 60000);
         return () => clearInterval(intervalo);
     }, []);
 
-    const cargarDatos = async () => {
-        try {
-            // No reseteamos los estados a [] aquí para evitar que el contador marque 0
-            const [resU, resV, resE, resI, resL, resC, resN] = await Promise.all([
-                axios.get('http://localhost:5000/usuarios'),
-                axios.get('http://localhost:5000/admin/todos-los-videos'),
-                axios.get('http://localhost:5000/expedientes'),
-                axios.get('http://localhost:5000/admin/todas-las-imagenes'),
-                axios.get('http://localhost:5000/lugares'),
-                axios.get('http://localhost:5000/chat-historial'),
-                axios.get('http://localhost:5000/admin/todas-noticias') 
-            ]);
+  const cargarDatos = async () => {
+    try {
+        // 1. Lanzamos el escáner a todas las frecuencias
+        const [resU, resV, resE, resI, resL, resC, resN] = await Promise.all([
+            axios.get('http://localhost:5000/usuarios'),
+            axios.get('http://localhost:5000/admin/todos-los-videos'),
+            axios.get('http://localhost:5000/expedientes'),
+            axios.get('http://localhost:5000/admin/todas-las-imagenes'),
+            axios.get('http://localhost:5000/lugares'),
+            axios.get('http://localhost:5000/chat-historial'),
+            axios.get('http://localhost:5000/admin/todas-noticias') 
+        ]);
 
-            setUsuarios(Array.isArray(resU.data) ? resU.data : []);
-            setVideos(Array.isArray(resV.data) ? resV.data : []);
-            setExpedientes(Array.isArray(resE.data) ? resE.data : []);
-            setImagenes(Array.isArray(resI.data) ? resI.data : []);
-            setLugares(Array.isArray(resL.data) ? resL.data : []);
-            setMensajes(Array.isArray(resC.data) ? [...resC.data].reverse() : []);
-            setNoticias(Array.isArray(resN.data) ? resN.data : []); 
-            
-            console.log("✅ DATOS SINCRONIZADOS");
-        } catch (err) { 
-            console.error("❌ ERROR EN EL RADAR:", err); 
-        }
-    };
+        // 2. Solo si todas responden, actualizamos el panel de una vez
+        // Esto evita que los contadores parpadeen en ( 0 )
+        const nuevosUsuarios = Array.isArray(resU.data) ? resU.data : [];
+        const nuevosVideos = Array.isArray(resV.data) ? resV.data : [];
+        const nuevosExpedientes = Array.isArray(resE.data) ? resE.data : [];
+        const nuevasImagenes = Array.isArray(resI.data) ? resI.data : [];
+        const nuevosLugares = Array.isArray(resL.data) ? resL.data : [];
+        const nuevasNoticias = Array.isArray(resN.data) ? resN.data : [];
+        const nuevosMensajes = Array.isArray(resC.data) ? [...resC.data].reverse() : [];
 
+        // 3. Inyección simultánea al motor
+        setUsuarios(nuevosUsuarios);
+        setVideos(nuevosVideos);
+        setExpedientes(nuevosExpedientes);
+        setImagenes(nuevasImagenes);
+        setLugares(nuevosLugares);
+        setNoticias(nuevasNoticias);
+        setMensajes(nuevosMensajes);
+        
+        console.log("✅ SINCRONIZACIÓN COMPLETA: Radar actualizado.");
+    } catch (err) { 
+        console.error("❌ FALLO EN LA RECEPCIÓN:", err); 
+        // Si hay error, no tocamos los estados para que no se pongan a 0
+    }
+};
     const gestionar = async (id, accion, tipo) => {
         if (!window.confirm(`¿Ejecutar orden de ${accion.toUpperCase()}?`)) return;
         
@@ -72,11 +83,12 @@ const PanelAdmin = () => {
                 await axios.delete(url);
             }
 
-            // Espera táctica de 300ms para que la DB procese antes de pedir los datos de nuevo
-            setTimeout(async () => {
-                await cargarDatos();
-                setCargando(false);
-            }, 300);
+            // EL CAMBIO CLAVE: Esperamos a que la base de datos respire y cargamos datos
+            // Eliminamos el setTimeout corto que causaba el fallo de los contadores
+            await cargarDatos();
+            setCargando(false);
+            
+            if (accion === 'aprobar') alert("✅ REGISTRO PUBLICADO");
 
         } catch (err) { 
             console.error("❌ ERROR OPERATIVO:", err);
@@ -111,7 +123,7 @@ const PanelAdmin = () => {
     return (
         <div className="panel-admin-container fade-in">
             <h2 className="titulo-neon">CONTROL DE MANDO UNIFICADO</h2>
-            {cargando && <div className="loading-overlay">ACTUALIZANDO SISTEMA...</div>}
+            {cargando && <div className="loading-overlay">SINCRONIZANDO CON EL SERVIDOR...</div>}
             
             <div className="tabs-admin">
                 <button className={tab === 'usuarios' ? 'active' : ''} onClick={() => cambiarTab('usuarios')}>USUARIOS ({usuarios.length})</button>
@@ -128,7 +140,7 @@ const PanelAdmin = () => {
                     <thead>
                         <tr>
                             <th>ESTADO / ID</th>
-                            <th>TÍTULO / NOMBRE</th>
+                            <th>TÍTULO / IMAGEN</th>
                             <th>AUTOR / INFO</th>
                             <th>GESTIÓN</th>
                         </tr>
@@ -154,6 +166,22 @@ const PanelAdmin = () => {
                                                 <button className="btn-leer" onClick={() => setExpedienteParaLeer(item)}>LEER</button>
                                                 {item.estado !== 'publicado' && <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'expediente')}>APROBAR</button>}
                                                 <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'expediente')}>ELIMINAR</button>
+                                            </td>
+                                        </>
+                                    )}
+                                    {tab === 'imagenes' && (
+                                        <>
+                                            <td className={item.estado === 'publica' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
+                                            <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                {item.url_imagen && (
+                                                    <img src={`http://localhost:5000/imagenes/${item.url_imagen}`} alt="preview" style={{ width: '50px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #00ff00' }} />
+                                                )}
+                                                {item.titulo}
+                                            </td>
+                                            <td>{item.agente || 'ANÓNIMO'}</td>
+                                            <td>
+                                                {item.estado !== 'publica' && <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'imagen')}>APROBAR</button>}
+                                                <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'imagen')}>ELIMINAR</button>
                                             </td>
                                         </>
                                     )}
@@ -202,7 +230,7 @@ const PanelAdmin = () => {
                                 </tr>
                             ))
                         ) : (
-                            <tr><td colSpan="4" className="no-data">SIN DATOS</td></tr>
+                            <tr><td colSpan="4" className="no-data">NO HAY REGISTROS EN ESTA SECCIÓN</td></tr>
                         )}
                     </tbody>
                 </table>
@@ -210,7 +238,7 @@ const PanelAdmin = () => {
 
             <div className="paginacion-admin">
                 <button disabled={paginaActual === 1} onClick={() => setPaginaActual(p => p - 1)} className="btn-pagi">◀</button>
-                <span className="pagi-info">PÁG {paginaActual}</span>
+                <span className="pagi-info">PÁG {paginaActual} DE {Math.ceil(listaActiva.length / itemsPorPagina) || 1}</span>
                 <button disabled={ultimoItem >= listaActiva.length} onClick={() => setPaginaActual(p => p + 1)} className="btn-pagi">▶</button>
             </div>
 
