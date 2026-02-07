@@ -7,16 +7,26 @@ const LecturaHistoria = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [historia, setHistoria] = useState(null);
+    const [esRelatoAdmin, setEsRelatoAdmin] = useState(false); // Para saber de qué tabla borrar
 
     const obtenerHistoria = async () => {
         try {
-            // CORRECCIÓN 1: 'expedientes-publicos' (sin la 'a' extra)
-            const res = await axios.get('http://localhost:5000/expedientes-publicos');
-            // Buscamos el ID. Usamos == por si uno es string y el otro número
-            const encontrada = res.data.find(h => h.id == id);
-            setHistoria(encontrada);
+            // 1. Intentamos buscar primero en los Relatos del Administrador
+            const resAdmin = await axios.get('http://localhost:5000/relatos-admin-publicos');
+            const encontradaAdmin = resAdmin.data.find(h => h.id == id);
+
+            if (encontradaAdmin) {
+                setHistoria(encontradaAdmin);
+                setEsRelatoAdmin(true);
+            } else {
+                // 2. Si no es de admin, buscamos en los expedientes públicos de usuarios
+                const resPublicos = await axios.get('http://localhost:5000/expedientes-publicos');
+                const encontradaPublica = resPublicos.data.find(h => h.id == id);
+                setHistoria(encontradaPublica);
+                setEsRelatoAdmin(false);
+            }
         } catch (err) {
-            console.error("Error al recuperar el relato del búnker");
+            console.error("❌ Error al recuperar el relato del búnker", err);
         }
     };
 
@@ -25,19 +35,33 @@ const LecturaHistoria = () => {
     }, [id]);
 
     const eliminarEstaHistoria = async () => {
-        if (window.confirm("¿Sultán, seguro que desea destruir este expediente para siempre?")) {
+        const mensajeConfirm = esRelatoAdmin 
+            ? "¿Sultán, seguro que desea destruir su propio relato para siempre?" 
+            : "¿Seguro que desea eliminar este expediente de usuario?";
+
+        if (window.confirm(mensajeConfirm)) {
             try {
-                // CORRECCIÓN 2: Usar la ruta que definimos en server.js (/expedientes/:id)
-                await axios.delete(`http://localhost:5000/expedientes/${id}`);
+                // Usamos la ruta correspondiente según el tipo de relato
+                const rutaBorrado = esRelatoAdmin 
+                    ? `http://localhost:5000/borrar-relato-admin/${id}` 
+                    : `http://localhost:5000/expedientes/${id}`;
+
+                await axios.delete(rutaBorrado);
                 alert("Expediente eliminado del sistema.");
-                navigate('/expedientes'); // Te devuelve a la lista
+                navigate(-1); // Volver a la pantalla anterior
             } catch (err) {
                 alert("Error al intentar eliminar el archivo secreto.");
             }
         }
     };
 
-    if (!historia) return <div className="admin-dashboard"><p style={{color: 'white', textAlign: 'center', marginTop: '50px'}}>Abriendo expediente clasificado...</p></div>;
+    if (!historia) return (
+        <div className="admin-dashboard">
+            <p style={{color: 'white', textAlign: 'center', marginTop: '50px'}}>
+                Buscando en los archivos clasificados...
+            </p>
+        </div>
+    );
 
     return (
         <div className="admin-dashboard fade-in">
@@ -46,7 +70,7 @@ const LecturaHistoria = () => {
                     <button 
                         onClick={() => navigate(-1)} 
                         className="forms-btn-submit" 
-                        style={{width: 'auto', background: '#333', padding: '10px 20px', cursor: 'pointer'}}
+                        style={{width: 'auto', background: '#333', padding: '10px 20px', cursor: 'pointer', border: '1px solid #555'}}
                     >
                         ⬅ VOLVER
                     </button>
@@ -54,7 +78,7 @@ const LecturaHistoria = () => {
                     <button 
                         onClick={eliminarEstaHistoria} 
                         className="forms-btn-submit" 
-                        style={{width: 'auto', background: '#ff4444', color: 'white', padding: '10px 20px', cursor: 'pointer'}}
+                        style={{width: 'auto', background: '#ff4444', color: 'white', padding: '10px 20px', cursor: 'pointer', border: 'none'}}
                     >
                         🗑️ ELIMINAR EXPEDIENTE
                     </button>
@@ -65,7 +89,13 @@ const LecturaHistoria = () => {
                 </h2>
                 
                 <p style={{color: '#888', fontFamily: 'Courier New', marginBottom: '20px'}}>
-                    ORIGEN DEL RELATO: <span style={{color: '#fff'}}>{(historia.usuario_nombre || 'ANÓNIMO').toUpperCase()}</span>
+                    TIPO DE ARCHIVO: <span style={{color: esRelatoAdmin ? '#00ff41' : '#ff9900'}}>
+                        {esRelatoAdmin ? 'RELATO DEL ADMINISTRADOR' : 'EXPEDIENTE DE AGENTE'}
+                    </span>
+                    <br />
+                    AUTOR: <span style={{color: '#fff'}}>
+                        {(historia.usuario_nombre || 'ADMINISTRADOR').toUpperCase()}
+                    </span>
                 </p>
 
                 <div style={{
@@ -79,7 +109,8 @@ const LecturaHistoria = () => {
                     borderRadius: '10px',
                     border: '1px solid rgba(0,255,65,0.1)'
                 }}>
-                    {historia.contenido}
+                    {/* Mostramos 'contenido' o 'cuerpo' según lo que venga de la DB */}
+                    {historia.contenido || historia.cuerpo || "Archivo sin contenido legible."}
                 </div>
             </div>
         </div>

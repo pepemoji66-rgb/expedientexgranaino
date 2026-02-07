@@ -23,34 +23,48 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // --- 1. CONFIGURACIÓN DE ALMACENAMIENTO ---
-const dirLugares = path.join(__dirname, '../public/lugares');
-const dirNoticias = path.join(__dirname, 'public/imagenes'); // Carpeta para las fotos de noticias
+const dirLugares = path.join(__dirname, 'public/lugares');
+const dirImagenes = path.join(__dirname, 'public/imagenes'); 
+const dirArchivosUsuarios = path.join(__dirname, 'public/archivos-usuarios'); 
 
+// Crear carpetas si no existen
 if (!fs.existsSync(dirLugares)) { fs.mkdirSync(dirLugares, { recursive: true }); }
-if (!fs.existsSync(dirNoticias)) { fs.mkdirSync(dirNoticias, { recursive: true }); }
+if (!fs.existsSync(dirImagenes)) { fs.mkdirSync(dirImagenes, { recursive: true }); }
+if (!fs.existsSync(dirArchivosUsuarios)) { fs.mkdirSync(dirArchivosUsuarios, { recursive: true }); }
 
-// Multer para Radar (Lugares)
-const storage = multer.diskStorage({
+// Configuración para Lugares (Radar)
+const storageLugares = multer.diskStorage({
     destination: (req, file, cb) => { cb(null, dirLugares); },
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, "_"));
     }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storageLugares });
 
-// Multer para NOTICIAS (Añadido para que no dé error al arrancar)
-const storageNoticias = multer.diskStorage({
-    destination: (req, file, cb) => { cb(null, dirNoticias); },
+// Configuración para Noticias (Oficiales)
+const storageGeneral = multer.diskStorage({
+    destination: (req, file, cb) => { cb(null, dirImagenes); },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + '-noticia-' + file.originalname.replace(/\s/g, "_"));
+        cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, "_"));
     }
 });
-const uploadNoticia = multer({ storage: storageNoticias });
+const uploadGeneral = multer({ storage: storageGeneral });
 
-// --- 2. RECURSOS ESTÁTICOS ---
+// Configuración para Galería de Usuarios (Agentes)
+const storageArchivos = multer.diskStorage({
+    destination: (req, file, cb) => { cb(null, dirArchivosUsuarios); },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, "_"));
+    }
+});
+const uploadArchivos = multer({ storage: storageArchivos });
+
+/// --- 2. RECURSOS ESTÁTICOS ---
 app.use('/imagenes', express.static(path.join(__dirname, 'public/imagenes')));
+app.use('/lugares', express.static(path.join(__dirname, 'public/lugares')));
+app.use('/archivos-usuarios', express.static(path.join(__dirname, 'public/archivos-usuarios')));
 app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
-app.use('/lugares', express.static(dirLugares));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // --- 3. CONEXIÓN BASE DE DATOS (Puerto 3307) ---
 const db = mysql.createPool({ 
@@ -66,34 +80,26 @@ db.getConnection((err, connection) => {
     }
 });
 
-// --- 4. LÓGICA DEL CHAT EN TIEMPO REAL (SOCKET.IO) ---
+// --- 4. LÓGICA DEL CHAT ---
 io.on('connection', (socket) => {
     console.log('📡 Usuario conectado al canal de comunicación');
-
     socket.on('limpiar_chat_servidor', () => {
         db.query("DELETE FROM chat_mensajes", (err) => {
             if (err) return console.error(err);
             io.emit('chat_limpiado');
         });
     });
-
     socket.on('enviar_mensaje', (data) => {
         const { nombre_usuario, mensaje, rol_usuario, tipo, destinatario } = data;
         const sqlInsert = "INSERT INTO chat_mensajes (nombre_usuario, mensaje, rol_usuario, tipo, destinatario) VALUES (?, ?, ?, ?, ?)";
         db.query(sqlInsert, [nombre_usuario, mensaje, rol_usuario, tipo, destinatario], (err, result) => {
             if (err) return console.error("Error guardando mensaje:", err);
-            io.emit('recibir_mensaje', {
-                id: result.insertId,
-                ...data,
-                fecha: new Date()
-            });
-            // Auto-limpieza de seguridad (solo los últimos 100 mensajes)
+            io.emit('recibir_mensaje', { id: result.insertId, ...data, fecha: new Date() });
             db.query("DELETE FROM chat_mensajes WHERE id NOT IN (SELECT id FROM (SELECT id FROM chat_mensajes ORDER BY id DESC LIMIT 100) as temp)", (err) => {
                 if (err) console.error("Error en auto-limpieza:", err);
             });
         });
     });
-
     socket.on('disconnect', () => { console.log('🔌 Usuario desconectado'); });
 });
 
@@ -106,11 +112,9 @@ app.get('/chat-historial', (req, res) => {
 
 // --- 5. RUTA DE LA IA ---
 app.post('/chat-ia', (req, res) => {
-    const { pregunta } = req.body;
     const respuestasBunker = [
         "Hermano, el radar detecta actividad paranormal. Servidores en guardia.",
         "Esa información está en el nivel 4 del búnker.",
-        "Interferencias detectadas. Consulta al resto de agentes.",
         "El Archivero está analizando los pergaminos de Granada...",
         "¡Silencio! Las sombras acechan. Sistema en modo búnker."
     ];
@@ -118,17 +122,18 @@ app.post('/chat-ia', (req, res) => {
     res.json({ respuesta: `(Búnker) ${respuestaLocal}` });
 });
 
-// --- 6. ESTADÍSTICAS (LOS CONTADORES TACTICOS) ---
-app.get('/admin/conteo-total', (req, res) => {
-    const sql = `SELECT 
-            (SELECT COUNT(*) FROM usuarios) as usuarios,
-            (SELECT COUNT(*) FROM videos) as videos,
-            (SELECT COUNT(*) FROM expedientes) as expedientes,
-            (SELECT COUNT(*) FROM lugares) as lugares,
-            (SELECT COUNT(*) FROM noticias) as noticias`;
-    db.query(sql, (err, result) => {
+// --- 6. RELATOS DEL ADMINISTRADOR ---
+app.get('/relatos-admin-publicos', (req, res) => {
+    db.query("SELECT * FROM `relatos administrador` ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
-        res.json(result[0]);
+        res.json(result);
+    });
+});
+
+app.delete('/borrar-relato-admin/:id', (req, res) => {
+    db.query("DELETE FROM `relatos administrador` WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Relato del admin eliminado" });
     });
 });
 
@@ -175,7 +180,7 @@ app.get('/expedientes', (req, res) => {
 });
 
 app.get('/expedientes-publicos', (req, res) => {
-    db.query("SELECT id, usuario_nombre, titulo, contenido FROM expedientes WHERE estado = 'publicado' ORDER BY id DESC", (err, result) => {
+    db.query("SELECT * FROM expedientes WHERE estado = 'publicado' ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
         res.json(result);
     });
@@ -213,7 +218,7 @@ app.get('/lugares', (req, res) => {
 
 app.post('/lugares', upload.single('foto'), (req, res) => {
     const { nombre, descripcion, latitud, longitud, ubicacion } = req.body;
-    const imagen_url = req.file ? `/lugares/${req.file.filename}` : '/lugares/default.jpg';
+    const imagen_url = req.file ? req.file.filename : 'default.jpg';
     const sql = "INSERT INTO lugares (nombre, descripcion, latitud, longitud, imagen_url, ubicacion, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')";
     db.query(sql, [nombre, descripcion, latitud, longitud, imagen_url, ubicacion], (err) => {
         if (err) return res.status(500).send(err);
@@ -272,7 +277,7 @@ app.delete('/borrar-video/:id', (req, res) => {
     });
 });
 
-// --- 11. IMÁGENES Y RELATOS ---
+// --- 11. IMÁGENES (Galería de Usuarios) ---
 app.get('/admin/todas-las-imagenes', (req, res) => {
     db.query("SELECT * FROM imagenes ORDER BY id DESC", (err, results) => {
         if (err) return res.status(500).json(err);
@@ -280,8 +285,32 @@ app.get('/admin/todas-las-imagenes', (req, res) => {
     });
 });
 
-app.put('/aprobar-imagen/:id', (req, res) => {
-    db.query("UPDATE imagenes SET estado = 'publica' WHERE id = ?", [req.params.id], (err) => {
+app.get('/imagenes-publicas', (req, res) => {
+    const sql = "SELECT * FROM imagenes WHERE estado = 'publica' ORDER BY id DESC";
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("❌ Error en radar:", err);
+            return res.status(500).json(err);
+        }
+        res.json(results);
+    });
+});
+
+app.post('/subir-imagen', uploadArchivos.single('imagen'), (req, res) => {
+    const { titulo, agente } = req.body;
+    const url_imagen = req.file ? req.file.filename : null;
+    if (!url_imagen) return res.status(400).json({ error: "Falta el archivo" });
+
+    const sql = "INSERT INTO imagenes (titulo, url_imagen, agente, estado) VALUES (?, ?, ?, 'pendiente')";
+    db.query(sql, [titulo, url_imagen, agente || 'ANÓNIMO'], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: "Imagen enviada al búnker para revisión" });
+    });
+});
+
+app.put(['/admin/aprobar-imagen/:id', '/aprobar-imagen/:id'], (req, res) => {
+    const { id } = req.params;
+    db.query("UPDATE imagenes SET estado = 'publica' WHERE id = ?", [id], (err, result) => {
         if (err) return res.status(500).json(err);
         res.json({ mensaje: "Imagen aprobada" });
     });
@@ -294,7 +323,7 @@ app.delete('/borrar-imagen/:id', (req, res) => {
     });
 });
 
-// --- 12. NOTICIAS (GEOLOCALIZADAS) ---
+// --- 12. NOTICIAS ---
 app.get('/admin/todas-noticias', (req, res) => {
     db.query("SELECT * FROM noticias ORDER BY fecha DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -316,18 +345,12 @@ app.put('/admin/aprobar-noticia/:id', (req, res) => {
     });
 });
 
-// RUTA REPARADA: Usamos imagen_url para coincidir con tu SQL
-app.post('/proponer-noticia', uploadNoticia.single('imagen'), (req, res) => {
+app.post('/proponer-noticia', uploadGeneral.single('imagen'), (req, res) => {
     const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud } = req.body;
     const imagen = req.file ? req.file.filename : null;
-
     const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, imagen_url, estado) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')";
-    
     db.query(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null, imagen], (err, result) => {
-        if (err) {
-            console.error("Fallo en DB:", err);
-            return res.status(500).json({ error: "Fallo en DB" });
-        }
+        if (err) return res.status(500).json({ error: "Fallo en DB" });
         res.json({ mensaje: "Noticia recibida", id: result.insertId });
     });
 });
@@ -343,5 +366,5 @@ app.delete('/borrar-noticia/:id', (req, res) => {
 const PORT = 5000;
 server.listen(PORT, () => {
     console.log(`🚀 BÚNKER OPERATIVO EN PUERTO ${PORT}`);
-    console.log(`📡 SECTOR NOTICIAS Y RADAR ACTIVADOS`);
+    console.log(`📡 SECTOR NOTICIAS, IMÁGENES Y RADAR ACTIVADOS`);
 });

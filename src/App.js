@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import axios from 'axios';
 import Indice from './components/Indice';
 import Hero from './components/Hero';
 import SeccionUsuarios from './components/SeccionUsuarios'; 
@@ -13,6 +14,8 @@ import Lugares from './components/Lugares';
 import Chat from './components/Chat'; 
 import ChatIA from './components/ChatIA';
 import Noticias from './components/Noticias'; 
+// IMPORTANTE: Importamos el nuevo componente
+import ArchivosUsuarios from './components/ArchivosUsuarios'; 
 
 import './App.css';
 import fondoAlhambra from './alhambra.jpg';
@@ -50,9 +53,45 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [userAuth, setUserAuth] = useState(null);
   const [tema, setTema] = useState('#00ff41');
+  
+  // --- RADAR CENTRAL DE CONTADORES ---
+  const [stats, setStats] = useState({
+    usuarios: 0,
+    imagenes: 0,
+    videos: 0,
+    noticias: 0,
+    expedientes: 0,
+    lugares: 0
+  });
 
   const ADMIN_EMAIL = 'expedientexpepe@moreno.com';
+  
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  // Función para cargar contadores (El Radar) actualizado para archivos públicos
+  const cargarContadores = useCallback(async () => {
+    try {
+      const [resU, resI, resV, resN, resE, resL] = await Promise.all([
+        axios.get('http://localhost:5000/usuarios'),
+        axios.get('http://localhost:5000/imagenes-publicas'),
+        axios.get('http://localhost:5000/admin/todos-los-videos'),
+        axios.get('http://localhost:5000/admin/todas-noticias'),
+        axios.get('http://localhost:5000/expedientes'),
+        axios.get('http://localhost:5000/lugares')
+      ]);
+
+      setStats({
+        usuarios: resU.data.length,
+        imagenes: resI.data.length, // Estos son los archivos de usuarios aprobados
+        videos: resV.data.length,
+        noticias: resN.data.length,
+        expedientes: resE.data.length,
+        lugares: resL.data.length
+      });
+    } catch (err) {
+      console.log("Error en el barrido del radar central.");
+    }
+  }, []);
 
   useEffect(() => {
     const sesionGuardada = localStorage.getItem('usuario_sesion');
@@ -64,7 +103,8 @@ function App() {
         localStorage.removeItem('usuario_sesion');
       }
     }
-  }, []);
+    cargarContadores();
+  }, [cargarContadores]);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--color-principal', tema);
@@ -74,6 +114,7 @@ function App() {
     if (datos) {
       localStorage.setItem('usuario_sesion', JSON.stringify(datos));
       setUserAuth(datos);
+      cargarContadores(); 
     }
   };
 
@@ -95,7 +136,6 @@ function App() {
         display: 'flex', flexDirection: 'column'
       }}>
 
-        {/* --- BOTÓN HAMBURGUESA (RESTAURADO CON ESTILOS FIJOS) --- */}
         <button onClick={toggleMenu} style={{
           position: 'fixed', top: '20px', right: '20px', zIndex: '2500',
           background: 'rgba(0,0,0,0.9)', border: '1px solid var(--color-principal)',
@@ -106,7 +146,6 @@ function App() {
           {isOpen ? '✕' : '☰'}
         </button>
 
-        {/* BARRA LATERAL (SIDEBAR) */}
         <nav style={{
           position: 'fixed', top: 0, right: isOpen ? '0' : '-320px',
           width: '300px', height: '100vh', background: 'rgba(0,0,0,0.98)',
@@ -116,20 +155,41 @@ function App() {
           
           <div style={{ flexGrow: 1, paddingTop: '80px', paddingLeft: '30px' }}>
             <ul style={{ listStyle: 'none', padding: 0 }}>
-              {["/", "/galeria", "/videos", "/expedientes", "/lugares", "/noticias", "/chat", "/chat-ia"].map((path, index) => {
-                const labels = ["Inicio", "Galería", "Vídeos", "Expedientes", "Mapa", "Noticias", "Chat Táctico", "Archivero IA"];
-                return (
-                  <li key={path} style={{ marginBottom: '18px' }}>
-                    <Link to={path} onClick={toggleMenu} style={{ 
-                      color: 'white', textDecoration: 'none', textTransform: 'uppercase', 
-                      fontSize: '0.9rem', fontFamily: 'monospace', letterSpacing: '1px'
-                    }}>
-                      [ {labels[index]} ]
-                    </Link>
-                  </li>
-                );
-              })}
+              {/* Rutas actualizadas: Se añade /archivos-usuarios */}
+              {[
+                {path: "/", label: "Inicio"},
+                {path: "/galeria", label: "Galería"},
+                {path: "/archivos-usuarios", label: "Archivos de Agentes"}, // <-- LA NUEVA PESTAÑA
+                {path: "/videos", label: "Vídeos"},
+                {path: "/expedientes", label: "Expedientes"},
+                {path: "/lugares", label: "Mapa"},
+                {path: "/noticias", label: "Noticias"},
+                {path: "/chat", label: "Chat Táctico"},
+                {path: "/chat-ia", label: "Archivero IA"}
+              ].map((route) => (
+                <li key={route.path} style={{ marginBottom: '18px' }}>
+                  <Link to={route.path} onClick={toggleMenu} style={{ 
+                    color: 'white', textDecoration: 'none', textTransform: 'uppercase', 
+                    fontSize: '0.9rem', fontFamily: 'monospace', letterSpacing: '1px'
+                  }}>
+                    [ {route.label} ]
+                  </Link>
+                </li>
+              ))}
               
+              {(!userAuth || (userAuth.email !== ADMIN_EMAIL && userAuth.rol !== 'admin')) && (
+                <li style={{ marginTop: '25px', paddingRight: '30px' }}>
+                  <Link to="/acceso" onClick={toggleMenu} style={{
+                    color: 'white', border: '1px solid white',
+                    padding: '12px', display: 'block', textAlign: 'center',
+                    background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textDecoration: 'none',
+                    fontSize: '0.8rem', fontFamily: 'monospace'
+                  }}>
+                    {userAuth ? '👤 MI PERFIL AGENTE' : '🔑 ACCESO AGENTES'}
+                  </Link>
+                </li>
+              )}
+
               {userAuth && (userAuth.email === ADMIN_EMAIL || userAuth.rol === 'admin') && (
                 <li style={{ marginTop: '25px', paddingRight: '30px' }}>
                   <Link to="/panel-mando" onClick={toggleMenu} style={{
@@ -167,13 +227,22 @@ function App() {
 
         <main style={{ flex: 1 }}>
           <Routes>
-            <Route path="/" element={<div className="home-layout"><Indice userAuth={userAuth} /><Hero userAuth={userAuth} /></div>} />
+            <Route path="/" element={
+              <div className="home-layout">
+                <Indice userAuth={userAuth} stats={stats} /> 
+                <Hero userAuth={userAuth} />
+              </div>
+            } />
             <Route path="/acceso" element={<SeccionUsuarios setAuth={actualizarAuth} />} />
             <Route path="/panel-mando" element={<PanelAdmin />} />
             <Route path="/expedientes" element={<Expedientes userAuth={userAuth} />} /> 
             <Route path="/lugares" element={<Lugares />} />
             <Route path="/videos" element={<Videos userAuth={userAuth} />} />
             <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
+            
+            {/* NUEVA RUTA CONECTADA */}
+            <Route path="/archivos-usuarios" element={<ArchivosUsuarios />} />
+            
             <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
             <Route path="/chat" element={<Chat usuarioActivo={userAuth} />} />
             <Route path="/chat-ia" element={<ChatIA />} />

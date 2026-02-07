@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './galeria.css';
+import Forms from './Forms'; 
 
 const Galeria = ({ userAuth }) => {
     const [imagenes, setImagenes] = useState([]);
@@ -10,7 +11,7 @@ const Galeria = ({ userAuth }) => {
     const navigate = useNavigate();
 
     const [nuevoTitulo, setNuevoTitulo] = useState('');
-    const [nuevaUrl, setNuevaUrl] = useState('');
+    const [archivoSeleccionado, setArchivoSeleccionado] = useState(null); 
     const [nuevaDesc, setNuevaDesc] = useState('');
 
     const imagenesPorPagina = 6;
@@ -24,7 +25,7 @@ const Galeria = ({ userAuth }) => {
                 : 'http://localhost:5000/imagenes-publicas';
 
             const res = await axios.get(endpoint);
-            setImagenes(res.data);
+            setImagenes(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error("❌ Error cargando el archivo:", err);
             setImagenes([]);
@@ -36,28 +37,44 @@ const Galeria = ({ userAuth }) => {
     }, [cargarImagenes]);
 
     const subirImagen = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault(); 
+        
         if (!userAuth) {
             alert("Acceso denegado. Registre sus credenciales.");
             return;
         }
 
+        if (!archivoSeleccionado) {
+            alert("Hermano, selecciona un archivo visual para el búnker.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('titulo', nuevoTitulo);
+        formData.append('imagen', archivoSeleccionado); 
+        formData.append('agente', userAuth.nombre || 'Agente Anónimo');
+        formData.append('descripcion', nuevaDesc); 
+
         try {
-            await axios.post('http://localhost:5000/subir-imagen', {
-                titulo: nuevoTitulo,
-                url: nuevaUrl,
-                descripcion: nuevaDesc,
-                agente: userAuth.nombre || 'Agente Anónimo'
+            await axios.post('http://localhost:5000/subir-imagen', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("🚀 EVIDENCIA ENVIADA.");
-            setNuevoTitulo(''); setNuevaUrl(''); setNuevaDesc('');
+            
+            alert("🚀 EVIDENCIA ENVIADA AL ARCHIVO.");
+            
+            // Limpieza de estados
+            setNuevoTitulo(''); 
+            setArchivoSeleccionado(null); 
+            setNuevaDesc('');
+            
+            // Recarga crucial para ver la nueva foto
             cargarImagenes();
         } catch (err) {
+            console.error("Error en la subida:", err);
             alert("❌ FALLO EN LA CONEXIÓN.");
         }
     };
 
-    // --- FUNCIÓN PARA ENVIAR DATOS AL MAPA ---
     const verEnMapa = (img) => {
         const payload = {
             id: img.id,
@@ -84,16 +101,34 @@ const Galeria = ({ userAuth }) => {
             </header>
 
             {userAuth ? (
-                <section className="form-subida-img" style={{ maxWidth: '600px', margin: '0 auto 40px' }}>
-                    <h2 className="titulo-form">REGISTRAR HALLAZGO</h2>
-                    <form onSubmit={subirImagen}>
-                        <div className="input-group-galeria">
-                            <input type="text" placeholder="TÍTULO..." value={nuevoTitulo} onChange={e => setNuevoTitulo(e.target.value)} required />
-                            <input type="text" placeholder="ARCHIVO (ej: fantasma.jpg)..." value={nuevaUrl} onChange={e => setNuevaUrl(e.target.value)} required />
-                        </div>
-                        <textarea placeholder="DESCRIPCIÓN DE LA EVIDENCIA..." value={nuevaDesc} onChange={e => setNuevaDesc(e.target.value)} required></textarea>
-                        <button type="submit" className="btn-neon-img">SUBIR AL ARCHIVO</button>
-                    </form>
+                <section className="contenedor-formulario-fijo">
+                    <Forms 
+                        title="REGISTRAR HALLAZGO"
+                        subtitle="Aportar evidencia gráfica al sector"
+                        onSubmit={subirImagen}
+                        onClear={() => { setNuevoTitulo(''); setArchivoSeleccionado(null); setNuevaDesc(''); }}
+                    >
+                        <input 
+                            type="text" 
+                            placeholder="TÍTULO DE LA EVIDENCIA..." 
+                            value={nuevoTitulo} 
+                            onChange={e => setNuevoTitulo(e.target.value)} 
+                            required 
+                        />
+                        <input 
+                            type="file" 
+                            accept="image/*"
+                            className="input-file-bunker"
+                            onChange={e => setArchivoSeleccionado(e.target.files[0])} 
+                            required 
+                        />
+                        <textarea 
+                            placeholder="DESCRIPCIÓN DE LA EVIDENCIA..." 
+                            value={nuevaDesc} 
+                            onChange={e => setNuevaDesc(e.target.value)} 
+                            required
+                        ></textarea>
+                    </Forms>
                 </section>
             ) : (
                 <div style={{ textAlign: 'center', marginBottom: '30px', color: '#888' }}>
@@ -107,13 +142,13 @@ const Galeria = ({ userAuth }) => {
                         <div key={img.id} className="card-imagen" onClick={() => setFotoExpandida(img)}>
                             <div className="contenedor-img">
                                 <img
-                                    /* AJUSTE: Apuntamos a la carpeta de imágenes del servidor */
-                                    src={`http://localhost:5000/imagenes/${img.url_imagen}`}
+                                    src={`/imagenes/${img.url_imagen}`}
                                     alt={img.titulo}
                                     onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = 'https://via.placeholder.com/400x300?text=ARCHIVO+NO+ENCONTRADO';
-                                    }}
+                                        // Si no está en public, intentamos pedirla al servidor directamente
+                                        e.target.onerror = null; 
+// Cambiamos la ruta para que apunte a la carpeta de archivos de usuarios
+                                e.target.src = `http://localhost:5000/archivos-usuarios/${img.url_imagen}`;                                    }}
                                 />
                                 {img.estado === 'pendiente' && <span className="badge-pendiente">EN REVISIÓN</span>}
                             </div>
@@ -130,7 +165,11 @@ const Galeria = ({ userAuth }) => {
 
             <div className="paginacion">
                 {Array.from({ length: Math.ceil(imagenes.length / imagenesPorPagina) }, (_, i) => (
-                    <button key={i} onClick={() => setPaginaActual(i + 1)} className={paginaActual === i + 1 ? 'active' : ''}>
+                    <button 
+                        key={i} 
+                        onClick={() => setPaginaActual(i + 1)} 
+                        className={paginaActual === i + 1 ? 'active' : ''}
+                    >
                         {i + 1}
                     </button>
                 ))}
@@ -140,27 +179,22 @@ const Galeria = ({ userAuth }) => {
                 <div className="modal-galeria-abierta" onClick={() => setFotoExpandida(null)}>
                     <div className="contenido-foto-grande" onClick={e => e.stopPropagation()}>
                         <button className="cerrar-modal" onClick={() => setFotoExpandida(null)}>×</button>
-                        
                         <img 
-                            /* AJUSTE: Apuntamos a la carpeta de imágenes del servidor */
-                            src={`http://localhost:5000/imagenes/${fotoExpandida.url_imagen}`} 
+                            src={`/imagenes/${fotoExpandida.url_imagen}`} 
                             alt={fotoExpandida.titulo} 
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://via.placeholder.com/600x400?text=ERROR+AL+CARGAR';
+                                e.target.src = `http://localhost:5000/imagenes/${fotoExpandida.url_imagen}`;
                             }}
                         />
-                        
                         <div className="texto-foto-grande">
-                            <h2 className="neon-text-blue">{fotoExpandida.titulo.toUpperCase()}</h2>
+                            <h2 className="neon-text-blue">{fotoExpandida.titulo?.toUpperCase()}</h2>
                             <p className="desc-galeria">{fotoExpandida.descripcion}</p>
-                            
                             <div className="footer-modal-img">
-                                <span className="fecha-modal">📅 {new Date(fotoExpandida.fecha).toLocaleDateString()}</span>
-                                <button 
-                                    className="btn-ver-mapa"
-                                    onClick={() => verEnMapa(fotoExpandida)}
-                                >
+                                <span className="fecha-modal">
+                                    📅 {fotoExpandida.fecha ? new Date(fotoExpandida.fecha).toLocaleDateString() : 'Fecha desconocida'}
+                                </span>
+                                <button className="btn-ver-mapa" onClick={() => verEnMapa(fotoExpandida)}>
                                     📍 VER POSICIÓN EN RADAR
                                 </button>
                             </div>

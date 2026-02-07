@@ -1,0 +1,109 @@
+/* archivosusuarios.css */
+.archivos-page {
+    padding: 80px 20px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: white;
+    font-family: 'monospace';
+}
+
+.titulo-neon {
+    text-align: center;
+    color: var(--color-principal);
+    text-shadow: 0 0 10px var(--color-principal);
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+}
+
+.archivos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.archivo-card {
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.archivo-card:hover {
+    border-color: var(--color-principal);
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 255, 65, 0.2);
+}
+
+.archivo-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    filter: grayscale(40%);
+    transition: 0.3s;
+}
+
+.archivo-card:hover img {
+    filter: grayscale(0%);
+}
+
+.archivo-card .info {
+    padding: 15px;
+    background: linear-gradient(to top, black, transparent);
+}
+
+.archivo-card h4 {
+    margin: 0 0 5px;
+    color: var(--color-principal);
+    font-size: 1.1rem;
+}
+
+.archivo-card p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* Paginación estilo Terminal */
+.paginacion {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.paginacion button {
+    background: black;
+    color: white;
+    border: 1px solid #444;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: 'monospace';
+    transition: 0.3s;
+}
+
+.paginacion button:hover {
+    border-color: var(--color-principal);
+    color: var(--color-principal);
+}
+
+.paginacion button.active {
+    background: var(--color-principal);
+    color: black;
+    border-color: var(--color-principal);
+    box-shadow: 0 0 10px var(--color-principal);
+}
+
+/* Animación de entrada */
+.archivos-page {
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
