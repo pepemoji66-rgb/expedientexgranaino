@@ -232,15 +232,35 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* NOTICIAS */}
-                                {tab === 'noticias' && (
-                                    <>
-                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
-                                        <td>{item.titulo}</td>
-                                        <td>{item.ubicacion}</td>
-                                        <td><button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'noticia')}>BORRAR</button></td>
-                                    </>
-                                )}
+                               {/* NOTICIAS */}
+{tab === 'noticias' && (
+    <>
+        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>
+            {item.estado?.toUpperCase()}
+        </td>
+        <td>{item.titulo}</td>
+        <td>{item.ubicacion}</td>
+        <td>
+            <div style={{ display: 'flex', gap: '5px' }}>
+                {item.estado === 'pendiente' && (
+                    <button 
+                        className="btn-approve" 
+                        onClick={() => gestionar(item.id, 'aprobar', 'noticia')}
+                        style={{ backgroundColor: '#28a745', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                        APROBAR
+                    </button>
+                )}
+                <button 
+                    className="btn-del" 
+                    onClick={() => gestionar(item.id, 'borrar', 'noticia')}
+                >
+                    BORRAR
+                </button>
+            </div>
+        </td>
+    </>
+)}
 
                                 {/* VIDEOS */}
                                 {tab === 'videos' && (

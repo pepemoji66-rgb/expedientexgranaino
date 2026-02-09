@@ -41,7 +41,6 @@ const Noticias = ({ userAuth }) => {
         obtenerNoticias();
     }, [obtenerNoticias, userAuth]);
 
-    // --- CÁLCULOS DE PAGINACIÓN ---
     const indiceUltimoItem = paginaActual * noticiasPorPagina;
     const indicePrimerItem = indiceUltimoItem - noticiasPorPagina;
     const noticiasPaginadas = noticias.slice(indicePrimerItem, indiceUltimoItem);
@@ -52,7 +51,6 @@ const Noticias = ({ userAuth }) => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // --- FUNCIONES DE LÓGICA ORIGINALES ---
     const buscarDireccion = async (texto) => {
         setNuevaNoticia({ ...nuevaNoticia, ubicacion: texto });
         if (texto.length > 4) {
@@ -75,13 +73,14 @@ const Noticias = ({ userAuth }) => {
     };
 
     const verEnMapa = (item) => {
-        if (!item.latitud || !item.longitud) {
-            navigate('/lugares', { state: { buscarUbicacion: item.ubicacion } });
-        } else {
-            navigate('/lugares', { 
-                state: { lat: parseFloat(item.latitud), lng: parseFloat(item.longitud), nombre: item.titulo } 
-            });
-        }
+        const payload = {
+            id: item.id,
+            latitud: item.latitud,
+            longitud: item.longitud,
+            tipo: 'noticia'
+        };
+        localStorage.setItem('lugar_a_resaltar', JSON.stringify(payload));
+        navigate('/lugares');
     };
 
     const enviarPropuesta = async (e) => {
@@ -124,33 +123,38 @@ const Noticias = ({ userAuth }) => {
                 <div className="linea-decorativa"></div>
             </header>
             
-            {/* GRID DE NOTICIAS: Solo renderiza 1 vez */}
             <div className="noticias-grid">
-                {noticiasPaginadas.map((item) => (
-                    <div key={item.id} className="card-noticia fade-in">
-                        {item.imagen && (
-                            <div className="noticia-img-container">
-                                <img src={`http://localhost:5000/imagenes/${item.imagen}`} alt={item.titulo} className="noticia-miniatura" />
+                {noticiasPaginadas.map((item) => {
+                    const nombreImagen = item.imagen_url || item.imagen;
+                    return (
+                        <div key={item.id} className="card-noticia fade-in">
+                            {nombreImagen && (
+                                <div className="noticia-img-container">
+                                    <img 
+                                        src={`http://localhost:5000/imagenes/${nombreImagen}`} 
+                                        alt={item.titulo} 
+                                        className="noticia-miniatura" 
+                                    />
+                                </div>
+                            )}
+                            <div className="card-header">
+                                <span className={`alerta-tag ${item.nivel_alerta === 'CRÍTICO' ? 'alerta-critica' : ''}`}>
+                                    [{item.nivel_alerta.toUpperCase()}]
+                                </span>
+                                <span className="fecha-noticia">{new Date(item.fecha).toLocaleDateString()}</span>
                             </div>
-                        )}
-                        <div className="card-header">
-                            <span className={`alerta-tag ${item.nivel_alerta === 'CRÍTICO' ? 'alerta-critica' : ''}`}>
-                                [{item.nivel_alerta.toUpperCase()}]
-                            </span>
-                            <span className="fecha-noticia">{new Date(item.fecha).toLocaleDateString()}</span>
+                            <h2 className="noticia-titulo">{item.titulo}</h2>
+                            {item.ubicacion && <div className="noticia-loc-badge">📍 {item.ubicacion}</div>}
+                            <p className="noticia-resumen">{item.cuerpo.substring(0, 100)}...</p>
+                            <div className="noticia-footer-btns">
+                                <button className="btn-leer-noticia" onClick={() => setNoticiaSeleccionada(item)}>👁️ INFORME</button>
+                                {item.ubicacion && <button className="btn-ver-mapa" onClick={() => verEnMapa(item)}>📍 MAPA</button>}
+                            </div>
                         </div>
-                        <h2 className="noticia-titulo">{item.titulo}</h2>
-                        {item.ubicacion && <div className="noticia-loc-badge">📍 {item.ubicacion}</div>}
-                        <p className="noticia-resumen">{item.cuerpo.substring(0, 100)}...</p>
-                        <div className="noticia-footer-btns">
-                            <button className="btn-leer-noticia" onClick={() => setNoticiaSeleccionada(item)}>👁️ INFORME</button>
-                            {item.ubicacion && <button className="btn-ver-mapa" onClick={() => verEnMapa(item)}>📍 MAPA</button>}
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
-            {/* BOTONES PAGINACIÓN */}
             {totalPaginas > 1 && (
                 <div className="paginacion-bunker" style={{ textAlign: 'center', margin: '30px 0' }}>
                     <button disabled={paginaActual === 1} onClick={() => cambiarPagina(paginaActual - 1)}>ATRÁS</button>
@@ -159,7 +163,6 @@ const Noticias = ({ userAuth }) => {
                 </div>
             )}
 
-            {/* FORMULARIO RECUPERADO */}
             {userAuth && (
                 <div className="contenedor-form-noticia" style={{ marginTop: '50px' }}>
                     <Forms 
@@ -168,35 +171,36 @@ const Noticias = ({ userAuth }) => {
                         onClear={limpiarFormulario}
                     >
                         <input type="text" placeholder="TITULAR" value={nuevaNoticia.titulo} onChange={e => setNuevaNoticia({...nuevaNoticia, titulo: e.target.value})} required />
-                        
                         <div style={{ position: 'relative' }}>
                             <input type="text" placeholder="UBICACIÓN" value={nuevaNoticia.ubicacion} onChange={e => buscarDireccion(e.target.value)} required />
                             {buscandoLoc && <span style={{ position: 'absolute', right: '10px', top: '10px' }}>🛰️</span>}
                         </div>
-
                         <select value={nuevaNoticia.nivel_alerta} onChange={e => setNuevaNoticia({...nuevaNoticia, nivel_alerta: e.target.value})}>
                             <option value="Bajo">Nivel: BAJO</option>
                             <option value="Medio">Nivel: MEDIO</option>
                             <option value="Alto">Nivel: ALTO</option>
                             <option value="CRÍTICO">Nivel: CRÍTICO</option>
                         </select>
-
                         <div className="input-file-bunker" style={{ border: '1px solid #00ff41', padding: '10px', margin: '10px 0' }}>
                             <label style={{ color: '#00ff41', fontSize: '12px', display: 'block' }}>📷 IMAGEN:</label>
                             <input id="input-imagen-noticia" type="file" accept="image/*" onChange={e => setImagen(e.target.files[0])} />
                         </div>
-
                         <textarea placeholder="DESCRIPCIÓN..." value={nuevaNoticia.cuerpo} onChange={e => setNuevaNoticia({...nuevaNoticia, cuerpo: e.target.value})} required />
                     </Forms>
                 </div>
             )}
 
-            {/* MODAL */}
             {noticiaSeleccionada && (
                 <div className="modal-noticia-overlay" onClick={() => setNoticiaSeleccionada(null)}>
                     <div className="modal-noticia-content" onClick={e => e.stopPropagation()}>
                         <h2>{noticiaSeleccionada.titulo}</h2>
-                        {noticiaSeleccionada.imagen && <img src={`http://localhost:5000/imagenes/${noticiaSeleccionada.imagen}`} alt="Evidencia" style={{ width: '100%' }} />}
+                        {(noticiaSeleccionada.imagen_url || noticiaSeleccionada.imagen) && (
+                            <img 
+                                src={`http://localhost:5000/imagenes/${noticiaSeleccionada.imagen_url || noticiaSeleccionada.imagen}`} 
+                                alt="Evidencia" 
+                                style={{ width: '100%', borderRadius: '8px' }} 
+                            />
+                        )}
                         <div className="modal-cuerpo" style={{ whiteSpace: 'pre-wrap', marginTop: '15px' }}>{noticiaSeleccionada.cuerpo}</div>
                         <button className="btn-cerrar-archivo" onClick={() => setNoticiaSeleccionada(null)}>CERRAR</button>
                     </div>

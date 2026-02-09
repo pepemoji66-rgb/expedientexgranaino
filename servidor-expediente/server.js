@@ -21,52 +21,51 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true })); // Para procesar formularios complejos
 
-// --- 1. CONFIGURACIÓN DE ALMACENAMIENTO ---
+// --- 1. CONFIGURACIÓN DE ALMACENAMIENTO (RUTAS ABSOLUTAS) ---
 const dirLugares = path.join(__dirname, 'public/lugares');
 const dirImagenes = path.join(__dirname, 'public/imagenes'); 
 const dirArchivosUsuarios = path.join(__dirname, 'public/archivos-usuarios'); 
 
-// Crear carpetas si no existen
-if (!fs.existsSync(dirLugares)) { fs.mkdirSync(dirLugares, { recursive: true }); }
-if (!fs.existsSync(dirImagenes)) { fs.mkdirSync(dirImagenes, { recursive: true }); }
-if (!fs.existsSync(dirArchivosUsuarios)) { fs.mkdirSync(dirArchivosUsuarios, { recursive: true }); }
+// Asegurar que las carpetas existan en el Backend
+[dirLugares, dirImagenes, dirArchivosUsuarios].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+        console.log(`📁 Carpeta creada: ${dir}`);
+    }
+});
 
-// Configuración para Lugares (Radar)
+const safeFilename = (file) => Date.now() + '-' + file.originalname.replace(/\s/g, "_");
+
+// Configuraciones de Multer
 const storageLugares = multer.diskStorage({
     destination: (req, file, cb) => { cb(null, dirLugares); },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, "_"));
-    }
+    filename: (req, file, cb) => { cb(null, safeFilename(file)); }
 });
 const upload = multer({ storage: storageLugares });
 
-// Configuración para Noticias (Oficiales)
 const storageGeneral = multer.diskStorage({
     destination: (req, file, cb) => { cb(null, dirImagenes); },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, "_"));
-    }
+    filename: (req, file, cb) => { cb(null, safeFilename(file)); }
 });
 const uploadGeneral = multer({ storage: storageGeneral });
 
-// Configuración para Galería de Usuarios (Agentes)
 const storageArchivos = multer.diskStorage({
     destination: (req, file, cb) => { cb(null, dirArchivosUsuarios); },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, "_"));
-    }
+    filename: (req, file, cb) => { cb(null, safeFilename(file)); }
 });
 const uploadArchivos = multer({ storage: storageArchivos });
 
-/// --- 2. RECURSOS ESTÁTICOS ---
-app.use('/imagenes', express.static(path.join(__dirname, 'public/imagenes')));
-app.use('/lugares', express.static(path.join(__dirname, 'public/lugares')));
-app.use('/archivos-usuarios', express.static(path.join(__dirname, 'public/archivos-usuarios')));
+// --- 2. RECURSOS ESTÁTICOS (LAS PUERTAS DEL BÚNKER) ---
+// Importante: No tocar estas rutas, son las que React usa para pedir las fotos
+app.use('/imagenes', express.static(dirImagenes));
+app.use('/archivos-usuarios', express.static(dirArchivosUsuarios));
+app.use('/lugares', express.static(dirLugares));
 app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- 3. CONEXIÓN BASE DE DATOS (Puerto 3307) ---
+// --- 3. CONEXIÓN BASE DE DATOS ---
 const db = mysql.createPool({ 
     host: 'localhost', user: 'root', password: '', database: 'expedientex', port: 3307,
     waitForConnections: true, connectionLimit: 10, queueLimit: 0
@@ -82,7 +81,6 @@ db.getConnection((err, connection) => {
 
 // --- 4. LÓGICA DEL CHAT ---
 io.on('connection', (socket) => {
-    console.log('📡 Usuario conectado al canal de comunicación');
     socket.on('limpiar_chat_servidor', () => {
         db.query("DELETE FROM chat_mensajes", (err) => {
             if (err) return console.error(err);
@@ -95,12 +93,8 @@ io.on('connection', (socket) => {
         db.query(sqlInsert, [nombre_usuario, mensaje, rol_usuario, tipo, destinatario], (err, result) => {
             if (err) return console.error("Error guardando mensaje:", err);
             io.emit('recibir_mensaje', { id: result.insertId, ...data, fecha: new Date() });
-            db.query("DELETE FROM chat_mensajes WHERE id NOT IN (SELECT id FROM (SELECT id FROM chat_mensajes ORDER BY id DESC LIMIT 100) as temp)", (err) => {
-                if (err) console.error("Error en auto-limpieza:", err);
-            });
         });
     });
-    socket.on('disconnect', () => { console.log('🔌 Usuario desconectado'); });
 });
 
 app.get('/chat-historial', (req, res) => {
@@ -112,14 +106,7 @@ app.get('/chat-historial', (req, res) => {
 
 // --- 5. RUTA DE LA IA ---
 app.post('/chat-ia', (req, res) => {
-    const respuestasBunker = [
-        "Hermano, el radar detecta actividad paranormal. Servidores en guardia.",
-        "Esa información está en el nivel 4 del búnker.",
-        "El Archivero está analizando los pergaminos de Granada...",
-        "¡Silencio! Las sombras acechan. Sistema en modo búnker."
-    ];
-    const respuestaLocal = respuestasBunker[Math.floor(Math.random() * respuestasBunker.length)];
-    res.json({ respuesta: `(Búnker) ${respuestaLocal}` });
+    res.json({ respuesta: `(Búnker) El Archivero está analizando los pergaminos...` });
 });
 
 // --- 6. RELATOS DEL ADMINISTRADOR ---
@@ -133,7 +120,7 @@ app.get('/relatos-admin-publicos', (req, res) => {
 app.delete('/borrar-relato-admin/:id', (req, res) => {
     db.query("DELETE FROM `relatos administrador` WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Relato del admin eliminado" });
+        res.json({ mensaje: "Relato borrado" });
     });
 });
 
@@ -190,21 +177,21 @@ app.post('/subir-expediente', (req, res) => {
     const { titulo, contenido, usuario_nombre } = req.body;
     db.query("INSERT INTO expedientes (titulo, contenido, usuario_nombre, estado) VALUES (?, ?, ?, 'pendiente')", [titulo, contenido, usuario_nombre], (err) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Expediente enviado" });
+        res.json({ mensaje: "Enviado" });
     });
 });
 
 app.put('/aprobar-expediente/:id', (req, res) => {
     db.query("UPDATE expedientes SET estado = 'publicado' WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Expediente publicado" });
+        res.json({ mensaje: "Publicado" });
     });
 });
 
 app.delete('/expedientes/:id', (req, res) => {
     db.query("DELETE FROM expedientes WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Expediente eliminado" });
+        res.json({ mensaje: "Eliminado" });
     });
 });
 
@@ -216,11 +203,12 @@ app.get('/lugares', (req, res) => {
     });
 });
 
+// Cambiado 'foto' para coincidir con el radar
 app.post('/lugares', upload.single('foto'), (req, res) => {
     const { nombre, descripcion, latitud, longitud, ubicacion } = req.body;
     const imagen_url = req.file ? req.file.filename : 'default.jpg';
-    const sql = "INSERT INTO lugares (nombre, descripcion, latitud, longitud, imagen_url, ubicacion, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')";
-    db.query(sql, [nombre, descripcion, latitud, longitud, imagen_url, ubicacion], (err) => {
+    db.query("INSERT INTO lugares (nombre, descripcion, latitud, longitud, imagen_url, ubicacion, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')", 
+    [nombre, descripcion, latitud, longitud, imagen_url, ubicacion], (err) => {
         if (err) return res.status(500).send(err);
         res.send("📍 Reporte recibido.");
     });
@@ -277,7 +265,7 @@ app.delete('/borrar-video/:id', (req, res) => {
     });
 });
 
-// --- 11. IMÁGENES (Galería de Usuarios) ---
+// --- 11. IMÁGENES (GALERÍA AGENTES / ARCHIVOS) ---
 app.get('/admin/todas-las-imagenes', (req, res) => {
     db.query("SELECT * FROM imagenes ORDER BY id DESC", (err, results) => {
         if (err) return res.status(500).json(err);
@@ -286,31 +274,28 @@ app.get('/admin/todas-las-imagenes', (req, res) => {
 });
 
 app.get('/imagenes-publicas', (req, res) => {
-    const sql = "SELECT * FROM imagenes WHERE estado = 'publica' ORDER BY id DESC";
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error("❌ Error en radar:", err);
-            return res.status(500).json(err);
-        }
+    db.query("SELECT * FROM imagenes WHERE estado = 'publica' ORDER BY id DESC", (err, results) => {
+        if (err) return res.status(500).json(err);
         res.json(results);
     });
 });
 
+// CORREGIDO: Aseguramos que el campo sea 'imagen' para el formulario de hallazgos
 app.post('/subir-imagen', uploadArchivos.single('imagen'), (req, res) => {
-    const { titulo, agente } = req.body;
+    const { titulo, agente, descripcion, latitud, longitud } = req.body;
     const url_imagen = req.file ? req.file.filename : null;
-    if (!url_imagen) return res.status(400).json({ error: "Falta el archivo" });
+    
+    if (!url_imagen) return res.status(400).json({ error: "Falta el archivo visual" });
 
-    const sql = "INSERT INTO imagenes (titulo, url_imagen, agente, estado) VALUES (?, ?, ?, 'pendiente')";
-    db.query(sql, [titulo, url_imagen, agente || 'ANÓNIMO'], (err) => {
+    const sql = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')";
+    db.query(sql, [titulo, url_imagen, agente || 'ANÓNIMO', descripcion || '', latitud || 0, longitud || 0], (err) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Imagen enviada al búnker para revisión" });
+        res.json({ mensaje: "Imagen enviada", archivo: url_imagen });
     });
 });
 
 app.put(['/admin/aprobar-imagen/:id', '/aprobar-imagen/:id'], (req, res) => {
-    const { id } = req.params;
-    db.query("UPDATE imagenes SET estado = 'publica' WHERE id = ?", [id], (err, result) => {
+    db.query("UPDATE imagenes SET estado = 'publica' WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
         res.json({ mensaje: "Imagen aprobada" });
     });
@@ -345,12 +330,17 @@ app.put('/admin/aprobar-noticia/:id', (req, res) => {
     });
 });
 
+// CORREGIDO: Usamos uploadGeneral para las noticias
 app.post('/proponer-noticia', uploadGeneral.single('imagen'), (req, res) => {
     const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud } = req.body;
-    const imagen = req.file ? req.file.filename : null;
+    const imagen_url = req.file ? req.file.filename : null;
+    
     const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, imagen_url, estado) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')";
-    db.query(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null, imagen], (err, result) => {
-        if (err) return res.status(500).json({ error: "Fallo en DB" });
+    db.query(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null, imagen_url], (err, result) => {
+        if (err) {
+            console.error("Error en DB Noticias:", err);
+            return res.status(500).json({ error: "Fallo en DB" });
+        }
         res.json({ mensaje: "Noticia recibida", id: result.insertId });
     });
 });
@@ -365,6 +355,6 @@ app.delete('/borrar-noticia/:id', (req, res) => {
 // --- MOTOR ---
 const PORT = 5000;
 server.listen(PORT, () => {
-    console.log(`🚀 BÚNKER OPERATIVO EN PUERTO ${PORT}`);
-    console.log(`📡 SECTOR NOTICIAS, IMÁGENES Y RADAR ACTIVADOS`);
+    console.log(`🚀 BÚNKER 100% OPERATIVO EN PUERTO ${PORT}`);
+    console.log(`📍 Rutas estáticas activas para: /imagenes, /archivos-usuarios, /lugares`);
 });

@@ -5,7 +5,13 @@ import './galeria.css';
 import Forms from './Forms'; 
 
 const Galeria = ({ userAuth }) => {
-    const [imagenes, setImagenes] = useState([]);
+    const [registros, setRegistros] = useState({
+        'lugares': [],
+        'imagenes': [],
+        'archivos-usuarios': []
+    });
+    
+    const [pestanaActiva, setPestanaActiva] = useState('lugares'); 
     const [paginaActual, setPaginaActual] = useState(1);
     const [fotoExpandida, setFotoExpandida] = useState(null);
     const navigate = useNavigate();
@@ -16,19 +22,43 @@ const Galeria = ({ userAuth }) => {
 
     const imagenesPorPagina = 6;
 
+    // --- CONFIGURACIÓN DE RUTAS (El corazón del cambio) ---
+    const config = {
+        'lugares': { 
+            urlBase: 'http://localhost:5000/lugares/', // Apuntamos al puerto 5000
+            columna: 'imagen_url',
+            etiqueta: 'SECTOR LUGARES'
+        },
+        'imagenes': { 
+            urlBase: 'http://localhost:5000/imagenes/', 
+            columna: 'imagen_url', 
+            etiqueta: 'ALERTA NOTICIAS'
+        },
+        'archivos-usuarios': { 
+            urlBase: 'http://localhost:5000/archivos-usuarios/', 
+            columna: 'url_imagen', 
+            etiqueta: 'EVIDENCIA AGENTE'
+        }
+    };
+
     const cargarImagenes = useCallback(async () => {
         try {
             const isAdmin = userAuth && (userAuth.rol === 'admin' || userAuth.email === 'expedientexpepe@moreno.com');
             
-            const endpoint = isAdmin
-                ? 'http://localhost:5000/admin/todas-las-imagenes'
-                : 'http://localhost:5000/imagenes-publicas';
+            const [resL, resN, resA] = await Promise.all([
+                axios.get('http://localhost:5000/lugares'),
+                axios.get('http://localhost:5000/admin/todas-noticias'),
+                axios.get(isAdmin ? 'http://localhost:5000/admin/todas-las-imagenes' : 'http://localhost:5000/imagenes-publicas')
+            ]);
 
-            const res = await axios.get(endpoint);
-            setImagenes(Array.isArray(res.data) ? res.data : []);
+            setRegistros({
+                'lugares': Array.isArray(resL.data) ? resL.data : [],
+                'imagenes': Array.isArray(resN.data) ? resN.data : [],
+                'archivos-usuarios': Array.isArray(resA.data) ? resA.data : []
+            });
         } catch (err) {
-            console.error("❌ Error cargando el archivo:", err);
-            setImagenes([]);
+            console.error("❌ Error cargando el búnker:", err);
+            setRegistros({ 'lugares': [], 'imagenes': [], 'archivos-usuarios': [] });
         }
     }, [userAuth]);
 
@@ -38,16 +68,8 @@ const Galeria = ({ userAuth }) => {
 
     const subirImagen = async (e) => {
         if (e) e.preventDefault(); 
-        
-        if (!userAuth) {
-            alert("Acceso denegado. Registre sus credenciales.");
-            return;
-        }
-
-        if (!archivoSeleccionado) {
-            alert("Hermano, selecciona un archivo visual para el búnker.");
-            return;
-        }
+        if (!userAuth) { alert("Acceso denegado."); return; }
+        if (!archivoSeleccionado) { alert("Hermano, selecciona un archivo."); return; }
 
         const formData = new FormData();
         formData.append('titulo', nuevoTitulo);
@@ -59,15 +81,8 @@ const Galeria = ({ userAuth }) => {
             await axios.post('http://localhost:5000/subir-imagen', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            
-            alert("🚀 EVIDENCIA ENVIADA AL ARCHIVO.");
-            
-            // Limpieza de estados
-            setNuevoTitulo(''); 
-            setArchivoSeleccionado(null); 
-            setNuevaDesc('');
-            
-            // Recarga crucial para ver la nueva foto
+            alert("🚀 EVIDENCIA ENVIADA.");
+            setNuevoTitulo(''); setArchivoSeleccionado(null); setNuevaDesc('');
             cargarImagenes();
         } catch (err) {
             console.error("Error en la subida:", err);
@@ -76,127 +91,106 @@ const Galeria = ({ userAuth }) => {
     };
 
     const verEnMapa = (img) => {
+        const conf = config[pestanaActiva];
         const payload = {
             id: img.id,
-            nombre: img.titulo,
+            nombre: img.titulo || img.nombre,
             latitud: img.latitud,
             longitud: img.longitud,
-            imagen_url: img.url_imagen, 
-            descripcion: img.descripcion,
+            imagen_url: img[conf.columna], 
+            descripcion: img.descripcion || img.cuerpo || img.descripcionclon,
             esDeGaleria: true
         };
         localStorage.setItem('lugar_a_resaltar', JSON.stringify(payload));
         navigate('/lugares');
     };
 
-    const indiceUltima = paginaActual * imagenesPorPagina;
-    const indicePrimera = indiceUltima - imagenesPorPagina;
-    const imagenesActuales = imagenes.slice(indicePrimera, indiceUltima);
+    const confActual = config[pestanaActiva];
+    const listaActual = registros[pestanaActiva] || [];
+    const imagenesActuales = listaActual.slice((paginaActual - 1) * imagenesPorPagina, paginaActual * imagenesPorPagina);
 
     return (
         <div className="galeria-page">
             <header className="galeria-header">
                 <h1 className="titulo-neon">ARCHIVO VISUAL CLASIFICADO</h1>
-                <p className="subtitle">GRANADA PARANORMAL - SECTOR ALHAMBRA</p>
+                <p className="subtitle">ESTADO: CONECTADO AL PUERTO 5000</p>
             </header>
 
-            {userAuth ? (
-                <section className="contenedor-formulario-fijo">
-                    <Forms 
-                        title="REGISTRAR HALLAZGO"
-                        subtitle="Aportar evidencia gráfica al sector"
-                        onSubmit={subirImagen}
-                        onClear={() => { setNuevoTitulo(''); setArchivoSeleccionado(null); setNuevaDesc(''); }}
-                    >
-                        <input 
-                            type="text" 
-                            placeholder="TÍTULO DE LA EVIDENCIA..." 
-                            value={nuevoTitulo} 
-                            onChange={e => setNuevoTitulo(e.target.value)} 
-                            required 
-                        />
-                        <input 
-                            type="file" 
-                            accept="image/*"
-                            className="input-file-bunker"
-                            onChange={e => setArchivoSeleccionado(e.target.files[0])} 
-                            required 
-                        />
-                        <textarea 
-                            placeholder="DESCRIPCIÓN DE LA EVIDENCIA..." 
-                            value={nuevaDesc} 
-                            onChange={e => setNuevaDesc(e.target.value)} 
-                            required
-                        ></textarea>
-                    </Forms>
-                </section>
-            ) : (
-                <div style={{ textAlign: 'center', marginBottom: '30px', color: '#888' }}>
-                    <p>ℹ️ Iniciando visor en modo lectura. Identifíquese para aportar evidencias.</p>
-                </div>
-            )}
-
-            <div className="galeria-grid">
-                {imagenesActuales.length > 0 ? (
-                    imagenesActuales.map((img) => (
-                        <div key={img.id} className="card-imagen" onClick={() => setFotoExpandida(img)}>
-                            <div className="contenedor-img">
-                                <img
-                                    src={`/imagenes/${img.url_imagen}`}
-                                    alt={img.titulo}
-                                    onError={(e) => {
-                                        // Si no está en public, intentamos pedirla al servidor directamente
-                                        e.target.onerror = null; 
-// Cambiamos la ruta para que apunte a la carpeta de archivos de usuarios
-                                e.target.src = `http://localhost:5000/archivos-usuarios/${img.url_imagen}`;                                    }}
-                                />
-                                {img.estado === 'pendiente' && <span className="badge-pendiente">EN REVISIÓN</span>}
-                            </div>
-                            <div className="info-img">
-                                <h3>{img.titulo}</h3>
-                                <p className="agente-tag">FUENTE: {img.agente || 'Desconocido'}</p>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <p style={{ gridColumn: '1/-1', textAlign: 'center' }}>Cargando registros visuales...</p>
-                )}
-            </div>
-
-            <div className="paginacion">
-                {Array.from({ length: Math.ceil(imagenes.length / imagenesPorPagina) }, (_, i) => (
+            <div className="pestanas-galeria" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '30px' }}>
+                {['lugares', 'imagenes', 'archivos-usuarios'].map(f => (
                     <button 
-                        key={i} 
-                        onClick={() => setPaginaActual(i + 1)} 
-                        className={paginaActual === i + 1 ? 'active' : ''}
+                        key={f}
+                        onClick={() => { setPestanaActiva(f); setPaginaActual(1); }}
+                        className={pestanaActiva === f ? 'active' : ''}
+                        style={{
+                            background: pestanaActiva === f ? '#00ff41' : '#111',
+                            color: pestanaActiva === f ? '#000' : '#00ff41',
+                            border: '2px solid #00ff41', padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold'
+                        }}
                     >
-                        {i + 1}
+                        📁 {f.toUpperCase()}
                     </button>
                 ))}
             </div>
 
+            {userAuth && pestanaActiva === 'archivos-usuarios' && (
+                <section className="contenedor-formulario-fijo">
+                    <Forms title="REGISTRAR HALLAZGO" onSubmit={subirImagen} onClear={() => { setNuevoTitulo(''); setArchivoSeleccionado(null); setNuevaDesc(''); }}>
+                        <input type="text" placeholder="TÍTULO..." value={nuevoTitulo} onChange={e => setNuevoTitulo(e.target.value)} required />
+                        <input type="file" accept="image/*" onChange={e => setArchivoSeleccionado(e.target.files[0])} required />
+                        <textarea placeholder="DESCRIPCIÓN..." value={nuevaDesc} onChange={e => setNuevaDesc(e.target.value)} required />
+                    </Forms>
+                </section>
+            )}
+
+            <div className="galeria-grid">
+                {imagenesActuales.length > 0 ? (
+                    imagenesActuales.map((img) => {
+                        const nombreArchivo = img[confActual.columna];
+                        // CONSTRUCCIÓN DE RUTA AL BACKEND
+                        const rutaImg = nombreArchivo ? `${confActual.urlBase}${nombreArchivo}` : null;
+
+                        return (
+                            <div key={img.id} className="card-imagen" onClick={() => rutaImg && setFotoExpandida({ ...img, rutaCompleta: rutaImg })}>
+                                <div className="contenedor-img">
+                                    {rutaImg ? (
+                                        <img
+                                            src={rutaImg}
+                                            alt={img.titulo || img.nombre}
+                                            onError={(e) => { 
+                                                e.target.onerror = null; 
+                                                e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII="; 
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="placeholder-vacio">⚠️ SIN RUTA</div>
+                                    )}
+                                    <span className="badge-sector">{confActual.etiqueta}</span>
+                                </div>
+                                <div className="info-img">
+                                    <h3>{img.titulo || img.nombre}</h3>
+                                    <p className="agente-tag">FUENTE: {img.agente || 'Sistema'}</p>
+                                </div>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>No hay datos visuales detectados...</p>
+                )}
+            </div>
+
+            {/* MODAL (Corregido también la ruta del modal) */}
             {fotoExpandida && (
                 <div className="modal-galeria-abierta" onClick={() => setFotoExpandida(null)}>
                     <div className="contenido-foto-grande" onClick={e => e.stopPropagation()}>
                         <button className="cerrar-modal" onClick={() => setFotoExpandida(null)}>×</button>
-                        <img 
-                            src={`/imagenes/${fotoExpandida.url_imagen}`} 
-                            alt={fotoExpandida.titulo} 
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = `http://localhost:5000/imagenes/${fotoExpandida.url_imagen}`;
-                            }}
-                        />
+                        <img src={fotoExpandida.rutaCompleta} alt="Evidencia" onError={(e) => { e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII="; }} />
                         <div className="texto-foto-grande">
-                            <h2 className="neon-text-blue">{fotoExpandida.titulo?.toUpperCase()}</h2>
-                            <p className="desc-galeria">{fotoExpandida.descripcion}</p>
+                            <h2 className="neon-text-blue">{(fotoExpandida.titulo || fotoExpandida.nombre)?.toUpperCase()}</h2>
+                            <p className="desc-galeria">{fotoExpandida.descripcion || fotoExpandida.cuerpo || fotoExpandida.descripcionclon}</p>
                             <div className="footer-modal-img">
-                                <span className="fecha-modal">
-                                    📅 {fotoExpandida.fecha ? new Date(fotoExpandida.fecha).toLocaleDateString() : 'Fecha desconocida'}
-                                </span>
-                                <button className="btn-ver-mapa" onClick={() => verEnMapa(fotoExpandida)}>
-                                    📍 VER POSICIÓN EN RADAR
-                                </button>
+                                <span>📅 {fotoExpandida.fecha ? new Date(fotoExpandida.fecha).toLocaleDateString() : 'Desconocida'}</span>
+                                <button className="btn-ver-mapa" onClick={() => verEnMapa(fotoExpandida)}>📍 VER EN RADAR</button>
                             </div>
                         </div>
                     </div>
