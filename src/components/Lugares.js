@@ -30,7 +30,9 @@ const iconoResaltado = new L.Icon({
 const ActualizadorMapa = ({ centro }) => {
     const map = useMap();
     useEffect(() => {
-        if (centro) map.flyTo(centro, 15, { animate: true });
+        if (centro && centro[0] && centro[1]) {
+            map.flyTo(centro, 15, { animate: true });
+        }
     }, [centro, map]);
     return null;
 };
@@ -38,13 +40,13 @@ const ActualizadorMapa = ({ centro }) => {
 const Lugares = () => {
     const [puntos, setPuntos] = useState([]);
     const [noticias, setNoticias] = useState([]);
-    const [archivos, setArchivos] = useState([]); 
-    const [vista, setVista] = useState('lugares'); 
+    const [archivos, setArchivos] = useState([]);
+    const [vista, setVista] = useState('lugares');
     const [centroMapa, setCentroMapa] = useState([37.1773, -3.5986]);
-    const [idResaltado, setIdResaltado] = useState(null); 
+    const [idResaltado, setIdResaltado] = useState(null);
     const [indicesPestanas, setIndicesPestanas] = useState({});
 
-    // Función mágica para evitar bucles en las fotos de los popups
+    // Función para evitar bucles en las fotos de los popups
     const handleImgError = (e) => {
         e.target.onerror = null;
         e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII=";
@@ -55,31 +57,31 @@ const Lugares = () => {
             const [resL, resN, resA] = await Promise.all([
                 axios.get('http://localhost:5000/lugares'),
                 axios.get('http://localhost:5000/admin/todas-noticias'),
-                axios.get('http://localhost:5000/imagenes-publicas') 
+                axios.get('http://localhost:5000/imagenes-publicas')
             ]);
-            
+
             setPuntos(resL.data.filter(p => p.estado === 'activo' || p.estado === 'aprobado' || p.estado === 'publicado'));
             setNoticias(resN.data.filter(n => n.estado === 'aprobado' && n.latitud && n.longitud));
-            setArchivos(resA.data); 
-            
+            setArchivos(resA.data);
+
             const resaltar = localStorage.getItem('lugar_a_resaltar');
             if (resaltar) {
                 const data = JSON.parse(resaltar);
                 if (data.tipo === 'noticia') setVista('noticias');
                 else if (data.tipo === 'archivo') setVista('archivos');
-                
+
                 setCentroMapa([parseFloat(data.latitud), parseFloat(data.longitud)]);
                 setIdResaltado(data.id);
                 localStorage.removeItem('lugar_a_resaltar');
             }
-            
-        } catch (err) { 
-            console.error("❌ ERROR EN EL RADAR:", err); 
+
+        } catch (err) {
+            console.error("❌ ERROR EN EL RADAR:", err);
         }
     }, []);
 
-    useEffect(() => { 
-        cargarDatos(); 
+    useEffect(() => {
+        cargarDatos();
     }, [cargarDatos]);
 
     const agruparNoticias = () => {
@@ -100,17 +102,17 @@ const Lugares = () => {
 
             {/* Selector de Vistas */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', gap: '15px', flexWrap: 'wrap' }}>
-                <button 
+                <button
                     onClick={() => { setVista('lugares'); setIdResaltado(null); }}
                     style={{ background: vista === 'lugares' ? '#00ff41' : '#222', color: vista === 'lugares' ? '#000' : '#00ff41', border: '2px solid #00ff41', padding: '10px 15px', fontWeight: 'bold', cursor: 'pointer' }}
                 > 📍 LUGARES </button>
 
-                <button 
+                <button
                     onClick={() => { setVista('noticias'); setIdResaltado(null); }}
                     style={{ background: vista === 'noticias' ? '#ff4444' : '#222', color: vista === 'noticias' ? '#000' : '#ff4444', border: '2px solid #ff4444', padding: '10px 15px', fontWeight: 'bold', cursor: 'pointer' }}
                 > ⚠️ ALERTAS </button>
 
-                <button 
+                <button
                     onClick={() => { setVista('archivos'); setIdResaltado(null); }}
                     style={{ background: vista === 'archivos' ? '#00d4ff' : '#222', color: vista === 'archivos' ? '#000' : '#00d4ff', border: '2px solid #00d4ff', padding: '10px 15px', fontWeight: 'bold', cursor: 'pointer' }}
                 > 📂 ARCHIVOS AGENTES </button>
@@ -122,7 +124,7 @@ const Lugares = () => {
                         <ActualizadorMapa centro={centroMapa} />
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-                        {/* LUGARES */}
+                        {/* 1. LUGARES */}
                         {vista === 'lugares' && puntos.map(l => (
                             <Marker key={`l-${l.id}`} position={[parseFloat(l.latitud), parseFloat(l.longitud)]} icon={idResaltado === l.id ? iconoResaltado : iconoLugar}>
                                 <Popup>
@@ -135,7 +137,7 @@ const Lugares = () => {
                             </Marker>
                         ))}
 
-                        {/* ALERTAS */}
+                        {/* 2. ALERTAS AGRUPADAS */}
                         {vista === 'noticias' && noticiasAgrupadas.map((grupo, idx) => {
                             const keyGrupo = `${grupo[0].latitud}-${grupo[0].longitud}`;
                             const indexActual = indicesPestanas[keyGrupo] || 0;
@@ -163,13 +165,18 @@ const Lugares = () => {
                             );
                         })}
 
-                        {/* ARCHIVOS USUARIOS */}
+                        {/* 3. ARCHIVOS USUARIOS */}
                         {vista === 'archivos' && archivos.map(a => (
                             <Marker key={`a-${a.id}`} position={[parseFloat(a.latitud), parseFloat(a.longitud)]} icon={idResaltado === a.id ? iconoResaltado : iconoArchivo}>
                                 <Popup>
                                     <div className="popup-bunker">
                                         <h4 style={{ color: '#00d4ff' }}>📂 ARCHIVO DE AGENTE</h4>
-                                        <img src={`http://localhost:5000/archivos-usuarios/${a.url_imagen}`} alt={a.titulo} style={{ width: '100%', borderRadius: '4px', border: '1px solid #00d4ff', marginBottom: '5px' }} onError={handleImgError} />
+                                        <img
+                                            src={`http://localhost:5000/imagenes/${a.url_imagen}`}
+                                            alt={a.titulo}
+                                            style={{ width: '100%', borderRadius: '4px', border: '1px solid #00d4ff', marginBottom: '5px' }}
+                                            onError={handleImgError}
+                                        />
                                         <strong style={{ color: '#fff' }}>{a.titulo}</strong>
                                         <p style={{ fontSize: '11px', color: '#aaa' }}>{a.descripcion}</p>
                                         <small style={{ color: '#00d4ff' }}>FUERZA: {a.agente}</small>
@@ -187,8 +194,8 @@ const Lugares = () => {
                     </h3>
                     <div className="lista-scrollable">
                         {(vista === 'lugares' ? puntos : vista === 'noticias' ? noticias : archivos).map(item => (
-                            <div 
-                                key={item.id} 
+                            <div
+                                key={item.id}
                                 onClick={() => {
                                     setCentroMapa([parseFloat(item.latitud), parseFloat(item.longitud)]);
                                     setIdResaltado(item.id);

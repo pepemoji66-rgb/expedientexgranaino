@@ -7,20 +7,26 @@ const PanelAdmin = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [videos, setVideos] = useState([]);
     const [expedientes, setExpedientes] = useState([]);
-    const [misRelatos, setMisRelatos] = useState([]); 
+    const [misRelatos, setMisRelatos] = useState([]);
     const [imagenes, setImagenes] = useState([]);
     const [lugares, setLugares] = useState([]);
     const [mensajes, setMensajes] = useState([]);
-    const [noticias, setNoticias] = useState([]); 
+    const [noticias, setNoticias] = useState([]);
     const [expedienteParaLeer, setExpedienteParaLeer] = useState(null);
     const [cargando, setCargando] = useState(false);
 
     const [paginaActual, setPaginaActual] = useState(1);
-    const itemsPorPagina = 8; 
+    const itemsPorPagina = 8;
 
     useEffect(() => {
         cargarDatos();
     }, []);
+
+    // --- FUNCIÓN DE SEGURIDAD PARA IMÁGENES ROTAS ---
+    const handleImgError = (e) => {
+        e.target.onerror = null;
+        e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII=";
+    };
 
     const cargarDatos = async () => {
         try {
@@ -43,10 +49,10 @@ const PanelAdmin = () => {
             setNoticias(Array.isArray(resN.data) ? resN.data : []);
             setMensajes(Array.isArray(resC.data) ? [...resC.data].reverse() : []);
             setMisRelatos(Array.isArray(resMR.data) ? resMR.data : []);
-            
+
             console.log("✅ Radar sincronizado: Sistema de archivos integrado.");
-        } catch (err) { 
-            console.error("❌ Fallo en la recepción de datos"); 
+        } catch (err) {
+            console.error("❌ Fallo en la recepción de datos");
         }
     };
 
@@ -55,12 +61,10 @@ const PanelAdmin = () => {
         setCargando(true);
         try {
             let url = `http://localhost:5000/`;
-            // Lógica unificada de rutas
             if (tipo === 'usuario') url += `usuarios/${id}`;
             else if (tipo === 'expediente') url += accion === 'aprobar' ? `aprobar-expediente/${id}` : `expedientes/${id}`;
             else if (tipo === 'mis-relatos') url += `borrar-relato-admin/${id}`;
             else if (tipo === 'video') url += accion === 'aprobar' ? `aprobar-video/${id}` : `borrar-video/${id}`;
-            // AJUSTE MAESTRO PARA IMÁGENES
             else if (tipo === 'imagen') url += accion === 'aprobar' ? `admin/aprobar-imagen/${id}` : `borrar-imagen/${id}`;
             else if (tipo === 'lugar') url += accion === 'aprobar' ? `aprobar-lugar/${id}` : `lugares/${id}`;
             else if (tipo === 'chat') url += `borrar-mensaje/${id}`;
@@ -75,7 +79,7 @@ const PanelAdmin = () => {
             await cargarDatos();
             setCargando(false);
             alert(`✅ REGISTRO ${accion === 'aprobar' ? 'PUBLICADO' : 'ELIMINADO'}`);
-        } catch (err) { 
+        } catch (err) {
             console.error(err);
             alert("❌ Error en la operación");
             setCargando(false);
@@ -83,7 +87,7 @@ const PanelAdmin = () => {
     };
 
     const obtenerListaActiva = () => {
-        switch(tab) {
+        switch (tab) {
             case 'usuarios': return usuarios;
             case 'videos': return videos;
             case 'expedientes': return expedientes;
@@ -110,7 +114,7 @@ const PanelAdmin = () => {
         <div className="panel-admin-container fade-in">
             <h2 className="titulo-neon">CONTROL DE MANDO UNIFICADO</h2>
             {cargando && <div className="loading-overlay">OPERANDO...</div>}
-            
+
             <div className="tabs-admin">
                 <button className={tab === 'usuarios' ? 'active' : ''} onClick={() => cambiarTab('usuarios')}>USUARIOS</button>
                 <button className={tab === 'videos' ? 'active' : ''} onClick={() => cambiarTab('videos')}>VÍDEOS</button>
@@ -172,7 +176,7 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* IMÁGENES / ARCHIVOS (HALLAZGOS) */}
+                                {/* IMÁGENES / ARCHIVOS (HALLAZGOS) - CORREGIDO */}
                                 {tab === 'imagenes' && (
                                     <>
                                         <td className={item.estado === 'publica' || item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>
@@ -180,20 +184,21 @@ const PanelAdmin = () => {
                                         </td>
                                         <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             {item.url_imagen && (
-                                                <img 
-                                                    src={`/imagenes/${item.url_imagen.split('/').pop()}`} 
-                                                    alt="p" 
-                                                    style={{ width: '50px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #00ff41' }} 
+                                                <img
+                                                    src={`http://localhost:5000/archivos-usuarios/${item.url_imagen.split('/').pop()}`}
+                                                    alt="hallazgo"
+                                                    onError={handleImgError}
+                                                    style={{ width: '50px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #00ff41' }}
                                                 />
                                             )}
-                                            <div style={{textAlign: 'left'}}>
+                                            <div style={{ textAlign: 'left' }}>
                                                 <strong>{item.titulo}</strong>
-                                                <br/><small style={{color: '#888'}}>{item.descripcion?.substring(0, 20)}...</small>
+                                                <br /><small style={{ color: '#888' }}>{item.descripcion?.substring(0, 20)}...</small>
                                             </div>
                                         </td>
                                         <td>
-                                            <span style={{color: '#00d4ff'}}>👤 {item.agente || 'ANÓNIMO'}</span>
-                                            <br/><small>📍 {item.latitud}, {item.longitud}</small>
+                                            <span style={{ color: '#00d4ff' }}>👤 {item.agente || 'ANÓNIMO'}</span>
+                                            <br /><small>📍 {item.latitud}, {item.longitud}</small>
                                         </td>
                                         <td>
                                             {(item.estado !== 'publica' && item.estado !== 'aprobado') && (
@@ -204,13 +209,18 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* MAPA / LUGARES */}
+                                {/* MAPA / LUGARES - CORREGIDO */}
                                 {tab === 'lugares' && (
                                     <>
                                         <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
                                         <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             {(item.imagen_url || item.imagen) && (
-                                                <img src={`/lugares/${(item.imagen_url || item.imagen).split('/').pop()}`} alt="p" style={{ width: '50px', height: '40px', borderRadius: '4px', objectFit: 'cover' }} />
+                                                <img
+                                                    src={`http://localhost:5000/lugares/${(item.imagen_url || item.imagen).split('/').pop()}`}
+                                                    alt="lugar"
+                                                    onError={handleImgError}
+                                                    style={{ width: '50px', height: '40px', borderRadius: '4px', objectFit: 'cover' }}
+                                                />
                                             )}
                                             {item.nombre}
                                         </td>
@@ -232,35 +242,30 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                               {/* NOTICIAS */}
-{tab === 'noticias' && (
-    <>
-        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>
-            {item.estado?.toUpperCase()}
-        </td>
-        <td>{item.titulo}</td>
-        <td>{item.ubicacion}</td>
-        <td>
-            <div style={{ display: 'flex', gap: '5px' }}>
-                {item.estado === 'pendiente' && (
-                    <button 
-                        className="btn-approve" 
-                        onClick={() => gestionar(item.id, 'aprobar', 'noticia')}
-                        style={{ backgroundColor: '#28a745', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer', fontWeight: 'bold' }}
-                    >
-                        APROBAR
-                    </button>
-                )}
-                <button 
-                    className="btn-del" 
-                    onClick={() => gestionar(item.id, 'borrar', 'noticia')}
-                >
-                    BORRAR
-                </button>
-            </div>
-        </td>
-    </>
-)}
+                                {/* NOTICIAS */}
+                                {tab === 'noticias' && (
+                                    <>
+                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>
+                                            {item.estado?.toUpperCase()}
+                                        </td>
+                                        <td>{item.titulo}</td>
+                                        <td>{item.ubicacion}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: '5px' }}>
+                                                {item.estado === 'pendiente' && (
+                                                    <button
+                                                        className="btn-approve"
+                                                        onClick={() => gestionar(item.id, 'aprobar', 'noticia')}
+                                                        style={{ backgroundColor: '#28a745', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer', fontWeight: 'bold' }}
+                                                    >
+                                                        APROBAR
+                                                    </button>
+                                                )}
+                                                <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'noticia')}>BORRAR</button>
+                                            </div>
+                                        </td>
+                                    </>
+                                )}
 
                                 {/* VIDEOS */}
                                 {tab === 'videos' && (
