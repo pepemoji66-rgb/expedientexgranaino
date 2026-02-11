@@ -9,12 +9,12 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 const app = express();
-const server = http.createServer(app); 
+const server = http.createServer(app);
 
 // --- CONFIGURACIÓN DE SOCKET.IO ---
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000", 
+        origin: "http://localhost:3000",
         methods: ["GET", "POST"]
     }
 });
@@ -25,8 +25,8 @@ app.use(bodyParser.urlencoded({ extended: true })); // Para procesar formularios
 
 // --- 1. CONFIGURACIÓN DE ALMACENAMIENTO (RUTAS ABSOLUTAS) ---
 const dirLugares = path.join(__dirname, 'public/lugares');
-const dirImagenes = path.join(__dirname, 'public/imagenes'); 
-const dirArchivosUsuarios = path.join(__dirname, 'public/archivos-usuarios'); 
+const dirImagenes = path.join(__dirname, 'public/imagenes');
+const dirArchivosUsuarios = path.join(__dirname, 'public/archivos-usuarios');
 
 // Asegurar que las carpetas existan en el Backend
 [dirLugares, dirImagenes, dirArchivosUsuarios].forEach(dir => {
@@ -66,7 +66,7 @@ app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- 3. CONEXIÓN BASE DE DATOS ---
-const db = mysql.createPool({ 
+const db = mysql.createPool({
     host: 'localhost', user: 'root', password: '', database: 'expedientex', port: 3307,
     waitForConnections: true, connectionLimit: 10, queueLimit: 0
 });
@@ -207,11 +207,11 @@ app.get('/lugares', (req, res) => {
 app.post('/lugares', upload.single('foto'), (req, res) => {
     const { nombre, descripcion, latitud, longitud, ubicacion } = req.body;
     const imagen_url = req.file ? req.file.filename : 'default.jpg';
-    db.query("INSERT INTO lugares (nombre, descripcion, latitud, longitud, imagen_url, ubicacion, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')", 
-    [nombre, descripcion, latitud, longitud, imagen_url, ubicacion], (err) => {
-        if (err) return res.status(500).send(err);
-        res.send("📍 Reporte recibido.");
-    });
+    db.query("INSERT INTO lugares (nombre, descripcion, latitud, longitud, imagen_url, ubicacion, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')",
+        [nombre, descripcion, latitud, longitud, imagen_url, ubicacion], (err) => {
+            if (err) return res.status(500).send(err);
+            res.send("📍 Reporte recibido.");
+        });
 });
 
 app.put('/aprobar-lugar/:id', (req, res) => {
@@ -284,7 +284,7 @@ app.get('/imagenes-publicas', (req, res) => {
 app.post('/subir-imagen', uploadArchivos.single('imagen'), (req, res) => {
     const { titulo, agente, descripcion, latitud, longitud } = req.body;
     const url_imagen = req.file ? req.file.filename : null;
-    
+
     if (!url_imagen) return res.status(400).json({ error: "Falta el archivo visual" });
 
     const sql = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado) VALUES (?, ?, ?, ?, ?, ?, 'pendiente')";
@@ -330,25 +330,45 @@ app.put('/admin/aprobar-noticia/:id', (req, res) => {
     });
 });
 
-// CORREGIDO: Usamos uploadGeneral para las noticias
+// --- REEMPLAZA TU RUTA /proponer-noticia CON ESTA ---
+
 app.post('/proponer-noticia', uploadGeneral.single('imagen'), (req, res) => {
+    // 1. Extraemos los datos del cuerpo de la solicitud
     const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud } = req.body;
-    const imagen_url = req.file ? req.file.filename : null;
-    
-    const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, imagen_url, estado) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')";
-    db.query(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null, imagen_url], (err, result) => {
+
+    // 2. Capturamos el nombre del archivo si existe
+    const nombreImagen = req.file ? req.file.filename : null;
+
+    // 3. Generamos la fecha actual para que la DB no de error
+    const fechaActual = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    // 4. SQL CORREGIDO: Usamos 'imagen' para que coincida con tu phpMyAdmin
+    const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, imagen, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente', ?)";
+
+    db.query(sql, [
+        titulo,
+        cuerpo,
+        nivel_alerta,
+        ubicacion || 'Sin ubicación',
+        latitud || null,
+        longitud || null,
+        nombreImagen, // Esto caerá en la columna 'imagen' de tu tabla
+        fechaActual
+    ], (err, result) => {
         if (err) {
-            console.error("Error en DB Noticias:", err);
-            return res.status(500).json({ error: "Fallo en DB" });
+            console.error("❌ ERROR CRÍTICO EN DB NOTICIAS:", err.message);
+            return res.status(500).json({ error: "Error de sincronización con la base de datos", detalle: err.message });
         }
-        res.json({ mensaje: "Noticia recibida", id: result.insertId });
+        console.log("✅ Noticia guardada en el archivo central con ID:", result.insertId);
+        res.json({ mensaje: "Noticia recibida con éxito", id: result.insertId });
     });
 });
 
-app.delete('/borrar-noticia/:id', (req, res) => {
-    db.query("DELETE FROM noticias WHERE id = ?", [req.params.id], (err) => {
+// También asegúrate de que el GET de noticias no falle si hay fechas raras
+app.get('/admin/todas-noticias', (req, res) => {
+    db.query("SELECT * FROM noticias ORDER BY id DESC", (err, result) => {
         if (err) return res.status(500).json(err);
-        res.json({ mensaje: "Noticia eliminada" });
+        res.json(result);
     });
 });
 

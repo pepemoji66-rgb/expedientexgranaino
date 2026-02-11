@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Forms from './Forms'; 
+import Forms from './Forms';
 import './noticias.css';
 
 const Noticias = ({ userAuth }) => {
@@ -9,21 +9,21 @@ const Noticias = ({ userAuth }) => {
     const [cargando, setCargando] = useState(true);
     const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
     const navigate = useNavigate();
-    
+
     // --- LÓGICA DE PAGINACIÓN ---
     const [paginaActual, setPaginaActual] = useState(1);
-    const noticiasPorPagina = 6; 
+    const noticiasPorPagina = 6;
 
-    const [nuevaNoticia, setNuevaNoticia] = useState({ 
-        titulo: '', 
-        cuerpo: '', 
+    const [nuevaNoticia, setNuevaNoticia] = useState({
+        titulo: '',
+        cuerpo: '',
         nivel_alerta: 'Bajo',
         ubicacion: '',
         latitud: null,
         longitud: null
     });
 
-    const [imagen, setImagen] = useState(null); 
+    const [imagen, setImagen] = useState(null);
     const [buscandoLoc, setBuscandoLoc] = useState(false);
 
     const obtenerNoticias = useCallback(async () => {
@@ -72,17 +72,6 @@ const Noticias = ({ userAuth }) => {
         }
     };
 
-    const verEnMapa = (item) => {
-        const payload = {
-            id: item.id,
-            latitud: item.latitud,
-            longitud: item.longitud,
-            tipo: 'noticia'
-        };
-        localStorage.setItem('lugar_a_resaltar', JSON.stringify(payload));
-        navigate('/lugares');
-    };
-
     const enviarPropuesta = async (e) => {
         if (e) e.preventDefault();
         const formData = new FormData();
@@ -99,7 +88,7 @@ const Noticias = ({ userAuth }) => {
             await axios.post('http://localhost:5000/proponer-noticia', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("📡 REPORTE RECIBIDO");
+            alert("📡 REPORTE ENVIADO AL BÚNKER PARA REVISIÓN");
             limpiarFormulario();
             obtenerNoticias();
         } catch (err) {
@@ -122,33 +111,55 @@ const Noticias = ({ userAuth }) => {
                 <h1 className="titulo-noticias">📡 TELETIPO DE ALERTA SECTOR X</h1>
                 <div className="linea-decorativa"></div>
             </header>
-            
+
             <div className="noticias-grid">
                 {noticiasPaginadas.map((item) => {
-                    const nombreImagen = item.imagen_url || item.imagen;
+                    const nombreImagen = item.imagen || item.imagen_url;
                     return (
-                        <div key={item.id} className="card-noticia fade-in">
-                            {nombreImagen && (
-                                <div className="noticia-img-container">
-                                    <img 
-                                        src={`http://localhost:5000/imagenes/${nombreImagen}`} 
-                                        alt={item.titulo} 
-                                        className="noticia-miniatura" 
+                        <div key={item.id} className="card-noticia fade-in" onClick={() => setNoticiaSeleccionada(item)}>
+                            <div className="noticia-img-container" style={{ position: 'relative', minHeight: '150px', background: '#000' }}>
+                                {nombreImagen && (
+                                    <span style={{
+                                        position: 'absolute', top: 0, left: 0, background: 'rgba(0,0,0,0.8)',
+                                        color: '#00ff41', fontSize: '10px', zIndex: 10, padding: '4px', borderBottomRightRadius: '5px'
+                                    }}>
+                                        FILE: {nombreImagen}
+                                    </span>
+                                )}
+
+                                {nombreImagen ? (
+                                    <img
+                                        src={`http://localhost:5000/imagenes/${nombreImagen}`}
+                                        alt={item.titulo}
+                                        className="noticia-miniatura"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            // Imagen transparente 1x1 para cortar el bucle de raíz
+                                            e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII=";
+                                            e.target.classList.add('img-error');
+                                        }}
                                     />
-                                </div>
-                            )}
-                            <div className="card-header">
-                                <span className={`alerta-tag ${item.nivel_alerta === 'CRÍTICO' ? 'alerta-critica' : ''}`}>
-                                    [{item.nivel_alerta.toUpperCase()}]
-                                </span>
-                                <span className="fecha-noticia">{new Date(item.fecha).toLocaleDateString()}</span>
+                                ) : (
+                                    <div className="sin-evidencia-visual">⚠️ SIN CAPTURA</div>
+                                )}
                             </div>
-                            <h2 className="noticia-titulo">{item.titulo}</h2>
-                            {item.ubicacion && <div className="noticia-loc-badge">📍 {item.ubicacion}</div>}
-                            <p className="noticia-resumen">{item.cuerpo.substring(0, 100)}...</p>
-                            <div className="noticia-footer-btns">
-                                <button className="btn-leer-noticia" onClick={() => setNoticiaSeleccionada(item)}>👁️ INFORME</button>
-                                {item.ubicacion && <button className="btn-ver-mapa" onClick={() => verEnMapa(item)}>📍 MAPA</button>}
+
+                            <div className="noticia-contenido">
+                                <div className="noticia-meta">
+                                    <span className={`noticia-alerta alerta-${item.nivel_alerta?.toLowerCase()}`}>
+                                        {item.nivel_alerta}
+                                    </span>
+                                    <span className="noticia-fecha">
+                                        {item.fecha ? new Date(item.fecha).toLocaleDateString() : 'PENDIENTE'}
+                                    </span>
+                                </div>
+                                <h3 className="noticia-titulo">{item.titulo}</h3>
+                                <p className="noticia-cuerpo-resumen">
+                                    {item.cuerpo?.substring(0, 100)}...
+                                </p>
+                                <div className="noticia-footer">
+                                    📍 {item.ubicacion}
+                                </div>
                             </div>
                         </div>
                     );
@@ -156,57 +167,88 @@ const Noticias = ({ userAuth }) => {
             </div>
 
             {totalPaginas > 1 && (
-                <div className="paginacion-bunker" style={{ textAlign: 'center', margin: '30px 0' }}>
+                <div className="paginacion-bunker">
                     <button disabled={paginaActual === 1} onClick={() => cambiarPagina(paginaActual - 1)}>ATRÁS</button>
-                    <span style={{ color: '#00ff41', margin: '0 15px' }}>{paginaActual} / {totalPaginas}</span>
+                    <span className="pagi-info">{paginaActual} / {totalPaginas}</span>
                     <button disabled={paginaActual === totalPaginas} onClick={() => cambiarPagina(paginaActual + 1)}>SIGUIENTE</button>
                 </div>
             )}
 
             {userAuth && (
-                <div className="contenedor-form-noticia" style={{ marginTop: '50px' }}>
-                    <Forms 
+                <div className="contenedor-form-noticia">
+                    <Forms
                         title={userAuth.rol === 'admin' ? 'COMUNICADO OFICIAL' : 'REPORTAR SUCESO'}
                         onSubmit={enviarPropuesta}
                         onClear={limpiarFormulario}
                     >
-                        <input type="text" placeholder="TITULAR" value={nuevaNoticia.titulo} onChange={e => setNuevaNoticia({...nuevaNoticia, titulo: e.target.value})} required />
+                        <input type="text" placeholder="TITULAR" value={nuevaNoticia.titulo} onChange={e => setNuevaNoticia({ ...nuevaNoticia, titulo: e.target.value })} required />
                         <div style={{ position: 'relative' }}>
                             <input type="text" placeholder="UBICACIÓN" value={nuevaNoticia.ubicacion} onChange={e => buscarDireccion(e.target.value)} required />
-                            {buscandoLoc && <span style={{ position: 'absolute', right: '10px', top: '10px' }}>🛰️</span>}
+                            {buscandoLoc && <span className="loader-satelite">🛰️</span>}
                         </div>
-                        <select value={nuevaNoticia.nivel_alerta} onChange={e => setNuevaNoticia({...nuevaNoticia, nivel_alerta: e.target.value})}>
+                        <select value={nuevaNoticia.nivel_alerta} onChange={e => setNuevaNoticia({ ...nuevaNoticia, nivel_alerta: e.target.value })}>
                             <option value="Bajo">Nivel: BAJO</option>
                             <option value="Medio">Nivel: MEDIO</option>
                             <option value="Alto">Nivel: ALTO</option>
                             <option value="CRÍTICO">Nivel: CRÍTICO</option>
                         </select>
-                        <div className="input-file-bunker" style={{ border: '1px solid #00ff41', padding: '10px', margin: '10px 0' }}>
-                            <label style={{ color: '#00ff41', fontSize: '12px', display: 'block' }}>📷 IMAGEN:</label>
+                        <div className="input-file-bunker">
+                            <label>📷 EVIDENCIA VISUAL:</label>
                             <input id="input-imagen-noticia" type="file" accept="image/*" onChange={e => setImagen(e.target.files[0])} />
                         </div>
-                        <textarea placeholder="DESCRIPCIÓN..." value={nuevaNoticia.cuerpo} onChange={e => setNuevaNoticia({...nuevaNoticia, cuerpo: e.target.value})} required />
+                        <textarea placeholder="DESCRIPCIÓN DEL SUCESO..." value={nuevaNoticia.cuerpo} onChange={e => setNuevaNoticia({ ...nuevaNoticia, cuerpo: e.target.value })} required />
                     </Forms>
                 </div>
             )}
-
+/* ... resto del código ... */
+            {/* --- MODAL DE DETALLE --- */}
             {noticiaSeleccionada && (
                 <div className="modal-noticia-overlay" onClick={() => setNoticiaSeleccionada(null)}>
-                    <div className="modal-noticia-content" onClick={e => e.stopPropagation()}>
-                        <h2>{noticiaSeleccionada.titulo}</h2>
-                        {(noticiaSeleccionada.imagen_url || noticiaSeleccionada.imagen) && (
-                            <img 
-                                src={`http://localhost:5000/imagenes/${noticiaSeleccionada.imagen_url || noticiaSeleccionada.imagen}`} 
-                                alt="Evidencia" 
-                                style={{ width: '100%', borderRadius: '8px' }} 
-                            />
-                        )}
-                        <div className="modal-cuerpo" style={{ whiteSpace: 'pre-wrap', marginTop: '15px' }}>{noticiaSeleccionada.cuerpo}</div>
-                        <button className="btn-cerrar-archivo" onClick={() => setNoticiaSeleccionada(null)}>CERRAR</button>
+                    <div className="modal-noticia-content" onClick={(e) => e.stopPropagation()}>
+
+                        {/* BOTÓN DE CIERRE */}
+                        <button
+                            className="btn-cerrar-modal"
+                            onClick={() => setNoticiaSeleccionada(null)}
+                            title="Cerrar Informe"
+                        >
+                            X
+                        </button>
+
+                        <h2 className="noticia-titulo-modal" style={{ color: 'var(--color-critico)', textAlign: 'center' }}>
+                            INCÓGNITA
+                        </h2>
+
+                        <p className="noticia-meta-modal">
+                            <span style={{ color: 'var(--color-principal)' }}>{noticiaSeleccionada.titulo}</span><br />
+                            {/* Protección contra undefined en toUpperCase */}
+                            Nivel: {(noticiaSeleccionada.nivel_alerta || noticiaSeleccionada.alerta || "desconocido").toUpperCase()} | {noticiaSeleccionada.ubicacion}
+                        </p>
+
+                        <hr className="linea-decorativa" />
+
+                        <img
+                            src={noticiaSeleccionada.imagen
+                                ? `http://localhost:5000/imagenes/${noticiaSeleccionada.imagen}`
+                                : noticiaSeleccionada.imagen_url
+                            }
+                            alt="Evidencia"
+                            className="img-modal-expandida"
+                            onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/400x220?text=ARCHIVO+CLASIFICADO";
+                                e.target.onerror = null;
+                            }}
+                        />
+
+                        <div className="noticia-cuerpo-modal" style={{ whiteSpace: 'pre-wrap' }}>
+                            {noticiaSeleccionada.cuerpo}
+                        </div>
                     </div>
                 </div>
             )}
-        </div>
+            {/* Fin del Modal */}
+
+        </div> /* Fin de noticias-page */
     );
 };
 

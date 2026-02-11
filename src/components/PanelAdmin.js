@@ -22,7 +22,6 @@ const PanelAdmin = () => {
         cargarDatos();
     }, []);
 
-    // --- FUNCIÓN DE SEGURIDAD PARA IMÁGENES ROTAS ---
     const handleImgError = (e) => {
         e.target.onerror = null;
         e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII=";
@@ -50,9 +49,9 @@ const PanelAdmin = () => {
             setMensajes(Array.isArray(resC.data) ? [...resC.data].reverse() : []);
             setMisRelatos(Array.isArray(resMR.data) ? resMR.data : []);
 
-            console.log("✅ Radar sincronizado: Sistema de archivos integrado.");
+            console.log("✅ Sistema Sincronizado");
         } catch (err) {
-            console.error("❌ Fallo en la recepción de datos");
+            console.error("❌ Fallo en la recepción de datos", err);
         }
     };
 
@@ -61,14 +60,35 @@ const PanelAdmin = () => {
         setCargando(true);
         try {
             let url = `http://localhost:5000/`;
-            if (tipo === 'usuario') url += `usuarios/${id}`;
-            else if (tipo === 'expediente') url += accion === 'aprobar' ? `aprobar-expediente/${id}` : `expedientes/${id}`;
-            else if (tipo === 'mis-relatos') url += `borrar-relato-admin/${id}`;
-            else if (tipo === 'video') url += accion === 'aprobar' ? `aprobar-video/${id}` : `borrar-video/${id}`;
-            else if (tipo === 'imagen') url += accion === 'aprobar' ? `admin/aprobar-imagen/${id}` : `borrar-imagen/${id}`;
-            else if (tipo === 'lugar') url += accion === 'aprobar' ? `aprobar-lugar/${id}` : `lugares/${id}`;
-            else if (tipo === 'chat') url += `borrar-mensaje/${id}`;
-            else if (tipo === 'noticia') url += accion === 'aprobar' ? `admin/aprobar-noticia/${id}` : `borrar-noticia/${id}`;
+
+            // LÓGICA DE RUTAS CORREGIDA
+            if (tipo === 'usuario') {
+                url += `usuarios/${id}`;
+            }
+            else if (tipo === 'expediente') {
+                url += accion === 'aprobar' ? `aprobar-expediente/${id}` : `expedientes/${id}`;
+            }
+            else if (tipo === 'mis-relatos') {
+                url += `borrar-relato-admin/${id}`;
+            }
+            else if (tipo === 'video') {
+                url += accion === 'aprobar' ? `aprobar-video/${id}` : `borrar-video/${id}`;
+            }
+            else if (tipo === 'imagen') {
+                // Se asegura que use admin/ tanto para aprobar como para borrar si tu server lo requiere
+                url += accion === 'aprobar' ? `admin/aprobar-imagen/${id}` : `admin/borrar-imagen/${id}`;
+            }
+            else if (tipo === 'lugar') {
+                url += accion === 'aprobar' ? `aprobar-lugar/${id}` : `lugares/${id}`;
+            }
+            else if (tipo === 'chat') {
+                url += `borrar-mensaje/${id}`;
+            }
+            else if (tipo === 'noticia') {
+                url += accion === 'aprobar' ? `admin/aprobar-noticia/${id}` : `admin/borrar-noticia/${id}`;
+            }
+
+            console.log(`📡 Enviando petición a: ${url} mediante ${accion.toUpperCase()}`);
 
             if (accion === 'aprobar') {
                 await axios.put(url);
@@ -77,11 +97,11 @@ const PanelAdmin = () => {
             }
 
             await cargarDatos();
-            setCargando(false);
             alert(`✅ REGISTRO ${accion === 'aprobar' ? 'PUBLICADO' : 'ELIMINADO'}`);
         } catch (err) {
-            console.error(err);
-            alert("❌ Error en la operación");
+            console.error("❌ Error en la operación:", err);
+            alert("❌ Error en la operación. Revisa si la ruta existe en el servidor.");
+        } finally {
             setCargando(false);
         }
     };
@@ -120,7 +140,7 @@ const PanelAdmin = () => {
                 <button className={tab === 'videos' ? 'active' : ''} onClick={() => cambiarTab('videos')}>VÍDEOS</button>
                 <button className={tab === 'expedientes' ? 'active' : ''} onClick={() => cambiarTab('expedientes')}>EXPEDIENTES</button>
                 <button className={tab === 'mis-relatos' ? 'active' : ''} onClick={() => cambiarTab('mis-relatos')}>MIS RELATOS</button>
-                <button className={tab === 'imagenes' ? 'active' : ''} onClick={() => cambiarTab('imagenes')}>IMÁGENES/ARCHIVOS</button>
+                <button className={tab === 'imagenes' ? 'active' : ''} onClick={() => cambiarTab('imagenes')}>IMÁGENES</button>
                 <button className={tab === 'lugares' ? 'active' : ''} onClick={() => cambiarTab('lugares')}>MAPA</button>
                 <button className={tab === 'noticias' ? 'active' : ''} onClick={() => cambiarTab('noticias')}>NOTICIAS</button>
                 <button className={tab === 'chat' ? 'active' : ''} onClick={() => cambiarTab('chat')}>CHAT</button>
@@ -132,14 +152,14 @@ const PanelAdmin = () => {
                         <tr>
                             <th>ESTADO</th>
                             <th>TÍTULO / INFO</th>
-                            <th>AUTOR / UBICACIÓN</th>
+                            <th>AUTOR / UBICACIÓN / FECHA</th>
                             <th>GESTIÓN</th>
                         </tr>
                     </thead>
                     <tbody>
                         {itemsPaginados.map(item => (
                             <tr key={item.id} className="fila-admin">
-                                {/* USUARIOS */}
+
                                 {tab === 'usuarios' && (
                                     <>
                                         <td><span className="id-tag">#{item.id}</span></td>
@@ -149,7 +169,6 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* MIS RELATOS */}
                                 {tab === 'mis-relatos' && (
                                     <>
                                         <td className="status-ok">ADMIN</td>
@@ -162,10 +181,9 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* EXPEDIENTES */}
                                 {tab === 'expedientes' && (
                                     <>
-                                        <td className={item.estado === 'publicado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
+                                        <td className={item.estado === 'publicado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase() || 'PENDIENTE'}</td>
                                         <td>{item.titulo}</td>
                                         <td>{item.usuario_nombre}</td>
                                         <td>
@@ -176,16 +194,15 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* IMÁGENES / ARCHIVOS (HALLAZGOS) - CORREGIDO */}
                                 {tab === 'imagenes' && (
                                     <>
-                                        <td className={item.estado === 'publica' || item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>
-                                            {item.estado?.toUpperCase()}
+                                        <td className={(item.estado === 'publica' || item.estado === 'aprobado') ? 'status-ok' : 'status-pending'}>
+                                            {(item.estado || 'PENDIENTE').toUpperCase()}
                                         </td>
                                         <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            {item.url_imagen && (
+                                            {(item.url_imagen || item.imagen) && (
                                                 <img
-                                                    src={`http://localhost:5000/archivos-usuarios/${item.url_imagen.split('/').pop()}`}
+                                                    src={`http://localhost:5000/archivos-usuarios/${(item.url_imagen || item.imagen).split('/').pop()}`}
                                                     alt="hallazgo"
                                                     onError={handleImgError}
                                                     style={{ width: '50px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #00ff41' }}
@@ -196,10 +213,7 @@ const PanelAdmin = () => {
                                                 <br /><small style={{ color: '#888' }}>{item.descripcion?.substring(0, 20)}...</small>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span style={{ color: '#00d4ff' }}>👤 {item.agente || 'ANÓNIMO'}</span>
-                                            <br /><small>📍 {item.latitud}, {item.longitud}</small>
-                                        </td>
+                                        <td><span style={{ color: '#00d4ff' }}>👤 {item.agente || item.nombre_usuario || 'ANÓNIMO'}</span></td>
                                         <td>
                                             {(item.estado !== 'publica' && item.estado !== 'aprobado') && (
                                                 <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'imagen')}>APROBAR</button>
@@ -209,10 +223,9 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* MAPA / LUGARES - CORREGIDO */}
                                 {tab === 'lugares' && (
                                     <>
-                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
+                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase() || 'PENDIENTE'}</td>
                                         <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             {(item.imagen_url || item.imagen) && (
                                                 <img
@@ -232,7 +245,6 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* CHAT */}
                                 {tab === 'chat' && (
                                     <>
                                         <td><span className="id-tag">#{item.id}</span></td>
@@ -242,35 +254,44 @@ const PanelAdmin = () => {
                                     </>
                                 )}
 
-                                {/* NOTICIAS */}
                                 {tab === 'noticias' && (
                                     <>
-                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>
-                                            {item.estado?.toUpperCase()}
+                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase() || 'PENDIENTE'}</td>
+                                        <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            {(item.imagen || item.imagen_url) && (
+                                                <img
+                                                    src={`http://localhost:5000/imagenes/${item.imagen || item.imagen_url}`}
+                                                    alt="noticia"
+                                                    onError={handleImgError}
+                                                    style={{ width: '50px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #ff4444' }}
+                                                />
+                                            )}
+                                            <div style={{ textAlign: 'left' }}>
+                                                <strong>{item.titulo}</strong>
+                                                <br /><small style={{ color: '#888' }}>{item.cuerpo?.substring(0, 30)}...</small>
+                                            </div>
                                         </td>
-                                        <td>{item.titulo}</td>
-                                        <td>{item.ubicacion}</td>
+                                        <td>
+                                            {item.ubicacion} <br />
+                                            <small style={{ color: '#aaa' }}>
+                                                📅 {item.fecha && !isNaN(new Date(item.fecha)) ? new Date(item.fecha).toLocaleDateString() : 'BÚNKER'}
+                                            </small>
+                                        </td>
                                         <td>
                                             <div style={{ display: 'flex', gap: '5px' }}>
-                                                {item.estado === 'pendiente' && (
-                                                    <button
-                                                        className="btn-approve"
-                                                        onClick={() => gestionar(item.id, 'aprobar', 'noticia')}
-                                                        style={{ backgroundColor: '#28a745', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer', fontWeight: 'bold' }}
-                                                    >
-                                                        APROBAR
-                                                    </button>
+                                                {item.estado !== 'aprobado' && (
+                                                    <button className="btn-ok" onClick={() => gestionar(item.id, 'aprobar', 'noticia')}>APROBAR</button>
                                                 )}
+                                                <button className="btn-leer" onClick={() => setExpedienteParaLeer(item)}>VER</button>
                                                 <button className="btn-del" onClick={() => gestionar(item.id, 'borrar', 'noticia')}>BORRAR</button>
                                             </div>
                                         </td>
                                     </>
                                 )}
 
-                                {/* VIDEOS */}
                                 {tab === 'videos' && (
                                     <>
-                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase()}</td>
+                                        <td className={item.estado === 'aprobado' ? 'status-ok' : 'status-pending'}>{item.estado?.toUpperCase() || 'PENDIENTE'}</td>
                                         <td>{item.titulo}</td>
                                         <td><a href={item.url} target="_blank" rel="noreferrer" className="link-ver">LINK</a></td>
                                         <td>
@@ -291,14 +312,15 @@ const PanelAdmin = () => {
                 <button disabled={ultimoItem >= listaActiva.length} onClick={() => setPaginaActual(p => p + 1)} className="btn-pagi">▶</button>
             </div>
 
-            {/* MODAL DE LECTURA */}
             {expedienteParaLeer && (
                 <div className="modal-admin-overlay" onClick={() => setExpedienteParaLeer(null)}>
                     <div className="modal-admin-content" onClick={e => e.stopPropagation()}>
                         <h3>{expedienteParaLeer.titulo}</h3>
-                        <p>De: {expedienteParaLeer.usuario_nombre || 'Administrador'}</p>
+                        <p>De: {expedienteParaLeer.usuario_nombre || expedienteParaLeer.agente || 'Agente / Admin'}</p>
                         <hr />
-                        <div className="cuerpo-modal">{expedienteParaLeer.contenido || expedienteParaLeer.cuerpo}</div>
+                        <div className="cuerpo-modal" style={{ whiteSpace: 'pre-wrap' }}>
+                            {expedienteParaLeer.contenido || expedienteParaLeer.cuerpo || expedienteParaLeer.descripcion}
+                        </div>
                         <button className="btn-del" onClick={() => setExpedienteParaLeer(null)}>CERRAR</button>
                     </div>
                 </div>
