@@ -1,123 +1,157 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './archivosusuarios.css';
 import { useNavigate } from 'react-router-dom';
+import './archivosusuarios.css'; 
 
 const ArchivosUsuarios = () => {
     const [hallazgos, setHallazgos] = useState([]);
     const [archivo, setArchivo] = useState(null);
-    const [datos, setDatos] = useState({ titulo: '', descripcion: '', latitud: '', longitud: '' });
+    const [form, setForm] = useState({ 
+        titulo: '', 
+        desc: '', 
+        lugar: '', 
+        lat: '0', 
+        lon: '0' 
+    });
     const [subiendo, setSubiendo] = useState(false);
     const navigate = useNavigate();
 
-    // Recuperamos al usuario del localStorage para saber quién es
-    const usuarioLogueado = JSON.parse(localStorage.getItem('usuario')) || {};
+    // Obtener nombre del agente desde la sesión
+    const agenteActual = JSON.parse(localStorage.getItem('usuario_sesion'))?.nombre || 'Agente Desconocido';
 
     useEffect(() => {
         cargarHallazgos();
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                setForm(f => ({ 
+                    ...f, 
+                    lat: pos.coords.latitude.toFixed(6), 
+                    lon: pos.coords.longitude.toFixed(6) 
+                }));
+            });
+        }
     }, []);
 
     const cargarHallazgos = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/imagenes-publicas');
+            const res = await axios.get('http://localhost:5000/api/archivos-usuarios');
             setHallazgos(res.data);
-        } catch (err) {
-            console.error("❌ Error cargando archivos de agentes:", err);
+        } catch (err) { 
+            console.error("Error cargando archivos", err); 
         }
     };
 
-    // --- LÓGICA PARA SUBIR ARCHIVOS ---
-    const handleSubida = async (e) => {
+    const handleSubir = async (e) => {
         e.preventDefault();
-        if (!archivo) return alert("Selecciona un archivo primero, hermano.");
-
+        if (!archivo) return alert("Sube una prueba visual, hermano.");
         setSubiendo(true);
+
         const formData = new FormData();
-        formData.append('imagen', archivo);
-        formData.append('titulo', datos.titulo);
-        formData.append('descripcion', datos.descripcion);
-        formData.append('latitud', datos.latitud);
-        formData.append('longitud', datos.longitud);
-        formData.append('agente', usuarioLogueado.nombre || 'Agente Desconocido');
+        formData.append('archivo', archivo);
+        formData.append('titulo', form.titulo);
+        formData.append('descripcion', form.desc);
+        formData.append('ubicacion', form.lugar);
+        formData.append('latitud', form.lat);
+        formData.append('longitud', form.lon);
+        formData.append('agente', agenteActual);
 
         try {
-            await axios.post('http://localhost:5000/subir-hallazgo', formData);
-            alert("✅ Hallazgo enviado al búnker. Pendiente de aprobación.");
-            setDatos({ titulo: '', descripcion: '', latitud: '', longitud: '' });
+            await axios.post('http://localhost:5000/api/archivos-usuarios', formData);
+            alert("✅ Hallazgo transmitido al Búnker.");
+            setForm({ ...form, titulo: '', desc: '', lugar: '' });
             setArchivo(null);
-            cargarHallazgos(); // Refrescar lista
+            cargarHallazgos();
         } catch (err) {
-            console.error(err);
-            alert("❌ Fallo en el envío de inteligencia.");
-        } finally {
-            setSubiendo(false);
+            alert("❌ Error de transmisión.");
+        } finally { 
+            setSubiendo(false); 
         }
     };
 
-    const verEnMapa = (dato) => {
-        const payload = {
-            id: dato.id,
-            latitud: parseFloat(dato.latitud),
-            longitud: parseFloat(dato.longitud),
-            tipo: 'archivo',
-            nombre: dato.titulo
-        };
-        localStorage.setItem('lugar_a_resaltar', JSON.stringify(payload));
+    const verMapa = (h) => {
+        localStorage.setItem('lugar_a_resaltar', JSON.stringify({
+            id: h.id, 
+            latitud: parseFloat(h.latitud), 
+            longitud: parseFloat(h.longitud), 
+            tipo: 'hallazgo', 
+            nombre: h.titulo
+        }));
         navigate('/lugares');
     };
 
     return (
         <div className="archivos-container">
-            <h2 className="titulo-archivos">📂 ARCHIVOS DE CAMPO (INTELIGENCIA)</h2>
+            <h1 className="titulo-neon">📡 REGISTRO DE CAMPO</h1>
+            
+            {/* FORMULARIO ESTRECHO Y REDONDEADO */}
+            <div className="form-bunker-wrapper">
+                <form onSubmit={handleSubir} className="form-bunker">
+                    <div className="form-group">
+                        <label>TÍTULO DEL ARCHIVO</label>
+                        <input 
+                            type="text" 
+                            value={form.titulo} 
+                            onChange={(e) => setForm({...form, titulo: e.target.value})} 
+                            placeholder="Ej: Objeto no identificado..." 
+                            required 
+                        />
+                    </div>
 
-            {/* --- FORMULARIO DE SUBIDA (Solo para Agentes o Admin) --- */}
-            {usuarioLogueado.id && (
-                <div className="formulario-subida-bunker">
-                    <h3 className="titulo-neon-chico">REGISTRAR NUEVO HALLAZGO</h3>
-                    <form onSubmit={handleSubida} className="form-bunker">
-                        <input type="text" placeholder="TÍTULO DEL HALLAZGO" value={datos.titulo} onChange={e => setDatos({ ...datos, titulo: e.target.value })} required />
-                        <textarea placeholder="DESCRIPCIÓN DE LA EVIDENCIA" value={datos.descripcion} onChange={e => setDatos({ ...datos, descripcion: e.target.value })} />
-                        <div className="coordenadas">
-                            <input type="number" step="any" placeholder="LATITUD" value={datos.latitud} onChange={e => setDatos({ ...datos, latitud: e.target.value })} required />
-                            <input type="number" step="any" placeholder="LONGITUD" value={datos.longitud} onChange={e => setDatos({ ...datos, longitud: e.target.value })} required />
+                    <div className="form-group">
+                        <label>UBICACIÓN / LUGAR</label>
+                        <input 
+                            type="text" 
+                            value={form.lugar} 
+                            onChange={(e) => setForm({...form, lugar: e.target.value})} 
+                            placeholder="Coordenadas o zona..." 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>EVIDENCIA VISUAL</label>
+                        <input 
+                            type="file" 
+                            onChange={(e) => setArchivo(e.target.files[0])} 
+                            className="file-input"
+                            accept="image/*,video/*"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>DESCRIPCIÓN DE LA ANOMALÍA</label>
+                        <textarea 
+                            value={form.desc} 
+                            onChange={(e) => setForm({...form, desc: e.target.value})} 
+                            placeholder="Relate lo sucedido..."
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" disabled={subiendo} className="btn-enviar">
+                        {subiendo ? 'TRANSMITIENDO...' : 'ENVIAR AL BÚNKER'}
+                    </button>
+                    
+                    <div className="form-footer">
+                        <button type="button" onClick={() => navigate('/')} className="btn-secundario">INICIO</button>
+                        <button type="button" onClick={() => navigate('/radar')} className="btn-secundario">RADAR</button>
+                    </div>
+                </form>
+            </div>
+
+            <hr className="neon-divider" />
+
+            {/* GRID DE HALLAZGOS ABAJO */}
+            <div className="hallazgos-grid">
+                {hallazgos.map(h => (
+                    <div key={h.id} className="card-hallazgo">
+                        <img src={`http://localhost:5000/archivos-usuarios/${h.nombre_archivo}`} alt={h.titulo} />
+                        <div className="card-info">
+                            <h3>{h.titulo}</h3>
+                            <p className="agente-tag">Por: {h.agente}</p>
+                            <button onClick={() => verMapa(h)} className="btn-mapa">VER EN RADAR</button>
                         </div>
-                        <input type="file" onChange={e => setArchivo(e.target.files[0])} accept="image/*" required />
-                        <button type="submit" className="btn-radar" disabled={subiendo}>
-                            {subiendo ? "TRANSMITIENDO..." : "ENVIAR AL COMANDANTE"}
-                        </button>
-                    </form>
-                </div>
-            )}
-
-            <hr className="divisor-bunker" />
-
-            <div className="archivos-grid">
-                {hallazgos.map(item => {
-                    const rutaFoto = `http://localhost:5000/archivos-usuarios/${item.url_imagen}`;
-                    return (
-                        <div key={item.id} className="archivo-card">
-                            <div className="contenedor-img-agente">
-                                <img
-                                    src={rutaFoto}
-                                    alt={item.titulo}
-                                    onClick={() => verEnMapa(item)}
-                                    style={{ cursor: 'pointer', width: '100%', height: 'auto', display: 'block' }}
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII=";
-                                    }}
-                                />
-                            </div>
-                            <div className="archivo-info">
-                                <h3 className="titulo-neon-chico">{item.titulo}</h3>
-                                <p className="agente-tag">🕵️ AGENTE: {item.agente}</p>
-                                <button className="btn-radar" onClick={() => verEnMapa(item)}>
-                                    📍 LOCALIZAR EN RADAR
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
+                    </div>
+                ))}
             </div>
         </div>
     );

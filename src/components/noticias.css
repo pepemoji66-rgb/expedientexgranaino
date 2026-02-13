@@ -1,11 +1,12 @@
 /* ============================================================
-   PÁGINA DE NOTICIAS - ESTILO BÚNKER (VERSIÓN FINAL LIMPIA)
+   PÁGINA DE NOTICIAS - VERSIÓN OPTIMIZADA BÚNKER
    ============================================================ */
 :root {
     --color-principal: #00ff41;
     --color-critico: #ff4444;
     --color-bg-tarjeta: rgba(0, 0, 0, 0.9);
     --fuente-bunker: 'Courier New', monospace;
+    --border-bunker: 1px solid rgba(0, 255, 65, 0.3);
 }
 
 .noticias-page {
@@ -22,7 +23,6 @@
     color: var(--color-principal);
     text-shadow: 0 0 10px var(--color-principal);
     letter-spacing: 5px;
-    margin-bottom: 10px;
     text-transform: uppercase;
 }
 
@@ -42,7 +42,7 @@
 
 .card-noticia {
     background: var(--color-bg-tarjeta);
-    border: 1px solid rgba(0, 255, 65, 0.3);
+    border: var(--border-bunker);
     border-radius: 8px;
     overflow: hidden;
     display: flex;
@@ -57,13 +57,13 @@
     transform: translateY(-5px);
 }
 
-/* --- CONTENEDOR DE IMÁGENES (FIJO) --- */
+/* --- CONTENEDOR DE IMÁGENES --- */
 .noticia-img-container {
     width: 100%;
     height: 200px;
     overflow: hidden;
     background: #111;
-    border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+    border-bottom: var(--border-bunker);
     position: relative;
 }
 
@@ -71,8 +71,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Evita que la imagen se estire */
-    display: block;
     transition: transform 0.5s ease;
 }
 
@@ -80,7 +78,6 @@
     transform: scale(1.05);
 }
 
-/* Etiqueta de ID de archivo */
 .noticia-img-container span {
     position: absolute;
     top: 0;
@@ -88,13 +85,13 @@
     background: rgba(0, 0, 0, 0.8);
     color: var(--color-principal);
     font-size: 10px;
-    z-index: 10;
     padding: 3px 6px;
     border-right: 1px solid var(--color-principal);
     border-bottom: 1px solid var(--color-principal);
+    z-index: 5;
 }
 
-/* --- CONTENIDO TEXTUAL --- */
+/* --- CONTENIDO --- */
 .noticia-contenido {
     padding: 20px;
     flex-grow: 1;
@@ -168,7 +165,6 @@
 .paginacion-bunker {
     display: flex;
     justify-content: center;
-    align-items: center;
     gap: 20px;
     margin: 40px 0;
 }
@@ -194,7 +190,7 @@
     cursor: not-allowed;
 }
 
-/* --- MODAL DE DETALLE (CORREGIDO) --- */
+/* --- MODAL --- */
 .modal-noticia-overlay {
     position: fixed;
     top: 0;
@@ -207,7 +203,6 @@
     align-items: center;
     z-index: 9999;
     backdrop-filter: blur(8px);
-    cursor: zoom-out;
 }
 
 .modal-noticia-content {
@@ -220,7 +215,6 @@
     overflow-y: auto;
     position: relative;
     box-shadow: 0 0 50px rgba(0, 255, 65, 0.2);
-    cursor: default;
 }
 
 .btn-cerrar-modal {
@@ -230,35 +224,23 @@
     background: rgba(255, 68, 68, 0.1);
     border: 1px solid var(--color-critico);
     color: var(--color-critico);
-    font-size: 1.2rem;
     width: 35px;
     height: 35px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: 0.3s;
-    font-family: var(--fuente-bunker);
-    z-index: 100;
-}
-
-.btn-cerrar-modal:hover {
-    background: var(--color-critico);
-    color: #fff;
-    box-shadow: 0 0 10px var(--color-critico);
 }
 
 .img-modal-expandida {
     width: 100%;
     max-height: 500px;
     object-fit: contain;
-    /* Mantiene la proporción en el modal */
     margin-bottom: 20px;
     border: 1px solid #333;
-    background: #050505;
 }
 
-/* --- ESTADOS DE ERROR / SIN IMAGEN --- */
+/* --- EFECTOS Y ERRORES --- */
 .sin-evidencia-visual,
 .img-error {
     display: flex;
@@ -267,12 +249,8 @@
     background: linear-gradient(45deg, #000 25%, #080808 25%, #080808 50%, #000 50%, #000 75%, #080808 75%, #080808 100%);
     background-size: 30px 30px;
     color: var(--color-principal);
-    font-weight: bold;
     height: 100%;
-    /* Ocupa todo el contenedor */
     width: 100%;
-    border: 1px solid #1a1a1a;
-    letter-spacing: 2px;
     animation: flicker 3s infinite;
 }
 
@@ -288,16 +266,41 @@
     }
 }
 
-/* --- FORMULARIO --- */
+/* --- EL FORMULARIO (UNIFICADO Y LIMPIO) --- */
 .contenedor-form-noticia {
     margin-top: 60px;
-    padding-top: 40px;
+    padding: 40px 0;
     border-top: 1px dashed var(--color-principal);
+    position: relative;
+    clear: both;
+}
+
+/* Anulamos el efecto modal para que se quede en el pie de página */
+.contenedor-form-noticia .forms-overlay {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    display: block !important;
+    z-index: 1 !important;
+}
+
+.contenedor-form-noticia .forms-container {
+    position: relative !important;
+    margin: 0 auto !important;
+    max-width: 600px !important;
+    transform: none !important;
+    border: var(--border-bunker);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
 }
 
 .input-file-bunker {
-    border: 1px solid rgba(0, 255, 65, 0.3);
+    border: var(--border-bunker);
     padding: 15px;
     background: #050505;
     margin: 10px 0;
+    color: var(--color-principal);
 }

@@ -131,3 +131,90 @@
         font-size: 1.5rem;
     }
 }
+
+/* Aseguramos que el contenedor de aportaciones fluya debajo de los vídeos */
+.seccion-aportaciones {
+    clear: both;
+    display: block;
+    width: 100%;
+    margin-top: 50px;
+    padding-bottom: 50px;
+    position: relative;
+    /* Cambia esto si estaba en fixed o absolute */
+    z-index: 10;
+}
+
+/* Si el formulario usa un estilo de "modal" que aparece solo, 
+   asegúrate de que no tenga un alto que bloquee el scroll */
+.subir-video-seccion {
+    max-width: 600px;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--color-principal);
+    padding: 20px;
+}
+
+/* --- BLOQUE DE ARREGLO PARA EL FORMULARIO REBELDE --- */
+
+/* Forzamos que la sección de aportaciones no deje pasar nada encima */
+.seccion-aportaciones {
+    clear: both !important;
+    display: block !important;
+    position: relative !important;
+    margin-top: 100px !important;
+    padding: 40px 0 !important;
+    width: 100% !important;
+}
+
+/* ATENCIÓN HERMANO: Aquí atacamos directamente al contenedor del Form 
+   para que deje de flotar sobre los vídeos.
+*/
+.seccion-aportaciones .forms-container {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    /* Quita el centrado de pantalla */
+    margin: 0 auto !important;
+    /* Lo centra pero dentro de su sitio */
+    z-index: 1 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+/* Aseguramos que el fondo no sea transparente y tape lo de atrás si hay scroll */
+.subir-video-seccion {
+    background: #000 !important;
+    border: 1px solid var(--color-principal) !important;
+    position: relative !important;
+}
+
+/* EL EXORCISMO DEL OVERLAY */
+
+/* 1. Quitamos el fondo negro gigante y el desenfoque */
+.seccion-aportaciones .forms-overlay {
+    position: relative !important;
+    /* Pasa de flotar a estar en la cola */
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    /* Quitamos el fondo negro que tapa todo */
+    backdrop-filter: none !important;
+    /* Quitamos el desenfoque */
+    display: block !important;
+    /* Ya no necesitamos el flex de centrado */
+    z-index: 1 !important;
+    /* Lo bajamos al nivel del suelo */
+    padding: 0 !important;
+    margin-top: 50px !important;
+}
+
+/* 2. Ajustamos la caja del formulario que hay dentro para que no sea gigante */
+.seccion-aportaciones .forms-container {
+    position: relative !important;
+    margin: 0 auto !important;
+    max-width: 500px !important;
+    /* Para que no ocupe toda la pantalla */
+    box-shadow: 0 0 20px var(--color-principal);
+}

@@ -14,6 +14,7 @@ const Galeria = ({ userAuth }) => {
     const [pestanaActiva, setPestanaActiva] = useState('lugares'); 
     const [paginaActual, setPaginaActual] = useState(1);
     const [fotoExpandida, setFotoExpandida] = useState(null);
+    const [mostrarForm, setMostrarForm] = useState(false); 
     const navigate = useNavigate();
 
     const [nuevoTitulo, setNuevoTitulo] = useState('');
@@ -22,10 +23,9 @@ const Galeria = ({ userAuth }) => {
 
     const imagenesPorPagina = 6;
 
-    // --- CONFIGURACIÓN DE RUTAS (El corazón del cambio) ---
     const config = {
         'lugares': { 
-            urlBase: 'http://localhost:5000/lugares/', // Apuntamos al puerto 5000
+            urlBase: 'http://localhost:5000/lugares/', 
             columna: 'imagen_url',
             etiqueta: 'SECTOR LUGARES'
         },
@@ -83,6 +83,7 @@ const Galeria = ({ userAuth }) => {
             });
             alert("🚀 EVIDENCIA ENVIADA.");
             setNuevoTitulo(''); setArchivoSeleccionado(null); setNuevaDesc('');
+            setMostrarForm(false); 
             cargarImagenes();
         } catch (err) {
             console.error("Error en la subida:", err);
@@ -120,7 +121,7 @@ const Galeria = ({ userAuth }) => {
                 {['lugares', 'imagenes', 'archivos-usuarios'].map(f => (
                     <button 
                         key={f}
-                        onClick={() => { setPestanaActiva(f); setPaginaActual(1); }}
+                        onClick={() => { setPestanaActiva(f); setPaginaActual(1); setMostrarForm(false); }}
                         className={pestanaActiva === f ? 'active' : ''}
                         style={{
                             background: pestanaActiva === f ? '#00ff41' : '#111',
@@ -134,8 +135,31 @@ const Galeria = ({ userAuth }) => {
             </div>
 
             {userAuth && pestanaActiva === 'archivos-usuarios' && (
+                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <button 
+                        onClick={() => setMostrarForm(!mostrarForm)}
+                        style={{
+                            background: '#000', color: '#00ff41', border: '1px solid #00ff41',
+                            padding: '10px 25px', cursor: 'pointer', fontFamily: 'monospace'
+                        }}
+                    >
+                        {mostrarForm ? '✖ CANCELAR REGISTRO' : '➕ AÑADIR NUEVO HALLAZGO'}
+                    </button>
+                </div>
+            )}
+
+            {mostrarForm && userAuth && pestanaActiva === 'archivos-usuarios' && (
                 <section className="contenedor-formulario-fijo">
-                    <Forms title="REGISTRAR HALLAZGO" onSubmit={subirImagen} onClear={() => { setNuevoTitulo(''); setArchivoSeleccionado(null); setNuevaDesc(''); }}>
+                    <Forms 
+                        title="REGISTRAR HALLAZGO" 
+                        onSubmit={subirImagen} 
+                        onClear={() => { 
+                            setNuevoTitulo(''); 
+                            setArchivoSeleccionado(null); 
+                            setNuevaDesc('');
+                            setMostrarForm(false); // <--- ESTO ES LO QUE HACE QUE EL BOTÓN ABORTAR FUNCIONE
+                        }}
+                    >
                         <input type="text" placeholder="TÍTULO..." value={nuevoTitulo} onChange={e => setNuevoTitulo(e.target.value)} required />
                         <input type="file" accept="image/*" onChange={e => setArchivoSeleccionado(e.target.files[0])} required />
                         <textarea placeholder="DESCRIPCIÓN..." value={nuevaDesc} onChange={e => setNuevaDesc(e.target.value)} required />
@@ -147,21 +171,13 @@ const Galeria = ({ userAuth }) => {
                 {imagenesActuales.length > 0 ? (
                     imagenesActuales.map((img) => {
                         const nombreArchivo = img[confActual.columna];
-                        // CONSTRUCCIÓN DE RUTA AL BACKEND
                         const rutaImg = nombreArchivo ? `${confActual.urlBase}${nombreArchivo}` : null;
 
                         return (
                             <div key={img.id} className="card-imagen" onClick={() => rutaImg && setFotoExpandida({ ...img, rutaCompleta: rutaImg })}>
                                 <div className="contenedor-img">
                                     {rutaImg ? (
-                                        <img
-                                            src={rutaImg}
-                                            alt={img.titulo || img.nombre}
-                                            onError={(e) => { 
-                                                e.target.onerror = null; 
-                                                e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII="; 
-                                            }}
-                                        />
+                                        <img src={rutaImg} alt={img.titulo || img.nombre} />
                                     ) : (
                                         <div className="placeholder-vacio">⚠️ SIN RUTA</div>
                                     )}
@@ -175,16 +191,17 @@ const Galeria = ({ userAuth }) => {
                         );
                     })
                 ) : (
-                    <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px' }}>No hay datos visuales detectados...</p>
+                    <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px', color: '#00ff41' }}>
+                        📡 NO HAY DATOS VISUALES DETECTADOS EN ESTE SECTOR...
+                    </p>
                 )}
             </div>
 
-            {/* MODAL (Corregido también la ruta del modal) */}
             {fotoExpandida && (
                 <div className="modal-galeria-abierta" onClick={() => setFotoExpandida(null)}>
                     <div className="contenido-foto-grande" onClick={e => e.stopPropagation()}>
                         <button className="cerrar-modal" onClick={() => setFotoExpandida(null)}>×</button>
-                        <img src={fotoExpandida.rutaCompleta} alt="Evidencia" onError={(e) => { e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII="; }} />
+                        <img src={fotoExpandida.rutaCompleta} alt="Evidencia" />
                         <div className="texto-foto-grande">
                             <h2 className="neon-text-blue">{(fotoExpandida.titulo || fotoExpandida.nombre)?.toUpperCase()}</h2>
                             <p className="desc-galeria">{fotoExpandida.descripcion || fotoExpandida.cuerpo || fotoExpandida.descripcionclon}</p>

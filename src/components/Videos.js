@@ -14,45 +14,45 @@ const Videos = ({ userAuth }) => {
 
     const cargarVideos = async () => {
         try {
-            // Cargamos siempre los vídeos públicos para todos
-            const res = await axios.get('http://localhost:5000/videos-publicos');
-            setVideos(res.data); 
+            const res = await axios.get('http://localhost:5000/api/videos');
+            setVideos(res.data);
         } catch (err) {
-            console.error("❌ Error al conectar con el servidor");
+            console.error("❌ Error al conectar con el servidor:", err);
         }
     };
 
     const handleSubirVideo = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/subir-video', {
+            await axios.post('http://localhost:5000/api/videos', {
                 titulo: titulo,
                 url: nuevaUrl,
                 usuario: userAuth?.nombre || 'ANÓNIMO'
             });
-            alert("Vídeo enviado correctamente para revisión.");
+            alert("Vídeo enviado correctamente al archivo.");
             setNuevaUrl('');
             setTitulo('');
-            cargarVideos(); 
+            cargarVideos();
         } catch (err) {
+            console.error("Error al subir:", err);
             alert("❌ Error al subir el contenido");
         }
     };
 
     return (
-        <div className="videos-container fade-in">
-            {/* Título más serio y profesional */}
+        <div className="videos-container fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            {/* 1. CABECERA */}
             <h1 className="titulo-seccion">ARCHIVO AUDIOVISUAL</h1>
 
-            <div className="grid-videos">
+            {/* 2. ZONA DE VÍDEOS (Contenedor Flexible) */}
+            <div className="grid-videos" style={{ flex: '1' }}>
                 {videos && videos.length > 0 ? (
                     videos.map((vid) => (
                         <div key={vid.id} className="video-card">
                             <div className="video-wrapper">
                                 {vid.url && !vid.url.includes('http') ? (
                                     <video controls className="video-elemento" key={vid.url}>
-                                        <source src={`/videos/${vid.url}.mp4`} type="video/mp4" />
-                                        <source src={`/videos/${vid.url}`} type="video/mp4" />
+                                        <source src={`http://localhost:5000/ver-videos/${vid.url}`} type="video/mp4" />
                                         Tu navegador no soporta el formato de vídeo.
                                     </video>
                                 ) : (
@@ -73,38 +73,37 @@ const Videos = ({ userAuth }) => {
                         </div>
                     ))
                 ) : (
-                    <div className="texto-vacio" style={{textAlign: 'center', width: '100%', color: '#888'}}>
+                    <div className="texto-vacio" style={{ textAlign: 'center', width: '100%', color: '#888', padding: '50px' }}>
                         <p>No hay vídeos disponibles en este momento.</p>
                     </div>
                 )}
             </div>
 
-            {/* Lógica de registro para aportar material */}
-            <div className="seccion-aportaciones" style={{ marginTop: '40px', textAlign: 'center' }}>
+            {/* 3. SECCIÓN DE APORTACIONES (Anclada al final) */}
+            <div className="seccion-aportaciones" style={{ marginTop: '100px', width: '100%', position: 'relative', clear: 'both' }}>
                 {userAuth ? (
-                    <div className="subir-video-seccion">
+                    <div className="subir-video-seccion" style={{ position: 'relative', zIndex: '1' }}>
                         <Forms title="COMPARTIR VÍDEO" onSubmit={handleSubirVideo}>
-                            <input 
-                                type="text" 
-                                placeholder="TÍTULO DEL VÍDEO" 
-                                value={titulo} 
-                                onChange={(e) => setTitulo(e.target.value)} 
-                                required 
+                            <input
+                                type="text"
+                                placeholder="TÍTULO DEL VÍDEO"
+                                value={titulo}
+                                onChange={(e) => setTitulo(e.target.value)}
+                                required
                             />
-                            <input 
-                                type="text" 
-                                placeholder="URL DE YOUTUBE O NOMBRE DEL ARCHIVO" 
-                                value={nuevaUrl} 
-                                onChange={(e) => setNuevaUrl(e.target.value)} 
-                                required 
+                            <input
+                                type="text"
+                                placeholder="ARCHIVO (ej: 1.mp4) O URL YOUTUBE"
+                                value={nuevaUrl}
+                                onChange={(e) => setNuevaUrl(e.target.value)}
+                                required
                             />
                         </Forms>
                     </div>
                 ) : (
-                    <div className="aviso-registro-videos" style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div className="aviso-registro-videos" style={{ padding: '40px', textAlign: 'center', borderTop: '1px dashed var(--color-principal)' }}>
                         <p style={{ color: '#aaa', fontSize: '0.9rem', fontStyle: 'italic' }}>
-                            Para aportar su propio material audiovisual a esta colección, 
-                            por favor <strong style={{color: 'var(--color-principal)'}}>inicie sesión</strong> o regístrese.
+                            Para aportar su propio material audiovisual, por favor <strong style={{ color: 'var(--color-principal)' }}>inicie sesión</strong>.
                         </p>
                     </div>
                 )}

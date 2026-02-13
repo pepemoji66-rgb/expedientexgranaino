@@ -11,9 +11,10 @@ const Expedientes = () => {
 
     const cargarDatos = useCallback(async () => {
         try {
+            // AJUSTE: He corregido la ruta de relatos-admin para que coincida con tu server.js
             const endpoint = seccion === 'usuarios'
                 ? 'http://localhost:5000/expedientes-publicos' 
-                : 'http://localhost:5000/relatos-administrador';
+                : 'http://localhost:5000/relatos-admin-publicos';
             
             const res = await axios.get(endpoint);
             console.log("⚡ Datos del búnker:", res.data);
@@ -42,6 +43,7 @@ const Expedientes = () => {
             alert("🚀 EXPEDIENTE ENVIADO AL JEFE PARA REVISIÓN.");
             setNuevoTitulo('');
             setNuevoContenido('');
+            cargarDatos(); // Para refrescar la lista
         } catch (err) {
             alert("❌ Error en la transmisión al Búnker.");
         }

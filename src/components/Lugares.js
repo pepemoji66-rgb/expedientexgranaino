@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useLocation } from 'react-router-dom';
 import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
@@ -33,6 +34,7 @@ const ActualizadorMapa = ({ centro }) => {
 };
 
 const Lugares = () => {
+    const location = useLocation();
     const [puntos, setPuntos] = useState([]);
     const [noticias, setNoticias] = useState([]);
     const [vista, setVista] = useState('lugares');
@@ -48,7 +50,6 @@ const Lugares = () => {
 
     const cargarDatos = useCallback(async () => {
         try {
-            // Solo pedimos Lugares y Noticias (Eliminado Archivos)
             const [resL, resN] = await Promise.all([
                 axios.get('http://localhost:5000/lugares'),
                 axios.get('http://localhost:5000/admin/todas-noticias')
@@ -57,20 +58,25 @@ const Lugares = () => {
             setPuntos(resL.data.filter(p => p.estado === 'activo' || p.estado === 'aprobado' || p.estado === 'publicado'));
             setNoticias(resN.data.filter(n => n.estado === 'aprobado' && n.latitud && n.longitud));
 
-            const resaltar = localStorage.getItem('lugar_a_resaltar');
-            if (resaltar) {
-                const data = JSON.parse(resaltar);
-                if (data.tipo === 'noticia') setVista('noticias');
-
-                setCentroMapa([parseFloat(data.latitud), parseFloat(data.longitud)]);
-                setIdResaltado(data.id);
-                localStorage.removeItem('lugar_a_resaltar');
+            // LÓGICA DE NAVEGACIÓN DESDE NOTICIAS
+            if (location.state && location.state.lat && location.state.lng) {
+                setVista('noticias');
+                setCentroMapa([parseFloat(location.state.lat), parseFloat(location.state.lng)]);
+                if (location.state.noticiaId) setIdResaltado(location.state.noticiaId);
+            } else {
+                const resaltar = localStorage.getItem('lugar_a_resaltar');
+                if (resaltar) {
+                    const data = JSON.parse(resaltar);
+                    if (data.tipo === 'noticia') setVista('noticias');
+                    setCentroMapa([parseFloat(data.latitud), parseFloat(data.longitud)]);
+                    setIdResaltado(data.id);
+                    localStorage.removeItem('lugar_a_resaltar');
+                }
             }
-
         } catch (err) {
             console.error("❌ ERROR EN EL RADAR:", err);
         }
-    }, []);
+    }, [location.state]);
 
     useEffect(() => {
         cargarDatos();
@@ -92,7 +98,6 @@ const Lugares = () => {
         <section className="panel-admin-container fade-in">
             <h2 className="titulo-neon">SISTEMA DE MANDO ESTRATÉGICO</h2>
 
-            {/* Selector de Vistas - Simplificado a 2 botones */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', gap: '15px', flexWrap: 'wrap' }}>
                 <button
                     onClick={() => { setVista('lugares'); setIdResaltado(null); }}
@@ -111,7 +116,6 @@ const Lugares = () => {
                         <ActualizadorMapa centro={centroMapa} />
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-                        {/* 1. LUGARES */}
                         {vista === 'lugares' && puntos.map(l => (
                             <Marker key={`l-${l.id}`} position={[parseFloat(l.latitud), parseFloat(l.longitud)]} icon={idResaltado === l.id ? iconoResaltado : iconoLugar}>
                                 <Popup>
@@ -124,7 +128,6 @@ const Lugares = () => {
                             </Marker>
                         ))}
 
-                        {/* 2. ALERTAS (NOTICIAS) */}
                         {vista === 'noticias' && noticiasAgrupadas.map((grupo, idx) => {
                             const keyGrupo = `${grupo[0].latitud}-${grupo[0].longitud}`;
                             const indexActual = indicesPestanas[keyGrupo] || 0;
@@ -144,8 +147,6 @@ const Lugares = () => {
                                             )}
                                             <h4 style={{ color: '#ff4444' }}>⚠️ ALERTA</h4>
                                             <strong style={{ color: '#00ff88' }}>{n.titulo}</strong>
-
-                                            {/* IMAGEN DE ALERTA CORREGIDA */}
                                             {n.imagen_url && (
                                                 <img
                                                     src={`http://localhost:5000/imagenes/${n.imagen_url}`}
@@ -154,7 +155,6 @@ const Lugares = () => {
                                                     onError={handleImgError}
                                                 />
                                             )}
-
                                             <p style={{ fontSize: '11px', marginTop: '8px', lineHeight: '1.4' }}>{n.cuerpo}</p>
                                         </div>
                                     </Popup>
@@ -164,7 +164,6 @@ const Lugares = () => {
                     </MapContainer>
                 </div>
 
-                {/* Lista Derecha */}
                 <div className="panel-objetivos">
                     <h3 className="titulo-objetivos">
                         {vista === 'lugares' ? '🎯 OBJETIVOS' : '🔥 ALERTAS'}

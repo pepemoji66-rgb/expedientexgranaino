@@ -1,109 +1,119 @@
-/* archivosusuarios.css */
-.archivos-page {
-    padding: 80px 20px 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-    color: white;
-    font-family: 'monospace';
+/* Contenedor que centra todo */
+.archivos-container {
+    padding: 20px;
+    background-color: #000;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra horizontalmente */
+    color: #00ff41;
+    font-family: 'Courier New', Courier, monospace;
 }
 
 .titulo-neon {
+    text-shadow: 0 0 15px #00ff41;
+    margin-bottom: 30px;
     text-align: center;
-    color: var(--color-principal);
-    text-shadow: 0 0 10px var(--color-principal);
-    letter-spacing: 3px;
-    margin-bottom: 40px;
+}
+
+/* EL CANDADO: Esto evita que se desparrame */
+.form-bunker-wrapper {
+    background: rgba(5, 5, 5, 0.9);
+    border: 2px solid #00ff41;
+    border-radius: 20px;
+    padding: 25px;
+    width: 90%; /* Responsive */
+    max-width: 480px; /* AQUÍ se queda estrecho como en la foto */
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    margin: 0 auto 40px auto; /* Centrado absoluto */
+}
+
+.form-bunker {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.75rem;
+    margin-bottom: 5px;
+    color: #00ff41;
     text-transform: uppercase;
 }
 
-.archivos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 25px;
-    margin-bottom: 30px;
+/* Inputs que no se rompen */
+.form-bunker input, 
+.form-bunker textarea {
+    background: #111 !important;
+    border: 1px solid #00ff41 !important;
+    border-radius: 5px !important;
+    color: #00ff41 !important;
+    padding: 10px !important;
+    outline: none;
 }
 
-.archivo-card {
-    background: rgba(0, 0, 0, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
+.btn-enviar {
+    background: #00ff41 !important;
+    color: #000 !important;
+    padding: 12px !important;
+    font-weight: bold !important;
+    border: none !important;
+    border-radius: 10px !important;
     cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
+    transition: 0.3s ease;
 }
 
-.archivo-card:hover {
-    border-color: var(--color-principal);
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 255, 65, 0.2);
+.btn-enviar:hover {
+    box-shadow: 0 0 15px #00ff41;
+    transform: scale(1.02);
 }
 
-.archivo-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    filter: grayscale(40%);
-    transition: 0.3s;
-}
-
-.archivo-card:hover img {
-    filter: grayscale(0%);
-}
-
-.archivo-card .info {
-    padding: 15px;
-    background: linear-gradient(to top, black, transparent);
-}
-
-.archivo-card h4 {
-    margin: 0 0 5px;
-    color: var(--color-principal);
-    font-size: 1.1rem;
-}
-
-.archivo-card p {
-    margin: 0;
-    font-size: 0.8rem;
-    color: #888;
-}
-
-/* Paginación estilo Terminal */
-.paginacion {
+/* Footer del formulario */
+.form-footer {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     gap: 10px;
-    margin-top: 30px;
 }
 
-.paginacion button {
-    background: black;
-    color: white;
-    border: 1px solid #444;
-    padding: 8px 15px;
+.btn-secundario {
+    flex: 1;
+    background: transparent;
+    border: 1px solid #00ff41;
+    color: #00ff41;
+    padding: 8px;
+    border-radius: 5px;
     cursor: pointer;
-    font-family: 'monospace';
-    transition: 0.3s;
+    font-size: 0.8rem;
 }
 
-.paginacion button:hover {
-    border-color: var(--color-principal);
-    color: var(--color-principal);
+/* EL GRID: Las fotos de abajo */
+.hallazgos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
 }
 
-.paginacion button.active {
-    background: var(--color-principal);
-    color: black;
-    border-color: var(--color-principal);
-    box-shadow: 0 0 10px var(--color-principal);
+.card-hallazgo {
+    border: 1px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #0a0a0a;
 }
 
-/* Animación de entrada */
-.archivos-page {
-    animation: fadeIn 0.8s ease-in-out;
+.card-hallazgo img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.card-info {
+    padding: 15px;
 }
