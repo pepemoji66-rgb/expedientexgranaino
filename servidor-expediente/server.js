@@ -39,6 +39,7 @@ const dirAudios = path.join(__dirname, 'public/audio');
 
 const safeFilename = (file) => Date.now() + '-' + file.originalname.replace(/\s/g, "_");
 
+// Configuraciones de Multer
 const upload = multer({
     storage: multer.diskStorage({
         destination: (req, file, cb) => { cb(null, dirLugares); },
@@ -60,7 +61,21 @@ const uploadArchivos = multer({
     })
 });
 
-// --- 3. RECURSOS ESTÁTICOS (Tuberías) ---
+const uploadAdmin = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            const { seccion } = req.body;
+            let dest = dirImagenes; 
+            if (seccion === 'videos') dest = dirVideos;
+            else if (seccion === 'audios') dest = dirAudios;
+            else if (seccion === 'noticias') dest = dirImagenes;
+            cb(null, dest);
+        },
+        filename: (req, file, cb) => { cb(null, safeFilename(file)); }
+    })
+});
+
+// --- 3. RECURSOS ESTÁTICOS ---
 app.use('/imagenes', express.static(dirImagenes));
 app.use('/archivos-usuarios', express.static(dirArchivosUsuarios));
 app.use('/lugares', express.static(dirLugares));
@@ -81,7 +96,95 @@ app.use('/', galeriaRoutes(db, uploadArchivos, uploadGeneral));
 app.use('/', authRoutes(db));
 app.use('/', expedientesRoutes(db, upload));
 
-// --- 6. LÓGICA DEL CHAT ---
+// --- 6. RUTAS PANEL DE CONTROL (REVISADO) ---
+
+app.get('/usuarios', (req, res) => {
+    db.query("SELECT id, nombre, email FROM usuarios", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+app.get('/videos-publicos', (req, res) => {
+    db.query("SELECT * FROM videos WHERE estado = 'aprobado'", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+app.get('/admin/todos-los-videos', (req, res) => {
+    db.query("SELECT * FROM videos ORDER BY id DESC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+app.get('/admin/todas-las-imagenes', (req, res) => {
+    db.query("SELECT * FROM imagenes ORDER BY id DESC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+app.get('/admin/todas-noticias', (req, res) => {
+    db.query("SELECT * FROM noticias ORDER BY id DESC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+app.get('/relatos-admin-publicos', (req, res) => {
+    db.query("SELECT * FROM expedientes WHERE usuario_id = 0 OR usuario_id IS NULL ORDER BY id DESC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+// RUTA MAESTRA DE SUBIDA (CORREGIDA AL 100%)
+app.post('/admin/subir-todo', uploadAdmin.single('archivo'), (req, res) => {
+    const { seccion, titulo } = req.body;
+    if (!req.file) return res.status(400).send("No hay archivo");
+
+    const nombreArchivo = req.file.filename;
+    let sql = "";
+    let params = [];
+
+    switch (seccion) {
+        case 'videos':
+            sql = "INSERT INTO videos (titulo, url, estado, usuario) VALUES (?, ?, 'aprobado', 'ADMIN')";
+            params = [titulo, nombreArchivo];
+            break;
+        case 'imagenes_publicas':
+            // ✅ CORRECCIÓN: Tabla 'imagenes', columna 'url_imagen' y 'agente'
+            sql = "INSERT INTO imagenes (titulo, url_imagen, estado, agente, fecha) VALUES (?, ?, 'publica', 'ADMIN', NOW())";
+            params = [titulo, nombreArchivo];
+            break;
+        case 'noticias':
+            sql = "INSERT INTO noticias (titulo, imagen, estado, fecha) VALUES (?, ?, 'aprobado', NOW())";
+            params = [titulo, nombreArchivo];
+            break;
+        case 'audios':
+            sql = "INSERT INTO audios (titulo, ruta) VALUES (?, ?)";
+            params = [titulo, nombreArchivo];
+            break;
+        case 'expedientes':
+            sql = "INSERT INTO expedientes (titulo, contenido, estado, usuario_nombre) VALUES (?, 'Subida Admin', 'publicado', 'ADMIN')";
+            params = [titulo];
+            break;
+        default:
+            return res.status(400).send("Sección no válida");
+    }
+
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            console.error("❌ ERROR EN DB:", err.sqlMessage);
+            return res.status(500).json({ error: err.sqlMessage });
+        }
+        res.json({ message: "Carga completada, pichica", id: result.insertId });
+    });
+});
+
+// --- 7. LÓGICA DEL CHAT ---
 io.on('connection', (socket) => {
     socket.on('limpiar_chat_servidor', () => {
         db.query("DELETE FROM chat_mensajes", (err) => {
@@ -106,8 +209,7 @@ app.get('/chat-historial', (req, res) => {
     });
 });
 
-app.post('/chat-ia', (req, res) => res.json({ respuesta: `(Búnker) El Archivero está analizando los pergaminos...` }));
+app.post('/chat-ia', (req, res) => res.json({ respuesta: `(Búnker) El Archivero está analizando...` }));
 
-// --- MOTOR ---
 const PORT = 5000;
-server.listen(PORT, () => console.log(`🚀 BÚNKER EN PUERTO ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 BÚNKER EN PUERTO ${PORT} (DB: 3307)`));

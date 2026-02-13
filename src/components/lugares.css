@@ -155,3 +155,126 @@
     background: rgba(0, 255, 136, 0.2);
     border-left: 4px solid #00ff88;
 }
+.btn-mando {
+    background: #222;
+    color: #fff;
+    border: 2px solid #444;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.activo-lugares { background: #00ff41 !important; color: #000 !important; border-color: #00ff41 !important; }
+.activo-alertas { background: #ff4444 !important; color: #000 !important; border-color: #ff4444 !important; }
+.activo-galeria { background: #00d4ff !important; color: #000 !important; border-color: #00d4ff !important; }
+
+.grid-imagenes-moderno {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.card-foto-hallazgo {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.card-foto-hallazgo:hover { transform: scale(1.03); border-color: #00d4ff; }
+
+.card-foto-hallazgo img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.info-hallazgo { padding: 10px; text-align: center; }
+.info-hallazgo h4 { color: #00d4ff; margin-bottom: 5px; }
+
+.paginacion-bunker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+    color: #00ff41;
+}
+
+.paginacion-bunker button {
+    background: #00ff41;
+    color: #000;
+    border: none;
+    padding: 8px 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.paginacion-bunker button:disabled { background: #333; color: #666; cursor: not-allowed; }/* ============================================================
+    CONTROL DE DAÑOS: POPUPS DEL RADAR
+   ============================================================ */
+
+/* Contenedor principal del Popup */
+.leaflet-popup-content-wrapper {
+    background: #000 !important;
+    color: #00ff41 !important;
+    border: 2px solid #00ff41 !important;
+    border-radius: 0px !important;
+    padding: 0px !important;
+    width: 300px !important; /* Forzamos un ancho manejable */
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.6) !important;
+}
+
+/* Ajuste del contenido para que no desborde */
+.leaflet-popup-content {
+    width: 270px !important;
+    margin: 15px !important;
+    overflow: hidden !important;
+}
+
+/* ARREGLO DE LA IMAGEN (El problema principal) */
+.img-popup-bunker, 
+.leaflet-popup-content img {
+    width: 100% !important;   /* Se ajusta al ancho del popup */
+    max-width: 270px !important;
+    height: 160px !important; /* Altura controlada */
+    object-fit: cover !important; /* Evita que se estire */
+    border: 1px solid #00ff41 !important;
+    display: block !important;
+    margin-bottom: 10px !important;
+}
+
+/* BOTÓN DE CERRAR (Imprescindible para no quedarse atrapado) */
+.leaflet-popup-close-button {
+    color: #00ff41 !important;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    top: 5px !important;
+    right: 5px !important;
+    z-index: 9999 !important; /* Por encima de todo */
+}
+
+/* Piquito inferior */
+.leaflet-popup-tip {
+    background: #00ff41 !important;
+}
+
+/* Textos dentro del popup */
+.popup-bunker-v2 h4 {
+    font-family: 'Courier New', monospace !important;
+    text-transform: uppercase !important;
+    margin: 0 0 8px 0 !important;
+    font-size: 1.1rem !important;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.4);
+}
+
+.popup-bunker-v2 p {
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.85rem !important;
+    color: #ffffff !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+}

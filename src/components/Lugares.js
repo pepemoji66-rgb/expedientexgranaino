@@ -6,7 +6,7 @@ import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import './paneladmin.css';
 
-// --- ICONOS ---
+// --- ICONOS ESTRATÉGICOS ---
 const iconoLugar = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
@@ -22,7 +22,7 @@ const iconoResaltado = new L.Icon({
     iconSize: [30, 45], iconAnchor: [15, 45], popupAnchor: [1, -34]
 });
 
-// Componente para mover el mapa suavemente
+// Componente para el movimiento fluido del mapa
 const ActualizadorMapa = ({ centro }) => {
     const map = useMap();
     useEffect(() => {
@@ -37,19 +37,20 @@ const Lugares = () => {
     const location = useLocation();
     const [puntos, setPuntos] = useState([]);
     const [noticias, setNoticias] = useState([]);
-    const [vista, setVista] = useState('lugares');
+    const [vista, setVista] = useState('lugares'); 
     const [centroMapa, setCentroMapa] = useState([37.1773, -3.5986]);
     const [idResaltado, setIdResaltado] = useState(null);
     const [indicesPestanas, setIndicesPestanas] = useState({});
 
-    // Función para evitar bucles si la imagen falla
+    // Cortafuegos para el bucle de imágenes
     const handleImgError = (e) => {
-        e.target.onerror = null;
-        e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN8Xw8AAoMBX928o1oAAAAASUVORK5CYII=";
+        e.target.onerror = null; 
+        e.target.src = "https://placehold.co/300x200/000000/00ff41?text=SIN+IMAGEN+DISPONIBLE";
     };
 
     const cargarDatos = useCallback(async () => {
         try {
+            console.log("📡 SINCRONIZANDO RADAR...");
             const [resL, resN] = await Promise.all([
                 axios.get('http://localhost:5000/lugares'),
                 axios.get('http://localhost:5000/admin/todas-noticias')
@@ -58,30 +59,22 @@ const Lugares = () => {
             setPuntos(resL.data.filter(p => p.estado === 'activo' || p.estado === 'aprobado' || p.estado === 'publicado'));
             setNoticias(resN.data.filter(n => n.estado === 'aprobado' && n.latitud && n.longitud));
 
-            // LÓGICA DE NAVEGACIÓN DESDE NOTICIAS
-            if (location.state && location.state.lat && location.state.lng) {
+            // ESTO ES LO IMPORTANTE: Si vienes de "Archivos" o "Noticias", el mapa reacciona
+            if (location.state?.lat && location.state?.lng) {
+                // Si trae datos, cambiamos a la vista de noticias automáticamente
                 setVista('noticias');
-                setCentroMapa([parseFloat(location.state.lat), parseFloat(location.state.lng)]);
+                const nuevasCoords = [parseFloat(location.state.lat), parseFloat(location.state.lng)];
+                setCentroMapa(nuevasCoords);
                 if (location.state.noticiaId) setIdResaltado(location.state.noticiaId);
-            } else {
-                const resaltar = localStorage.getItem('lugar_a_resaltar');
-                if (resaltar) {
-                    const data = JSON.parse(resaltar);
-                    if (data.tipo === 'noticia') setVista('noticias');
-                    setCentroMapa([parseFloat(data.latitud), parseFloat(data.longitud)]);
-                    setIdResaltado(data.id);
-                    localStorage.removeItem('lugar_a_resaltar');
-                }
             }
         } catch (err) {
-            console.error("❌ ERROR EN EL RADAR:", err);
+            console.error("❌ ERROR DE CONEXIÓN:", err);
         }
     }, [location.state]);
 
-    useEffect(() => {
-        cargarDatos();
-    }, [cargarDatos]);
+    useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
+    // Lógica para que varios puntos en la misma coordenada no se tapen
     const agruparNoticias = () => {
         const grupos = {};
         noticias.forEach(n => {
@@ -98,64 +91,64 @@ const Lugares = () => {
         <section className="panel-admin-container fade-in">
             <h2 className="titulo-neon">SISTEMA DE MANDO ESTRATÉGICO</h2>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', gap: '15px', flexWrap: 'wrap' }}>
+            <div className="selector-vistas-bunker">
                 <button
                     onClick={() => { setVista('lugares'); setIdResaltado(null); }}
-                    style={{ background: vista === 'lugares' ? '#00ff41' : '#222', color: vista === 'lugares' ? '#000' : '#00ff41', border: '2px solid #00ff41', padding: '10px 15px', fontWeight: 'bold', cursor: 'pointer' }}
-                > 📍 LUGARES </button>
+                    className={`btn-mando-v2 ${vista === 'lugares' ? 'activo-lugares' : ''}`}
+                > 📍 SECTORES CLAVE </button>
 
                 <button
                     onClick={() => { setVista('noticias'); setIdResaltado(null); }}
-                    style={{ background: vista === 'noticias' ? '#ff4444' : '#222', color: vista === 'noticias' ? '#000' : '#ff4444', border: '2px solid #ff4444', padding: '10px 15px', fontWeight: 'bold', cursor: 'pointer' }}
-                > ⚠️ ALERTAS </button>
+                    className={`btn-mando-v2 ${vista === 'noticias' ? 'activo-alertas' : ''}`}
+                > ⚠️ ALERTAS ACTIVAS </button>
             </div>
 
             <div className="contenedor-radar-flexible">
-                <div className="mapa-mando">
-                    <MapContainer center={centroMapa} zoom={13} style={{ height: '100%', width: '100%' }}>
+                {/* EL MAPA REY */}
+                <div className="mapa-mando-wrapper">
+                    <MapContainer center={centroMapa} zoom={13} className="mapa-principal-leaflet">
                         <ActualizadorMapa centro={centroMapa} />
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
+                        {/* Marcadores de Lugares */}
                         {vista === 'lugares' && puntos.map(l => (
                             <Marker key={`l-${l.id}`} position={[parseFloat(l.latitud), parseFloat(l.longitud)]} icon={idResaltado === l.id ? iconoResaltado : iconoLugar}>
                                 <Popup>
-                                    <div className="popup-bunker">
-                                        <h4 style={{ color: '#00ff41' }}>📍 {l.nombre}</h4>
-                                        {l.imagen_url && <img src={`http://localhost:5000/lugares/${l.imagen_url}`} alt={l.nombre} style={{ width: '100%', borderRadius: '4px' }} onError={handleImgError} />}
-                                        <p style={{ fontSize: '12px', color: '#ccc' }}>{l.descripcion}</p>
+                                    <div className="popup-bunker-v2">
+                                        <h4>📍 {l.nombre}</h4>
+                                        {l.imagen_url && <img src={`http://localhost:5000/lugares/${l.imagen_url}`} onError={handleImgError} />}
+                                        <p>{l.descripcion}</p>
                                     </div>
                                 </Popup>
                             </Marker>
                         ))}
 
+                        {/* Marcadores de Noticias (con selector si están agrupadas) */}
                         {vista === 'noticias' && noticiasAgrupadas.map((grupo, idx) => {
                             const keyGrupo = `${grupo[0].latitud}-${grupo[0].longitud}`;
                             const indexActual = indicesPestanas[keyGrupo] || 0;
                             const n = grupo[indexActual];
-
                             return (
                                 <Marker key={`g-${idx}`} position={[parseFloat(n.latitud), parseFloat(n.longitud)]} icon={idResaltado === n.id ? iconoResaltado : iconoNoticia}>
                                     <Popup>
-                                        <div className="popup-bunker">
+                                        <div className="popup-bunker-v2">
+                                            <h4 style={{ color: '#ff4444' }}>⚠️ ALERTA</h4>
+                                            <strong>{n.titulo}</strong>
+                                            <img src={`http://localhost:5000/imagenes/${n.imagen}`} onError={handleImgError} />
+                                            <p>{n.cuerpo}</p>
                                             {grupo.length > 1 && (
-                                                <div style={{ display: 'flex', gap: '5px', marginBottom: '10px', borderBottom: '1px solid #444', paddingBottom: '5px' }}>
-                                                    {grupo.map((_, i) => (
-                                                        <button key={i} onClick={() => setIndicesPestanas({ ...indicesPestanas, [keyGrupo]: i })}
-                                                            style={{ background: indexActual === i ? '#ff4444' : '#333', color: '#fff', border: 'none', padding: '2px 6px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}> INFO {i + 1} </button>
-                                                    ))}
+                                                <div className="selector-noticia-popup">
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setIndicesPestanas(prev => ({...prev, [keyGrupo]: (indexActual - 1 + grupo.length) % grupo.length}));
+                                                    }}>◀</button>
+                                                    <span>{indexActual + 1} / {grupo.length}</span>
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setIndicesPestanas(prev => ({...prev, [keyGrupo]: (indexActual + 1) % grupo.length}));
+                                                    }}>▶</button>
                                                 </div>
                                             )}
-                                            <h4 style={{ color: '#ff4444' }}>⚠️ ALERTA</h4>
-                                            <strong style={{ color: '#00ff88' }}>{n.titulo}</strong>
-                                            {n.imagen_url && (
-                                                <img
-                                                    src={`http://localhost:5000/imagenes/${n.imagen_url}`}
-                                                    alt={n.titulo}
-                                                    style={{ width: '100%', borderRadius: '4px', marginTop: '8px', border: '1px solid #ff4444' }}
-                                                    onError={handleImgError}
-                                                />
-                                            )}
-                                            <p style={{ fontSize: '11px', marginTop: '8px', lineHeight: '1.4' }}>{n.cuerpo}</p>
                                         </div>
                                     </Popup>
                                 </Marker>
@@ -164,11 +157,10 @@ const Lugares = () => {
                     </MapContainer>
                 </div>
 
-                <div className="panel-objetivos">
-                    <h3 className="titulo-objetivos">
-                        {vista === 'lugares' ? '🎯 OBJETIVOS' : '🔥 ALERTAS'}
-                    </h3>
-                    <div className="lista-scrollable">
+                {/* LISTA DE OBJETIVOS (CONECTADA AL MAPA) */}
+                <div className="panel-objetivos-radar">
+                    <h3 className="titulo-objetivos-v2">{vista === 'lugares' ? '🎯 OBJETIVOS' : '🔥 ALERTAS'}</h3>
+                    <div className="lista-objetivos-scroll-v2">
                         {(vista === 'lugares' ? puntos : noticias).map(item => (
                             <div
                                 key={item.id}
@@ -176,19 +168,11 @@ const Lugares = () => {
                                     setCentroMapa([parseFloat(item.latitud), parseFloat(item.longitud)]);
                                     setIdResaltado(item.id);
                                 }}
-                                className={`objetivo-item ${idResaltado === item.id ? 'sel-activo' : ''}`}
-                                style={{
-                                    borderLeft: idResaltado === item.id ? `4px solid ${vista === 'noticias' ? '#ff4444' : '#00ff41'}` : '4px solid transparent',
-                                    background: idResaltado === item.id ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                                    padding: '10px', cursor: 'pointer', marginBottom: '5px'
-                                }}
+                                className={`objetivo-item-v2 ${idResaltado === item.id ? 'sel-activo' : ''}`}
                             >
-                                <div style={{ color: idResaltado === item.id ? '#fff' : '#ccc', fontWeight: 'bold' }}>
-                                    {item.nombre || item.titulo}
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                                    {item.ubicacion || 'Sector Detectado'}
-                                </div>
+                                <div className="item-txt-v2">{item.nombre || item.titulo}</div>
+                                <div className="item-sub-v2">{item.ubicacion || 'Detectado por el radar'}</div>
+                                {idResaltado === item.id && <div className="scanner-line"></div>}
                             </div>
                         ))}
                     </div>

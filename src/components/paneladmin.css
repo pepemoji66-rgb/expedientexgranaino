@@ -1,23 +1,25 @@
 /* ============================================================
-   CONTENEDOR DEL BÚNKER ADMIN
+    VARIABLES Y BASE (ESTILO HACKER UNIFICADO)
    ============================================================ */
 :root {
     --color-principal: #00ff41;
     --color-leer: #00d4ff;
     --color-borrar: #ff4444;
     --color-pendiente: #ffb100;
+    --fondo-bunker: rgba(0, 0, 0, 0.9);
 }
 
+/* Contenedor Maestro */
 .panel-admin-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 30px auto;
-    padding: 25px;
-    background: rgba(0, 0, 0, 0.9);
+    padding: 100px 20px 40px; 
+    background: var(--fondo-bunker);
     border: 1px solid var(--color-principal);
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
-    font-family: 'Courier New', monospace;
+    min-height: 100vh;
     color: #fff;
+    font-family: 'Courier New', monospace;
+    position: relative;
 }
 
 .titulo-neon {
@@ -27,201 +29,188 @@
     letter-spacing: 3px;
     margin-bottom: 30px;
     text-shadow: 0 0 10px var(--color-principal);
+    font-family: 'Orbitron', sans-serif;
 }
 
 /* ============================================================
-   SISTEMA DE PESTAÑAS (TABS) 
+    SISTEMA DE NAVEGACIÓN (BOTONERA)
    ============================================================ */
-.tabs-admin {
+.selector-vistas-bunker, .tabs-admin {
     display: flex;
+    justify-content: center;
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 25px;
-    border-bottom: 1px solid rgba(0, 255, 65, 0.2);
     padding-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.2);
 }
 
-.tabs-admin button {
+.btn-mando-v2, .tabs-admin button {
     background: transparent;
     border: 1px solid var(--color-principal);
     color: var(--color-principal);
-    padding: 10px 15px;
+    padding: 10px 20px;
     cursor: pointer;
     font-family: 'Courier New', monospace;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     transition: 0.3s;
     text-transform: uppercase;
 }
 
-.tabs-admin button.active {
+.btn-mando-v2.activo-lugares, .btn-mando-v2.activo-alertas, .tabs-admin button.active {
     background: var(--color-principal);
     color: #000;
-    box-shadow: 0 0 10px var(--color-principal);
+    box-shadow: 0 0 15px var(--color-principal);
     font-weight: bold;
-}
-
-.tabs-admin button:hover:not(.active) {
-    background: rgba(0, 255, 65, 0.1);
 }
 
 /* ============================================================
-   TABLA DE GESTIÓN
+    LAYOUT RADAR (MAPA + LISTA)
    ============================================================ */
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.tabla-admin {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-}
-
-.tabla-admin th {
-    background: rgba(0, 255, 65, 0.1);
-    color: var(--color-principal);
-    padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: left;
-    text-transform: uppercase;
-}
-
-.tabla-admin td {
-    padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    vertical-align: middle;
-}
-
-/* BOTONES DE ACCIÓN */
-.btn-leer, .btn-ok, .btn-del, .btn-pagi {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-    border: none;
-    padding: 8px 12px;
-    font-size: 0.7rem;
-    margin-right: 5px;
-}
-
-.btn-leer { background: var(--color-leer); color: #000; }
-.btn-ok { background: var(--color-principal); color: #000; }
-.btn-del { background: var(--color-borrar); color: #fff; }
-
-.btn-leer:hover, .btn-ok:hover, .btn-del:hover {
-    filter: brightness(1.3);
-    transform: scale(1.05);
-}
-
-/* ESTADOS DE REGISTRO */
-.status-ok {
-    color: var(--color-principal);
-    font-weight: bold;
-    text-shadow: 0 0 5px var(--color-principal);
-}
-
-.status-pending {
-    color: var(--color-pendiente);
-    font-weight: bold;
-}
-
-.link-ver {
-    color: var(--color-leer);
-    text-decoration: underline;
-}
-
-/* ============================================================
-   MODAL LECTOR ADMIN
-   ============================================================ */
-.modal-admin-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+.contenedor-radar-flexible {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 3000;
-    padding: 20px;
-}
-
-.modal-admin-content {
-    background: #050505;
-    border: 2px solid var(--color-principal);
-    padding: 30px;
-    max-width: 800px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 0 40px rgba(0, 255, 65, 0.3);
-}
-
-.modal-titulo {
-    color: var(--color-principal);
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-}
-
-.modal-agente {
-    color: #888;
-    font-size: 0.8rem;
-    margin-bottom: 15px;
-}
-
-.modal-hr {
-    border: 0;
-    border-top: 1px solid rgba(0, 255, 65, 0.3);
-    margin: 15px 0;
-}
-
-.cuerpo-expediente {
-    line-height: 1.6;
-    color: #ccc;
-    white-space: pre-wrap;
-    text-align: justify;
-    margin-bottom: 25px;
-}
-
-.btn-cerrar-modal {
-    background: var(--color-borrar);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    width: 100%;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-/* ============================================================
-   PAGINACIÓN
-   ============================================================ */
-.paginacion-admin {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     gap: 20px;
-    margin-top: 25px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border: 2px solid var(--color-principal);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    margin-top: 20px;
+    height: 600px;
 }
 
-.btn-pagi {
-    background: transparent;
+@media (max-width: 950px) {
+    .contenedor-radar-flexible {
+        flex-direction: column;
+        height: auto;
+    }
+}
+
+.mapa-mando-wrapper {
+    flex: 2;
     border: 1px solid var(--color-principal);
-    color: var(--color-principal);
-    padding: 5px 15px;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
 }
 
-.btn-pagi:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
+.mapa-principal-leaflet { height: 100%; width: 100%; }
+
+.panel-objetivos-radar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #050505;
+    border-left: 3px solid var(--color-principal);
+    padding: 10px;
+    overflow: hidden;
 }
 
-.pagi-info {
-    font-size: 0.8rem;
-    color: var(--color-principal);
+.lista-objetivos-scroll-v2 {
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 5px;
 }
+
+/* Scrollbar Verde */
+.lista-objetivos-scroll-v2::-webkit-scrollbar { width: 6px; }
+.lista-objetivos-scroll-v2::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 10px; }
+
+.objetivo-item-v2 {
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(0, 40, 0, 0.2);
+    position: relative;
+}
+
+.objetivo-item-v2:hover { background: rgba(0, 255, 65, 0.1); transform: translateX(5px); }
+.objetivo-item-v2.sel-activo {
+    background: rgba(0, 255, 65, 0.2);
+    border-left: 5px solid var(--color-principal);
+}
+
+.item-txt-v2 { color: #fff; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; }
+.item-sub-v2 { color: var(--color-principal); font-size: 0.75rem; opacity: 0.8; }
+
+.scanner-line {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 2px;
+    background: var(--color-principal);
+    box-shadow: 0 0 10px var(--color-principal);
+    animation: scan 2s infinite linear;
+}
+@keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+
+/* ============================================================
+    ARREGLO DEFINITIVO DE POPUPS (ADIÓS DESPARRAME)
+   ============================================================ */
+
+/* 1. Forzamos el tamaño del contenedor para que no crezca infinito */
+.leaflet-popup-content-wrapper {
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid var(--color-principal) !important;
+    border-radius: 0px !important;
+    width: 280px !important; /* Ancho fijo para que no se desparrame */
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5) !important;
+    overflow: hidden !important;
+}
+
+/* 2. Ajustamos el contenido interno */
+.leaflet-popup-content {
+    width: 250px !important; /* Un poco menos que el wrapper */
+    margin: 15px !important;
+    font-family: 'Courier New', monospace !important;
+}
+
+/* 3. LA IMAGEN: Aquí es donde se arregla el desparrame */
+.img-popup-bunker {
+    width: 100% !important;   /* Se ajusta al ancho del popup */
+    height: 150px !important; /* Altura fija para que todas sean iguales */
+    object-fit: cover !important; /* Recorta la imagen para que no se estire feo */
+    border: 1px solid var(--color-principal) !important;
+    display: block !important;
+    margin: 10px 0 !important;
+}
+
+/* 4. BOTÓN DE CERRAR (La X para poder salir) */
+.leaflet-popup-close-button {
+    color: var(--color-principal) !important;
+    font-size: 20px !important;
+    padding: 8px !important;
+    z-index: 1000 !important; /* Que siempre esté encima */
+}
+
+/* 5. El piquito del popup */
+.leaflet-popup-tip {
+    background: var(--color-principal) !important;
+}
+
+/* Títulos y textos */
+.popup-bunker-v2 h4 {
+    color: var(--color-principal) !important;
+    font-size: 1rem !important;
+    margin: 0 0 5px 0 !important;
+    text-transform: uppercase !important;
+}
+
+.desc-popup-bunker {
+    font-size: 0.8rem !important;
+    color: #ccc !important;
+    max-height: 80px; /* Si el texto es muy largo, que no rompa el popup */
+    overflow-y: auto;
+}
+
+/* ============================================================
+    OTRAS SECCIONES (TABLAS Y MODALES)
+   ============================================================ */
+.tabla-admin { width: 100%; border-collapse: collapse; }
+.tabla-admin th { background: rgba(0, 255, 65, 0.1); color: var(--color-principal); padding: 15px; border: 1px solid #222; }
+.tabla-admin td { padding: 12px; border: 1px solid #111; }
+
+.btn-leer { background: var(--color-leer); color: #000; padding: 5px 10px; border:none; cursor:pointer;}
+.btn-ok { background: var(--color-principal); color: #000; padding: 5px 10px; border:none; cursor:pointer;}
+.btn-del { background: var(--color-borrar); color: #fff; padding: 5px 10px; border:none; cursor:pointer;}
