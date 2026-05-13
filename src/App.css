@@ -1,17 +1,16 @@
 /* =============================================
-    Ã°ÂÂÂ VARIABLES Y TEMA TÃÂCTICO
+    VARIABLES Y TEMA TÁCTICO
    ============================================= */
 :root {
     --color-principal: #00d4ff;
     --rgb-principal: 0, 212, 255;
     --color-acento: #ff00ff;
     --bg-bunker: #020406;
-    --bg-glass: rgba(5, 10, 20, 0.75);
-    --border-subtle: rgba(var(--rgb-principal), 0.15);
-    --glow-subtle: 0 0 20px rgba(var(--rgb-principal), 0.2);
-    --glow-strong: 0 0 35px rgba(var(--rgb-principal), 0.4);
+    --bg-glass: rgba(10, 15, 20, 0.7);
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --glow-subtle: 0 0 20px rgba(0, 212, 255, 0.2);
+    --glow-strong: 0 0 35px rgba(0, 212, 255, 0.4);
 }
-
 
 * {
     margin: 0;
@@ -31,8 +30,11 @@ body, html {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* overflow: hidden; */
-    background: transparent;
+    position: relative;
+    color: #e0e6ed;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #020408;
+    overflow-x: hidden;
 }
 
 .main-content-bunker {
@@ -58,168 +60,14 @@ body, html {
     box-sizing: border-box !important;
 }
 
-.form-fijo-abajo input, 
-.form-fijo-abajo .forms-container {
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-}
-
 .audio-item-card audio {
     max-width: 100%;
     height: 40px;
 }
 
-/* =============================================
-    Ã°ÂÂÂ NAVEGACIÃÂN Y MENÃÂ (ESTILO BÃÂNKER)
-   ============================================= */
+/* NAVEGACIÓN Y MENÚ (ESTILO BÚNKER) */
 /* Sidebar logic unified below */
 
-.sidebar-footer {
-    padding: 25px;
-    border-top: 1px solid var(--border-subtle);
-    background: #0a0c10;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: auto;
-}
-
-.sidebar-footer-label {
-    color: #888;
-    font-size: 0.6rem;
-    margin-bottom: 15px;
-    text-align: center;
-    letter-spacing: 2px;
-}
-
-.theme-selector {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
-}
-
-.theme-dot {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: 0.3s;
-}
-
-.theme-dot.active {
-    border-color: #fff;
-    box-shadow: 0 0 10px currentColor;
-}
-
-.btn-logout {
-    background: rgba(255, 68, 68, 0.1);
-    border: 1px solid #ff4444;
-    color: #fff;
-    padding: 12px;
-    cursor: pointer;
-    text-transform: uppercase;
-    font-family: 'Courier New', monospace;
-    width: 100%;
-    margin-top: 15px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    transition: 0.3s;
-    border-radius: 4px;
-}
-
-.btn-logout:hover {
-    background: #ff4444;
-    box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
-}
-
-.btn-hamburguesa-tactico {
-    position: fixed;
-    top: 85px;
-    background: var(--bg-glass);
-    border: 1px solid var(--border-subtle);
-    color: var(--color-principal);
-    width: 45px;
-    height: 45px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--glow-subtle);
-    transition: 0.3s;
-}
-
-.btn-hamburguesa-tactico:hover {
-    background: var(--color-principal);
-    color: #000;
-}
-
-/* =============================================
-    Ã¢ÂÂ¨ ATMÃÂSFERA TÃÂCTICA (VARIABLES)
-   ============================================= */
-:root {
-    --color-principal: #00d4ff;
-    --rgb-principal: 0, 212, 255;
-    --bg-glass: rgba(10, 15, 20, 0.7);
-    --border-subtle: rgba(255, 255, 255, 0.1);
-    --glow-subtle: 0 0 15px rgba(var(--rgb-principal), 0.2);
-}
-
-.laser-scan-line {
-    position: fixed;
-    top: -2px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--color-principal), transparent);
-    box-shadow: 0 0 10px var(--color-principal);
-    z-index: 10000;
-    pointer-events: none;
-    opacity: 0.3;
-    animation: laser-move 8s linear infinite;
-}
-
-@keyframes laser-move {
-    0% { top: -5%; }
-    100% { top: 105%; }
-}
-
-
-/* Glassmorphism Utility */
-.glass-panel {
-    background: var(--bg-glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-}
-
-.neon-text-green, .central-titulo, h1, h2, h3, h4 {
-  color: var(--color-principal) !important;
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(var(--rgb-principal), 0.5);
-  font-family: 'Courier New', monospace;
-  letter-spacing: 2px;
-}
-
-.titulo-popup-neon {
-    margin: 0 0 10px 0;
-    color: var(--color-principal);
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 1.1rem;
-    text-shadow: 0 0 8px rgba(var(--rgb-principal), 0.5);
-}
-
-
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: #000; }
-::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 0; border: 2px solid #000; }
-
-/* Sidebar Profesional Unificada */
 .sidebar {
     position: fixed;
     right: -320px; 
@@ -298,9 +146,57 @@ body, html {
     box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
 }
 
-/* =============================================
-    Ã°ÂŸÂŽÂ¯ RADAR TÃƒÂ CTICO (EL CORRECAMINOS)
-   ============================================= */
+/* LÍNEA DE ESCANEO LÁSER */
+.laser-scan-line {
+    position: fixed;
+    top: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-principal), transparent);
+    box-shadow: 0 0 10px var(--color-principal);
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0.3;
+    animation: laser-move 8s linear infinite;
+}
+
+@keyframes laser-move {
+    0% { top: -5%; }
+    100% { top: 105%; }
+}
+
+/* Glassmorphism Utility */
+.glass-panel {
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+}
+
+.neon-text-green, .central-titulo, h1, h2, h3, h4 {
+  color: var(--color-principal) !important;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(var(--rgb-principal), 0.5);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+}
+
+.titulo-popup-neon {
+    margin: 0 0 10px 0;
+    color: var(--color-principal);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    text-shadow: 0 0 8px rgba(var(--rgb-principal), 0.5);
+}
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 0; border: 2px solid #000; }
+
+/* RADAR TÁCTICO */
 .panel-admin-container {
     width: 100% !important;
     padding: 70px 15px 30px; 
@@ -315,7 +211,6 @@ body, html {
     height: 85vh; 
     border: 2px solid var(--color-principal);
     border-radius: 8px;
-    /* overflow: hidden; */
     background: #000;
 }
 
@@ -334,19 +229,13 @@ body, html {
     flex-direction: column;
 }
 
-/* Ã°ÂÂÂ± PARCHE RESPONSIVO PARA EL MÃÂVIL */
 @media (max-width: 768px) {
     .contenedor-radar-flexible {
         flex-direction: column; 
         height: auto; 
         min-height: 90vh;
     }
-
-    .mapa-mando {
-        height: 60vh; 
-        width: 100%;
-    }
-
+    .mapa-mando { height: 60vh; width: 100%; }
     .panel-objetivos {
         flex: none;
         width: 100%;
@@ -369,9 +258,7 @@ body, html {
 
 .objetivo-item:hover { transform: translateX(5px); border-color: var(--color-principal); }
 
-/* =============================================
-    Ã°ÂÂÂ POPUPS DEL RADAR
-   ============================================= */
+/* POPUPS DEL RADAR */
 .leaflet-popup-content-wrapper {
     background: #000 !important;
     color: #fff !important;
@@ -406,9 +293,7 @@ body, html {
     font-family: 'Courier New', monospace !important;
 }
 
-/* =============================================
-    Ã°ÂÂÂ FORMULARIOS Y CARDS (LIMPIO)
-   ============================================= */
+/* FORMULARIOS Y CARDS */
 form, .formulario-bunker {
     display: flex;
     flex-direction: column;
@@ -427,9 +312,7 @@ input, textarea, select {
     font-family: 'Courier New', monospace !important;
 }
 
-/* =============================================
-    Ã°ÂÂÂÃ¯Â¸Â GALERÃÂA Y ARCHIVOS (RESPETADO)
-   ============================================= */
+/* GALERÍA Y ARCHIVOS */
 .grid-imagenes, .galeria-archivos, .grid-imagenes-hallazgos, .galeria-archivos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -464,11 +347,11 @@ input, textarea, select {
     margin-bottom: 5px;
     text-transform: uppercase;
 }
+
 .seccion-radar-total {
     position: relative;
     height: calc(100vh - 60px);
     width: 100%;
-    /* overflow: hidden; */
     background: #000;
 }
 
@@ -479,19 +362,6 @@ input, textarea, select {
     z-index: 1;
 }
 
-
-/* AJUSTE PARA EL POPUP DE LEAFLET */
-.leaflet-popup-content-wrapper {
-    background: rgba(0, 0, 0, 0.9) !important;
-    color: var(--color-principal) !important;
-    border: 1px solid var(--color-principal);
-    font-family: 'Courier New', monospace;
-}
-
-.leaflet-popup-tip {
-    background: var(--color-principal) !important;
-}
-/* EL BOTÃÂN Y EL MENÃÂ */
 .control-mando-bunker {
     position: absolute;
     bottom: 50px; 
@@ -510,7 +380,7 @@ input, textarea, select {
     cursor: pointer;
 }
 
-.desplegable-tÃÂ¡ctico {
+.desplegable-táctico {
     position: absolute;
     bottom: 80px;
     right: 0;
@@ -524,7 +394,7 @@ input, textarea, select {
     min-width: 150px;
 }
 
-.desplegable-tÃÂ¡ctico button {
+.desplegable-táctico button {
     background: rgba(var(--rgb-principal), 0.1);
     color: var(--color-principal);
     border: 1px solid var(--color-principal);
@@ -532,15 +402,15 @@ input, textarea, select {
     font-family: 'Courier New', monospace;
     cursor: pointer;
 }
-/* LISTA DE OBJETIVOS - MÃÂS LIMPIA Y CLARA */
+
 .lista-objetivos-flotante {
     position: absolute;
     top: 90px;
     left: 15px;
     z-index: 500;
     max-height: 60vh;
-    width: 250px; /* Un pelÃÂ­n mÃÂ¡s ancha para que no corte nombres */
-    background: rgba(10, 10, 10, 0.85); /* Negro mÃÂ¡s sÃÂ³lido pero con clase */
+    width: 250px;
+    background: rgba(10, 10, 10, 0.85);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(var(--rgb-principal), 0.3);
     border-radius: 12px;
@@ -549,24 +419,23 @@ input, textarea, select {
 }
 
 .item-objetivo-mini {
-    padding: 12px 10px; /* MÃÂ¡s espacio para el dedo/ratÃÂ³n */
-    margin-bottom: 8px; /* SeparaciÃÂ³n entre botones */
-    font-size: 13px; /* Un pelÃÂ­n mÃÂ¡s grande */
-    color: #e0e0e0; /* Blanco suave, no gris apagado */
-    background: rgba(255, 255, 255, 0.05); /* Fondo muy sutil para cada item */
+    padding: 12px 10px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 6px;
-    cursor: pointer !important; /* ÃÂ¡LA MANITA DEL RATÃÂN! */
+    cursor: pointer !important;
     transition: all 0.2s ease;
     font-family: 'Courier New', monospace;
     border: 1px solid transparent;
 }
 
-/* Efecto al pasar el ratÃÂ³n (Hover) */
 .item-objetivo-mini:hover {
     background: rgba(var(--rgb-principal), 0.1);
     border: 1px solid rgba(var(--rgb-principal), 0.5);
     color: var(--color-principal);
-    transform: translateX(5px); /* Se mueve un poco a la derecha al seÃÂ±alarlo */
+    transform: translateX(5px);
 }
 
 .item-objetivo-mini.activo {
@@ -575,111 +444,28 @@ input, textarea, select {
     font-weight: bold;
     box-shadow: 0 0 10px rgba(var(--rgb-principal), 0.4);
 }
-/* Cabecera para poder cerrar manualmente si quieres */
-.cabecera-lista {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(var(--rgb-principal), 0.3);
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    font-size: 11px;
-    color: var(--color-principal);
-}
 
-.btn-cerrar-lista {
-    background: none;
-    border: none;
-    color: #ff4444;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-/* Contenedor con scroll para que no se desborde si hay 100 sitios */
-.scroll-lista {
-    max-height: 40vh; /* Solo ocupa el 40% de la pantalla alto */
-    overflow-y: auto;
-}
-
-/* Ajuste mÃÂ³vil para que flote centrado y no moleste */
-@media (max-width: 768px) {
-    .lista-objetivos-flotante {
-        width: 80%;
-        left: 10%;
-        top: 20%;
-        z-index: 2000; /* Por encima de todo para elegir */
-        background: rgba(0, 0, 0, 0.9);
-    }
-}
 .maintenance-banner-bunker {
   position: sticky;
   top: 0;
   background: #ffb100;
   color: #000;
   text-align: center;
-  padding: 12px 40px; /* MÃƒÂ¡s espacio lateral para que no choque con nada */
+  padding: 12px 40px;
   font-weight: bold;
   font-family: monospace;
   font-size: 0.85rem;
   border-bottom: 2px solid #000;
-  z-index: 9000; /* Por debajo del botÃƒÂ³n del menÃƒÂº pero por encima del contenido */
+  z-index: 9000;
   animation: pulse-maint 2s infinite;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
+
 @keyframes pulse-maint {
   0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; }
 }
 
-/* REFUERZO TÃƒÂ CTICO FINAL */
-.btn-hamburguesa-tactico {
-    position: fixed !important;
-    top: 140px !important;
-    right: 20px !important;
-    left: auto !important;
-    z-index: 20000 !important;
-    display: flex !important;
-    width: 60px !important;
-    height: 60px !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    border: 2px solid var(--color-principal) !important;
-    box-shadow: 0 0 20px rgba(var(--rgb-principal), 0.5) !important;
-}
-
-.hamburger-btn {
-    display: none !important;
-}
-
-/* BOTÃƒÂ“N TÃƒÂ CTICO ABSOLUTO - SIN INTERFERENCIAS */
-.btn-tactico-absoluto {
-    position: fixed !important;
-    top: 155px !important;
-    right: 25px !important;
-    left: auto !important;
-    z-index: 99999 !important;
-    width: 60px !important;
-    height: 60px !important;
-    background: #000 !important;
-    border: 2px solid var(--color-principal) !important;
-    color: var(--color-principal) !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    box-shadow: 0 0 20px rgba(var(--rgb-principal), 0.6) !important;
-    font-size: 28px !important;
-    transition: 0.3s !important;
-}
-.btn-tactico-absoluto:hover {
-    transform: scale(1.1);
-    background: var(--color-principal) !important;
-    color: #000 !important;
-}
-.hamburger-btn { display: none !important; }
-
-
-
-/* ANIMACIONES TÃ CTICAS */
+/* ANIMACIONES TÁCTICAS */
 @keyframes blink {
   0% { opacity: 1; }
   50% { opacity: 0.3; }
@@ -688,16 +474,4 @@ input, textarea, select {
 
 .blink {
   animation: blink 2s infinite;
-}
-
-/* EFECTO DE PULSO PARA EL BOTÃ“N TÃ CTICO */
-@keyframes pulso-tactico {
-  0% { box-shadow: 0 0 0 0 rgba(var(--rgb-principal), 0.7); }
-  70% { box-shadow: 0 0 0 15px rgba(var(--rgb-principal), 0); }
-  100% { box-shadow: 0 0 0 0 rgba(var(--rgb-principal), 0); }
-}
-
-.btn-tactico-absoluto {
-  animation: pulso-tactico 2s infinite;
-  border: 2px solid var(--color-principal) !important;
 }
