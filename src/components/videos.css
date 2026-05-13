@@ -1,0 +1,216 @@
+/* VIDEOS.CSS - Estilo Agencia Profesional */
+.videos-container {
+    min-height: 100vh;
+    padding: 120px 20px 50px 20px;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+}
+
+.titulo-seccion-pro {
+    color: #fff;
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 60px;
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    font-weight: 900;
+}
+
+.grid-videos-pro {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.video-card-dossier {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    padding: 25px;
+    transition: 0.3s;
+    /* Evitar desborde en móvil */
+    min-width: 0;
+    overflow: hidden;
+}
+
+.video-card-dossier:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.video-frame-wrapper {
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    width: 100%;
+    overflow: hidden;
+    /* Forzar aspect ratio del contenedor */
+    position: relative;
+}
+
+.video-frame-wrapper video,
+.video-frame-wrapper iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+    display: block;
+    object-fit: contain;
+    background: #000;
+}
+
+.video-info-pro h3 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    word-break: break-word;
+}
+
+.video-meta-pro {
+    color: #444;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding-bottom: 15px;
+}
+
+.btn-primary-pro {
+    background: #fff;
+    color: #000;
+    border: none;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 12px 25px;
+    font-size: 0.7rem;
+}
+
+.btn-primary-pro:hover {
+    background: #ccc;
+}
+
+.original-dossier-card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.badge-prioridad {
+    background: #fff;
+    color: #000;
+    font-size: 0.6rem;
+    font-weight: 900;
+    border-radius: 0;
+}
+
+/* BOTONES TÁCTICOS COMPARTIR */
+.btn-mando-pro {
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: 0.3s;
+}
+
+.btn-secondary-pro {
+    background: transparent;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 10px 15px;
+    font-size: 0.65rem;
+}
+
+.btn-secondary-pro:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+    color: #fff !important;
+}
+
+.btn-primary-pro:hover {
+    background: #ccc;
+    color: #000;
+}
+
+/* ============================================
+   RESPONSIVE MÓVIL - FIX VÍDEOS DOSSIER
+   ============================================ */
+@media (max-width: 768px) {
+    .videos-container {
+        padding: 100px 10px 40px 10px;
+    }
+
+    .titulo-seccion-pro {
+        font-size: 1rem;
+        letter-spacing: 5px;
+        margin-bottom: 30px;
+    }
+
+    /* Forzar columna única en móvil */
+    .grid-videos-pro {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .video-card-dossier {
+        padding: 12px;
+    }
+
+    .video-frame-wrapper video,
+    .video-frame-wrapper iframe {
+        width: 100%;
+        aspect-ratio: 16/9;
+        object-fit: contain;
+    }
+
+    .video-info-pro h3 {
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-mando-pro {
+        font-size: 0.6rem;
+        padding: 8px 10px;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-secondary-pro {
+        padding: 8px 10px;
+        font-size: 0.6rem;
+    }
+
+    .btn-primary-pro {
+        padding: 10px 15px;
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .videos-container {
+        padding: 90px 8px 30px 8px;
+    }
+
+    .grid-videos-pro {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .video-card-dossier {
+        padding: 10px;
+    }
+
+    .video-info-pro h3 {
+        font-size: 0.8rem;
+    }
+}
+

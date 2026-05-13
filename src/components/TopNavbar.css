@@ -1,0 +1,409 @@
+.top-navbar {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1500;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.top-navbar-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    height: 75px;
+}
+
+/* LOGO SECTOR */
+.top-navbar-logo {
+    flex: 0 0 auto;
+}
+
+.logo-link {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    position: relative;
+}
+
+.logo-image {
+    height: 50px;
+    width: auto;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
+}
+
+/* CENTRAL NAVIGATION */
+.top-navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    justify-content: center;
+}
+
+.top-nav-link {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 8px 12px;
+    text-transform: uppercase;
+    transition: 0.3s;
+    letter-spacing: 1.5px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.top-nav-link:hover {
+    color: #fff;
+}
+
+.top-nav-link.active {
+    color: var(--color-principal);
+}
+
+.nav-underline {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--color-principal);
+    transition: 0.3s ease;
+    transform: translateX(-50%);
+    box-shadow: 0 0 10px var(--color-principal);
+}
+
+.top-nav-link:hover .nav-underline,
+.top-nav-link.active .nav-underline {
+    width: 70%;
+}
+
+/* ACTIONS AREA */
+.top-navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    flex: 0 0 auto;
+}
+
+.tactical-tools {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 2px 15px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tool-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 35px;
+}
+
+.tool-icon {
+    color: var(--color-principal);
+}
+
+.translator-tool {
+    position: relative;
+    padding-right: 15px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* MUSIC BUTTON STYLES */
+.btn-musica-top {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+    font-size: 0.6rem;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-musica-top.is-muted {
+    border-color: rgba(255, 68, 68, 0.4);
+    color: #ff4444;
+}
+
+.btn-musica-top.is-playing {
+    border-color: var(--color-principal);
+    color: var(--color-principal);
+}
+
+.btn-musica-top:hover {
+    background: var(--color-principal);
+    color: #000;
+    border-color: var(--color-principal);
+}
+
+.music-alert-popup {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid var(--color-principal, #00ff41);
+    color: var(--color-principal, #00ff41);
+    padding: 4px 10px;
+    font-size: 0.5rem;
+    font-weight: 900;
+    white-space: nowrap;
+    border-radius: 2px;
+    animation: invite-pulse 2s infinite;
+    z-index: 1000;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
+}
+
+@keyframes invite-pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+/* ============================================
+   GOOGLE TRANSLATE - OVERRIDE NUCLEAR
+   Google inyecta estilos inline, necesitamos
+   selectores de máxima especificidad
+   ============================================ */
+#google_translate_element {
+    height: 22px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+/* Override raíz: TODOS los hijos del contenedor */
+#google_translate_element *,
+#google_translate_element span,
+#google_translate_element a,
+#google_translate_element .goog-te-gadget,
+#google_translate_element .goog-te-gadget span,
+#google_translate_element .goog-te-gadget a {
+    color: #ffffff !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.goog-te-gadget,
+.goog-te-gadget-simple {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: 0.65rem !important;
+    font-family: 'Inter', sans-serif !important;
+    color: #ffffff !important;
+}
+
+.goog-te-gadget-simple img {
+    display: inline-block !important;
+    margin-right: 4px !important;
+}
+
+.goog-te-menu-value {
+    color: #ffffff !important;
+    margin: 0 !important;
+}
+
+.goog-te-menu-value *,
+.goog-te-menu-value span,
+.goog-te-menu-value a {
+    border-left: none !important;
+    color: #ffffff !important;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.goog-te-menu-value:hover span {
+    color: #fff !important;
+}
+
+/* Clases internas de Google Translate (pueden variar) */
+.VIpgJd-ZVi9od-l4eHX-hSRGPd,
+.VIpgJd-ZVi9od-l4eHX-hSRGPd span,
+.VIpgJd-ZVi9od-l4eHX-hSRGPd a,
+[class*="VIpgJd"] span,
+[class*="VIpgJd"] a {
+    color: #ffffff !important;
+}
+
+/* USER AREA */
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.social-mini-group {
+    display: flex;
+    gap: 12px;
+}
+
+.social-icon-btn {
+    color: rgba(255, 255, 255, 0.4);
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.social-icon-btn:hover {
+    color: var(--color-principal);
+    transform: translateY(-2px);
+}
+
+.agent-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(0, 255, 65, 0.05);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    border-radius: 2px;
+}
+
+.agent-status-led {
+    width: 5px;
+    height: 5px;
+    background: #00ff41;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #00ff41;
+}
+
+.agent-code {
+    font-size: 0.6rem;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.btn-access-tactical {
+    background: transparent;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 8px 18px;
+    border: 1px solid #fff;
+    border-radius: 2px;
+    letter-spacing: 2px;
+    transition: 0.3s;
+}
+
+.btn-access-tactical:hover {
+    background: #fff;
+    color: #000;
+}
+
+.navbar-glow-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-principal), transparent);
+    opacity: 0.3;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1250px) {
+    .top-navbar-container { padding: 0 15px; }
+    .top-navbar-links { gap: 5px; }
+    .top-nav-link { padding: 8px 8px; font-size: 0.6rem; }
+}
+
+@media (max-width: 1024px) {
+    .top-navbar-links { display: none; }
+    
+    .top-navbar-container {
+        height: auto;
+        min-height: 55px;
+        padding: 8px 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .top-navbar-actions {
+        gap: 10px;
+        flex: 1 1 auto;
+        justify-content: flex-end;
+    }
+    
+    .tactical-tools {
+        gap: 10px;
+        padding: 2px 8px;
+    }
+
+    /* MOSTRAR controles de música en móvil */
+    .tool-item.music-tool.desktop-only {
+        display: flex !important;
+    }
+
+    .btn-musica-top {
+        padding: 4px 6px;
+        font-size: 0.55rem;
+    }
+    
+    .btn-musica-top .music-text {
+        display: none;
+    }
+    
+    .translator-tool {
+        border-right: none;
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-navbar-container {
+        padding: 6px 8px;
+    }
+    
+    .logo-image {
+        height: 40px;
+    }
+    
+    .tactical-tools {
+        gap: 6px;
+        padding: 2px 6px;
+    }
+    
+    .tool-icon {
+        width: 12px;
+        height: 12px;
+    }
+    
+    #google_translate_element {
+        height: 18px;
+    }
+    
+    .goog-te-gadget,
+    .goog-te-gadget-simple {
+        font-size: 0.55rem !important;
+    }
+}

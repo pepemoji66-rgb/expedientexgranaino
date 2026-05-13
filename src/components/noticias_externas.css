@@ -1,0 +1,327 @@
+/* ==========================================
+   RADAR DE INTELIGENCIA EXTERNA
+   Feed RSS de noticias UFO/Paranormal
+   ========================================== */
+
+.radar-externo-widget {
+    background: linear-gradient(180deg, rgba(0,0,0,0.96), rgba(5,12,20,0.98));
+    border: 1px solid rgba(var(--rgb-principal), 0.2);
+    border-radius: 8px;
+    margin: 25px 0;
+    overflow: hidden;
+    box-shadow: 0 0 25px rgba(var(--rgb-principal), 0.06);
+}
+
+.radar-externo-widget.cargando {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 25px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: rgba(var(--rgb-principal), 0.6);
+    letter-spacing: 1px;
+}
+
+.radar-ext-loader {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(var(--rgb-principal), 0.2);
+    border-top: 2px solid var(--color-principal);
+    border-radius: 50%;
+    animation: spin-radar 0.8s linear infinite;
+}
+
+@keyframes spin-radar {
+    to { transform: rotate(360deg); }
+}
+
+/* --- HEADER --- */
+.radar-ext-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: linear-gradient(90deg, rgba(var(--rgb-principal), 0.1), transparent);
+    border-bottom: 1px solid rgba(var(--rgb-principal), 0.12);
+}
+
+.radar-ext-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.radar-ext-pulse {
+    font-size: 1.2rem;
+    animation: pulse-radar 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-radar {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.radar-ext-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    font-weight: bold;
+    color: var(--color-principal);
+    letter-spacing: 2px;
+}
+
+.radar-ext-count {
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 1px;
+}
+
+/* --- FILTROS --- */
+.radar-ext-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(var(--rgb-principal), 0.08);
+}
+
+.filtro-btn {
+    padding: 5px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(var(--rgb-principal), 0.15);
+    color: rgba(255,255,255,0.5);
+    font-family: 'Courier New', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.filtro-btn:hover {
+    background: rgba(var(--rgb-principal), 0.1);
+    color: var(--color-principal);
+    border-color: rgba(var(--rgb-principal), 0.3);
+}
+
+.filtro-btn.activo {
+    background: rgba(var(--rgb-principal), 0.15);
+    color: var(--color-principal);
+    border-color: var(--color-principal);
+    font-weight: bold;
+}
+
+/* --- GRID --- */
+.radar-ext-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    max-height: 500px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--rgb-principal), 0.3) transparent;
+}
+
+.radar-ext-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.radar-ext-grid::-webkit-scrollbar-thumb {
+    background: rgba(var(--rgb-principal), 0.3);
+    border-radius: 2px;
+}
+
+/* --- CARD --- */
+.card-ext-noticia {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s ease;
+}
+
+.card-ext-noticia:hover {
+    background: rgba(var(--rgb-principal), 0.04);
+}
+
+.card-ext-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.card-ext-fuente {
+    font-family: 'Courier New', monospace;
+    font-size: 0.6rem;
+    color: var(--color-principal);
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.card-ext-tiempo {
+    font-family: 'Courier New', monospace;
+    font-size: 0.58rem;
+    color: rgba(255,255,255,0.3);
+}
+
+.card-ext-titulo {
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.9);
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+    font-weight: normal;
+}
+
+.card-ext-resumen {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+    margin: 0 0 8px 0;
+    padding: 8px;
+    background: rgba(var(--rgb-principal), 0.03);
+    border-left: 2px solid rgba(var(--rgb-principal), 0.2);
+}
+
+.card-ext-acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-ext-toggle {
+    background: none;
+    border: 1px solid rgba(var(--rgb-principal), 0.2);
+    color: var(--color-principal);
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-ext-toggle:hover {
+    background: rgba(var(--rgb-principal), 0.1);
+}
+
+.btn-ext-leer {
+    font-family: 'Courier New', monospace;
+    font-size: 0.6rem;
+    color: var(--color-principal);
+    text-decoration: none;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-ext-leer:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.card-ext-categoria {
+    margin-top: 6px;
+}
+
+.tag-cat {
+    display: inline-block;
+    padding: 2px 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    border-radius: 2px;
+    font-weight: bold;
+}
+
+.tag-ovni {
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.tag-paranormal {
+    background: rgba(170, 0, 255, 0.1);
+    color: #aa00ff;
+    border: 1px solid rgba(170, 0, 255, 0.2);
+}
+
+.tag-misterio {
+    background: rgba(255, 177, 0, 0.1);
+    color: #ffb100;
+    border: 1px solid rgba(255, 177, 0, 0.2);
+}
+
+.tag-desclasificación, .tag-desclasificacion {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid rgba(255, 68, 68, 0.2);
+}
+
+.tag-ciencia {
+    background: rgba(0, 255, 65, 0.1);
+    color: #00ff41;
+    border: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+.tag-espacio {
+    background: rgba(0, 150, 255, 0.1);
+    color: #0096ff;
+    border: 1px solid rgba(0, 150, 255, 0.2);
+}
+
+/* --- FOOTER --- */
+.radar-ext-footer {
+    padding: 10px 20px;
+    border-top: 1px solid rgba(var(--rgb-principal), 0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.radar-ext-footer small {
+    font-family: 'Courier New', monospace;
+    font-size: 0.55rem;
+    color: rgba(var(--rgb-principal), 0.3);
+    letter-spacing: 1px;
+}
+
+.radar-ext-scanner {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-principal), transparent);
+    animation: scanner-sweep-ext 2.5s ease-in-out infinite;
+    opacity: 0.3;
+}
+
+@keyframes scanner-sweep-ext {
+    0% { opacity: 0.1; transform: scaleX(0.3); }
+    50% { opacity: 0.5; transform: scaleX(1); }
+    100% { opacity: 0.1; transform: scaleX(0.3); }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .radar-ext-header {
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-start;
+    }
+
+    .radar-ext-filtros {
+        padding: 10px 15px;
+    }
+
+    .card-ext-noticia {
+        padding: 12px 15px;
+    }
+
+    .card-ext-titulo {
+        font-size: 0.78rem;
+    }
+
+    .radar-ext-grid {
+        max-height: 400px;
+    }
+}

@@ -1,0 +1,170 @@
+/* FORMS.CSS - Bunker Pro */
+
+/* OVERLAY: Ahora se adapta al final de la página sin tapar los audios */
+.forms-overlay {
+    position: relative !important; /* Mantenemos tu cambio clave */
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: auto;
+    background: transparent;
+    backdrop-filter: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px; /* Reducido un poco para móviles */
+    box-sizing: border-box; /* Crucial para que no se salga de la pantalla */
+}
+
+/* CONTENEDOR: El búnker del formulario */
+.forms-container {
+    background: var(--bg-bunker);
+    border: 2px solid var(--color-principal);
+    padding: 25px;
+    width: 100%;
+    max-width: 500px; /* Evita que se haga gigante en monitores grandes */
+    box-shadow: 0 0 25px rgba(var(--rgb-principal), 0.3);
+    border-radius: 8px;
+    box-sizing: border-box; /* Asegura que el padding no lo ensanche */
+}
+
+.forms-title {
+    color: var(--color-principal);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    text-shadow: 0 0 10px var(--color-principal);
+    font-size: 1.2rem;
+}
+
+.forms-subtitle {
+    color: #fff;
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+}
+
+/* INPUTS: Tu diseño de fondo negro puro intacto */
+.forms-container input,
+.forms-container select,
+.forms-container textarea {
+    width: 100%;
+    background: #000 !important;
+    border: 1px solid var(--border-subtle) !important;
+    padding: 12px;
+    margin-bottom: 15px;
+    color: var(--color-principal) !important;
+    font-family: 'Courier New', monospace;
+    box-sizing: border-box; /* Para que no se salgan del contenedor */
+    transition: 0.3s;
+}
+
+.forms-container input:focus,
+.forms-container textarea:focus {
+    border-color: var(--color-principal) !important;
+    box-shadow: 0 0 10px var(--color-principal);
+    outline: none;
+}
+
+/* GRID PARA COORDENADAS: Tu GPS intacto */
+.coordenadas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: start;
+}
+
+/* INPUT DE ARCHIVO: Estilo búnker */
+.input-file-bunker {
+    border: 1px dashed var(--color-principal);
+    padding: 15px;
+    background: rgba(var(--rgb-principal), 0.05);
+    margin-bottom: 20px;
+    text-align: center;
+    border-radius: 4px;
+}
+
+/* BOTÓN TRANSMITIR: El toque maestro */
+.forms-btn-submit {
+    width: 100%;
+    background: var(--color-principal);
+    color: #000;
+    border: none;
+    padding: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.forms-btn-submit:hover {
+    background: #fff;
+    box-shadow: 0 0 20px var(--color-principal);
+}
+
+/* FILA DE BOTONES: Home y Limpiar */
+.forms-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.forms-btn-clear,
+.forms-btn-home {
+    flex: 1;
+    background: transparent;
+    color: var(--color-principal);
+    border: 1px solid var(--color-principal);
+    padding: 12px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.forms-btn-clear:hover {
+    background: rgba(255, 0, 0, 0.1);
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.forms-btn-home:hover {
+    background: rgba(var(--rgb-principal), 0.1);
+}
+
+/* INPUT FILE: Diseño final responsive */
+.forms-input[type="file"] {
+    padding: 10px;
+    background: rgba(var(--rgb-principal), 0.1);
+    border: 1px dashed var(--color-principal);
+    color: var(--color-principal);
+    cursor: pointer;
+    font-family: 'monospace';
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* AJUSTE PARA MÓVILES (Para que no se vea gigante) */
+@media (max-width: 480px) {
+    .forms-container {
+        padding: 15px;
+    }
+    .coordenadas-grid {
+        grid-template-columns: 1fr; /* En el móvil, las coordenadas una sobre otra */
+    }
+    .forms-btn-submit {
+        padding: 14px;
+        font-size: 0.9rem;
+    }
+}
+

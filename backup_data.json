@@ -1,0 +1,532 @@
+{
+  "archivos_usuarios": [],
+  "audios": [
+    {
+      "id": 1,
+      "titulo": "Audio de Prueba 2",
+      "ruta": "audio2.mp3",
+      "aprobado": 1,
+      "fecha_subida": "2026-03-10T19:59:54.000Z",
+      "autor": "Pepe Moreno",
+      "latitud": "0.00000000",
+      "longitud": "0.00000000",
+      "agente": "Agente Anónimo"
+    },
+    {
+      "id": 2,
+      "titulo": "Misterio Nocturno",
+      "ruta": "misterio.mp3",
+      "aprobado": 1,
+      "fecha_subida": "2026-03-10T19:59:54.000Z",
+      "autor": "Pepe Moreno",
+      "latitud": "0.00000000",
+      "longitud": "0.00000000",
+      "agente": "Agente Anónimo"
+    }
+  ],
+  "chat_mensajes": [],
+  "expedientes": [
+    {
+      "id": 1,
+      "titulo": "El Fantasma de la Diputación",
+      "contenido": "Múltiples testigos, incluidos guardias de seguridad del búnker, reportan lamentos y sombras en la tercera planta del edificio de la Diputación de Granada. El expediente permanece bajo estudio de psicofonías.",
+      "usuario_nombre": "Pepe Moreno",
+      "latitud": "37.181800",
+      "longitud": "-3.597500",
+      "estado": "aprobado",
+      "fecha": "2026-03-10T20:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "titulo": "Luces en la Alfaguara",
+      "contenido": "Detección de luces anaranjadas sobrevolando el antiguo sanatorio en formación triangular. No se detectó firma de radar civil. El Coronel solicita vigilancia constante en el sector.",
+      "usuario_nombre": "Agente Operativo",
+      "latitud": "37.247500",
+      "longitud": "-3.535800",
+      "estado": "aprobado",
+      "fecha": "2026-03-11T20:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "titulo": "INCIDENTE EVA 9: CONTACTO EN EL MONTE EL CONJURO (1979)",
+      "contenido": "El Escuadrón de Vigilancia Aérea n.º 9 (EVA 9), ubicado en el monte El Conjuro (Motril, Granada), ha sido protagonista de diversos eventos en sus más de 50 años de historia (desde 1955), destacando especialmente incidentes relacionados con la detección de tramas desconocidas en el radar.\n\n### Incidente del 17 de Noviembre de 1979\n**Contexto:** Seis días después del famoso \"Caso Manises\", el 17 de noviembre de 1979 a las 16:20, los radares del EVA 9 (Centro de Control de la Defensa) detectaron una traza UNK (desconocida) que se dirigía hacia sus instalaciones.\n\n**Desarrollo:** El contacto permaneció sin identificar durante 15 minutos.\n\n**Acción:** A las 16:45 se dio la orden de scramble, despegando un caza-bombardero F-1 Mirage desde la base aérea de Los Llanos (Albacete).\n\n**Desenlace:** La traza se volvió intermitente y finalmente se perdió a las 17:12 horas.\n\n**Información adicional del EVA 9:**\n- **Ubicación:** Monte de El Conjuro (Motril, Granada).\n- **Función:** Mantiene operativos los radares (actualmente el sistema Lanza 3D) y comunicaciones para garantizar la seguridad del espacio aéreo del sureste peninsular y el mar de Alborán.\n- **Misión:** Opera 24/7 identificando ecos sospechosos o problemas en los transpondedores de vuelo.\n\nhttps://www.youtube.com/watch?v=OFAtV-K_Vlk\n\nFuentes: Voces en el aire (ayfo.es), Crónicas de la Defensa.",
+      "usuario_nombre": "Pepe Moreno",
+      "latitud": "36.757800",
+      "longitud": "-3.421100",
+      "estado": "aprobado",
+      "fecha": "2026-05-07T17:11:45.000Z"
+    },
+    {
+      "id": 4,
+      "titulo": "EXPEDIENTE EVA 3: EL INCIDENTE DE CONSTANTINA (1968)",
+      "contenido": "El 12 de noviembre de 1968, el aire de la Sierra Norte de Sevilla se volvió espeso bajo la vigilancia del Escuadrón de Vigilancia Aérea número 3 (EVA 3). A las 19:45 horas, lo que comenzó como una guardia rutinaria se transformó en uno de los expedientes desclasificados más intrigantes de la aeronáutica militar española.\n\nUn capitán de la unidad, observando desde la zona residencial de oficiales, fijó su mirada en un objeto que despedía una luminiscencia blanca cegadora. Según el informe técnico, la luz se encontraba a unos 20 kilómetros de distancia y mantenía una altitud de 4.000 metros. Durante varios minutos, el objeto realizó maniobras imposibles: pulsaba en intensidad, desapareciendo casi por completo para luego brillar con una fuerza descomunal.\n\nAunque el Ejército del Aire intentó restarle importancia en sus conclusiones, calificándolo de 'baja fiabilidad' por la falta de trazas de radar sólidas en los equipos TPS-113 de la época, otros cinco testigos de la base confirmaron el fenómeno. ¿Fue una prueba tecnológica secreta o un visitante de fuera de nuestro mundo que sabía exactamente dónde estaban los ojos del radar español? Hoy, el Búnker recupera este informe para recordar que, a veces, los que mejor saben mirar al cielo son los que ven lo que nadie más quiere admitir.",
+      "usuario_nombre": "Pepe Moreno",
+      "latitud": "37.892000",
+      "longitud": "-5.589000",
+      "estado": "aprobado",
+      "fecha": "2026-05-07T17:18:28.000Z"
+    },
+    {
+      "id": 5,
+      "titulo": "EXPEDIENTE CONIL: LOS VISITANTES DE LA PLAYA DE LOS BATELES (1989)",
+      "contenido": "La noche del 29 de septiembre de 1989, mientras España aún comentaba la actualidad política y social, en la Playa de Los Bateles (Conil de la Frontera, Cádiz), el tejido de la realidad se desgarró para cinco jóvenes. Lázaro, Isabel, Loli y los dos Pedros no imaginaban que su paseo nocturno terminaría en los anales de la ufología mundial.\n\nA pie de arena, el grupo divisó a dos figuras de una estatura descomunal, superando los dos metros, vestidas con túnicas de un blanco radiante que parecía emitir su propia luz. Lo que siguió desafía cualquier lógica convencional: las entidades comenzaron a intercambiarse una esfera luminosa, como si realizaran un rito o una medición técnica. Momentos después, ante los ojos atónitos de los testigos, los seres 'mutaron', transformándose en lo que parecía ser un matrimonio extranjero de aspecto convencional, en un aparente intento de camuflaje biológico.\n\nSin embargo, el horror y el asombro no terminaron ahí. Una tercera figura apareció en escena: un ser con cabeza en forma de pera invertida y una extraña franja de vello blanco en la espalda. Aunque las versiones oficiales intentaron cerrar el caso alegando una confusión con operarios del barco cablero 'Monarch', los cálculos de posición y la naturaleza física de los encuentros directos sugieren algo mucho más profundo. Aquella noche, Conil no fue solo una playa gaditana, fue un puerto estelar donde lo imposible caminó sobre la arena.",
+      "usuario_nombre": "Pepe Moreno",
+      "latitud": "36.275500",
+      "longitud": "-6.091100",
+      "estado": "aprobado",
+      "fecha": "2026-05-07T17:33:14.000Z"
+    },
+    {
+      "id": 6,
+      "titulo": "INCIDENTE MANISES: EL EXPEDIENTE QUE CAMBIÓ LA AVIACIÓN ESPAÑOLA (1979)",
+      "contenido": "El 11 de noviembre de 1979, el cielo español fue testigo del evento ufológico más trascendental de su historia. El vuelo comercial TAE JK-297, un Super Caravelle con 109 pasajeros a bordo, cubría la ruta Salzburgo-Las Palmas cuando, sobre las 23:00 horas, el Comandante Javier Lerdo de Tejada divisó dos potentes luces rojas en curso de colisión.\n\nAnte la falta de respuesta de los radares de control y la persistencia de las luces que acosaban a la aeronave, el Comandante tomó una decisión sin precedentes: realizar un aterrizaje de emergencia en el aeropuerto de Manises (Valencia). Fue la primera vez en la historia que un avión comercial se vio obligado a aterrizar por la presencia de un fenómeno no identificado.\n\nLa respuesta militar no se hizo esperar. A las 00:40 horas, el Capitán Fernando Cámara despegó desde la Base de Los Llanos (Albacete) en un caza Mirage F-1. Durante más de hora y media, el Capitán Cámara persiguió a una forma troncocónica que cambiaba de color y que llegó a activar las alertas de guerra electrónica de su caza, indicando que el 'objetivo' estaba bloqueando su radar. El incidente, desclasificado en 1994, sigue siendo el pilar de la ufología técnica en España, donde un piloto de combate y una tripulación civil coincidieron en lo imposible.",
+      "usuario_nombre": "Pepe Moreno",
+      "latitud": "39.489300",
+      "longitud": "-0.481600",
+      "estado": "aprobado",
+      "fecha": "2026-05-07T17:46:54.000Z"
+    },
+    {
+      "id": 7,
+      "titulo": "LA LUZ DE LA RAMBLA",
+      "contenido": "En el municipio de Las Albuñuelas, el fenómeno conocido como 'La luz de la Rambla' es una realidad física reportada por generaciones de vecinos. Se describe como una luminosidad errante, a menudo de un color rojo intenso o amarillento, que surge del terreno en puntos específicos como 'La Puntanilla' o cerca del viejo roble al final de la rambla.\n\nLos informes coinciden en un comportamiento anómalo: la luz suele aparecer de madrugada, manteniéndose a una altura constante de unos dos metros sobre el suelo. A diferencia de un fenómeno atmosférico común, los testigos describen una 'inteligencia' en sus movimientos, llegando a seguir a los transeúntes por los barrancos antes de desvanecerse en el río o en las curvas del valle. \n\nAunque las teorías locales varían desde almas errantes hasta antiguos yacimientos de oro, el fenómeno se manifiesta como un orbe o 'bombilla' de gran potencia capaz de iluminar ramblas enteras. Este expediente documenta uno de los misterios más persistentes del Valle de Lecrín, un fenómeno que sigue manifestándose sin un patrón explicable en la oscuridad de la sierra granadina.",
+      "usuario_nombre": "Pepe Moreno",
+      "latitud": "36.927600",
+      "longitud": "-3.626400",
+      "estado": "aprobado",
+      "fecha": "2026-05-07T17:51:13.000Z",
+      "imagen_url": "luz_rambla.png"
+    }
+  ],
+  "imagenes": [
+    {
+      "id": 101,
+      "titulo": "Evidencia Soportújar",
+      "url_imagen": "soportujar.jpg",
+      "agente": "Pepe Moreno",
+      "descripcion": "Anomalía detectada en el pueblo de las brujas.",
+      "latitud": "36.927500",
+      "longitud": "-3.430500",
+      "estado": "aprobado",
+      "fecha": "2026-03-10T20:00:00.000Z"
+    }
+  ],
+  "noticias": [
+    {
+      "id": 1,
+      "titulo": "Incidente en la Alfaguara",
+      "cuerpo": "Se reportan luces extrañas en el antiguo sanatorio.",
+      "categoria": "Paranormal",
+      "autor": "Pepe Moreno",
+      "imagen_url": null,
+      "estado": "publicada",
+      "fecha": "2026-03-10T20:05:02.000Z",
+      "latitud": "37.17670000",
+      "longitud": "-3.59910000",
+      "aprobado": 1,
+      "ubicacion": "Granada",
+      "agente": "Pepe Moreno"
+    },
+    {
+      "id": 2,
+      "titulo": "El Fantasma del Granero",
+      "cuerpo": "Testigos afirman ver una figura en la planta alta.",
+      "categoria": "Apariciones",
+      "autor": "Pepe Moreno",
+      "imagen_url": null,
+      "estado": "publicada",
+      "fecha": "2026-03-10T20:05:02.000Z",
+      "latitud": "37.18000000",
+      "longitud": "-3.59300000",
+      "aprobado": 1,
+      "ubicacion": "Granada",
+      "agente": "Pepe Moreno"
+    },
+    {
+      "id": 3,
+      "titulo": "Incidente EVA 9: El Radar que Detectó lo Imposible",
+      "cuerpo": "El 17 de noviembre de 1979, el radar de Motril fijó una traza desconocida que provocó un despegue de emergencia (scramble) desde Albacete. Un misterio que sigue vivo en los archivos de la defensa granadina.",
+      "categoria": "Militar",
+      "autor": "Pepe Moreno",
+      "imagen_url": null,
+      "estado": "publicada",
+      "fecha": "2026-05-07T17:11:45.000Z",
+      "latitud": "36.75780000",
+      "longitud": "-3.42110000",
+      "aprobado": 1,
+      "ubicacion": "Motril",
+      "agente": "Pepe Moreno"
+    },
+    {
+      "id": 4,
+      "titulo": "EVA 3 Constantina: El Capitán que vio la Luz",
+      "cuerpo": "En 1968, un capitán y cinco testigos del Escuadrón de Vigilancia Aérea reportaron un objeto pulsante sobre Sevilla. Un caso de la desclasificación militar que hoy analizamos en el Búnker.",
+      "categoria": "Militar",
+      "autor": "Pepe Moreno",
+      "imagen_url": null,
+      "estado": "publicada",
+      "fecha": "2026-05-07T17:18:28.000Z",
+      "latitud": "37.89200000",
+      "longitud": "-5.58900000",
+      "aprobado": 1,
+      "ubicacion": "Sevilla",
+      "agente": "Pepe Moreno"
+    },
+    {
+      "id": 5,
+      "titulo": "Incidente Conil: ¿Invasión o Experimento?",
+      "cuerpo": "En septiembre de 1989, cinco testigos presenciaron el desembarco de seres gigantes en Conil de la Frontera. Un caso que conectó Cádiz con un avistamiento masivo en Rusia el mismo día.",
+      "categoria": "Mundial",
+      "autor": "Pepe Moreno",
+      "imagen_url": null,
+      "estado": "publicada",
+      "fecha": "2026-05-07T17:33:14.000Z",
+      "latitud": "36.27550000",
+      "longitud": "-6.09110000",
+      "aprobado": 1,
+      "ubicacion": "Cádiz",
+      "agente": "Pepe Moreno"
+    },
+    {
+      "id": 6,
+      "titulo": "Emergencia en Manises: El Caza que Persiguió a un OVNI",
+      "cuerpo": "El caso más famoso de la aviación española cumple décadas. Un vuelo comercial desviado y un piloto de combate que tuvo contacto visual y de radar con un objeto desconocido.",
+      "categoria": "Aviación",
+      "autor": "Pepe Moreno",
+      "imagen_url": null,
+      "estado": "publicada",
+      "fecha": "2026-05-07T17:46:54.000Z",
+      "latitud": "39.48930000",
+      "longitud": "-0.48160000",
+      "aprobado": 1,
+      "ubicacion": "Valencia",
+      "agente": "Pepe Moreno"
+    },
+    {
+      "id": 7,
+      "titulo": "La luz de la Rambla",
+      "cuerpo": "Investigación sobre las luces errantes de Las Albuñuelas. Fenómenos de color rojo y amarillo que aparecen de madrugada en puntos como 'La Puntanilla'.",
+      "categoria": "Leyendas",
+      "autor": "Pepe Moreno",
+      "imagen_url": "luz_rambla.png",
+      "estado": "publicada",
+      "fecha": "2026-05-07T17:51:13.000Z",
+      "latitud": "36.92760000",
+      "longitud": "-3.62640000",
+      "aprobado": 1,
+      "ubicacion": "Granada",
+      "agente": "Pepe Moreno"
+    }
+  ],
+  "lugares": [
+    {
+      "id": 1,
+      "titulo": "Diputación de Granada",
+      "ubicacion": "Granada",
+      "descripcion": "Lugar con actividad paranormal reportada.",
+      "latitud": "37.18180000",
+      "longitud": "-3.59750000",
+      "imagen_url": "1. Diputación de Granada.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 2,
+      "titulo": "Pub Granero",
+      "ubicacion": "Granada",
+      "descripcion": "Antiguo granero con historias de misterio.",
+      "latitud": "37.17550000",
+      "longitud": "-3.59420000",
+      "imagen_url": "2. Pub Granero.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 3,
+      "titulo": "Real Chancillería",
+      "ubicacion": "Granada",
+      "descripcion": "Edificio histórico con leyendas de fantasmas.",
+      "latitud": "37.17980000",
+      "longitud": "-3.59350000",
+      "imagen_url": "3. Real Chancillería.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 4,
+      "titulo": "Cortijo Jurado (Órgiva)",
+      "ubicacion": "Órgiva",
+      "descripcion": "Versión granadina del famoso cortijo malagueño.",
+      "latitud": "36.88970000",
+      "longitud": "-3.42450000",
+      "imagen_url": "4. Cortijo Jurado (Órgiva).jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 5,
+      "titulo": "Sanatorio de la Alfaguara",
+      "ubicacion": "Alfacar",
+      "descripcion": "Antiguo sanatorio antituberculoso abandonado.",
+      "latitud": "37.24750000",
+      "longitud": "-3.53580000",
+      "imagen_url": "5. Sanatorio de la Alfaguara.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 6,
+      "titulo": "Palacio de Caicedo",
+      "ubicacion": "Granada",
+      "descripcion": "Sede del conservatorio con ecos del pasado.",
+      "latitud": "37.17700000",
+      "longitud": "-3.60050000",
+      "imagen_url": "6. Palacio de Caicedo.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 7,
+      "titulo": "El Carmen del Aljibe del Rey",
+      "ubicacion": "Albaicín",
+      "descripcion": "Misterios en el corazón del Albaicín.",
+      "latitud": "37.18300000",
+      "longitud": "-3.59300000",
+      "imagen_url": "7. El Carmen del Aljibe del Rey.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 8,
+      "titulo": "Teatro Isabel la Católica",
+      "ubicacion": "Granada",
+      "descripcion": "El fantasma del teatro según las crónicas locales.",
+      "latitud": "37.17480000",
+      "longitud": "-3.59900000",
+      "imagen_url": "8. Teatro Isabel la Católica.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 9,
+      "titulo": "Cueva de la Mujer",
+      "ubicacion": "Alhama de Granada",
+      "descripcion": "Lugar de antiguos rituales y avistamientos.",
+      "latitud": "36.99950000",
+      "longitud": "-3.98500000",
+      "imagen_url": "9. Cueva de la Mujer.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 10,
+      "titulo": "Hospital Real",
+      "ubicacion": "Granada",
+      "descripcion": "Presencias en la biblioteca y los pasillos.",
+      "latitud": "37.18350000",
+      "longitud": "-3.60010000",
+      "imagen_url": "10. Hospital Real.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 11,
+      "titulo": "Alpujarra",
+      "ubicacion": "La Alpujarra",
+      "descripcion": "Fenómenos en la sierra granadina.",
+      "latitud": "36.93800000",
+      "longitud": "-3.34400000",
+      "imagen_url": "alpujarra.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 12,
+      "titulo": "Alpujarra 1",
+      "ubicacion": "La Alpujarra",
+      "descripcion": "Zona de avistamientos reportados.",
+      "latitud": "36.93900000",
+      "longitud": "-3.34500000",
+      "imagen_url": "alpujarra1.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 13,
+      "titulo": "Alpujarra 2",
+      "ubicacion": "La Alpujarra",
+      "descripcion": "Rutas del misterio.",
+      "latitud": "36.94000000",
+      "longitud": "-3.34600000",
+      "imagen_url": "alpujarra2.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 14,
+      "titulo": "Teatro Calderón Motril",
+      "ubicacion": "Motril",
+      "descripcion": "Sucesos extraños tras el telón.",
+      "latitud": "36.74600000",
+      "longitud": "-3.51800000",
+      "imagen_url": "calderon-motril-teatro.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 15,
+      "titulo": "Calle Motril",
+      "ubicacion": "Motril",
+      "descripcion": "Testimonios en la costa tropical.",
+      "latitud": "36.74500000",
+      "longitud": "-3.52000000",
+      "imagen_url": "Calle Motril.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 16,
+      "titulo": "Rincón Alpujarreño",
+      "ubicacion": "La Alpujarra",
+      "descripcion": "Lugar de descanso con energías extrañas.",
+      "latitud": "36.93500000",
+      "longitud": "-3.34000000",
+      "imagen_url": "rincon alpujarreño.jpg",
+      "estado": "aprobado"
+    },
+    {
+      "id": 17,
+      "titulo": "Soportújar",
+      "ubicacion": "Soportújar",
+      "descripcion": "El pueblo de las brujas de Granada.",
+      "latitud": "36.92750000",
+      "longitud": "-3.43050000",
+      "imagen_url": "soportujar.jpg",
+      "estado": "aprobado"
+    }
+  ],
+  "usuarios": [
+    {
+      "id": 1,
+      "nombre": "Pepe",
+      "apellidos": "Moreno",
+      "email": "archipegv2@gmail.com",
+      "password": "$2b$10$GwtFsJGuzWWcprf70mIc3ugVjEhZt4vjH.ASxbPmzWETUEPQCLSc2",
+      "rol": "admin",
+      "ciudad": "Granada",
+      "edad": 40,
+      "aprobado": 1,
+      "fecha_registro": "2026-03-10T19:40:38.000Z"
+    },
+    {
+      "id": 2,
+      "nombre": "cesar lumbreras",
+      "apellidos": "",
+      "email": "cesar@cesar",
+      "password": "$2b$10$3Wwol6U76s91SPM9OipU3.QxTkM8biJSJ1WCGMMdU61QAjsp19s0G",
+      "rol": "agente",
+      "ciudad": "girona",
+      "edad": 23,
+      "aprobado": 1,
+      "fecha_registro": "2026-03-10T19:44:33.000Z"
+    },
+    {
+      "id": 3,
+      "nombre": "Patxi",
+      "apellidos": null,
+      "email": "elpatxidelbarrio@gmail.com",
+      "password": "$2b$10$qGXNsjykEzaz4CqYZHjqX.dCIEonPhesAtjSf8kcTd0m.PAWKw/Zi",
+      "rol": "agente",
+      "ciudad": "Granada",
+      "edad": 22,
+      "aprobado": 1,
+      "fecha_registro": "2026-04-22 20:12:27"
+    },
+    {
+      "id": 4,
+      "nombre": "Noelia",
+      "apellidos": null,
+      "email": "noeliaville@hotmail.com",
+      "password": "$2b$10$u3FBm8BpE8PuH/NopA6IGeRLL8YjuGmFOmLqR2gMr9pmX4eUkco36",
+      "rol": "agente",
+      "ciudad": "Granada",
+      "edad": 48,
+      "aprobado": 1,
+      "fecha_registro": "2026-04-25 20:32:06"
+    },
+    {
+      "id": 5,
+      "nombre": "Maka Gomez",
+      "apellidos": null,
+      "email": "macagomezcasas1@gmail.com",
+      "password": "$2b$10$aEAl1WJ3Cydc7Yo3gFvQKuMGm/na4E05JER9320/sip.isWamV3ye",
+      "rol": "agente",
+      "ciudad": "Burela ",
+      "edad": 60,
+      "aprobado": 1,
+      "fecha_registro": "2026-04-25 23:06:50"
+    },
+    {
+      "id": 6,
+      "nombre": "Clau",
+      "apellidos": null,
+      "email": "claudia.more9@gmail.com",
+      "password": "$2b$10$nUgAadHJCf2lNpiCVyWzqufVAtFESZwyRKI64yTVQOw3U8HJfk7O2",
+      "rol": "agente",
+      "ciudad": "Granada",
+      "edad": 21,
+      "aprobado": 1,
+      "fecha_registro": "2026-04-26 09:00:25"
+    },
+    {
+      "id": 7,
+      "nombre": "Jessica",
+      "apellidos": null,
+      "email": "jessicavillada@gmail.com",
+      "password": "$2b$10$giyxLKh45Y4mERfwsXwo8uls7bp15VII7eAgjtMLZGqJcv51kTbQu",
+      "rol": "agente",
+      "ciudad": "Granada ",
+      "edad": 42,
+      "aprobado": 1,
+      "fecha_registro": "2026-04-28 07:46:24"
+    }
+  ],
+  "videos": [
+    {
+      "id": 4,
+      "titulo": "video 1",
+      "url": "1.mp4",
+      "usuario": "Invitado",
+      "estado": "validado",
+      "fecha": "2026-03-10T19:08:20.000Z",
+      "latitud": "0.00000000",
+      "longitud": "0.00000000"
+    },
+    {
+      "id": 5,
+      "titulo": "video 2",
+      "url": "2.mp4",
+      "usuario": "Invitado",
+      "estado": "validado",
+      "fecha": "2026-03-10T19:08:20.000Z",
+      "latitud": "0.00000000",
+      "longitud": "0.00000000"
+    },
+    {
+      "id": 6,
+      "titulo": "video 3",
+      "url": "3.mp4",
+      "usuario": "Invitado",
+      "estado": "validado",
+      "fecha": "2026-03-10T19:08:20.000Z",
+      "latitud": "0.00000000",
+      "longitud": "0.00000000"
+    },
+    {
+      "id": 7,
+      "titulo": "video 4",
+      "url": "4.mp4",
+      "usuario": "Invitado",
+      "estado": "validado",
+      "fecha": "2026-03-10T19:08:20.000Z",
+      "latitud": "0.00000000",
+      "longitud": "0.00000000"
+    },
+    {
+      "id": 8,
+      "titulo": "La Luz de Mafasca (Fuerteventura)",
+      "url": "https://www.youtube.com/watch?v=99nPjRcwIPA",
+      "usuario": "Pepe Moreno",
+      "estado": "validado",
+      "fecha": "2026-05-07T18:04:37.000Z",
+      "latitud": "28.358500",
+      "longitud": "-14.053700",
+      "capturas": null
+    }
+  ]
+}

@@ -1,0 +1,267 @@
+/* ==========================================
+   EFEMÉRIDES - "HOY EN LA HISTORIA X"
+   Widget de archivo desclasificado diario
+   ========================================== */
+
+.efemerides-widget {
+    background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(10,15,25,0.98));
+    border: 1px solid rgba(var(--rgb-principal), 0.3);
+    border-radius: 8px;
+    padding: 0;
+    margin: 25px 0;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 
+        0 0 20px rgba(var(--rgb-principal), 0.08),
+        inset 0 1px 0 rgba(var(--rgb-principal), 0.1);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.efemerides-widget:hover {
+    border-color: rgba(var(--rgb-principal), 0.5);
+    box-shadow: 
+        0 0 30px rgba(var(--rgb-principal), 0.15),
+        inset 0 1px 0 rgba(var(--rgb-principal), 0.15);
+}
+
+.efemerides-widget.cargando {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: rgba(var(--rgb-principal), 0.6);
+    letter-spacing: 1px;
+}
+
+/* --- LOADER --- */
+.efemerides-loader {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(var(--rgb-principal), 0.2);
+    border-top: 2px solid var(--color-principal);
+    border-radius: 50%;
+    animation: spin-efemeride 0.8s linear infinite;
+}
+
+@keyframes spin-efemeride {
+    to { transform: rotate(360deg); }
+}
+
+/* --- HEADER --- */
+.efemerides-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: linear-gradient(90deg, rgba(var(--rgb-principal), 0.12), transparent);
+    border-bottom: 1px solid rgba(var(--rgb-principal), 0.15);
+}
+
+.efemerides-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.efemerides-icon-pulse {
+    font-size: 1.3rem;
+    animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.15); }
+}
+
+.efemerides-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--color-principal);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.efemerides-fecha {
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* --- BODY --- */
+.efemerides-body {
+    padding: 20px;
+}
+
+.efemerides-titulo {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 20px rgba(var(--rgb-principal), 0.3);
+}
+
+/* --- META TAGS --- */
+.efemerides-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.meta-tag.año {
+    background: rgba(255, 177, 0, 0.1);
+    border: 1px solid rgba(255, 177, 0, 0.3);
+    color: #ffb100;
+}
+
+.meta-tag.ubicacion {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: #00d4ff;
+}
+
+.meta-tag.categoria {
+    background: rgba(var(--rgb-principal), 0.1);
+    border: 1px solid rgba(var(--rgb-principal), 0.3);
+    color: var(--color-principal);
+}
+
+/* --- CONTENIDO --- */
+.efemerides-contenido {
+    max-height: 80px;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    position: relative;
+}
+
+.efemerides-contenido::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.95));
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.efemerides-contenido.expandido {
+    max-height: 800px;
+}
+
+.efemerides-contenido.expandido::after {
+    opacity: 0;
+}
+
+.efemerides-contenido p {
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* --- BOTÓN EXPANDIR --- */
+.btn-expandir-efemeride {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(var(--rgb-principal), 0.05);
+    border: 1px dashed rgba(var(--rgb-principal), 0.25);
+    color: var(--color-principal);
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.btn-expandir-efemeride:hover {
+    background: rgba(var(--rgb-principal), 0.12);
+    border-color: rgba(var(--rgb-principal), 0.5);
+    box-shadow: 0 0 15px rgba(var(--rgb-principal), 0.1);
+}
+
+/* --- FOOTER --- */
+.efemerides-footer {
+    padding: 10px 20px;
+    border-top: 1px solid rgba(var(--rgb-principal), 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.efemerides-footer small {
+    font-family: 'Courier New', monospace;
+    font-size: 0.6rem;
+    color: rgba(var(--rgb-principal), 0.35);
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+}
+
+.efemerides-scanner-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-principal), transparent);
+    animation: scanner-sweep 3s ease-in-out infinite;
+    opacity: 0.4;
+    flex-shrink: 0;
+    max-width: 80px;
+}
+
+@keyframes scanner-sweep {
+    0% { opacity: 0.1; transform: scaleX(0.3); }
+    50% { opacity: 0.6; transform: scaleX(1); }
+    100% { opacity: 0.1; transform: scaleX(0.3); }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .efemerides-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .efemerides-titulo {
+        font-size: 0.9rem;
+    }
+
+    .efemerides-meta {
+        gap: 5px;
+    }
+
+    .meta-tag {
+        font-size: 0.6rem;
+        padding: 3px 7px;
+    }
+
+    .efemerides-contenido p {
+        font-size: 0.78rem;
+    }
+}

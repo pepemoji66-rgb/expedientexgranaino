@@ -1,0 +1,284 @@
+/* ======================================================
+   RADAR TÁCTICO v3.0 - BÚNKER DE EXPEDIENTEXGRANAINO
+   ====================================================== */
+
+:root {
+    --color-radar: #00ff41; /* Verde matriz clásico o el principal del búnker */
+    --rgb-radar: 0, 255, 65;
+}
+
+.seccion-radar-total {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: #000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.mapa-mando-full {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+
+/* --- GRID OVERLAY --- */
+.radar-overlay-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(var(--rgb-radar), 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(var(--rgb-radar), 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* --- POPUP V2: TACTICAL DESIGN --- */
+.popup-bunker-v2 {
+    background: #000 !important;
+    color: #fff !important;
+    padding: 10px;
+    min-width: 250px;
+    border: 1px solid var(--color-principal);
+    font-family: 'Orbitron', 'Roboto Mono', monospace;
+}
+
+.popup-header-tactico {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(var(--rgb-principal), 0.3);
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+}
+
+.status-online {
+    font-size: 0.6rem;
+    color: var(--color-principal);
+    font-weight: bold;
+    animation: blink 1s infinite alternate;
+}
+
+.titulo-popup-neon {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.agente-tag {
+    font-size: 0.65rem;
+    background: rgba(var(--rgb-principal), 0.15);
+    color: var(--color-principal);
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+/* --- CONTENEDOR IMAGEN Y NAVEGACIÓN --- */
+.contenedor-img-popup {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    background: #111;
+    border: 1px solid #333;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.overlay-ampliar-radar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(var(--rgb-principal), 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.3s;
+    z-index: 15;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: bold;
+    gap: 5px;
+}
+
+.contenedor-img-popup:hover .overlay-ampliar-radar {
+    opacity: 1;
+}
+
+.img-radar-popup {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.5s;
+}
+
+.contenedor-img-popup:hover .img-radar-popup {
+    transform: scale(1.1);
+}
+
+.controles-radar-popup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+    z-index: 20;
+    pointer-events: none; /* Dejamos pasar clicks al centro si hace falta */
+}
+
+.btn-radar-nav {
+    pointer-events: auto;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--color-principal);
+    color: var(--color-principal);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 10px rgba(var(--rgb-principal), 0.3);
+}
+
+.btn-radar-nav:hover {
+    background: var(--color-principal);
+    color: #000;
+}
+
+/* --- DESCRIPCIÓN --- */
+.descripcion-popup-container {
+    max-height: 80px;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-bottom: 10px;
+}
+
+.descripcion-popup {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: #ccc;
+    margin: 0;
+}
+
+.popup-footer-tactico {
+    font-size: 0.6rem;
+    color: #666;
+    border-top: 1px solid #222;
+    padding-top: 5px;
+    text-align: right;
+}
+
+/* --- UI STATUS BAR --- */
+.ui-radar-status {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--color-principal);
+    padding: 10px 20px;
+    display: flex;
+    gap: 20px;
+    backdrop-filter: blur(5px);
+    border-radius: 5px;
+}
+
+.status-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.status-item .label {
+    font-size: 0.7rem;
+    color: #888;
+}
+
+.status-item .value {
+    font-size: 0.8rem;
+    color: var(--color-principal);
+    font-weight: bold;
+}
+
+.value.pulse {
+    animation: blink 1.5s infinite alternate;
+}
+
+@keyframes blink {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+}
+
+/* --- AJUSTES MÓVIL --- */
+@media (max-width: 768px) {
+    .ui-radar-status {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        justify-content: center;
+        padding: 8px;
+    }
+
+    .popup-bunker-v2 {
+        min-width: 200px;
+        max-width: 240px;
+    }
+
+    .contenedor-img-popup {
+        height: 120px;
+    }
+
+    .btn-radar-nav {
+        width: 44px; /* Más grande para dedos */
+        height: 44px;
+    }
+}
+
+/* --- MARCADO PULSANTE (RADAR) --- */
+.marcador-pulsante {
+    width: 14px;
+    height: 14px;
+    background: var(--color-principal);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--color-principal);
+    animation: pulse-marker 1.5s infinite ease-out;
+}
+
+@keyframes pulse-marker {
+    0% { transform: scale(0.8); opacity: 1; box-shadow: 0 0 0 0 rgba(var(--rgb-principal), 0.7); }
+    100% { transform: scale(2); opacity: 0; box-shadow: 0 0 0 15px rgba(var(--rgb-principal), 0); }
+}
+
+/* LEAFLET OVERRIDES */
+.leaflet-popup-content-wrapper {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+}
+
+.leaflet-popup-tip-container {
+    display: none; /* Estilo más limpio sin el piquito */
+}

@@ -1,0 +1,179 @@
+.horoscopo-container {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: white;
+    font-family: 'monospace';
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--color-principal);
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    position: relative;
+}
+
+.horoscopo-nav {
+    margin-bottom: 20px;
+}
+
+.btn-volver-bunker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-principal);
+    text-decoration: none;
+    font-size: 0.8rem;
+    padding: 8px 15px;
+    border: 1px solid rgba(var(--rgb-principal), 0.3);
+    border-radius: 4px;
+    transition: 0.3s;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.btn-volver-bunker:hover {
+    background: var(--color-principal);
+    color: black;
+    box-shadow: 0 0 10px var(--color-principal);
+}
+
+.horoscopo-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.horoscopo-header h1 {
+    font-size: 2.5rem;
+    color: var(--color-principal);
+    text-shadow: 0 0 10px var(--color-principal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.subtitle {
+    color: #aaa;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.header-decoration {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    color: var(--color-principal);
+    opacity: 0.7;
+}
+
+.signos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.signo-card {
+    background: rgba(10, 10, 10, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.signo-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--color-principal);
+    box-shadow: 0 10px 20px rgba(var(--rgb-principal), 0.1);
+}
+
+.signo-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--color-principal);
+    opacity: 0.5;
+}
+
+.signo-icono {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    display: block;
+    color: var(--color-principal);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.signo-card h3 {
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    color: #eee;
+}
+
+.divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-principal), transparent);
+    margin: 15px 0;
+    opacity: 0.5;
+}
+
+.signo-card p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #ccc;
+    text-align: justify;
+}
+
+.horoscopo-footer {
+    margin-top: 60px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    color: #666;
+}
+
+.horoscopo-footer small {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.7rem;
+}
+
+/* Animaciones */
+.icon-spin {
+    animation: spin 10s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.cargando {
+    text-align: center;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loader-astral {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--color-principal);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+    .horoscopo-header h1 {
+        font-size: 1.8rem;
+    }
+}
+

@@ -1,0 +1,202 @@
+.carta-astral-page {
+    padding: 60px 5% 50px;
+    color: white;
+    font-family: 'Courier New', monospace;
+    min-height: 80vh;
+}
+
+.header-astral {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.titulo-neon {
+    color: var(--color-principal, var(--color-principal));
+    text-shadow: 0 0 15px var(--color-principal, var(--color-principal));
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.subtitulo {
+    color: #888;
+    letter-spacing: 2px;
+}
+
+.formulario-astral {
+    max-width: 500px;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--color-principal, var(--color-principal));
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(var(--rgb-principal), 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: var(--color-principal, var(--color-principal));
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    color: white;
+    padding: 10px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.input-with-btn {
+    display: flex;
+    gap: 10px;
+}
+
+.input-with-btn button {
+    background: var(--color-principal, var(--color-principal));
+    color: black;
+    border: none;
+    padding: 0 15px;
+    cursor: pointer;
+}
+
+.btn-generar {
+    width: 100%;
+    padding: 15px;
+    background: var(--color-principal, var(--color-principal));
+    color: black;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 10px;
+}
+
+.btn-generar:hover {
+    box-shadow: 0 0 20px var(--color-principal, var(--color-principal));
+}
+
+.resultados-astral {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.grid-posiciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.item-posicion {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.item-posicion:hover {
+    border-color: var(--color-principal, var(--color-principal));
+    background: rgba(var(--rgb-principal), 0.05);
+}
+
+.item-posicion .planeta {
+    display: block;
+    font-size: 0.7rem;
+    color: #888;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.item-posicion .signo {
+    font-size: 1.2rem;
+    color: var(--color-principal, var(--color-principal));
+    font-weight: bold;
+}
+
+.interpretacion-ia {
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid var(--color-principal, var(--color-principal));
+    padding: 30px;
+    line-height: 1.8;
+    border-radius: 10px;
+    position: relative;
+}
+
+.interpretacion-ia h3 {
+    color: var(--color-principal, var(--color-principal));
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.texto-ia p {
+    margin-bottom: 15px;
+}
+
+.btn-reset {
+    display: block;
+    margin: 30px auto;
+    background: transparent;
+    color: #555;
+    border: 1px solid #333;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+.btn-reset:hover {
+    color: white;
+    border-color: white;
+}
+
+.cargando-astral {
+    text-align: center;
+    padding: 50px;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: var(--color-principal, var(--color-principal));
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.mensaje-no-auth {
+    text-align: center;
+    max-width: 400px;
+    margin: 100px auto;
+    border: 1px solid #ff4444;
+    padding: 30px;
+    background: rgba(255, 0, 0, 0.05);
+}
+
+.error-astral {
+    color: #ff4444;
+    text-align: center;
+    margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .grid-posiciones {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+

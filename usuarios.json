@@ -1,0 +1,20 @@
+{
+  "usuarios": [
+    { 
+      "nombre": "Jose Jefe", 
+      "email": "archipegv2@gmail.com", 
+      "aprobado": 1, 
+      "rango": "Alto Mando" 
+    }
+  ],
+  "expedientes": [
+    {
+      "id": 1,
+      "titulo": "Expediente de Prueba",
+      "contenido": "Si ves esto, es que el búnker está conectado.",
+      "agente": "Jose Jefe",
+      "estado": "pendiente",
+      "fecha": "2026-02-18"
+    }
+  ]
+}

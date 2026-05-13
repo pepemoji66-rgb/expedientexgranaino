@@ -1,0 +1,187 @@
+.cabala-page {
+    padding: 120px 20px 50px;
+    max-width: 800px;
+    margin: 0 auto;
+    color: #e0e6ed;
+    font-family: 'Inter', sans-serif;
+}
+
+.titulo-cabala {
+    text-align: center;
+    color: var(--color-principal);
+    font-size: 2.2rem;
+    text-shadow: 0 0 15px rgba(var(--rgb-principal), 0.3);
+    letter-spacing: 5px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.subtitulo-cabala {
+    text-align: center;
+    color: #8892b0;
+    font-size: 0.8rem;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+}
+
+.cabala-container {
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-subtle);
+    padding: 40px;
+    border-radius: 4px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    margin-bottom: 50px;
+}
+
+.cabala-input-box label {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 0.75rem;
+    color: #8892b0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.input-bunker {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid #333 !important;
+    padding: 18px;
+    color: #fff !important;
+    font-family: 'Courier New', monospace;
+    font-size: 1.4rem;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 5px;
+    border-radius: 4px;
+}
+
+.input-bunker:focus {
+    border-color: var(--color-principal) !important;
+    outline: none;
+    background: rgba(var(--rgb-principal), 0.05) !important;
+}
+
+.btn-descifrar {
+    width: 100%;
+    padding: 18px;
+    background: var(--color-principal);
+    color: #000;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.btn-descifrar:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(var(--rgb-principal), 0.2);
+}
+
+/* RESULTADO */
+.cabala-resultado {
+    margin-top: 50px;
+    padding-top: 50px;
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+}
+
+.resultado-circle {
+    width: 140px;
+    height: 140px;
+    border: 1px solid var(--color-principal);
+    border-radius: 50%;
+    margin: 0 auto 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px rgba(var(--rgb-principal), 0.1);
+    position: relative;
+}
+
+.resultado-circle::before {
+    content: '';
+    position: absolute;
+    top: -5px; left: -5px; right: -5px; bottom: -5px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+}
+
+.valor-total {
+    font-size: 0.7rem;
+    color: #8892b0;
+    margin-top: 5px;
+    font-family: 'Courier New', monospace;
+}
+
+.valor-maestro {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: var(--color-principal);
+    line-height: 1;
+    font-family: 'Courier New', monospace;
+}
+
+.resultado-info h3 {
+    color: #fff;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+}
+
+.mensaje-cabala {
+    font-style: italic;
+    line-height: 1.8;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    color: #ccd6f6;
+    font-size: 1rem;
+}
+
+.btn-limpiar {
+    background: transparent;
+    border: 1px solid #444;
+    color: #8892b0;
+    padding: 12px 30px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    border-radius: 4px;
+}
+
+.btn-limpiar:hover {
+    color: #fff;
+    border-color: #fff;
+}
+
+.cabala-info-secundaria {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 40px;
+    border-left: 2px solid var(--color-principal);
+    border-radius: 0 4px 4px 0;
+}
+
+.cabala-info-secundaria h3 {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    color: var(--color-principal);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.cabala-info-secundaria p {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #8892b0;
+}
+

@@ -1,0 +1,123 @@
+.comentarios-container {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 40px;
+    margin: 40px auto;
+    max-width: 900px;
+    font-family: 'Inter', sans-serif;
+}
+
+.titulo-seccion-bunker {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 40px;
+    letter-spacing: 3px;
+}
+
+.form-comentario {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 50px;
+}
+
+.input-bunker-comentario {
+    background: #050505;
+    border: 1px solid #222;
+    color: #fff;
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    resize: none;
+    height: 120px;
+    outline: none;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+.input-bunker-comentario:focus {
+    border-color: #444;
+}
+
+.btn-enviar-comentario {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 0.8rem;
+}
+
+.btn-enviar-comentario:hover {
+    background: #ccc;
+}
+
+.comentario-card {
+    padding: 25px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    background: transparent;
+}
+
+.comentario-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.comentario-agente {
+    color: #fff;
+}
+
+.comentario-fecha {
+    color: #444;
+}
+
+.comentario-mensaje {
+    color: #8892b0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.btn-borrar-comentario {
+    background: transparent;
+    color: #ff4444;
+    border: 1px solid #ff4444;
+    padding: 5px 10px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-left: 10px;
+}
+
+.btn-borrar-comentario:hover {
+    background: #ff4444;
+    color: #fff;
+}
+
+.no-comentarios {
+    text-align: center;
+    color: #444;
+    font-size: 0.8rem;
+    padding: 40px 0;
+}
+
+/* Scrollbar técnica */
+.lista-comentarios::-webkit-scrollbar {
+    width: 3px;
+}
+.lista-comentarios::-webkit-scrollbar-thumb {
+    background: #222;
+}

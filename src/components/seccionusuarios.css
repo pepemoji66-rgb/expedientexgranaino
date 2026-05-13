@@ -1,0 +1,94 @@
+.usuarios-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh; /* Para que deje ver el footer */
+    padding: 20px;
+}
+
+.glass-card-usuarios {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--color-principal);
+    padding: 40px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 0 30px rgba(var(--rgb-principal), 0.2);
+    text-align: center;
+}
+
+.forms-title {
+    color: var(--color-principal);
+    font-family: 'Courier New', monospace;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+}
+
+.usuarios-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.forms-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #444;
+    padding: 12px;
+    color: white;
+    font-family: 'Courier New', monospace;
+    outline: none;
+    transition: 0.3s;
+}
+
+.forms-input:focus {
+    border-color: var(--color-principal);
+    background: rgba(var(--rgb-principal), 0.05);
+}
+
+.input-group-doble {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group-doble .forms-input {
+    width: 50%;
+}
+
+.forms-btn-submit {
+    background: var(--color-principal);
+    color: black;
+    border: none;
+    padding: 15px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.forms-btn-submit:hover {
+    background: white;
+    box-shadow: 0 0 15px var(--color-principal);
+}
+
+.toggle-form {
+    margin-top: 25px;
+    color: #ccc;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.link-toggle {
+    color: var(--color-principal);
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* Responsive total */
+@media (max-width: 480px) {
+    .glass-card-usuarios {
+        padding: 20px;
+    }
+}

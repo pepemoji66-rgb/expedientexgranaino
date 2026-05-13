@@ -1,0 +1,401 @@
+.indice-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 40px;
+    color: #e0e6ed;
+    background: transparent;
+}
+
+/* CABECERA DE MONITORIZACIÓN */
+.monitoring-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    color: #555; /* Muy sutil */
+}
+
+.radar-status-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 2px;
+}
+
+.pulse-dot {
+    width: 5px;
+    height: 5px;
+    background: #444;
+    border-radius: 50%;
+}
+
+/* SECCIÓN RADAR TÉCNICO */
+.radar-section {
+    display: flex;
+    gap: 50px;
+    align-items: center;
+    margin-bottom: 40px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.radar-scanner.technical {
+    width: 180px;
+    height: 180px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+}
+
+.radar-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    transform-origin: left center;
+    animation: rotate 6s linear infinite;
+}
+
+.radar-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    border-radius: 50%;
+}
+
+.c1 { width: 33%; height: 33%; }
+.c2 { width: 66%; height: 66%; }
+.c3 { width: 100%; height: 100%; }
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* RESUMEN DE INTELIGENCIA (SIN NÚMEROS) */
+.intel-summary-technical {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.intel-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.intel-status-label {
+    font-size: 0.7rem;
+    color: #666;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.intel-status-value {
+    font-size: 0.75rem;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* TELETIPO DE INTELIGENCIA */
+.intel-ticker {
+    background: #000;
+    border-top: 1px solid #111;
+    border-bottom: 1px solid #111;
+    display: flex;
+    align-items: center;
+    height: 35px;
+    overflow: hidden;
+    margin-bottom: 40px;
+}
+
+.ticker-label {
+    background: #000;
+    color: #444;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    border-right: 1px solid #111;
+    letter-spacing: 1px;
+}
+
+.ticker-wrapper {
+    flex: 1;
+    overflow: hidden;
+}
+
+.ticker-content {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: ticker 40s linear infinite;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: uppercase;
+}
+
+@keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-250%); }
+}
+
+/* CALIBRACIÓN DE FRECUENCIA */
+.frequency-calibration {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.calib-label {
+    font-size: 0.6rem;
+    color: #444;
+    letter-spacing: 1px;
+}
+
+.calib-dots {
+    display: flex;
+    gap: 8px;
+    opacity: 0.5;
+    transition: 0.3s;
+}
+
+.calib-dots:hover {
+    opacity: 1;
+}
+
+.calib-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.calib-dot.active {
+    box-shadow: 0 0 5px currentColor;
+    transform: scale(1.2);
+}
+
+/* SECCIÓN DOSSIER */
+.dossier-actions-personal {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.btn-technical-link.highlight {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+
+.btn-technical-link.highlight:hover {
+    background: #ccc;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+
+.btn-dossier-tech {
+    background: rgba(var(--rgb-principal), 0.05);
+    border: 1px solid var(--color-principal);
+    color: var(--color-principal);
+    padding: 15px 20px;
+    font-size: 0.8rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 100%;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    box-shadow: 0 0 15px rgba(var(--rgb-principal), 0.1);
+    margin: 20px 0;
+}
+
+.btn-dossier-tech:hover {
+    background: var(--color-principal);
+    color: #000;
+    box-shadow: 0 0 30px rgba(var(--rgb-principal), 0.4);
+}
+
+.btn-dossier-tech.open {
+    background: #000;
+    color: #fff;
+    border-color: #fff;
+}
+
+.dossier-content-tech {
+    padding: 50px 40px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(var(--rgb-principal), 0.2);
+    text-align: center;
+    box-shadow: inset 0 0 50px rgba(var(--rgb-principal), 0.05);
+    border-radius: 4px;
+}
+
+.dossier-content-tech h3 {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    color: #fff;
+    letter-spacing: 2px;
+}
+
+.dossier-content-tech p {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: #8892b0;
+    max-width: 800px;
+    margin: 0 auto 30px;
+}
+
+.btn-technical-link {
+    display: inline-block;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 10px 20px;
+    border: 1px solid #333;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+.btn-technical-link:hover {
+    border-color: #fff;
+}
+
+
+/* COMENTARIOS */
+.indice-container :global(.comentarios-container) {
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    padding-top: 50px;
+    margin-top: 50px;
+}
+
+/* PANEL DE ACCIONES TÁCTICAS (BOTONES PRINCIPALES) */
+.tactical-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 60px;
+    margin-bottom: 60px;
+}
+
+.btn-tactical {
+    background: #000;
+    border: 1px solid #333;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    border-radius: 4px;
+}
+
+.btn-tactical:hover {
+    border-color: #fff;
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.btn-tactical.map {
+    border: 2px solid #fff; /* EL MAPA RESALTA */
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-tactical .btn-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.btn-tactical .btn-text {
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.btn-tactical.map .btn-text {
+    font-size: 0.9rem;
+}
+
+/* PROTOCOLOS DEL BÚNKER (ENLACES LEGALES Y SOBRE MÍ) - AHORA ARRIBA */
+.bunker-protocols-top {
+    margin-bottom: 60px;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(var(--rgb-principal), 0.1);
+    text-align: center;
+}
+
+.protocol-links-grid {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.protocol-link {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    padding: 8px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.01);
+    text-transform: uppercase;
+}
+
+.protocol-link:hover {
+    color: #000;
+    background: var(--color-principal);
+    border-color: var(--color-principal);
+    box-shadow: 0 0 15px rgba(var(--rgb-principal), 0.3);
+}
+
+.dossier-section-top {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .indice-container { padding: 20px; }
+    .radar-section { flex-direction: column; padding: 30px 20px; gap: 30px; }
+    .intel-summary-technical { width: 100%; }
+    .tactical-actions-grid { grid-template-columns: 1fr; }
+    .protocol-links-grid { gap: 15px; flex-direction: column; }
+    .bunker-protocols-footer { padding: 30px 20px; }
+}
