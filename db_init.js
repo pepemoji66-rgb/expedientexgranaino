@@ -24,12 +24,15 @@ module.exports = async (db) => {
             email VARCHAR(255) UNIQUE,
             password VARCHAR(255),
             rol VARCHAR(50) DEFAULT 'agente',
-            rango VARCHAR(50) DEFAULT 'Agente',
+            rango VARCHAR(50) DEFAULT 'Agente en Prácticas',
             ciudad VARCHAR(255),
             edad INT,
             aprobado INT DEFAULT 0,
             fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
             visitas INT DEFAULT 0,
+            puntos_experiencia INT DEFAULT 0,
+            misiones_completadas INT DEFAULT 0,
+            verificado INT DEFAULT 0,
             fecha_nacimiento VARCHAR(100),
             hora_nacimiento VARCHAR(100),
             ciudad_nacimiento VARCHAR(255),
@@ -37,14 +40,22 @@ module.exports = async (db) => {
             lon_nacimiento DOUBLE
         )`);
 
-        // Parches de seguridad para columnas nuevas o perdidas
+        // Protocolo de parcheo: Asegurar columnas esenciales si no existen
         try {
-            await db.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visitas INT DEFAULT 0");
-        } catch (e) { /* Fallback si no soporta IF NOT EXISTS */ }
-        
+            await db.execute("ALTER TABLE usuarios ADD COLUMN visitas INT DEFAULT 0");
+        } catch (e) {}
         try {
-            await db.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS rango VARCHAR(50) DEFAULT 'Agente'");
-        } catch (e) { /* Fallback */ }
+            await db.execute("ALTER TABLE usuarios ADD COLUMN rango VARCHAR(50) DEFAULT 'Agente en Prácticas'");
+        } catch (e) {}
+        try {
+            await db.execute("ALTER TABLE usuarios ADD COLUMN puntos_experiencia INT DEFAULT 0");
+        } catch (e) {}
+        try {
+            await db.execute("ALTER TABLE usuarios ADD COLUMN misiones_completadas INT DEFAULT 0");
+        } catch (e) {}
+        try {
+            await db.execute("ALTER TABLE usuarios ADD COLUMN verificado INT DEFAULT 0");
+        } catch (e) {}
 
         await db.execute(`CREATE TABLE IF NOT EXISTS videos (
             id INT AUTO_INCREMENT PRIMARY KEY,
