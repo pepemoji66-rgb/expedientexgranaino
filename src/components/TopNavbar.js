@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import ControlMusica from './ControlMusica';
 import logoBunker from '../assets/logo_bunker.jpeg';
+import { ADMIN_EMAIL } from '../config';
 import './TopNavbar.css';
 
 // Componente blindado para el traductor para evitar re-renders innecesarios
@@ -120,9 +121,16 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen }) => {
                             </a>
                         </div>
                         {userAuth ? (
-                            <div className="agent-badge">
-                                <span className="agent-status-led"></span>
-                                <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                {(userAuth.rol === 'admin' || userAuth.email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase()) && (
+                                    <Link to="/panel-mando" className="btn-access-tactical" style={{ borderColor: 'var(--color-principal)', color: 'var(--color-principal)' }}>
+                                        PANEL
+                                    </Link>
+                                )}
+                                <div className="agent-badge">
+                                    <span className="agent-status-led"></span>
+                                    <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
+                                </div>
                             </div>
                         ) : (
                             <Link to="/acceso" className="btn-access-tactical">ACCESO</Link>

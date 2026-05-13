@@ -337,9 +337,9 @@
     .top-nav-link { padding: 8px 8px; font-size: 0.6rem; }
 }
 
-/* MOBILE MENU BUTTON */
+/* MOBILE MENU BUTTON (NOW GLOBAL) */
 .mobile-menu-btn {
-    display: none;
+    display: flex;
     background: transparent;
     border: 1px solid var(--color-principal);
     color: var(--color-principal);
