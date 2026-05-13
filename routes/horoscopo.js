@@ -10,18 +10,22 @@ module.exports = (db, genAI) => {
             // 1. Intentar obtener de la DB
             const results = await db.query("SELECT * FROM horoscopos WHERE fecha = ?", [today]);
             
-            // Si hay resultados, comprobamos que no sea un fallback (longitud corta o frases tipo)
+            // Si hay resultados, verificamos que sean de calidad (contengan Salud, Dinero y Amor)
             if (results.length > 0) {
-                const pred = results[0].prediccion;
-                // Palabras clave que indican que es un horóscopo local (genérico)
-                const palabrasFallback = ["triangulación de satélites", "informe desclasificado", "anomalía magnética", "Proyecto Libro Azul", "presencia antigua", "sector norte", "contador Geiger", "radar del búnker"];
-                const esFallback = palabrasFallback.some(p => pred.includes(p)) || pred.length < 100;
+                const pred = results[0].prediccion || '';
+                // Verificación POSITIVA: el horóscopo debe mencionar los tres pilares
+                const tieneCalidad = 
+                    (pred.toLowerCase().includes('salud') || pred.toLowerCase().includes('health')) &&
+                    (pred.toLowerCase().includes('dinero') || pred.toLowerCase().includes('econom') || pred.toLowerCase().includes('trabajo')) &&
+                    (pred.toLowerCase().includes('amor') || pred.toLowerCase().includes('pareja') || pred.toLowerCase().includes('relaci'));
 
-                if (!esFallback) {
-                    console.log("🔮 Horóscopo real de IA recuperado del Búnker.");
+                if (tieneCalidad && pred.length > 150) {
+                    console.log("🔮 Horóscopo de calidad recuperado de la base de datos.");
                     return res.json(results);
                 }
-                console.log("⚠️ Detectado horóscopo genérico en DB. Intentando sintonizar IA real...");
+                // Si no tiene calidad, borramos y regeneramos
+                console.log("⚠️ Horóscopo sin Salud/Dinero/Amor en DB. Borrando y regenerando...");
+                await db.execute("DELETE FROM horoscopos WHERE fecha = ?", [today]);
             }
 
             // 2. Intentar primero con Gemini (Dual Logic)

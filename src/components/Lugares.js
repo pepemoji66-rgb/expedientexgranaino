@@ -76,13 +76,13 @@ const Lugares = () => {
                 parseFloat(p.latitud) !== 0
             );
 
-            // Deduplicación inteligente por coordenadas
+            // Deduplicación inteligente por coordenadas (~100m de radio = 3 decimales)
             const unicos = [];
             const coordenadasVistas = new Set();
 
             for (const p of todosLosPuntos) {
-                const lat = parseFloat(p.latitud).toFixed(5);
-                const lng = parseFloat(p.longitud).toFixed(5);
+                const lat = parseFloat(p.latitud).toFixed(3);
+                const lng = parseFloat(p.longitud).toFixed(3);
                 const key = `${lat},${lng}`;
 
                 if (!coordenadasVistas.has(key)) {
