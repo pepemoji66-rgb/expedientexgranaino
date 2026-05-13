@@ -29,6 +29,7 @@ module.exports = async (db) => {
             edad INT,
             aprobado INT DEFAULT 0,
             fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+            visitas INT DEFAULT 0,
             fecha_nacimiento VARCHAR(100),
             hora_nacimiento VARCHAR(100),
             ciudad_nacimiento VARCHAR(255),
@@ -36,12 +37,14 @@ module.exports = async (db) => {
             lon_nacimiento DOUBLE
         )`);
 
+        // Parches de seguridad para columnas nuevas o perdidas
         try {
-            await db.execute("ALTER TABLE usuarios ADD COLUMN rango VARCHAR(50) DEFAULT 'Agente'");
-            console.log("🛠️ PARCHE APLICADO: Columna 'rango' añadida a usuarios.");
-        } catch (e) {
-            // Ya existe o no es necesario
-        }
+            await db.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visitas INT DEFAULT 0");
+        } catch (e) { /* Fallback si no soporta IF NOT EXISTS */ }
+        
+        try {
+            await db.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS rango VARCHAR(50) DEFAULT 'Agente'");
+        } catch (e) { /* Fallback */ }
 
         await db.execute(`CREATE TABLE IF NOT EXISTS videos (
             id INT AUTO_INCREMENT PRIMARY KEY,

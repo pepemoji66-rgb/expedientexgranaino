@@ -142,15 +142,32 @@ module.exports = (db) => {
         try {
             const { username, nombre, email, password, ciudad, edad } = req.body;
 
+            // Validación básica de entrada
+            if (!email || !password || (!username && !nombre)) {
+                return res.status(400).json({ error: "Faltan datos críticos para el registro." });
+            }
+
             // Hashing de la contraseña antes de guardar
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
             // Valores por defecto robustos y simplificados
-            const finalNombre = (username || nombre).trim();
+            const finalNombre = (username || nombre || "Agente Anónimo").trim();
             const finalCiudad = (ciudad || 'Desconocida').trim();
             const finalEdad = parseInt(edad) || 0;
-            const finalEmail = email ? email.trim() : `${finalNombre.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}@bunker.local`;
+            const finalEmail = email.trim();
+
+            console.log(`📝 Intentando registrar agente: ${finalNombre} (${finalEmail})`);
+
+            // Verificación previa para evitar el error 500 por duplicados
+            const existe = await db.query("SELECT id FROM usuarios WHERE email = ? OR nombre = ?", [finalEmail, finalNombre]);
+            if (existe && existe.length > 0) {
+                console.warn(`⚠️ Intento de duplicado: ${finalEmail} o ${finalNombre}`);
+                return res.status(400).json({ 
+                    error: "Identificación duplicada", 
+                    detalle: "El email o el nombre ya están registrados en el búnker." 
+                });
+            }
 
             // REGISTRO AUTOMÁTICO: Ahora se registran como 'aprobado = 1' para acceso inmediato
             const sql = "INSERT INTO usuarios (nombre, email, password, ciudad, edad, rol, rango, aprobado, fecha_registro, visitas) VALUES (?, ?, ?, ?, ?, 'agente', 'Agente en Prácticas', 1, NOW(), 0)";
@@ -168,12 +185,13 @@ module.exports = (db) => {
                 console.warn("⚠️ No se pudo enviar la alerta de sistema.");
             }
 
+            console.log(`✅ Registro completado con éxito para: ${finalNombre}`);
             res.json({ mensaje: "¡Bienvenido al Búnker! Registro completado. Ya puedes acceder al sistema." });
         } catch (err) {
-            console.error("❌ Error en Registro:", err.message);
+            console.error("❌ Error CRÍTICO en Registro:", err);
             res.status(500).json({
-                error: "Error en el servidor de registro",
-                detalle: "Asegúrese de que el email no esté ya registrado."
+                error: "Fallo interno en el servidor de registro",
+                detalle: err.message || "Error desconocido."
             });
         }
     });
