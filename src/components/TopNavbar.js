@@ -51,9 +51,8 @@ const GoogleTranslator = memo(() => {
     return <div id="google_translate_element"></div>;
 });
 
-const TopNavbar = ({ userAuth }) => {
+const TopNavbar = ({ userAuth, toggleMenu, isOpen }) => {
     const location = useLocation();
-    const [menuAbierto, setMenuAbierto] = React.useState(false);
 
     const menuItems = [
         { path: "/", label: "INICIO", icon: <Home size={16} /> },
@@ -75,7 +74,7 @@ const TopNavbar = ({ userAuth }) => {
     menuItems.push({ path: "/chat", label: "CHAT", icon: <MessageSquare size={16} /> });
 
     return (
-        <nav className={`top-navbar ${menuAbierto ? 'menu-activo' : ''}`}>
+        <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>
             <div className="top-navbar-container">
                 {/* LOGO SECTOR */}
                 <div className="top-navbar-logo">
@@ -84,7 +83,7 @@ const TopNavbar = ({ userAuth }) => {
                     </Link>
                 </div>
 
-                {/* CENTRAL NAVIGATION */}
+                {/* CENTRAL NAVIGATION (DESKTOP) */}
                 <ul className="top-navbar-links">
                     {menuItems.map((item) => (
                         <li key={item.path}>
@@ -124,23 +123,16 @@ const TopNavbar = ({ userAuth }) => {
                             <div className="agent-badge">
                                 <span className="agent-status-led"></span>
                                 <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
-                                {userAuth.rango && (
-                                    <span className="agent-rango">
-                                        {userAuth.rango === 'Agente en Prácticas' ? '🔰 ' :
-                                         userAuth.rango === 'Cabo' ? '🎖️ ' :
-                                         userAuth.rango === 'Cabo 1º' ? '🎖️🎖️ ' :
-                                         userAuth.rango === 'Sargento' ? '⭐ ' :
-                                         userAuth.rango === 'Teniente' ? '⭐⭐ ' :
-                                         userAuth.rango === 'Capitán' ? '⭐⭐⭐ ' :
-                                         userAuth.rango === 'Comandante' ? '🦅 ' : '🛡️ '}
-                                        {userAuth.rango.toUpperCase()}
-                                    </span>
-                                )}
                             </div>
                         ) : (
                             <Link to="/acceso" className="btn-access-tactical">ACCESO</Link>
                         )}
                     </div>
+
+                    {/* BOTÓN HAMBURGUESA (MÓVIL) */}
+                    <button className="mobile-menu-btn" onClick={toggleMenu} aria-label="Toggle Menu">
+                        {isOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
                 </div>
             </div>
             <div className="navbar-glow-line"></div>

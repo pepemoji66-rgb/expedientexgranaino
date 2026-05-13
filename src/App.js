@@ -187,38 +187,8 @@ function App() {
         display: 'flex',
         flexDirection: 'column'
       }}>
-        {/* BARRA DE NAVEGACIÓN HORIZONTAL (PC) */}
-        <TopNavbar userAuth={userAuth} />
- 
-        {/* BOTÓN TÁCTICO ABSOLUTO - AHORA ESCUCHA AL TEMA */}
-        <button 
-          className="btn-tactico-absoluto" 
-          onClick={toggleMenu} 
-          aria-label="Abrir Menú"
-          style={{
-            position: 'fixed',
-            top: '160px',
-            right: '25px',
-            left: 'auto',
-            zIndex: 99999,
-            width: '65px',
-            height: '65px',
-            background: '#000',
-            border: '3px solid var(--color-principal)',
-            color: 'var(--color-principal)',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 0 25px rgba(var(--rgb-principal), 0.7)',
-            fontSize: '32px',
-            outline: 'none',
-            padding: '0'
-          }}
-        >
-          {isOpen ? '✕' : '☰'}
-        </button>
+        {/* BARRA DE NAVEGACIÓN HORIZONTAL (PC + MÓVIL) */}
+        <TopNavbar userAuth={userAuth} toggleMenu={toggleMenu} isOpen={isOpen} />
  
         {/* BARRA DE NAVEGACIÓN LATERAL */}
         <nav className={`sidebar ${isOpen ? 'open' : ''}`}>

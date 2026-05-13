@@ -23,7 +23,7 @@ body, html {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    /* overflow: hidden; */
+    overflow-x: hidden;
     background-color: #000;
 }
 
@@ -72,42 +72,7 @@ body, html {
 /* =============================================
     Ã°ÂÂÂ NAVEGACIÃÂN Y MENÃÂ (ESTILO BÃÂNKER)
    ============================================= */
-.hamburger {
-    position: fixed;
-    top: 20px;
-    right: 20px; 
-    z-index: 1000;
-    background: var(--color-principal);
-    color: black;
-    border: none;
-    font-size: 24px;
-    width: 45px;
-    height: 45px;
-    cursor: pointer;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 15px rgba(var(--rgb-principal), 0.6);
-    transition: 0.3s;
-}
-
-.sidebar {
-    position: fixed;
-    right: -300px; 
-    width: 280px;
-    min-height: 100vh;
-    background: #05070a;
-    backdrop-filter: blur(15px);
-    border-left: 1px solid var(--color-principal);
-    transition: 0.3s ease-out;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    /* overflow: hidden; */
-}
-
-.sidebar.open { right: 0; }
+/* Sidebar logic unified below */
 
 .sidebar-footer {
     padding: 25px;
@@ -197,24 +162,7 @@ body, html {
    ============================================= */
 :root {
     --color-principal: #00d4ff;
-    --rgb-principal: 0, 212, 255;
-    --color-acento: #ff00ff;
-    --bg-bunker: #05070a;
-    --bg-glass: rgba(10, 15, 20, 0.7);
-    --border-subtle: rgba(255, 255, 255, 0.1);
-    --glow-subtle: 0 0 15px rgba(var(--rgb-principal), 0.2);
-}
-
-.App {
-    min-min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    color: #e0e6ed;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-/* LÃÂNEA DE ESCANEO LÃÂSER */
+/* LÃƒÂ NEA DE ESCANEO LÃƒÂ SER */
 .laser-scan-line {
     position: fixed;
     top: -2px;
@@ -266,7 +214,7 @@ body, html {
 ::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 0; border: 2px solid #000; }
 
-/* Sidebar Profesional */
+/* Sidebar Profesional Unificada */
 .sidebar {
     position: fixed;
     right: -320px; 
@@ -279,10 +227,74 @@ body, html {
     z-index: 2000;
     padding-top: 60px;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.open { right: 0; }
+
+.sidebar-footer {
+    padding: 25px;
+    border-top: 1px solid var(--border-subtle);
+    background: #0a0c10;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: auto;
+}
+
+.sidebar-footer-label {
+    color: #888;
+    font-size: 0.6rem;
+    margin-bottom: 15px;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.theme-selector {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.theme-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.3s;
+}
+
+.theme-dot.active {
+    border-color: #fff;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.btn-logout {
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid #ff4444;
+    color: #fff;
+    padding: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+    width: 100%;
+    margin-top: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    transition: 0.3s;
+    border-radius: 4px;
+}
+
+.btn-logout:hover {
+    background: #ff4444;
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
 }
 
 /* =============================================
-    Ã°ÂÂÂ¯ RADAR TÃÂCTICO (EL CORRECAMINOS)
+    Ã°ÂŸÂŽÂ¯ RADAR TÃƒÂ CTICO (EL CORRECAMINOS)
    ============================================= */
 .panel-admin-container {
     width: 100% !important;
@@ -600,12 +612,12 @@ input, textarea, select {
   background: #ffb100;
   color: #000;
   text-align: center;
-  padding: 12px 40px; /* MÃÂ¡s espacio lateral para que no choque con nada */
+  padding: 12px 40px; /* MÃƒÂ¡s espacio lateral para que no choque con nada */
   font-weight: bold;
   font-family: monospace;
   font-size: 0.85rem;
   border-bottom: 2px solid #000;
-  z-index: 9000; /* Por debajo del botÃÂ³n del menÃÂº pero por encima del contenido */
+  z-index: 9000; /* Por debajo del botÃƒÂ³n del menÃƒÂº pero por encima del contenido */
   animation: pulse-maint 2s infinite;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
@@ -613,7 +625,7 @@ input, textarea, select {
   0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; }
 }
 
-/* REFUERZO TÃÂCTICO FINAL */
+/* REFUERZO TÃƒÂ CTICO FINAL */
 .btn-hamburguesa-tactico {
     position: fixed !important;
     top: 140px !important;
@@ -632,7 +644,7 @@ input, textarea, select {
     display: none !important;
 }
 
-/* BOTÃÂN TÃÂCTICO ABSOLUTO - SIN INTERFERENCIAS */
+/* BOTÃƒÂ“N TÃƒÂ CTICO ABSOLUTO - SIN INTERFERENCIAS */
 .btn-tactico-absoluto {
     position: fixed !important;
     top: 155px !important;
@@ -662,7 +674,7 @@ input, textarea, select {
 
 
 
-/* ANIMACIONES TÃCTICAS */
+/* ANIMACIONES TÃ CTICAS */
 @keyframes blink {
   0% { opacity: 1; }
   50% { opacity: 0.3; }
@@ -673,7 +685,7 @@ input, textarea, select {
   animation: blink 2s infinite;
 }
 
-/* EFECTO DE PULSO PARA EL BOTÃN TÃCTICO */
+/* EFECTO DE PULSO PARA EL BOTÃ“N TÃ CTICO */
 @keyframes pulso-tactico {
   0% { box-shadow: 0 0 0 0 rgba(var(--rgb-principal), 0.7); }
   70% { box-shadow: 0 0 0 15px rgba(var(--rgb-principal), 0); }
