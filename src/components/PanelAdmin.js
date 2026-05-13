@@ -126,7 +126,6 @@ const PanelAdmin = () => {
                 comentarios: { base: '/comentarios' }
             };
 
-
             const route = mapping[tipo];
             if (!route) throw new Error("Tipo de sector no reconocido");
 
@@ -925,7 +924,7 @@ const PanelAdmin = () => {
                                 </>
                             )}
 
-                            {(tab === 'lugares' || tab === 'expedientes' || tab === 'noticias') && (
+                            {(tab === 'imagenes' || tab === 'lugares' || tab === 'expedientes' || tab === 'noticias') && (
                                 <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
                                     <label style={{ display: 'block', color: '#b18904', fontSize: '0.8rem', marginBottom: '10px', fontWeight: 'bold' }}>🛰️ GEOLOCALIZACIÓN ESTRATÉGICA</label>
                                     
