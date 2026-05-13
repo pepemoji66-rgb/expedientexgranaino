@@ -162,7 +162,12 @@ body, html {
    ============================================= */
 :root {
     --color-principal: #00d4ff;
-/* LÃƒÂ NEA DE ESCANEO LÃƒÂ SER */
+    --rgb-principal: 0, 212, 255;
+    --bg-glass: rgba(10, 15, 20, 0.7);
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --glow-subtle: 0 0 15px rgba(var(--rgb-principal), 0.2);
+}
+
 .laser-scan-line {
     position: fixed;
     top: -2px;
