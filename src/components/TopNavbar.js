@@ -112,14 +112,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen }) => {
                     </div>
 
                     <div className="user-area desktop-only">
-                        <div className="social-mini-group">
-                            <a href="https://x.com/PEPE1318057" target="_blank" rel="noopener noreferrer" className="social-icon-btn">
-                                <Twitter size={16} />
-                            </a>
-                            <a href="https://www.instagram.com/expedientexgranaino/" target="_blank" rel="noopener noreferrer" className="social-icon-btn">
-                                <Instagram size={16} />
-                            </a>
-                        </div>
+
                         {userAuth ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {(userAuth.rol === 'admin' || userAuth.email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase()) && (
