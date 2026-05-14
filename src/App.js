@@ -25,6 +25,7 @@ import AvisoLegal from './components/AvisoLegal';
 import Horoscopo from './components/Horoscopo';
 import CartaAstral from './components/CartaAstral';
 import Tarot from './components/Tarot';
+import { X } from 'lucide-react';
 import TopNavbar from './components/TopNavbar';
 
 import CookieBanner from './components/CookieBanner';
@@ -192,7 +193,11 @@ function App() {
  
         {/* BARRA DE NAVEGACIÓN LATERAL */}
         <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
-          <div style={{ flexGrow: 1, paddingTop: '80px', paddingLeft: '30px', overflowY: 'auto' }}>
+          {/* BOTÓN DE CIERRE TÁCTICO */}
+          <button className="sidebar-close-btn" onClick={toggleMenu} aria-label="Cerrar Menú">
+            <X size={28} />
+          </button>
+          <div style={{ flexGrow: 1, paddingTop: '40px', paddingLeft: '30px', overflowY: 'auto' }}>
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {[
                 { path: "/", label: "Inicio" },
