@@ -23,6 +23,29 @@ module.exports = (db, upload) => {
         } catch (err) { res.status(200).json([]); }
     });
 
+    // Obtener el ÚLTIMO expediente publicado (para el Banner de Vigilancia)
+    router.get('/ultimo', async (req, res) => {
+        try {
+            const sql = "SELECT * FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo') ORDER BY fecha DESC LIMIT 1";
+            const results = await db.query(sql);
+            res.json(results[0] || null);
+        } catch (err) {
+            res.status(500).json({ error: "Error al captar señal del último expediente." });
+        }
+    });
+
+    // Incrementar Relevancia (Likes)
+    router.post('/relevancia/:id', async (req, res) => {
+        try {
+            await db.execute("UPDATE expedientes SET relevancia = relevancia + 1 WHERE id = ?", [req.params.id]);
+            const results = await db.query("SELECT relevancia FROM expedientes WHERE id = ?", [req.params.id]);
+            res.json({ mensaje: "Relevancia aumentada.", relevancia: results[0]?.relevancia || 0 });
+        } catch (err) {
+            console.error("Error relevancia:", err);
+            res.status(500).json({ error: "Error al registrar relevancia táctica." });
+        }
+    });
+
     // Obtener todos los expedientes (Panel de Control)
     router.get('/todos', async (req, res) => {
         try {

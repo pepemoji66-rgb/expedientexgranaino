@@ -100,8 +100,15 @@ module.exports = async (db) => {
             estado VARCHAR(50) DEFAULT 'pendiente', 
             fecha DATETIME DEFAULT CURRENT_TIMESTAMP, 
             tipo VARCHAR(50) DEFAULT 'agente',
-            imagen_url VARCHAR(255)
+            imagen_url VARCHAR(255),
+            relevancia INT DEFAULT 0
         )`);
+
+        // Protocolo de parcheo: Asegurar columna relevancia si no existe
+        try {
+            await db.execute("ALTER TABLE expedientes ADD COLUMN relevancia INT DEFAULT 0");
+            console.log("🩹 PARCHE APLICADO: Columna 'relevancia' añadida a expedientes.");
+        } catch (e) { }
 
         await db.execute(`CREATE TABLE IF NOT EXISTS chat_mensajes (
             id INT AUTO_INCREMENT PRIMARY KEY, 

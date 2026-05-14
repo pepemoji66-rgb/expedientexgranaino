@@ -30,7 +30,6 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 </div>
             </div>
 
-            {/* === EFEMÉRIDES: HOY EN LA HISTORIA X (MÁXIMA VISIBILIDAD) === */}
             <Efemerides />
 
             {/* --- SECCIÓN REUBICADA: PROTOCOLOS Y SOBRE MÍ (AHORA AL PRINCIPIO) --- */}

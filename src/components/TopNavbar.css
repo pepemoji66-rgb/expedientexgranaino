@@ -257,12 +257,13 @@
 .user-area {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 30px; /* Más espacio para que el agente respire */
 }
 
 .social-mini-group {
     display: flex;
-    gap: 12px;
+    gap: 15px;
+    margin-right: 5px; /* Separación extra de la placa */
 }
 
 .social-icon-btn {
@@ -275,31 +276,6 @@
 .social-icon-btn:hover {
     color: var(--color-principal);
     transform: translateY(-2px);
-}
-
-.agent-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: rgba(0, 255, 65, 0.05);
-    border: 1px solid rgba(0, 255, 65, 0.2);
-    border-radius: 2px;
-}
-
-.agent-status-led {
-    width: 5px;
-    height: 5px;
-    background: #00ff41;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #00ff41;
-}
-
-.agent-code {
-    font-size: 0.6rem;
-    color: #fff;
-    font-weight: 800;
-    letter-spacing: 1px;
 }
 
 .btn-access-tactical {
@@ -421,5 +397,14 @@
 
     #google_translate_element {
         width: 100px;
+    }
+}
+
+
+
+@media (max-width: 480px) {
+    .top-navbar-logo {
+        flex: 0 1 auto;
+        max-width: 120px;
     }
 }

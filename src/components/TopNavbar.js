@@ -13,9 +13,8 @@ import {
     Languages,
     Menu,
     X,
-    RefreshCw,
-    Instagram,
-    Twitter
+    Twitter,
+    Instagram
 } from 'lucide-react';
 import ControlMusica from './ControlMusica';
 import logoBunker from '../assets/logo_bunker.jpeg';
@@ -127,10 +126,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen }) => {
                                         PANEL
                                     </Link>
                                 )}
-                                <div className="agent-badge">
-                                    <span className="agent-status-led"></span>
-                                    <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
-                                </div>
+                                <Link to="/acceso" className="btn-access-tactical">MI PERFIL</Link>
                             </div>
                         ) : (
                             <Link to="/acceso" className="btn-access-tactical">ACCESO</Link>

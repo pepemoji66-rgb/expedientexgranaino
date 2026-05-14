@@ -117,6 +117,30 @@ const Expedientes = () => {
         }
     };
 
+    const aumentarRelevancia = async (e, id) => {
+        if (e) e.stopPropagation();
+        if (!userAuth) {
+            alert("🔒 ACCESO DENEGADO: Necesitas rango de 'Agente' para marcar relevancia.");
+            return;
+        }
+
+        try {
+            const res = await axios.post(`${API_BASE_URL}/api/expedientes/relevancia/${id}`);
+            if (res.data && res.data.relevancia !== undefined) {
+                // Actualizar localmente el contador
+                setDatos(prevDatos => prevDatos.map(item => 
+                    item.id === id ? { ...item, relevancia: res.data.relevancia } : item
+                ));
+                // Si el modal está abierto, actualizarlo también
+                if (relatoAbierto && relatoAbierto.id === id) {
+                    setRelatoAbierto(prev => ({ ...prev, relevancia: res.data.relevancia }));
+                }
+            }
+        } catch (err) {
+            console.error("Error al marcar relevancia:", err);
+        }
+    };
+
     const compartirExpediente = async (red) => {
         if (!relatoAbierto) return;
         const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}`;
@@ -207,6 +231,9 @@ const Expedientes = () => {
                                         <span className="card-tag">{item.tipo === 'jefe' ? '🛡️ JEFE' : '👤 AGENTE'}</span>
                                         <h3 className="card-title-mobile">{item.titulo?.toUpperCase()}</h3>
                                         <div className="card-footer-mobile">
+                                            <div className="relevancia-mini" onClick={(e) => aumentarRelevancia(e, item.id)}>
+                                                ⭐ <span className="rel-count">{item.relevancia || 0}</span>
+                                            </div>
                                             <small>{item.usuario_nombre || 'ANÓNIMO'}</small>
                                             <button className="btn-leer-pro">ABRIR</button>
                                         </div>
@@ -251,9 +278,14 @@ const Expedientes = () => {
                                             {item.latitud ? `${item.latitud}, ${item.longitud}` : '---'}
                                         </td>
                                         <td>
-                                            <button className="btn-leer-pro" onClick={() => setRelatoAbierto(item)}>
-                                                ABRIR
-                                            </button>
+                                            <div className="btn-group-tabla">
+                                                <button className="btn-relevancia-tabla" onClick={(e) => aumentarRelevancia(e, item.id)}>
+                                                    ⭐ {item.relevancia || 0}
+                                                </button>
+                                                <button className="btn-leer-pro" onClick={() => setRelatoAbierto(item)}>
+                                                    ABRIR
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -374,9 +406,14 @@ const Expedientes = () => {
                         </div>
                         
                         <div className="modal-footer-pro">
-                            <button onClick={() => setRelatoAbierto(null)} className="btn-volver-atras">
-                                ⬅ VOLVER AL ARCHIVO
-                            </button>
+                            <div className="modal-actions-top">
+                                <button onClick={() => setRelatoAbierto(null)} className="btn-volver-atras">
+                                    ⬅ VOLVER
+                                </button>
+                                <button className="btn-marcar-relevante" onClick={(e) => aumentarRelevancia(e, relatoAbierto.id)}>
+                                    ⭐ MARCAR COMO RELEVANTE ({relatoAbierto.relevancia || 0})
+                                </button>
+                            </div>
                             <div className="share-section-modal" style={{ marginTop: '15px', borderTop: '1px solid #333', paddingTop: '15px', width: '100%' }}>
                                 <p style={{ color: 'var(--color-principal)', fontSize: '0.7rem', marginBottom: '10px', textAlign: 'center', fontFamily: 'monospace' }}>
                                     📡 DIFUNDIR EN EL RADAR EXTERNO (MUFON/UFO):

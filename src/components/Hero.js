@@ -10,8 +10,25 @@ import imgRelatos from '../assets/misterio_relatos.png';
 
 const Hero = ({ userAuth }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [ultimoExpediente, setUltimoExpediente] = useState(null);
 
-    const slides = [
+    useEffect(() => {
+        const fetchUltimo = async () => {
+            try {
+                const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:10000';
+                const response = await fetch(`${apiBase}/api/expedientes/ultimo`);
+                const data = await response.json();
+                if (data && data.id) {
+                    setUltimoExpediente(data);
+                }
+            } catch (err) {
+                console.error("Error al captar último expediente para Hero:", err);
+            }
+        };
+        fetchUltimo();
+    }, []);
+
+    const baseSlides = [
         {
             id: 0,
             image: imgEspacio,
@@ -62,7 +79,7 @@ const Hero = ({ userAuth }) => {
         },
         {
             id: 4,
-            image: imgEspacio, // Reusamos una de las imágenes que encaja bien
+            image: imgEspacio,
             subtitle: "RECLUTAMIENTO",
             title: "REGISTRO 100% ANÓNIMO",
             tagline: "PROTEGEMOS TU IDENTIDAD",
@@ -74,10 +91,35 @@ const Hero = ({ userAuth }) => {
         }
     ];
 
+    const [slides, setSlides] = useState(baseSlides);
+
+    useEffect(() => {
+        if (ultimoExpediente) {
+            const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:10000';
+            const nuevoSlide = {
+                id: 'nuevo-exp',
+                image: ultimoExpediente.imagen_url 
+                    ? (ultimoExpediente.imagen_url.startsWith('http') ? ultimoExpediente.imagen_url : `${apiBase}/imagenes/${ultimoExpediente.imagen_url}`)
+                    : imgEspacio,
+                subtitle: "ULTIMA HORA",
+                title: ultimoExpediente.titulo.toUpperCase(),
+                tagline: "NUEVO EXPEDIENTE DESCLASIFICADO",
+                infoTitle: "ARCHIVO RECIENTE",
+                infoText: `El agente ${ultimoExpediente.usuario_nombre.toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
+                highlight: "NUEVA EVIDENCIA DISPONIBLE EN EL ARCHIVO",
+                btnText: "Abrir Informe",
+                btnLink: "/expedientes"
+            };
+            setSlides([nuevoSlide, ...baseSlides]);
+        } else {
+            setSlides(baseSlides);
+        }
+    }, [ultimoExpediente]);
+
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % slides.length);
-        }, 3500); // Cambia cada 3.5 segundos en lugar de 6
+        }, 5000); // 5 segundos para que de tiempo a leer el nuevo expediente
 
         return () => clearInterval(timer);
     }, [slides.length]);
@@ -97,6 +139,32 @@ const Hero = ({ userAuth }) => {
             {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
             <div className="hero-top-actions">
                 <div className="action-buttons-group">
+                    {ultimoExpediente && (
+                        <Link to="/expedientes" className="btn-nuevo-archivo-blink">
+                            <span className="blink-dot"></span> NUEVO ARCHIVO
+                        </Link>
+                    )}
+                    
+                    {/* PLACA DE AGENTE INTEGRADA EN PANEL DE MANDOS */}
+                    {userAuth && (
+                        <div className="hero-agent-badge">
+                            <span className="agent-status-led"></span>
+                            <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
+                            {userAuth.rango && (
+                                <span className="agent-rango-tag">
+                                    {userAuth.rango === 'Agente en Prácticas' ? '🔰 ' :
+                                     userAuth.rango === 'Cabo' ? '🎖️ ' :
+                                     userAuth.rango === 'Cabo 1º' ? '🎖️🎖️ ' :
+                                     userAuth.rango === 'Sargento' ? '⭐ ' :
+                                     userAuth.rango === 'Teniente' ? '⭐⭐ ' :
+                                     userAuth.rango === 'Capitán' ? '⭐⭐⭐ ' :
+                                     userAuth.rango === 'Comandante' ? '🦅 ' : '🛡️ '}
+                                    {userAuth.rango.toUpperCase()}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
                     <Link to="/expedientes" className="btn-mufon-red">
                         REPORTAR EXPERIENCIA
                     </Link>
