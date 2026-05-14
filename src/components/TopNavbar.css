@@ -16,7 +16,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 30px;
+    padding: 0 15px; /* Reducido de 30px para ganar sitio */
     height: 75px;
 }
 
@@ -49,22 +49,23 @@
 .top-navbar-links {
     list-style: none;
     display: flex;
-    gap: 10px;
+    gap: 2px; /* Mínimo espacio entre enlaces */
     margin: 0;
     padding: 0;
     flex: 1;
     justify-content: center;
+    overflow: hidden; /* Evita desbordes */
 }
 
 .top-nav-link {
     color: rgba(255, 255, 255, 0.6);
     text-decoration: none;
-    font-size: 0.7rem;
+    font-size: 0.65rem; /* Reducido de 0.7rem */
     font-weight: 700;
-    padding: 8px 12px;
+    padding: 6px 4px; /* Muy compacto */
     text-transform: uppercase;
     transition: 0.3s;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.5px; /* Casi sin espacio entre letras */
     position: relative;
     display: flex;
     flex-direction: column;
@@ -100,18 +101,17 @@
 .top-navbar-actions {
     display: flex;
     align-items: center;
-    gap: 25px;
-    flex: 0 0 auto;
+    gap: 10px; /* Reducido de 20px */
+    height: 100%;
+    flex-shrink: 0; /* Vital para que no desaparezca */
 }
 
 .tactical-tools {
     display: flex;
     align-items: center;
     gap: 15px;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 2px 15px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding-right: 15px;
 }
 
 .tool-item {
@@ -257,13 +257,60 @@
 .user-area {
     display: flex;
     align-items: center;
-    gap: 30px; /* Más espacio para que el agente respire */
+    gap: 8px; /* Más compacto */
+    height: 100%;
+    flex-shrink: 0; /* No se toca */
 }
 
+/* Redes sociales fuera del menú superior para ganar espacio */
 .social-mini-group {
+    display: none;
+}
+
+.btn-logout-mini {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid #ff4444;
+    padding: 6px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 0.65rem;
+    font-weight: 900;
+    transition: 0.3s;
+    text-decoration: none;
     display: flex;
-    gap: 15px;
-    margin-right: 5px; /* Separación extra de la placa */
+    align-items: center;
+    gap: 5px;
+    height: 32px; /* Alineación con el resto */
+}
+
+.btn-logout-mini:hover {
+    background: #ff4444;
+    color: #fff;
+}
+
+.btn-access-tactical {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 15px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 0.65rem;
+    font-weight: 900;
+    transition: 0.3s;
+    text-decoration: none;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px; /* Altura fija para alineación perfecta */
+}
+
+.btn-access-tactical:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 .social-icon-btn {

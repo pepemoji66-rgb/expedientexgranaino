@@ -14,7 +14,8 @@ import {
     Menu,
     X,
     Twitter,
-    Instagram
+    Instagram,
+    LogOut
 } from 'lucide-react';
 import ControlMusica from './ControlMusica';
 import logoBunker from '../assets/logo_bunker.jpeg';
@@ -120,13 +121,17 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen }) => {
                             </a>
                         </div>
                         {userAuth ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {(userAuth.rol === 'admin' || userAuth.email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase()) && (
-                                    <Link to="/panel-mando" className="btn-access-tactical" style={{ borderColor: 'var(--color-principal)', color: 'var(--color-principal)' }}>
+                                    <Link to="/panel-mando" className="btn-access-tactical" style={{ borderColor: 'var(--color-principal)', color: 'var(--color-principal)', height: '32px', display: 'flex', alignItems: 'center' }}>
                                         PANEL
                                     </Link>
                                 )}
-                                <Link to="/acceso" className="btn-access-tactical">MI PERFIL</Link>
+                                <Link to="/acceso" className="btn-access-tactical" style={{ height: '32px', display: 'flex', alignItems: 'center' }}>MI PERFIL</Link>
+                                <button onClick={cerrarSesion} className="btn-logout-mini" title="DESCONECTAR AGENTE">
+                                    <LogOut size={14} />
+                                    <span className="desktop-only">SALIR</span>
+                                </button>
                             </div>
                         ) : (
                             <Link to="/acceso" className="btn-access-tactical">ACCESO</Link>

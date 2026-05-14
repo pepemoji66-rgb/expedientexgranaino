@@ -188,7 +188,7 @@ function App() {
         flexDirection: 'column'
       }}>
         {/* BARRA DE NAVEGACIÓN HORIZONTAL (PC + MÓVIL) */}
-        <TopNavbar userAuth={userAuth} toggleMenu={toggleMenu} isOpen={isOpen} />
+        <TopNavbar userAuth={userAuth} toggleMenu={toggleMenu} isOpen={isOpen} cerrarSesion={cerrarSesion} />
  
         {/* BARRA DE NAVEGACIÓN LATERAL */}
         <nav className={`sidebar ${isOpen ? 'open' : ''}`}>

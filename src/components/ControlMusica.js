@@ -35,11 +35,7 @@ const ControlMusica = () => {
         <span className="music-icon">{sonando ? '🔊' : '🎵'}</span>
         <span className="music-text">{sonando ? 'AUDIO: ON' : 'MÚSICA AMBIENTE'}</span>
       </button>
-      {!sonando && (
-          <div className="music-alert-popup">
-              <span>🎧 ¡ACTIVA EL SONIDO!</span>
-          </div>
-      )}
+      {/* Eliminado el popup intrusivo a petición del usuario */}
     </div>
   );
 };
