@@ -13,8 +13,6 @@ import {
     Languages,
     Menu,
     X,
-    Twitter,
-    Instagram,
     LogOut
 } from 'lucide-react';
 import ControlMusica from './ControlMusica';
@@ -52,7 +50,7 @@ const GoogleTranslator = memo(() => {
     return <div id="google_translate_element"></div>;
 });
 
-const TopNavbar = ({ userAuth, toggleMenu, isOpen }) => {
+const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     const location = useLocation();
 
     const menuItems = [
@@ -112,7 +110,6 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen }) => {
                     </div>
 
                     <div className="user-area desktop-only">
-
                         {userAuth ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {(userAuth.rol === 'admin' || userAuth.email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase()) && (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 import './Hero.css';
 
 // Importamos las imágenes para el carrusel
@@ -15,8 +16,7 @@ const Hero = ({ userAuth }) => {
     useEffect(() => {
         const fetchUltimo = async () => {
             try {
-                const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:10000';
-                const response = await fetch(`${apiBase}/api/expedientes/ultimo`);
+                const response = await fetch(`${API_BASE_URL}/api/expedientes/ultimo`);
                 const data = await response.json();
                 if (data && data.id) {
                     setUltimoExpediente(data);
@@ -95,11 +95,10 @@ const Hero = ({ userAuth }) => {
 
     useEffect(() => {
         if (ultimoExpediente) {
-            const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:10000';
             const nuevoSlide = {
                 id: 'nuevo-exp',
                 image: ultimoExpediente.imagen_url 
-                    ? (ultimoExpediente.imagen_url.startsWith('http') ? ultimoExpediente.imagen_url : `${apiBase}/imagenes/${ultimoExpediente.imagen_url}`)
+                    ? (ultimoExpediente.imagen_url.startsWith('http') ? ultimoExpediente.imagen_url : `${API_BASE_URL}/imagenes/${ultimoExpediente.imagen_url}`)
                     : imgEspacio,
                 subtitle: "ULTIMA HORA",
                 title: ultimoExpediente.titulo.toUpperCase(),
