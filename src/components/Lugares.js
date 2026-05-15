@@ -61,19 +61,17 @@ const Lugares = () => {
         try {
             setCargando(true);
             const resultados = await Promise.allSettled([
-                axios.get(`${API_BASE_URL}/api/lugares`),
-                axios.get(`${API_BASE_URL}/api/galeria/imagenes-publicas`),
-                axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`)
+                axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
+                axios.get(`${API_BASE_URL}/api/expedientes`)
             ]);
 
-            const manuales = resultados[0].status === 'fulfilled' ? (resultados[0].value.data || []).map(p => ({ ...p, id: `lugar-${p.id}`, tipo: 'lugar' })) : [];
-            const galeria = resultados[1].status === 'fulfilled' ? (resultados[1].value.data.data || resultados[1].value.data || []).map(p => ({ ...p, id: `foto-${p.id}`, tipo: 'foto' })) : [];
-            const noticias = resultados[2].status === 'fulfilled' ? (resultados[2].value.data.data || resultados[2].value.data || []).map(p => ({ ...p, id: `noticia-${p.id}`, tipo: 'noticia' })) : [];
+            const noticias = resultados[0].status === 'fulfilled' ? (resultados[0].value.data.data || resultados[0].value.data || []).map(p => ({ ...p, id: `noticia-${p.id}`, tipo: 'noticia' })) : [];
+            const expedientes = resultados[1].status === 'fulfilled' ? (resultados[1].value.data || []).map(p => ({ ...p, id: p.id, tipo: 'expediente' })) : [];
 
-            const todosLosPuntos = [...manuales, ...galeria, ...noticias].filter(p => 
+            // Prioridad: 1. Expedientes (Relatos), 2. Noticias
+            const todosLosPuntos = [...expedientes, ...noticias].filter(p => 
                 p && p.latitud && p.longitud && 
-                !isNaN(parseFloat(p.latitud)) && !isNaN(parseFloat(p.longitud)) &&
-                parseFloat(p.latitud) !== 0
+                parseFloat(p.latitud) !== 0 && parseFloat(p.longitud) !== 0
             );
 
             // Deduplicación inteligente por coordenadas (~100m de radio = 3 decimales)
@@ -224,11 +222,15 @@ const Lugares = () => {
                                 <Popup autoClose={true} closeOnClick={true}>
                                     <div className="popup-bunker-v2">
                                         <div className="popup-header-tactico">
-                                            <span className="status-online">📡 ONLINE</span>
+                                            <span className="status-online">
+                                                {m.tipo === 'expediente' ? '📜 RELATO' : 
+                                                 m.tipo === 'noticia' ? '📰 NOTICIA' : 
+                                                 m.tipo === 'lugar' ? '📍 LUGAR' : '📸 EVIDENCIA'}
+                                            </span>
                                             <h4 className="titulo-popup-neon">{m.titulo || m.nombre || 'EVIDENCIA'}</h4>
                                         </div>
                                         <div className="agente-tag">
-                                            ID_AGENTE: {m.agente || m.usuario_nombre || 'SISTEMA'}
+                                            {m.tipo === 'expediente' ? 'AUTOR' : 'AGENTE'}: {m.agente || m.usuario_nombre || 'SISTEMA'}
                                         </div>
                                         {renderContenidoPopup(m, idx)}
                                         <div className="descripcion-popup-container">

@@ -12,7 +12,7 @@ const Galeria = ({ userAuth }) => {
         'imagenes': []
     });
 
-    const [pestanaActiva, setPestanaActiva] = useState('imagenes');
+    const [pestanaActiva, setPestanaActiva] = useState('noticias');
     const [paginaActual, setPaginaActual] = useState(1);
     const [fotoExpandida, setFotoExpandida] = useState(null);
     
@@ -32,18 +32,23 @@ const Galeria = ({ userAuth }) => {
     const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
     const navigate = useNavigate();
-    const imagenesPorPagina = 8; // Ajustado a 8 para llenar 2 filas completas de 4 columnas
+    const imagenesPorPagina = 8;
 
     const config = {
-        'imagenes': { 
+        'noticias': { 
             urlBase: `${API_BASE_URL}/imagenes/`, 
             columna: 'imagen_url', 
-            etiqueta: 'FOTO'
+            etiqueta: 'NOTICIA'
         },
         'relatos': {
             urlBase: `${API_BASE_URL}/imagenes/`,
             columna: 'imagen_url',
             etiqueta: 'RELATO'
+        },
+        'imagenes': { 
+            urlBase: `${API_BASE_URL}/imagenes/`, 
+            columna: 'imagen_url', 
+            etiqueta: 'EVIDENCIA'
         }
     };
 
@@ -51,31 +56,27 @@ const Galeria = ({ userAuth }) => {
         try {
             const isAdmin = userAuth && (userAuth.rol === 'admin' || userAuth.email === ADMIN_EMAIL);
             
-            const [resA, resL, resE1, resE2] = await Promise.all([
+            const [resG, resN, resE1, resE2] = await Promise.all([
                 axios.get(isAdmin ? `${API_BASE_URL}/api/galeria/admin/todas-las-imagenes` : `${API_BASE_URL}/api/galeria/imagenes-publicas`),
-                axios.get(`${API_BASE_URL}/api/lugares`),
+                axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
                 axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`),
                 axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`)
             ]);
 
-            // Transformamos los lugares
-            const lugaresTransformados = (Array.isArray(resL.data) ? resL.data : []).map(l => ({
-                id: `lugar-${l.id}`,
-                titulo: l.nombre || l.titulo,
-                imagen_url: l.imagen_url || l.imagenes || l.imagen,
-                descripcion: l.descripcion,
-                latitud: l.latitud,
-                longitud: l.longitud,
-                agente: 'ARCHIVO MAPA',
-                fecha: l.fecha || null,
-                esDeLugar: true
-            }));
-
-            // Galería normal
-            const GaleriaNormal = (Array.isArray(resA.data) ? resA.data : []).map(img => ({
+            // Galería de fotos (Evidencias)
+            const GaleriaNormal = (Array.isArray(resG.data) ? resG.data : []).map(img => ({
                 ...img,
                 id: `foto-${img.id}`,
-                imagen_url: img.imagen_url || img.url_imagen
+                imagen_url: img.imagen_url || img.url_imagen,
+                tipo: 'foto'
+            }));
+
+            // Noticias con imagen
+            const noticiasData = Array.isArray(resN.data) ? resN.data : (resN.data?.data || []);
+            const noticiasConImagen = noticiasData.filter(n => n.imagen_url).map(n => ({
+                ...n,
+                id: `noticia-${n.id}`,
+                tipo: 'noticia'
             }));
 
             // Relatos con imagen
@@ -84,17 +85,20 @@ const Galeria = ({ userAuth }) => {
             const todosExp = [...resE1Data, ...resE2Data];
             const relatosConImagen = todosExp.filter(e => e.imagen_url).map(e => ({
                 ...e,
+                id: `exp-${e.id}`,
+                tipo: 'expediente',
                 esRelato: true
             }));
 
             setRegistros({
-                'imagenes': [...GaleriaNormal, ...lugaresTransformados],
-                'relatos': relatosConImagen
+                'noticias': noticiasConImagen,
+                'relatos': relatosConImagen,
+                'imagenes': GaleriaNormal
             });
-            console.log("✅ GALERÍA Y RELATOS CARGADOS");
+            console.log("✅ GALERÍA UNIFICADA: NOTICIAS, RELATOS Y EVIDENCIAS CARGADAS");
         } catch (err) {
             console.error("❌ ERROR AL CARGAR GALERÍA:", err);
-            setRegistros({ 'imagenes': [], 'relatos': [] });
+            setRegistros({ 'noticias': [], 'relatos': [], 'imagenes': [] });
         }
     }, [userAuth]);
 
@@ -287,19 +291,27 @@ const Galeria = ({ userAuth }) => {
             <nav className="pestanas-galeria-container">
                 <div className="pestanas-galeria-wrapper">
                     <button
-                        className={`btn-pestana-moderno ${pestanaActiva === 'imagenes' ? 'active' : ''}`}
-                        onClick={() => { setPestanaActiva('imagenes'); setPaginaActual(1); }}
+                        className={`btn-pestana-moderno ${pestanaActiva === 'noticias' ? 'active' : ''}`}
+                        onClick={() => { setPestanaActiva('noticias'); setPaginaActual(1); }}
                     >
-                        <span className="icon-folder">📁</span>
-                        <span className="text-folder">FOTOS</span>
+                        <span className="icon-folder">📰</span>
+                        <span className="text-folder">NOTICIAS</span>
                         <div className="indicator-neon"></div>
                     </button>
                     <button
                         className={`btn-pestana-moderno ${pestanaActiva === 'relatos' ? 'active' : ''}`}
                         onClick={() => { setPestanaActiva('relatos'); setPaginaActual(1); }}
                     >
-                        <span className="icon-folder">🛡️</span>
+                        <span className="icon-folder">📜</span>
                         <span className="text-folder">RELATOS</span>
+                        <div className="indicator-neon"></div>
+                    </button>
+                    <button
+                        className={`btn-pestana-moderno ${pestanaActiva === 'imagenes' ? 'active' : ''}`}
+                        onClick={() => { setPestanaActiva('imagenes'); setPaginaActual(1); }}
+                    >
+                        <span className="icon-folder">📸</span>
+                        <span className="text-folder">FOTOS</span>
                         <div className="indicator-neon"></div>
                     </button>
                 </div>
@@ -513,11 +525,15 @@ const Galeria = ({ userAuth }) => {
                                     </div>
                                     <h2 className="neon-text-blue">{(fotoExpandida.titulo || fotoExpandida.nombre)?.toUpperCase()}</h2>
                                     
-                                    <div className="contenedor-acciones-rapidas" style={{ margin: '20px 0' }}>
-                                        {fotoExpandida.esRelato ? (
+                                    <div className="contenedor-acciones-rapidas" style={{ margin: '20px 0', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                        {fotoExpandida.tipo === 'expediente' && (
                                             <button className="btn-action-map-v2" onClick={() => navigate('/expedientes')}>📖 LEER RELATO COMPLETO</button>
-                                        ) : (
-                                            <button className="btn-action-map-v2" onClick={() => verEnMapa(fotoExpandida)}>📍 LOCALIZAR EN EL RADAR</button>
+                                        )}
+                                        {fotoExpandida.tipo === 'noticia' && (
+                                            <button className="btn-action-map-v2" onClick={() => navigate('/noticias')}>📰 VER NOTICIA COMPLETA</button>
+                                        )}
+                                        {(fotoExpandida.latitud && parseFloat(fotoExpandida.latitud) !== 0) && (
+                                            <button className="btn-action-map-v2" style={{ background: 'var(--color-principal)', color: '#000' }} onClick={() => verEnMapa(fotoExpandida)}>📍 LOCALIZAR EN EL RADAR</button>
                                         )}
                                     </div>
                                 </header>
