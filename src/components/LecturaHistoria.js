@@ -173,8 +173,33 @@ const LecturaHistoria = () => {
                         minHeight: '200px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        position: 'relative' // Necesario para el botón absoluto
                     }}>
+                        {/* BOTÓN FLOTANTE SOBRE IMAGEN */}
+                        {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
+                            <button
+                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: historia.id } })}
+                                style={{
+                                    position: 'absolute',
+                                    top: '30px',
+                                    right: '30px',
+                                    zIndex: 10,
+                                    background: 'rgba(0,255,65,0.9)',
+                                    color: '#000',
+                                    border: 'none',
+                                    padding: '10px 15px',
+                                    borderRadius: '4px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 0 20px rgba(0,255,65,0.5)',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.8rem'
+                                }}
+                            >
+                                📍 LOCALIZAR EN RADAR
+                            </button>
+                        )}
                         <img 
                             src={
                                 (historia.imagen_url && historia.imagen_url.startsWith('http')) 

@@ -268,6 +268,20 @@
     100% { transform: scale(2); opacity: 0; box-shadow: 0 0 0 15px rgba(var(--rgb-principal), 0); }
 }
 
+/* MARCADO RESALTADO (OBJETIVO FIJADO) */
+.marcador-pulsante.pulso-resaltado {
+    background: #ff0000; /* Rojo impacto para objetivo fijado */
+    box-shadow: 0 0 20px #ff0000;
+    animation: pulse-resaltado 1s infinite ease-out;
+    width: 18px;
+    height: 18px;
+}
+
+@keyframes pulse-resaltado {
+    0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.9); }
+    100% { transform: scale(3); opacity: 0; box-shadow: 0 0 0 25px rgba(255, 0, 0, 0); }
+}
+
 /* LEAFLET OVERRIDES */
 .leaflet-popup-content-wrapper {
     background: transparent !important;

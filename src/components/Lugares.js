@@ -8,16 +8,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import API_BASE_URL from '../config';
 
-const crearIconoPulsante = () => new L.divIcon({
-    className: 'marcador-contenedor',
-    html: '<div class="marcador-pulsante"></div>',
+const crearIconoPulsante = (esResaltado = false) => new L.divIcon({
+    className: `marcador-contenedor ${esResaltado ? 'resaltado' : ''}`,
+    html: `<div class="marcador-pulsante ${esResaltado ? 'pulso-resaltado' : ''}"></div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
     popupAnchor: [0, -12]
 });
 
 const iconos = {
-    hallazgos: crearIconoPulsante()
+    hallazgos: (resaltar) => crearIconoPulsante(resaltar)
 };
 
 const ActualizadorMapa = ({ centro, idResaltado }) => {
@@ -205,7 +205,7 @@ const Lugares = () => {
                             <Marker
                                 key={`punto-${m.id || idx}`}
                                 position={[parseFloat(m.latitud), parseFloat(m.longitud)]}
-                                icon={iconos.hallazgos}
+                                icon={iconos.hallazgos(esEste)}
                                 zIndexOffset={esEste ? 1000 : 0}
                                 eventHandlers={{
                                     click: () => { 
