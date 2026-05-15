@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import API_BASE_URL from '../config';
@@ -9,6 +10,7 @@ const Expedientes = () => {
     const [seccion, setSeccion] = useState('jefe'); // Priorizamos relatos del jefe
     const [datos, setDatos] = useState([]);
     const [relatoAbierto, setRelatoAbierto] = useState(null);
+    const navigate = useNavigate();
     const [nuevoTitulo, setNuevoTitulo] = useState('');
     const [nuevoContenido, setNuevoContenido] = useState('');
     const [latitud, setLatitud] = useState('');
@@ -386,7 +388,30 @@ const Expedientes = () => {
                         </div>
                         
                         {relatoAbierto.imagen_url && (
-                            <div className="img-relato-full">
+                            <div className="img-relato-full" style={{ position: 'relative' }}>
+                                {relatoAbierto.latitud && relatoAbierto.longitud && parseFloat(relatoAbierto.latitud) !== 0 && (
+                                    <button
+                                        onClick={() => navigate('/lugares', { state: { lat: relatoAbierto.latitud, lng: relatoAbierto.longitud, noticiaId: relatoAbierto.id } })}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '15px',
+                                            right: '15px',
+                                            zIndex: 20,
+                                            background: 'rgba(0,255,65,0.9)',
+                                            color: '#000',
+                                            border: 'none',
+                                            padding: '8px 12px',
+                                            borderRadius: '4px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 0 15px rgba(0,255,65,0.5)',
+                                            fontFamily: 'monospace',
+                                            fontSize: '0.75rem'
+                                        }}
+                                    >
+                                        📍 VER EN RADAR
+                                    </button>
+                                )}
                                 <img 
                                     src={relatoAbierto.imagen_url.startsWith('http') ? relatoAbierto.imagen_url : `${API_BASE_URL}/imagenes/${relatoAbierto.imagen_url}`} 
                                     alt="evidencia" 
