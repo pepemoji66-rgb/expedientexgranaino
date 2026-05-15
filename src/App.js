@@ -210,7 +210,8 @@ function App() {
                 { path: "/lugares", label: "Mapa de Lugares" },
                 ...(userAuth ? [
                   { path: "/horoscopo", label: "Horóscopo Diario" },
-                  { path: "/tarot", label: "El Oráculo (Tarot)" }
+                  { path: "/tarot", label: "El Oráculo (Tarot)" },
+                  { path: "/carta-astral", label: "Carta Astral" }
                 ] : []),
 
                 { path: "/chat", label: "Canal Táctico" }
