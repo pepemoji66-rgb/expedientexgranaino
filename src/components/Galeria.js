@@ -15,15 +15,7 @@ const Galeria = ({ userAuth }) => {
     const [pestanaActiva, setPestanaActiva] = useState('noticias');
     const [paginaActual, setPaginaActual] = useState(1);
     const [fotoExpandida, setFotoExpandida] = useState(null);
-    
-    const [nuevoTitulo, setNuevoTitulo] = useState('');
-    const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
-    const [nuevaDesc, setNuevaDesc] = useState('');
-    const [latitud, setLatitud] = useState('');
-    const [longitud, setLongitud] = useState('');
-    const [busquedaCiudad, setBusquedaCiudad] = useState('');
-    const [subiendo, setSubiendo] = useState(false);
-    const [mostrarFormSubida, setMostrarFormSubida] = useState(false);
+    const [cargando, setCargando] = useState(true);
 
     // --- ESTADOS DE ZOOM Y PAN ---
     const [zoom, setZoom] = useState(1);
@@ -44,32 +36,17 @@ const Galeria = ({ userAuth }) => {
             urlBase: `${API_BASE_URL}/imagenes/`,
             columna: 'imagen_url',
             etiqueta: 'RELATO'
-        },
-        'imagenes': { 
-            urlBase: `${API_BASE_URL}/imagenes/`, 
-            columna: 'imagen_url', 
-            etiqueta: 'EVIDENCIA'
         }
     };
 
     const cargarImagenes = useCallback(async () => {
         try {
-            const isAdmin = userAuth && (userAuth.rol === 'admin' || userAuth.email === ADMIN_EMAIL);
-            
-            const [resG, resN, resE1, resE2] = await Promise.all([
-                axios.get(isAdmin ? `${API_BASE_URL}/api/galeria/admin/todas-las-imagenes` : `${API_BASE_URL}/api/galeria/imagenes-publicas`),
+            setCargando(true);
+            const [resN, resE1, resE2] = await Promise.all([
                 axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
                 axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`),
                 axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`)
             ]);
-
-            // Galería de fotos (Evidencias)
-            const GaleriaNormal = (Array.isArray(resG.data) ? resG.data : []).map(img => ({
-                ...img,
-                id: `foto-${img.id}`,
-                imagen_url: img.imagen_url || img.url_imagen,
-                tipo: 'foto'
-            }));
 
             // Noticias con imagen
             const noticiasData = Array.isArray(resN.data) ? resN.data : (resN.data?.data || []);
@@ -92,15 +69,16 @@ const Galeria = ({ userAuth }) => {
 
             setRegistros({
                 'noticias': noticiasConImagen,
-                'relatos': relatosConImagen,
-                'imagenes': GaleriaNormal
+                'relatos': relatosConImagen
             });
-            console.log("✅ GALERÍA UNIFICADA: NOTICIAS, RELATOS Y EVIDENCIAS CARGADAS");
+            console.log("✅ GALERÍA PURIFICADA: SOLO NOTICIAS Y RELATOS");
         } catch (err) {
             console.error("❌ ERROR AL CARGAR GALERÍA:", err);
-            setRegistros({ 'noticias': [], 'relatos': [], 'imagenes': [] });
+            setRegistros({ 'noticias': [], 'relatos': [] });
+        } finally {
+            setCargando(false);
         }
-    }, [userAuth]);
+    }, []);
 
     useEffect(() => {
         cargarImagenes();
@@ -275,16 +253,8 @@ const Galeria = ({ userAuth }) => {
                 <h1 className="titulo-neon">GALERÍA DE EVIDENCIAS</h1>
                 <p className="subtitle">NIVEL DE ACCESO: {userAuth?.rol?.toUpperCase() || 'INVITADO'}</p>
                 
-                <button className="btn-subir-galeria-top" onClick={() => {
-                    if (userAuth) {
-                        setMostrarFormSubida(true);
-                    } else {
-                        if (window.confirm("🕵️ ACCESO RESTRINGIDO: Debes identificarte como Agente para registrar evidencias en el Búnker. ¿Ir a la terminal de acceso?")) {
-                            navigate('/acceso');
-                        }
-                    }
-                }}>
-                    <span className="icon">📤</span> SUBIR EVIDENCIA
+                <button className="btn-subir-galeria-top" onClick={() => navigate('/expedientes')}>
+                    <span className="icon">📝</span> REDACTAR RELATO
                 </button>
             </header>
 
@@ -304,14 +274,6 @@ const Galeria = ({ userAuth }) => {
                     >
                         <span className="icon-folder">📜</span>
                         <span className="text-folder">RELATOS</span>
-                        <div className="indicator-neon"></div>
-                    </button>
-                    <button
-                        className={`btn-pestana-moderno ${pestanaActiva === 'imagenes' ? 'active' : ''}`}
-                        onClick={() => { setPestanaActiva('imagenes'); setPaginaActual(1); }}
-                    >
-                        <span className="icon-folder">📸</span>
-                        <span className="text-folder">FOTOS</span>
                         <div className="indicator-neon"></div>
                     </button>
                 </div>
@@ -381,64 +343,6 @@ const Galeria = ({ userAuth }) => {
                     </div>
                     <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0, 0); }} className="btn-pag-nav"> ► </button>
                 </footer>
-            )}
-
-            {/* MODAL DE SUBIDA DE EVIDENCIA */}
-            {mostrarFormSubida && (
-                <div className="modal-galeria-abierta fade-in" onClick={() => setMostrarFormSubida(false)}>
-                    <div className="contenido-modal-subida" onClick={e => e.stopPropagation()}>
-                        <button className="cerrar-modal-neon" onClick={() => setMostrarFormSubida(false)}>×</button>
-                        <Forms title="REPORTE DE EVIDENCIA VISUAL" onSubmit={(e) => { subirImagen(e); setMostrarFormSubida(false); }}>
-                            <div className="grid-form-bunker">
-                                <div className="form-group-full">
-                                    <label>TÍTULO DEL HALLAZGO:</label>
-                                    <input
-                                        type="text" value={nuevoTitulo} onChange={e => setNuevoTitulo(e.target.value)}
-                                        placeholder="Ej: Luces sobre la Alhambra..." required
-                                    />
-                                </div>
-
-                                <div className="form-group-full">
-                                    <label>DESCRIPCIÓN TÁCTICA:</label>
-                                    <textarea
-                                        value={nuevaDesc} onChange={e => setNuevaDesc(e.target.value)}
-                                        placeholder="Describe lo que viste con detalle..."
-                                    ></textarea>
-                                </div>
-
-                                <div className="form-row-coords">
-                                    <div className="coord-field">
-                                        <label>LATITUD:</label>
-                                        <input type="number" step="any" value={latitud} onChange={e => setLatitud(e.target.value)} />
-                                    </div>
-                                    <div className="coord-field">
-                                        <label>LONGITUD:</label>
-                                        <input type="number" step="any" value={longitud} onChange={e => setLongitud(e.target.value)} />
-                                    </div>
-                                </div>
-
-                                <div className="form-row-search">
-                                    <input 
-                                        type="text" value={busquedaCiudad} onChange={e => setBusquedaCiudad(e.target.value)}
-                                        placeholder="Buscar ubicación..." 
-                                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), buscarCoordenadas())}
-                                    />
-                                    <button type="button" className="btn-tactico-mini" onClick={buscarCoordenadas}>🔍 BUSCAR</button>
-                                    <button type="button" className="btn-tactico-mini" onClick={obtenerPosicion}>📡 GPS</button>
-                                </div>
-
-                                <div className="form-group-full">
-                                    <label>ARCHIVO DE EVIDENCIA:</label>
-                                    <input type="file" onChange={e => setArchivoSeleccionado(e.target.files[0])} required />
-                                </div>
-
-                                <button type="submit" disabled={subiendo} className="btn-submit-bunker">
-                                    {subiendo ? 'TRANSMITIENDO...' : 'REGISTRAR EVIDENCIA EN EL BÚNKER'}
-                                </button>
-                            </div>
-                        </Forms>
-                    </div>
-                </div>
             )}
 
             {fotoExpandida && (
