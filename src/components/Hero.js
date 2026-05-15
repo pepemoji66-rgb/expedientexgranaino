@@ -12,20 +12,26 @@ import imgRelatos from '../assets/misterio_relatos.png';
 const Hero = ({ userAuth }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [ultimoExpediente, setUltimoExpediente] = useState(null);
+    const [ultimaNoticia, setUltimaNoticia] = useState(null);
 
     useEffect(() => {
-        const fetchUltimo = async () => {
+        const fetchUltimos = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/expedientes/ultimo`);
-                const data = await response.json();
-                if (data && data.id) {
-                    setUltimoExpediente(data);
-                }
+                // Rastrear último expediente
+                const resExp = await fetch(`${API_BASE_URL}/api/expedientes/ultimo`);
+                const dataExp = await resExp.json();
+                if (dataExp && dataExp.id) setUltimoExpediente(dataExp);
+
+                // Rastrear última noticia
+                const resNot = await fetch(`${API_BASE_URL}/api/noticias/ultima`);
+                const dataNot = await resNot.json();
+                if (dataNot && dataNot.id) setUltimaNoticia(dataNot);
+
             } catch (err) {
-                console.error("Error al captar último expediente para Hero:", err);
+                console.error("Error al captar últimas actualizaciones para Hero:", err);
             }
         };
-        fetchUltimo();
+        fetchUltimos();
     }, []);
 
     const baseSlides = [
@@ -94,6 +100,24 @@ const Hero = ({ userAuth }) => {
     const [slides, setSlides] = useState(baseSlides);
 
     useEffect(() => {
+        let nuevosSlides = [...baseSlides];
+        
+        if (ultimaNoticia) {
+            const slideNoticia = {
+                id: 'nueva-not',
+                image: ultimaNoticia.imagen_url || imgRelatos,
+                subtitle: "ULTIMA NOTICIA",
+                title: (ultimaNoticia.titulo || 'NUEVA NOTICIA').toUpperCase(),
+                tagline: "ACTUALIDAD EN EL BÚNKER",
+                infoTitle: "NUEVO ARCHIVO DISPONIBLE",
+                infoText: "Se ha detectado nueva actividad en el sector de noticias. Accede al informe completo.",
+                highlight: "¡MANTENTE AL TANTO DE LOS ÚLTIMOS SUCESOS!",
+                btnText: "Leer Noticia",
+                btnLink: "/noticias"
+            };
+            nuevosSlides = [slideNoticia, ...nuevosSlides];
+        }
+
         if (ultimoExpediente) {
             const nuevoSlide = {
                 id: 'nuevo-exp',
@@ -101,19 +125,19 @@ const Hero = ({ userAuth }) => {
                     ? (ultimoExpediente.imagen_url.startsWith('http') ? ultimoExpediente.imagen_url : `${API_BASE_URL}/imagenes/${ultimoExpediente.imagen_url}`)
                     : imgEspacio,
                 subtitle: "ULTIMA HORA",
-                title: ultimoExpediente.titulo.toUpperCase(),
+                title: (ultimoExpediente.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
                 tagline: "NUEVO EXPEDIENTE DESCLASIFICADO",
                 infoTitle: "ARCHIVO RECIENTE",
-                infoText: `El agente ${ultimoExpediente.usuario_nombre.toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
+                infoText: `El agente ${(ultimoExpediente.usuario_nombre || 'Desconocido').toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
                 highlight: "NUEVA EVIDENCIA DISPONIBLE EN EL ARCHIVO",
                 btnText: "Abrir Informe",
                 btnLink: "/expedientes"
             };
-            setSlides([nuevoSlide, ...baseSlides]);
-        } else {
-            setSlides(baseSlides);
+            nuevosSlides = [nuevoSlide, ...nuevosSlides];
         }
-    }, [ultimoExpediente]);
+        
+        setSlides(nuevosSlides);
+    }, [ultimoExpediente, ultimaNoticia]);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -138,8 +162,11 @@ const Hero = ({ userAuth }) => {
             {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
             <div className="hero-top-actions">
                 <div className="action-buttons-group">
-                    {ultimoExpediente && (
-                        <Link to="/expedientes" className="btn-nuevo-archivo-blink">
+                    {(ultimoExpediente || ultimaNoticia) && (
+                        <Link 
+                            to={(ultimaNoticia?.id || 0) > (ultimoExpediente?.id || 0) ? "/noticias" : "/expedientes"} 
+                            className="btn-nuevo-archivo-blink"
+                        >
                             <span className="blink-dot"></span> NUEVO ARCHIVO
                         </Link>
                     )}

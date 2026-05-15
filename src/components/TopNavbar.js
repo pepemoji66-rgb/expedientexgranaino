@@ -105,7 +105,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                             <Languages size={14} className="tool-icon" />
                             <GoogleTranslator />
                         </div>
-                        <div className="tool-item music-tool desktop-only">
+                        <div className="tool-item music-tool">
                             <ControlMusica />
                         </div>
                     </div>
