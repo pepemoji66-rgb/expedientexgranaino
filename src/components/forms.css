@@ -2,7 +2,7 @@
 
 /* OVERLAY: Ahora se adapta al final de la página sin tapar los audios */
 .forms-overlay {
-    position: relative !important; /* Mantenemos tu cambio clave */
+    position: relative !important;
     top: auto;
     left: auto;
     width: 100%;
@@ -13,40 +13,65 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    padding: 20px; /* Reducido un poco para móviles */
-    box-sizing: border-box; /* Crucial para que no se salga de la pantalla */
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 /* CONTENEDOR: El búnker del formulario */
 .forms-container {
-    background: var(--bg-bunker);
+    background: var(--bg-bunker, #020408);
     border: 2px solid var(--color-principal);
-    padding: 25px;
+    padding: 30px;
     width: 100%;
-    max-width: 500px; /* Evita que se haga gigante en monitores grandes */
-    box-shadow: 0 0 25px rgba(var(--rgb-principal), 0.3);
-    border-radius: 8px;
-    box-sizing: border-box; /* Asegura que el padding no lo ensanche */
+    max-width: 550px;
+    box-shadow: 0 0 35px rgba(var(--rgb-principal), 0.2);
+    border-radius: 12px;
+    box-sizing: border-box;
+    animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .forms-title {
     color: var(--color-principal);
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 3px;
-    margin-bottom: 5px;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
     font-family: 'Courier New', Courier, monospace;
-    text-shadow: 0 0 10px var(--color-principal);
-    font-size: 1.2rem;
+    text-shadow: 0 0 15px var(--color-principal);
+    font-size: 1.5rem;
 }
 
 .forms-subtitle {
     color: #fff;
     text-align: center;
-    font-size: 0.8rem;
-    opacity: 0.7;
-    margin-bottom: 25px;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-bottom: 30px;
     text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* FORM GROUP: For accessibility and better spacing */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.form-group label {
+    color: var(--color-principal);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    opacity: 0.9;
 }
 
 /* INPUTS: Tu diseño de fondo negro puro intacto */
@@ -55,39 +80,34 @@
 .forms-container textarea {
     width: 100%;
     background: #000 !important;
-    border: 1px solid var(--border-subtle) !important;
-    padding: 12px;
-    margin-bottom: 15px;
+    border: 1px solid rgba(var(--rgb-principal), 0.3) !important;
+    padding: 14px;
     color: var(--color-principal) !important;
     font-family: 'Courier New', monospace;
-    box-sizing: border-box; /* Para que no se salgan del contenedor */
-    transition: 0.3s;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.forms-container input::placeholder {
+    color: rgba(var(--rgb-principal), 0.4);
 }
 
 .forms-container input:focus,
 .forms-container textarea:focus {
     border-color: var(--color-principal) !important;
-    box-shadow: 0 0 10px var(--color-principal);
+    box-shadow: 0 0 15px rgba(var(--rgb-principal), 0.4);
     outline: none;
+    background: #050505 !important;
 }
 
 /* GRID PARA COORDENADAS: Tu GPS intacto */
 .coordenadas-grid {
     display: grid;
     grid-template-columns: 1fr 1fr auto;
-    gap: 10px;
-    margin-bottom: 15px;
-    align-items: start;
-}
-
-/* INPUT DE ARCHIVO: Estilo búnker */
-.input-file-bunker {
-    border: 1px dashed var(--color-principal);
-    padding: 15px;
-    background: rgba(var(--rgb-principal), 0.05);
+    gap: 15px;
     margin-bottom: 20px;
-    text-align: center;
-    border-radius: 4px;
+    align-items: end;
 }
 
 /* BOTÓN TRANSMITIR: El toque maestro */
@@ -96,40 +116,49 @@
     background: var(--color-principal);
     color: #000;
     border: none;
-    padding: 18px;
-    font-weight: bold;
+    padding: 20px;
+    font-weight: 900;
     cursor: pointer;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     text-transform: uppercase;
     font-family: 'Courier New', monospace;
-    transition: 0.3s;
-    margin-top: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 15px;
+    border-radius: 4px;
+    font-size: 1rem;
 }
 
 .forms-btn-submit:hover {
     background: #fff;
-    box-shadow: 0 0 20px var(--color-principal);
+    box-shadow: 0 0 30px var(--color-principal);
+    transform: scale(1.02);
+}
+
+.forms-btn-submit:active {
+    transform: scale(0.98);
 }
 
 /* FILA DE BOTONES: Home y Limpiar */
 .forms-row {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 15px;
+    margin-top: 15px;
     width: 100%;
 }
 
 .forms-btn-clear,
 .forms-btn-home {
     flex: 1;
-    background: transparent;
+    background: rgba(var(--rgb-principal), 0.05);
     color: var(--color-principal);
-    border: 1px solid var(--color-principal);
-    padding: 12px;
-    font-size: 0.7rem;
+    border: 1px solid rgba(var(--rgb-principal), 0.5);
+    padding: 15px;
+    font-size: 0.8rem;
     cursor: pointer;
     text-transform: uppercase;
     font-weight: bold;
+    transition: all 0.2s;
+    border-radius: 4px;
 }
 
 .forms-btn-clear:hover {
@@ -139,32 +168,44 @@
 }
 
 .forms-btn-home:hover {
-    background: rgba(var(--rgb-principal), 0.1);
-}
-
-/* INPUT FILE: Diseño final responsive */
-.forms-input[type="file"] {
-    padding: 10px;
-    background: rgba(var(--rgb-principal), 0.1);
-    border: 1px dashed var(--color-principal);
-    color: var(--color-principal);
-    cursor: pointer;
-    font-family: 'monospace';
-    width: 100%;
-    box-sizing: border-box;
+    background: rgba(var(--rgb-principal), 0.15);
+    border-color: var(--color-principal);
 }
 
 /* AJUSTE PARA MÓVILES (Para que no se vea gigante) */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .forms-container {
-        padding: 15px;
+        padding: 20px;
+        border-width: 1px;
     }
+    
+    .forms-title {
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+    
     .coordenadas-grid {
-        grid-template-columns: 1fr; /* En el móvil, las coordenadas una sobre otra */
+        grid-template-columns: 1fr;
     }
+    
     .forms-btn-submit {
-        padding: 14px;
+        padding: 16px;
         font-size: 0.9rem;
     }
+
+    .forms-row {
+        flex-direction: column;
+    }
 }
+
+/* Accesibilidad: High Contrast */
+@media (prefers-contrast: high) {
+    .forms-container {
+        border-width: 4px;
+    }
+    .forms-container input {
+        border-width: 2px;
+    }
+}
+
 

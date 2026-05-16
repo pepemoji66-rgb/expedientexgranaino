@@ -3,11 +3,13 @@ import axios from 'axios';
 // import Zoom from 'react-medium-image-zoom';
 // import 'react-medium-image-zoom/dist/styles.css';
 import Forms from './Forms';
+import { useLanguage } from '../context/LanguageContext';
 import AdSlot from './AdSlot';
 import './videos.css';
 import API_BASE_URL, { ADMIN_EMAIL } from '../config';
 
 const Videos = ({ userAuth }) => {
+    const { t } = useLanguage();
     const isAdmin = userAuth && (userAuth.rol === 'admin' || (userAuth.email && userAuth.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()));
     // API_BASE_URL is handled via config.js (process.env or Render fallback)
 
@@ -50,12 +52,12 @@ const Videos = ({ userAuth }) => {
     }, [videos]);
 
     const obtenerCoordenadas = () => {
-        if (!navigator.geolocation) return alert("El búnker no detecta tu señal GPS.");
+        if (!navigator.geolocation) return alert(t('videoNoGps'));
         navigator.geolocation.getCurrentPosition((pos) => {
             setLatitud(pos.coords.latitude.toFixed(6));
             setLongitud(pos.coords.longitude.toFixed(6));
         }, (err) => {
-            alert("❌ FALLO AL ESCANEAR SECTOR: " + err.message);
+            alert(t('videoGpsError') + err.message);
         });
     };
 
@@ -76,7 +78,7 @@ const Videos = ({ userAuth }) => {
     const handleSubirVideo = async (e) => {
         if (e) e.preventDefault();
         
-        if (!userAuth) return alert("Identifícate como agente.");
+        if (!userAuth) return alert(t('videoIdentify'));
 
         setCargando(true);
 
@@ -90,7 +92,7 @@ const Videos = ({ userAuth }) => {
                 capturas: capturas
             });
 
-            alert("✅ VÍDEO ENVIADO: La central revisará el material antes de publicarlo.");
+            alert(t('videoSent'));
             setTitulo('');
             setNuevaRuta('');
             setCapturas('');
@@ -340,10 +342,10 @@ const Videos = ({ userAuth }) => {
                                 🛡️ <strong>SISTEMA DE VERIFICACIÓN:</strong> Todo el material audiovisual será analizado por el Administrador antes de ser desclasificado al radar público.
                             </p>
                         </div>
-                        <Forms title="CARGAR EVIDENCIA" onSubmit={handleSubirVideo}>
-                            <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>NOMBRE DEL REGISTRO:</label>
+                        <Forms title={t('reportEvidence')} onSubmit={handleSubirVideo}>
+                            <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>{t('videoRegister')}</label>
                             <input
-                                type="text" placeholder="Ej: Avistamiento en el Genil" value={titulo}
+                                type="text" placeholder={t('videoRegisterPlaceholder')} value={titulo}
                                 onChange={(e) => setTitulo(e.target.value)}
                                 style={{
                                     width: '100%', marginBottom: '20px', padding: '12px',
@@ -352,9 +354,9 @@ const Videos = ({ userAuth }) => {
                                 }} required
                             />
 
-                             <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>URL O NOMBRE DE ARCHIVO:</label>
+                             <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>{t('videoUrl')}</label>
                             <input
-                                type="text" placeholder="URL de YouTube o nombre del archivo local" value={nuevaRuta}
+                                type="text" placeholder={t('videoUrlPlaceholder')} value={nuevaRuta}
                                 onChange={(e) => setNuevaRuta(e.target.value)}
                                 style={{
                                     width: '100%', marginBottom: '20px', padding: '12px',
@@ -363,9 +365,9 @@ const Videos = ({ userAuth }) => {
                                 }} required
                             />
 
-                            <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>URLS DE CAPTURAS (Separadas por comas):</label>
+                            <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>{t('videoCaptures')}</label>
                             <textarea
-                                placeholder="https://imagen1.jpg, https://imagen2.jpg..." value={capturas}
+                                placeholder={t('videoCapturesPlaceholder')} value={capturas}
                                 onChange={(e) => setCapturas(e.target.value)}
                                 style={{
                                     width: '100%', marginBottom: '20px', padding: '12px',
@@ -376,7 +378,7 @@ const Videos = ({ userAuth }) => {
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
                                 <div>
-                                    <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>LATITUD:</label>
+                                    <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>{t('latLong')}</label>
                                     <input
                                         type="number" step="any" placeholder="37.1773" value={latitud}
                                         onChange={(e) => setLatitud(e.target.value)}
@@ -388,7 +390,7 @@ const Videos = ({ userAuth }) => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>LONGITUD:</label>
+                                    <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>{t('latLong')}</label>
                                     <input
                                         type="number" step="any" placeholder="-3.5985" value={longitud}
                                         onChange={(e) => setLongitud(e.target.value)}
@@ -406,15 +408,7 @@ const Videos = ({ userAuth }) => {
                                 border: '1px solid var(--color-principal)', color: 'var(--color-principal)', background: 'transparent',
                                 cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.7rem'
                             }}>
-                                🛰️ ACTIVAR RADAR GPS (LOCALIZACIÓN ACTUAL)
-                            </button>
-
-                            <button type="submit" disabled={cargando} className="btn-ok-subir" style={{
-                                width: '100%', padding: '15px', background: 'var(--color-principal)',
-                                color: '#000', fontWeight: 'bold', cursor: 'pointer',
-                                border: 'none', textTransform: 'uppercase', letterSpacing: '2px'
-                            }}>
-                                {cargando ? "CIFRANDO DATOS..." : "ENVIAR AL ARCHIVO CENTRAL"}
+                                {t('videoGps')}
                             </button>
                         </Forms>
                     </div>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Forms from './Forms';
+import { useLanguage } from '../context/LanguageContext';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './audios.css';
 import API_BASE_URL from '../config';
 
 const Audios = ({ userAuth }) => {
+    const { t } = useLanguage();
     // RED DE SEGURIDAD: Siempre inicializamos como array vacío
     const [audios, setAudios] = useState([]);
     const [titulo, setTitulo] = useState('');
@@ -21,7 +23,7 @@ const Audios = ({ userAuth }) => {
     }, []);
 
     const obtenerCoordenadas = () => {
-        if (!navigator.geolocation) return alert("GPS NO DETECTADO.");
+        if (!navigator.geolocation) return alert(t('audioNoGps'));
         navigator.geolocation.getCurrentPosition((pos) => {
             setLatitud(pos.coords.latitude.toFixed(6));
             setLongitud(pos.coords.longitude.toFixed(6));
@@ -44,8 +46,8 @@ const Audios = ({ userAuth }) => {
 
     const handleSubirAudio = async (e) => {
         e.preventDefault();
-        if (tipoSubida === 'archivo' && !archivo) return alert("Selecciona un archivo primero, hermano.");
-        if (tipoSubida === 'enlace' && !rutaExterna) return alert("Pega un enlace o código iframe.");
+        if (tipoSubida === 'archivo' && !archivo) return alert(t('audioNoFile'));
+        if (tipoSubida === 'enlace' && !rutaExterna) return alert(t('audioNoLink'));
 
         const formData = new FormData();
         if (tipoSubida === 'archivo') {
@@ -64,7 +66,7 @@ const Audios = ({ userAuth }) => {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            alert("✅ Psicofonía enviada. El Alto Mando debe revisarla.");
+            alert(t('audioSent'));
             setTitulo('');
             setLatitud('');
             setLongitud('');
@@ -73,7 +75,7 @@ const Audios = ({ userAuth }) => {
             cargarAudios();
         } catch (err) {
             console.error("Error en subida:", err);
-            alert("❌ Fallo en la transmisión. Verifique su identidad de agente.");
+            alert(t('audioError'));
         }
     };
 
@@ -120,12 +122,12 @@ const Audios = ({ userAuth }) => {
                                             </div>
                                         ) : esSoloEnlace ? (
                                             <a href={aud.ruta} target="_blank" rel="noreferrer" className="btn-enlace-externo">
-                                                🎧 ABRIR ARCHIVO EXTERNO
+                                                {t('audioExternal')}
                                             </a>
                                         ) : (
                                             <audio controls crossOrigin="anonymous" className="reproductor-bunker">
                                                 <source src={audioSrc} type="audio/mpeg" />
-                                                SISTEMA NO COMPATIBLE
+                                                {t('audioCompatible')}
                                             </audio>
                                         )}
                                     </div>
@@ -135,7 +137,7 @@ const Audios = ({ userAuth }) => {
                     })
                 ) : (
                     <div className="no-hay-datos">
-                        <p>📡 No hay registros aprobados o la base de datos está fuera de línea...</p>
+                        <p>{t('audioNoData')}</p>
                     </div>
                 )}
             </div>
@@ -144,21 +146,21 @@ const Audios = ({ userAuth }) => {
 
             {userAuth && (
                 <div className="form-fijo-abajo">
-                    <Forms title="REGISTRAR NUEVA PRUEBA" onSubmit={handleSubirAudio}>
+                    <Forms title={t('reportEvidence')} onSubmit={handleSubirAudio}>
                         <div className="campo-form">
-                            <label>TÍTULO DEL HALLAZGO</label>
+                            <label>{t('findingTitle')}</label>
                             <input
                                 type="text"
                                 value={titulo}
                                 onChange={(e) => setTitulo(e.target.value)}
                                 className="input-bunker"
-                                placeholder="Ej: Psicofonía en sótano..."
+                                placeholder={t('findingPlaceholder')}
                                 required
                             />
                         </div>
 
                         <div className="campo-form">
-                            <label>URL DE IMAGEN (OPCIONAL)</label>
+                            <label>{t('imageUrlOptional')}</label>
                             <input
                                 type="text"
                                 value={imagenUrl}
@@ -170,11 +172,11 @@ const Audios = ({ userAuth }) => {
                         
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
                             <div className="campo-form">
-                                <label>LATITUD</label>
+                                <label>{t('latLong')}</label>
                                 <input type="number" step="any" value={latitud} onChange={e => setLatitud(e.target.value)} className="input-bunker" placeholder="0.00" />
                             </div>
                             <div className="campo-form">
-                                <label>LONGITUD</label>
+                                <label>{t('latLong')}</label>
                                 <input type="number" step="any" value={longitud} onChange={e => setLongitud(e.target.value)} className="input-bunker" placeholder="0.00" />
                             </div>
                         </div>
@@ -184,20 +186,20 @@ const Audios = ({ userAuth }) => {
                             background: 'transparent', border: '1px solid var(--color-principal)', color: 'var(--color-principal)',
                             fontFamily: 'monospace', cursor: 'pointer', fontSize: '0.7rem'
                         }}>
-                            🛰️ SCAN SECTOR (GPS)
+                            {t('scanGps')}
                         </button>
 
                         <div className="campo-form">
-                            <label>MÉTODO DE SUBIDA</label>
+                            <label>{t('uploadMethod')}</label>
                             <select value={tipoSubida} onChange={e => setTipoSubida(e.target.value)} className="input-bunker" style={{marginBottom: '15px'}}>
-                                <option value="archivo">SUBIR ARCHIVO (.MP3)</option>
-                                <option value="enlace">ENLACE / IFRAME (iVoox, Spotify)</option>
+                                <option value="archivo">{t('uploadFile')}</option>
+                                <option value="enlace">{t('uploadLink')}</option>
                             </select>
                         </div>
 
                         {tipoSubida === 'archivo' ? (
                             <div className="campo-form">
-                                <label>ARCHIVO (.MP3)</label>
+                                <label>{t('fileMp3')}</label>
                                 <input
                                     type="file"
                                     key={archivo ? 'lleno' : 'vacio'}
@@ -209,20 +211,17 @@ const Audios = ({ userAuth }) => {
                             </div>
                         ) : (
                             <div className="campo-form">
-                                <label>CÓDIGO DE INSERCIÓN O ENLACE</label>
+                                <label>{t('externalLink')}</label>
                                 <textarea
                                     value={rutaExterna}
                                     onChange={(e) => setRutaExterna(e.target.value)}
                                     className="input-bunker"
-                                    placeholder="Pega aquí el código <iframe...> de iVoox o Spotify"
+                                    placeholder={t('externalLinkPlaceholder')}
                                     style={{ height: '80px', resize: 'vertical' }}
                                     required={tipoSubida === 'enlace'}
                                 />
                             </div>
                         )}
-                        <button type="submit" className="btn-enviar-bunker">
-                            ENVIAR AL SERVIDOR
-                        </button>
                     </Forms>
                 </div>
             )}

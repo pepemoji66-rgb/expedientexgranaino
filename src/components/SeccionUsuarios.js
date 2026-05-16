@@ -3,9 +3,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Forms from './Forms';
 import API_BASE_URL from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
-// --- CONFIGURACIÓN DE CONEXIÓN AL BÚNKER ---
 const Seccionusuarios = ({ setAuth }) => {
+    const { t } = useLanguage();
     const [esLogin, setEsLogin] = useState(true);
     const [datos, setDatos] = useState({
         nombre: '',
@@ -30,7 +31,7 @@ const Seccionusuarios = ({ setAuth }) => {
             const res = await axios.post(url, datos);
 
             if (esLogin) {
-                alert("✅ ACCESO CONFIRMADO: " + (res.data.usuario?.nombre || "Agente Operativo"));
+                alert(t('successAuth') + ": " + (res.data.usuario?.nombre || "Agente Operativo"));
 
                 if (setAuth) {
                     setAuth(res.data.usuario);
@@ -38,7 +39,7 @@ const Seccionusuarios = ({ setAuth }) => {
                 }
                 navigate('/');
             } else {
-                alert("✅ ¡LISTO! Te has unido a la red del Búnker. Ya puedes iniciar sesión con tus credenciales.");
+                alert(t('successReg'));
                 setEsLogin(true);
             }
 
@@ -47,7 +48,7 @@ const Seccionusuarios = ({ setAuth }) => {
 
         } catch (err) {
             console.error("Error en la conexión:", err);
-            const msgError = err.response?.data?.mensaje || err.response?.data?.error || "Fallo en el servidor del búnker.";
+            const msgError = err.response?.data?.mensaje || err.response?.data?.error || t('errorFallen');
             alert(`❌ ERROR: ${msgError}`);
         } finally {
             setCargando(false);
@@ -62,51 +63,68 @@ const Seccionusuarios = ({ setAuth }) => {
     return (
         <div className="seccion-usuarios fade-in">
             <Forms
-                title={esLogin ? "IDENTIFICACIÓN DE AGENTE" : "ALTA EN EL SISTEMA"}
-                subtitle={esLogin ? "Introduzca sus credenciales de acceso" : "Únete a la red de investigación"}
+                title={esLogin ? t('loginTitle') : t('registerTitle')}
+                subtitle={esLogin ? t('loginSubtitle') : t('registerSubtitle')}
                 onSubmit={handleSubmit}
                 onClear={() => setDatos({ nombre: '', email: '', password: '', ciudad: '', edad: '' })}
-                btnText={cargando ? "PROCESANDO..." : (esLogin ? "ENTRAR AL BÚNKER" : "UNIRSE AL BÚNKER")}
+                btnText={cargando ? t('loading') : (esLogin ? t('loginTitle') : t('registerTitle'))}
             >
                 {!esLogin && (
-                    <input
-                        type="text"
-                        placeholder="TU NOMBRE O ALIAS"
-                        value={datos.nombre}
-                        onChange={(e) => setDatos({ ...datos, nombre: e.target.value })}
-                        required
-                    />
+                    <div className="form-group">
+                        <label htmlFor="nombre">{t('namePlaceholder')}</label>
+                        <input
+                            id="nombre"
+                            type="text"
+                            placeholder={t('namePlaceholder')}
+                            value={datos.nombre}
+                            onChange={(e) => setDatos({ ...datos, nombre: e.target.value })}
+                            required
+                        />
+                    </div>
                 )}
 
                 {!esLogin && (
-                    <input
-                        type="text"
-                        placeholder="CIUDAD (OPCIONAL)"
-                        value={datos.ciudad}
-                        onChange={(e) => setDatos({ ...datos, ciudad: e.target.value })}
-                    />
+                    <div className="form-group">
+                        <label htmlFor="ciudad">{t('cityPlaceholder')}</label>
+                        <input
+                            id="ciudad"
+                            type="text"
+                            placeholder={t('cityPlaceholder')}
+                            value={datos.ciudad}
+                            onChange={(e) => setDatos({ ...datos, ciudad: e.target.value })}
+                        />
+                    </div>
                 )}
 
-                <input
-                    type="email"
-                    placeholder="CORREO ELECTRÓNICO"
-                    value={datos.email}
-                    onChange={(e) => setDatos({ ...datos, email: e.target.value })}
-                    required
-                />
+                <div className="form-group">
+                    <label htmlFor="email">{t('emailPlaceholder')}</label>
+                    <input
+                        id="email"
+                        type="email"
+                        placeholder={t('emailPlaceholder')}
+                        value={datos.email}
+                        onChange={(e) => setDatos({ ...datos, email: e.target.value })}
+                        required
+                    />
+                </div>
 
-                <input
-                    type="password"
-                    placeholder="CONTRASEÑA"
-                    value={datos.password}
-                    onChange={(e) => setDatos({ ...datos, password: e.target.value })}
-                    required
-                />
+                <div className="form-group">
+                    <label htmlFor="password">{t('passwordPlaceholder')}</label>
+                    <input
+                        id="password"
+                        type="password"
+                        placeholder={t('passwordPlaceholder')}
+                        value={datos.password}
+                        onChange={(e) => setDatos({ ...datos, password: e.target.value })}
+                        required
+                    />
+                </div>
 
                 <p style={{ textAlign: 'center', color: '#fff', fontSize: '0.85rem', marginTop: '15px' }}>
-                    {esLogin ? "¿No tienes credenciales todavía? " : "¿Ya eres agente oficial? "}
+                    {esLogin ? t('noAccount') : t('hasAccount')}
                     <span
                         onClick={toggleModo}
+                        role="button"
                         style={{
                             color: 'var(--color-principal)',
                             cursor: 'pointer',
@@ -114,7 +132,7 @@ const Seccionusuarios = ({ setAuth }) => {
                             fontWeight: 'bold'
                         }}
                     >
-                        {esLogin ? "Regístrate aquí" : "Inicia sesión"}
+                        {esLogin ? t('registerLink') : t('loginLink')}
                     </span>
                 </p>
             </Forms>

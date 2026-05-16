@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import AdSlot from './AdSlot';
+import { useLanguage } from '../context/LanguageContext';
 import './Footer.css'; 
 
 const Footer = ({ visitasTotales = 0 }) => {
+    const { t } = useLanguage();
     const añoActual = new Date().getFullYear(); 
 
     // Formatear el contador (ej: 000123)
@@ -14,8 +16,8 @@ const Footer = ({ visitasTotales = 0 }) => {
             <AdSlot id="footer-top" />
             <div className="footer-content">
                 <p>
-                    &copy; {añoActual} EXPEDIENTEXGRANAINO Y MUNDIAL. Autor: José Moreno Jiménez. 
-                    <span className="footer-extra"> Prohibida la reproducción no autorizada.</span>
+                    &copy; {añoActual} EXPEDIENTEXGRANAINO Y MUNDIAL. {t('footerAuthor')} 
+                    <span className="footer-extra"> {t('footerRights')}</span>
                 </p>
                 
                 {/* CONTADOR DE VISITAS RETRO */}
@@ -31,7 +33,7 @@ const Footer = ({ visitasTotales = 0 }) => {
                     letterSpacing: '3px',
                     boxShadow: '0 0 10px rgba(var(--rgb-principal), 0.2)'
                 }}>
-                    VISITAS AL BÚNKER: <span style={{ fontWeight: 'bold', color: '#fff' }}>{contadorFormateado}</span>
+                    {t('footerVisits')} <span style={{ fontWeight: 'bold', color: '#fff' }}>{contadorFormateado}</span>
                 </div>
                 
                 {/* REDES SOCIALES */}
@@ -45,14 +47,13 @@ const Footer = ({ visitasTotales = 0 }) => {
                 </div>
 
                 <div className="footer-legal-links" style={{ margin: '10px 0', fontSize: '0.7rem' }}>
-                    <Link to="/privacidad" style={{ color: '#888', marginRight: '15px', textDecoration: 'none' }}>PRIVACIDAD</Link>
-                    <Link to="/cookies" style={{ color: '#888', marginRight: '15px', textDecoration: 'none' }}>COOKIES</Link>
-                    <Link to="/legal" style={{ color: '#888', marginRight: '15px', textDecoration: 'none' }}>AVISO LEGAL</Link>
-                    <Link to="/sobre-nosotros" style={{ color: '#888', textDecoration: 'none' }}>SOBRE EL PROYECTO</Link>
-
+                    <Link to="/privacidad" style={{ color: '#888', marginRight: '15px', textDecoration: 'none' }}>{t('navPrivacy')}</Link>
+                    <Link to="/cookies" style={{ color: '#888', marginRight: '15px', textDecoration: 'none' }}>{t('navCookies')}</Link>
+                    <Link to="/legal" style={{ color: '#888', marginRight: '15px', textDecoration: 'none' }}>{t('navLegal')}</Link>
+                    <Link to="/sobre-nosotros" style={{ color: '#888', textDecoration: 'none' }}>{t('navAboutProject')}</Link>
                 </div>
                 <div className="footer-contact">
-                    <span className="contact-label">CONTACTO ALTO MANDO:</span>
+                    <span className="contact-label">{t('footerContact')}</span>
                     <a href="mailto:archipegv2@gmail.com" className="contact-link">archipegv2@gmail.com</a>
                 </div>
             </div>

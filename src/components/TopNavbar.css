@@ -114,21 +114,52 @@
     padding-right: 15px;
 }
 
+.language-selector-bunker {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.lang-text-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 900;
+    padding: 6px 12px;
+    color: rgba(255, 255, 255, 0.7); /* Aumentado de 0.4 para visibilidad */
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 1px;
+}
+
+.lang-text-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.lang-text-btn.active {
+    color: #fff;
+    background: var(--color-principal);
+    box-shadow: 0 0 15px var(--color-principal);
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.lang-separator {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
 .tool-item {
     display: flex;
     align-items: center;
     gap: 8px;
     height: 35px;
-}
-
-.tool-icon {
-    color: var(--color-principal);
-}
-
-.translator-tool {
-    position: relative;
-    padding-right: 15px;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* MUSIC BUTTON STYLES */

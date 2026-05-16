@@ -31,6 +31,7 @@ import TopNavbar from './components/TopNavbar';
 import CookieBanner from './components/CookieBanner';
 import SobreNosotros from './components/SobreNosotros';
 import AtarfeDossier from './components/AtarfeDossier';
+import { useLanguage } from './context/LanguageContext';
 
 
 import { API_BASE_URL, ADMIN_EMAIL } from './config';
@@ -65,6 +66,7 @@ const FooterCondicional = (props) => {
 
 
 function App() {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [userAuth, setUserAuth] = useState(null);
   const [tema, setTema] = useState('#ffffff');
@@ -166,7 +168,7 @@ function App() {
   };
 
   const cerrarSesion = () => {
-    if (window.confirm("¿FINALIZAR TURNO DE GUARDIA, AGENTE?")) {
+    if (window.confirm(t('sysLogoutConfirm'))) {
       localStorage.removeItem('agente_sesion');
       setUserAuth(null);
       setIsOpen(false);
@@ -200,21 +202,21 @@ function App() {
           <div style={{ flexGrow: 1, paddingTop: '40px', paddingLeft: '30px', overflowY: 'auto' }}>
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {[
-                { path: "/", label: "Inicio" },
-                { path: "/galeria", label: "Galería de Fotos" },
-                { path: "/videos", label: "Vídeos" },
-                { path: "/noticias", label: "Noticias" },
-                { path: "/audios", label: "Audios" },
-                { path: "/expedientes", label: "Expedientes X" },
-                { path: "/especial-atarfe", label: "⚠️ Dossier Atarfe" },
-                { path: "/lugares", label: "Mapa de Lugares" },
+                { path: "/", label: t('navHome') },
+                { path: "/galeria", label: t('navGallery') },
+                { path: "/videos", label: t('navVideos') },
+                { path: "/noticias", label: t('navNews') },
+                { path: "/audios", label: t('navAudios') },
+                { path: "/expedientes", label: t('navFiles') },
+                { path: "/especial-atarfe", label: t('sysSidebarDossier') },
+                { path: "/lugares", label: t('navMap') },
                 ...(userAuth ? [
-                  { path: "/horoscopo", label: "Horóscopo Diario" },
-                  { path: "/tarot", label: "El Oráculo (Tarot)" },
-                  { path: "/carta-astral", label: "Carta Astral" }
+                  { path: "/horoscopo", label: t('navHoroscope') },
+                  { path: "/tarot", label: t('navTarot') },
+                  { path: "/carta-astral", label: t('navAstral') }
                 ] : []),
 
-                { path: "/chat", label: "Canal Táctico" }
+                { path: "/chat", label: t('navChat') }
 
 
               ].map((route) => (
@@ -239,7 +241,7 @@ function App() {
                   fontWeight: 'bold', textDecoration: 'none',
                   fontSize: '0.8rem', fontFamily: 'monospace', borderRadius: '4px'
                 }}>
-                  {userAuth ? `👤 AGENTE: ${userAuth.nombre?.toUpperCase()}` : '🔑 ACCESO AL BÚNKER'}
+                  {userAuth ? `${t('sysAgentLabel')} ${userAuth.nombre?.toUpperCase()}` : t('sysAccessBunker')}
                 </Link>
               </li>
 
@@ -255,7 +257,7 @@ function App() {
                       background: 'rgba(var(--rgb-principal), 0.1)', fontWeight: 'bold', textDecoration: 'none',
                       borderRadius: '4px', boxShadow: '0 0 15px rgba(var(--rgb-principal), 0.3)'
                     }}>
-                      ⚡ PANEL DE MANDO
+                      {t('sysControlPanel')}
                     </Link>
                   </li>
                 )}
@@ -266,12 +268,12 @@ function App() {
           <div className="sidebar-footer">
             {userAuth && (
               <button onClick={cerrarSesion} className="btn-logout">
-                🔴 DESCONECTAR AGENTE
+                🔴 {t('sysLogoutBtn')}
               </button>
             )}
             <div className="theme-selector-container">
 
-              <p className="sidebar-footer-label" style={{ marginBottom: '8px', fontSize: '10px', color: '#666' }}>FRECUENCIA VISUAL</p>
+              <p className="sidebar-footer-label" style={{ marginBottom: '8px', fontSize: '10px', color: '#666' }}>{t('sysVisualFreq')}</p>
               <div className="theme-selector" style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                 {['#00d4ff', '#00ff41', '#ff4444', '#ffb100', '#ff00ff'].map(c => (
                   <div key={c} onClick={() => setTema(c)} className={`theme-dot ${tema === c ? 'active' : ''}`} style={{ 

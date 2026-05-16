@@ -1,9 +1,10 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './forms.css';
 
-const Forms = ({ title, subtitle, children, onSubmit, onClear }) => {
+const Forms = ({ title, subtitle, children, onSubmit, onClear, btnText }) => {
+    const { t } = useLanguage();
 
-    // Función de seguridad para limpiar sin romper el sistema
     const handleClear = () => {
         if (onClear) {
             onClear();
@@ -12,20 +13,18 @@ const Forms = ({ title, subtitle, children, onSubmit, onClear }) => {
 
     return (
         <div className="forms-overlay fade-in">
-            <div className="forms-container">
-                <h2 className="forms-title">{title ? title.toUpperCase() : 'FORMULARIO TÁCTICO'}</h2>
+            <div className="forms-container" role="dialog" aria-labelledby="form-title">
+                <h2 id="form-title" className="forms-title">{title ? title.toUpperCase() : t('submit')}</h2>
                 {subtitle && <p className="forms-subtitle">{subtitle}</p>}
 
-                {/* Importante: encType permite que viajen audios/fotos/videos */}
-                <form onSubmit={onSubmit} encType="multipart/form-data">
-
+                <form onSubmit={onSubmit} encType="multipart/form-data" className="responsive-form">
                     <div className="forms-content">
                         {children}
                     </div>
 
                     <div className="forms-actions">
-                        <button type="submit" className="forms-btn-submit">
-                            ENVIAR SEÑAL
+                        <button type="submit" className="forms-btn-submit" aria-label={btnText || t('submit')}>
+                            {btnText || t('submit')}
                         </button>
 
                         <div className="forms-row">
@@ -33,15 +32,17 @@ const Forms = ({ title, subtitle, children, onSubmit, onClear }) => {
                                 type="button"
                                 className="forms-btn-clear"
                                 onClick={handleClear}
+                                aria-label={t('cancel')}
                             >
-                                ABORTAR
+                                {t('cancel')}
                             </button>
                             <button
                                 type="button"
                                 className="forms-btn-home"
                                 onClick={() => window.location.href = '/'}
+                                aria-label={t('home')}
                             >
-                                INICIO
+                                {t('home')}
                             </button>
                         </div>
                     </div>
@@ -51,4 +52,4 @@ const Forms = ({ title, subtitle, children, onSubmit, onClear }) => {
     );
 };
 
-export default Forms;
+export default Forms;

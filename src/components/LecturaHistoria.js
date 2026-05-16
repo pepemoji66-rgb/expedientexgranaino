@@ -4,8 +4,10 @@ import axios from 'axios';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './lecturahistoria.css';
 import API_BASE_URL from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 const LecturaHistoria = () => {
+    const { language, t } = useLanguage();
     const { id } = useParams();
     const navigate = useNavigate();
     const [historia, setHistoria] = useState(null);
@@ -64,8 +66,8 @@ const LecturaHistoria = () => {
 
     const eliminarEstaHistoria = async () => {
         const mensajeConfirm = esRelatoAdmin
-            ? "¿Sultán, seguro que desea destruir su propio relato para siempre?"
-            : "¿Seguro que desea eliminar este expediente de usuario?";
+            ? t('readConfirmDeleteAdmin')
+            : t('readConfirmDeleteAgent');
 
         if (window.confirm(mensajeConfirm)) {
             try {
@@ -75,10 +77,10 @@ const LecturaHistoria = () => {
                     : `${API_BASE_URL}/api/expedientes/expedientes/${id}`;
 
                 await axios.delete(rutaBorrado);
-                alert("✅ Expediente borrado de la existencia.");
+                alert(t('readDeleteSuccess'));
                 navigate(-1);
             } catch (err) {
-                alert("❌ Error: Las sombras impiden borrar este archivo.");
+                alert(t('readDeleteError'));
             }
         }
     };
@@ -88,7 +90,7 @@ const LecturaHistoria = () => {
             <div className="radar-loader-container" style={{ marginTop: '100px' }}>
                 <div className="radar-loader"></div>
                 <p style={{ color: 'var(--color-principal)', textAlign: 'center', fontFamily: 'Courier New' }}>
-                    DESENCRIPTANDO ARCHIVO SECRETO...
+                    {t('readDecrypting')}
                 </p>
             </div>
         </div>
@@ -97,9 +99,9 @@ const LecturaHistoria = () => {
     if (!historia) return (
         <div className="admin-dashboard">
             <div className="glass-card" style={{ marginTop: '100px', textAlign: 'center' }}>
-                <p style={{ color: '#ff4444' }}>⚠️ EL ARCHIVO NO EXISTE O HA SIDO ELIMINADO.</p>
+                <p style={{ color: '#ff4444' }}>{t('readNotFound')}</p>
                 <button onClick={() => navigate(-1)} className="forms-btn-submit" style={{ width: 'auto', marginTop: '20px' }}>
-                    VOLVER AL ARCHIVO
+                    {t('readBack')}
                 </button>
             </div>
         </div>
@@ -109,13 +111,12 @@ const LecturaHistoria = () => {
         <div className="admin-dashboard fade-in">
             <div className="glass-card full-width" style={{ textAlign: 'left', marginTop: '50px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
                     <button
                         onClick={() => navigate(-1)}
                         className="forms-btn-submit"
                         style={{ width: 'auto', background: '#222', padding: '10px 20px', cursor: 'pointer', border: '1px solid #444', borderRadius: '2px', fontWeight: 'bold' }}
                     >
-                        ⬅ VOLVER AL ARCHIVO
+                        ⬅ {t('readBack')}
                     </button>
 
                     <div style={{ display: 'flex', gap: '10px' }}>
@@ -130,7 +131,7 @@ const LecturaHistoria = () => {
                                     fontWeight: '900', boxShadow: '0 0 15px rgba(255,255,255,0.4)' 
                                 }}
                             >
-                                🎯 VER EN RADAR
+                                {t('readViewRadar')}
                             </button>
                         )}
                         
@@ -140,24 +141,23 @@ const LecturaHistoria = () => {
                                 className="forms-btn-submit"
                                 style={{ width: 'auto', background: '#8b0000', color: 'white', padding: '10px 20px', cursor: 'pointer', border: 'none', borderRadius: '2px', opacity: 0.8 }}
                             >
-                                🗑️ BORRAR
+                                🗑️ {t('readDelete')}
                             </button>
                         )}
                     </div>
                 </div>
-                </div>
 
                 <h2 className="admin-title" style={{ textAlign: 'left', color: 'var(--color-principal)', borderBottom: '1px solid rgba(0,255,65,0.3)', paddingBottom: '15px' }}>
-                    {historia.titulo ? historia.titulo.toUpperCase() : 'EXPEDIENTE SIN TÍTULO'}
+                    {historia.titulo ? historia.titulo.toUpperCase() : t('readNoTitle')}
                 </h2>
 
                 <div className="meta-lectura" style={{ color: '#aaa', fontFamily: 'Courier New', marginBottom: '25px', fontSize: '0.9rem' }}>
                     <p>ID_SERIAL: <span style={{ color: 'var(--color-principal)' }}>#{historia.id}</span></p>
                     <p>CLASIFICACIÓN: <span style={{ color: esRelatoAdmin ? 'var(--color-principal)' : '#ff9900' }}>
-                        {esRelatoAdmin ? 'RELATO DE COMANDANCIA' : 'REGISTRO DE AGENTE EXTERNÓ'}
+                        {esRelatoAdmin ? t('readAdminStory') : t('readAgentRegistry')}
                     </span></p>
                     <p>ORIGEN: <span style={{ color: '#fff' }}>
-                        {(historia.usuario_nombre || historia.agente || 'SISTEMA CENTRAL').toUpperCase()}
+                        {(historia.usuario_nombre || historia.agente || t('readSystemCentral')).toUpperCase()}
                     </span></p>
                 </div>
 
@@ -197,7 +197,7 @@ const LecturaHistoria = () => {
                                     fontSize: '0.8rem'
                                 }}
                             >
-                                📍 LOCALIZAR EN RADAR
+                                {t('readLocateRadar')}
                             </button>
                         )}
                         <img 
@@ -234,10 +234,45 @@ const LecturaHistoria = () => {
                     background: 'rgba(0,0,0,0.4)',
                     padding: '30px',
                     borderRadius: '5px',
-                    borderLeft: '4px solid var(--color-principal)',
                     boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
                 }}>
-                    {renderizarTextoConMedios(historia.contenido || historia.cuerpo || "CONTENIDO CLASIFICADO O NO DISPONIBLE.")}
+                    {language === 'en' && (
+                        <div style={{ marginBottom: '20px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
+                            <button 
+                                onClick={async (e) => {
+                                    const btn = e.currentTarget;
+                                    btn.innerText = "📡 " + t('readTranslateWait').toUpperCase();
+                                    
+                                    try {
+                                        const texto = historia.contenido || historia.cuerpo || "";
+                                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
+                                        const data = await res.json();
+                                        const traducido = data[0].map(x => x[0]).join("");
+                                        
+                                        setHistoria({ ...historia, contenido: traducido, cuerpo: traducido });
+                                        btn.style.display = 'none';
+                                    } catch (err) {
+                                        const urlTranslate = `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(historia.contenido || historia.cuerpo)}&op=translate`;
+                                        window.open(urlTranslate, '_blank');
+                                    }
+                                }}
+                                style={{
+                                    background: 'var(--color-principal)',
+                                    color: '#000',
+                                    border: 'none',
+                                    padding: '10px 20px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.8rem',
+                                    boxShadow: '0 0 15px rgba(0,255,65,0.4)'
+                                }}
+                            >
+                                📡 {t('readTranslateStory')}
+                            </button>
+                        </div>
+                    )}
+                    {renderizarTextoConMedios(historia.contenido || historia.cuerpo || t('readNoContent'))}
                     
                     {historia.fuente_url && (
                         <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid rgba(0,255,65,0.1)', textAlign: 'center' }}>
@@ -248,7 +283,7 @@ const LecturaHistoria = () => {
                                 className="btn-technical-link highlight"
                                 style={{ display: 'inline-block', textDecoration: 'none', padding: '12px 25px', background: 'rgba(0,255,65,0.05)', border: '1px solid var(--color-principal)', color: 'var(--color-principal)', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '1px' }}
                             >
-                                🌐 CONSULTAR FUENTE ORIGINAL DEL INFORME
+                                🌐 {t('readSource')}
                             </a>
                         </div>
                     )}

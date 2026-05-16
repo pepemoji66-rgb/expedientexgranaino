@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 import './tarot.css';
 import backImg from '../assets/tarot/back.jpg';
 import genericImg from '../assets/tarot/generic.jpg';
 
 const Tarot = () => {
+    const { t } = useLanguage();
     const [baraja, setBaraja] = useState([]);
     const [seleccionadas, setSeleccionadas] = useState([]);
     const [resultado, setResultado] = useState(null);
@@ -23,7 +25,7 @@ const Tarot = () => {
             setResultado(null);
             setSeleccionadas([]);
         } catch (err) {
-            setError("No se ha podido sintonizar la frecuencia del Oráculo.");
+            setError(t('errorFallen'));
         }
     };
 
@@ -55,8 +57,8 @@ const Tarot = () => {
     return (
         <div className="tarot-page">
             <header className="header-tarot">
-                <h1 className="titulo-neon">EL ORÁCULO DEL BÚNKER</h1>
-                <p className="subtitulo">Selecciona 5 Arcanos para descifrar tu frecuencia</p>
+                <h1 className="titulo-neon">{t('tarotTitle')}</h1>
+                <p className="subtitulo">{t('tarotSubtitle')}</p>
             </header>
 
             <div className="ritual-area">
@@ -91,13 +93,13 @@ const Tarot = () => {
 
                 {!resultado && (
                     <div className="controles-tarot">
-                        <p>{seleccionadas.length} / 5 Cartas elegidas</p>
+                        <p>{seleccionadas.length} / 5 {t('tarotCardsChosen')}</p>
                         <button 
                             className="btn-tarot" 
                             onClick={realizarTirada} 
                             disabled={seleccionadas.length !== 5 || loading}
                         >
-                            {loading ? 'SINTONIZANDO...' : 'REVELAR DESTINO'}
+                            {loading ? t('tarotSyncing') : t('tarotReveal')}
                         </button>
                     </div>
                 )}
@@ -106,7 +108,7 @@ const Tarot = () => {
             {resultado && (
                 <div className="resultado-tarot fade-in">
                     <div className="resumen-final">
-                        <h3>📜 MENSAJE DEL ORÁCULO</h3>
+                        <h3>{t('tarotMessage')}</h3>
                         <p className="resumen-texto">{resultado.resumen}</p>
                         
                         <div className="detalles-tirada">
@@ -117,7 +119,7 @@ const Tarot = () => {
                             ))}
                         </div>
 
-                        <button className="btn-tarot" onClick={cargarBaraja} style={{ marginTop: '30px' }}>NUEVO RITUAL</button>
+                        <button className="btn-tarot" onClick={cargarBaraja} style={{ marginTop: '30px' }}>{t('tarotNewRitual')}</button>
                     </div>
                 </div>
             )}

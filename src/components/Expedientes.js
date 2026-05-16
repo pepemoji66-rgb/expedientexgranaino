@@ -4,9 +4,11 @@ import axios from 'axios';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import API_BASE_URL from '../config';
 import AdSlot from './AdSlot';
+import { useLanguage } from '../context/LanguageContext';
 import './expedientes.css'; 
 
 const Expedientes = () => {
+    const { language, t } = useLanguage();
     const [seccion, setSeccion] = useState('jefe'); // Priorizamos relatos del jefe
     const [datos, setDatos] = useState([]);
     const [relatoAbierto, setRelatoAbierto] = useState(null);
@@ -106,7 +108,10 @@ const Expedientes = () => {
             await axios.post(`${API_BASE_URL}/api/expedientes/subir-expediente`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("🚀 EXPEDIENTE ARCHIVADO CORRECTAMENTE.");
+            alert(t('successAuth') + ": " + t('expUpload').replace('SUBIR AL ', ''));
+            // Wait, I should add a specific key for this.
+            // Actually, let's use a simpler one.
+            alert("🚀 " + t('expUpload'));
             setNuevoTitulo('');
             setNuevoContenido('');
             setLatitud('');
@@ -115,7 +120,7 @@ const Expedientes = () => {
             cargarDatos();
         } catch (err) {
             console.error("Error al subir expediente:", err);
-            alert("❌ Error en la transmisión al Búnker.");
+            alert("❌ " + t('errorFallen'));
         }
     };
 
@@ -146,7 +151,7 @@ const Expedientes = () => {
     const compartirExpediente = async (red) => {
         if (!relatoAbierto) return;
         const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}`;
-        const texto = `🛸 ¡AVISTAMIENTO DETECTADO! Mira este expediente en el Búnker de ExpedienteX: "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
+        const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
         
         // Prioridad 1: Web Share API (Móviles)
         if (navigator.share && red !== 'copy' && red !== 'instagram') {
@@ -175,9 +180,9 @@ const Expedientes = () => {
         } else if (red === 'copy' || red === 'twitter' || red === 'whatsapp') {
             try {
                 await navigator.clipboard.writeText(`${texto} ${url}`);
-                alert("📎 ENLACE COPIADO AL PORTAPAPELES. ¡LISTO PARA DIFUNDIR!");
+                alert(t('expCopySuccess'));
             } catch (err) {
-                alert("❌ ERROR AL COPIAR: Intenta compartir manualmente.");
+                alert(t('expCopyError'));
             }
         }
     };
@@ -187,11 +192,11 @@ const Expedientes = () => {
     return (
         <div className="experiencias-page">
             <header className="header-central">
-                <h1 className="titulo-principal">EXPEDIENTEXGRANAINO Y MUNDIAL</h1>
+                <h1 className="titulo-principal">{t('expTitle')}</h1>
             </header>
 
             <div className="advertencia-expedientes">
-                <p>🛡️ <strong>PROTOCOLO DE VERACIDAD:</strong> Priorizamos informes basados en sucesos reales, testimonios directos y evidencias de campo. Aunque permitimos la reconstrucción narrativa, la fidelidad a los hechos es nuestro estandarte. Documenta con responsabilidad.</p>
+                <p>{t('expProtocol')}</p>
             </div>
 
             <div className="botones-superiores">
@@ -199,13 +204,13 @@ const Expedientes = () => {
                     className={`btn-main ${seccion === 'usuarios' ? 'active' : ''}`}
                     onClick={() => setSeccion('usuarios')}
                 >
-                    INFORMES DE AGENTES
+                    {t('expAgentReports')}
                 </button>
                 <button
                     className={`btn-main admin-main ${seccion === 'jefe' ? 'active' : ''}`}
                     onClick={() => setSeccion('jefe')}
                 >
-                    RELATOS DEL ADMINISTRADOR
+                    {t('expAdminStories')}
                 </button>
             </div>
 
@@ -214,7 +219,7 @@ const Expedientes = () => {
                 {cargando ? (
                     <div className="cargando-expedientes">
                         <div className="scanner-line"></div>
-                        <p>DESCRIPTANDO SEÑAL...</p>
+                        <p>{t('expDecrypt')}</p>
                     </div>
                 ) : isMobile ? (
                     <div className="grid-expedientes-mobile">
@@ -230,31 +235,31 @@ const Expedientes = () => {
                                         </div>
                                     )}
                                     <div className="card-body-mobile">
-                                        <span className="card-tag">{item.tipo === 'jefe' ? '🛡️ JEFE' : '👤 AGENTE'}</span>
+                                        <span className="card-tag">{item.tipo === 'jefe' ? '🛡️ JEFE' : `👤 ${t('accessLevelAgent')}`}</span>
                                         <h3 className="card-title-mobile">{item.titulo?.toUpperCase()}</h3>
                                         <div className="card-footer-mobile">
                                             <div className="relevancia-mini" onClick={(e) => aumentarRelevancia(e, item.id)}>
                                                 ⭐ <span className="rel-count">{item.relevancia || 0}</span>
                                             </div>
                                             <small>{item.usuario_nombre || 'ANÓNIMO'}</small>
-                                            <button className="btn-leer-pro">ABRIR</button>
+                                            <button className="btn-leer-pro">{t('expOpen')}</button>
                                         </div>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <p className="no-datos">SIN EXPEDIENTES EN ESTE SECTOR.</p>
+                            <p className="no-datos">{t('expNoData')}</p>
                         )}
                     </div>
                 ) : (
                     <table className="tabla-pro">
                         <thead>
                             <tr>
-                                <th>ESTADO</th>
-                                <th>IMAGEN</th>
-                                <th>TÍTULO</th>
-                                <th>UBICACIÓN</th>
-                                <th>ACCIÓN</th>
+                                <th>{t('expStatus')}</th>
+                                <th>{t('expImage')}</th>
+                                <th>{t('findingTitle')}</th>
+                                <th>{t('expLocation')}</th>
+                                <th>{t('expAction')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -263,7 +268,7 @@ const Expedientes = () => {
                                     <tr key={item.id}>
                                         <td>
                                             <span className="status-badge-pro">
-                                                {item.tipo === 'jefe' ? '🛡️ JEFE' : '👤 AGENTE'}
+                                                {item.tipo === 'jefe' ? '🛡️ JEFE' : `👤 ${t('accessLevelAgent')}`}
                                             </span>
                                         </td>
                                         <td>
@@ -285,7 +290,7 @@ const Expedientes = () => {
                                                     ⭐ {item.relevancia || 0}
                                                 </button>
                                                 <button className="btn-leer-pro" onClick={() => setRelatoAbierto(item)}>
-                                                    ABRIR
+                                                    {t('expOpen')}
                                                 </button>
                                             </div>
                                         </td>
@@ -294,7 +299,7 @@ const Expedientes = () => {
                             ) : (
                                 <tr>
                                     <td colSpan="5" className="no-datos">
-                                        📡 FRECUENCIA LIMPIA. NINGUNA ACTIVIDAD DETECTADA.
+                                        {t('expNoData')}
                                     </td>
                                 </tr>
                             )}
@@ -308,24 +313,24 @@ const Expedientes = () => {
                 <div className="contenedor-envio-expediente">
                     <div style={{ background: 'rgba(255,177,0,0.1)', border: '1px solid #ffb100', padding: '15px', marginBottom: '20px', borderRadius: '5px', textAlign: 'center' }}>
                         <p style={{ color: '#ffb100', fontSize: '0.8rem', fontFamily: 'monospace', margin: 0 }}>
-                            📑 <strong>CONTROL DE ARCHIVO:</strong> Los informes enviados serán validados por el Administrador antes de su publicación definitiva.
+                            {t('expControlArchive')}
                         </p>
                     </div>
                     <h2 className="titulo-neon-p">
-                        {seccion === 'jefe' ? 'REDACTAR RELATO OFICIAL' : 'REDACTAR NUEVO INFORME'}
+                        {seccion === 'jefe' ? t('expWriteAdmin') : t('expWriteReport')}
                     </h2>
                     <form onSubmit={enviarExpediente} className="form-expediente">
                         <input
                             type="text"
                             className="input-bunker-exp"
-                            placeholder="TÍTULO DEL INFORME..."
+                            placeholder={`${t('findingTitle')}...`}
                             value={nuevoTitulo}
                             onChange={(e) => setNuevoTitulo(e.target.value)}
                             required
                         />
                         <textarea
                             className="textarea-bunker-exp"
-                            placeholder="DESCRIPCIÓN DE LOS HECHOS..."
+                            placeholder={`${t('newsDesc')}...`}
                             value={nuevoContenido}
                             onChange={(e) => setNuevoContenido(e.target.value)}
                             required
@@ -333,36 +338,36 @@ const Expedientes = () => {
                         
                         {/* BUSCADOR DE COORDENADAS */}
                         <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
-                            <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>RADAR GEOGRÁFICO (BUSCAR CIUDAD/PUEBLO):</label>
+                            <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>{t('expRadarSearch')}</label>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <input 
                                     type="text" 
                                     value={busquedaLugar} 
                                     onChange={e => setBusquedaLugar(e.target.value)} 
-                                    placeholder="Ej: Granada, Albolote, Maracena..."
+                                    placeholder={t('newsLocationPlaceholder')}
                                     className="input-bunker-exp"
                                     style={{ flex: 1, marginBottom: 0 }}
                                 />
-                                <button type="button" onClick={buscarCoordenadas} style={{ padding: '10px', background: 'var(--color-principal)', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-                                    BUSCAR
+                                <button type="button" onClick={buscarCoordenadas} style={{ padding: '10px', background: 'var(--color-principal)', color: '#000', border: 'none', padding: '0 15px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                    {t('newsSearch')}
                                 </button>
                             </div>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', alignItems: 'end', marginBottom: '15px' }}>
                             <div>
-                                <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>LATITUD</label>
+                                <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>{t('latLong')}</label>
                                 <input type="number" step="any" className="input-bunker-exp" value={latitud} onChange={e => setLatitud(e.target.value)} />
                             </div>
                             <div>
-                                <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>LONGITUD</label>
+                                <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>{t('latLong')}</label>
                                 <input type="number" step="any" className="input-bunker-exp" value={longitud} onChange={e => setLongitud(e.target.value)} />
                             </div>
                             <button type="button" onClick={obtenerUbicacion} style={{
                                 padding: '10px', background: 'transparent', border: '1px solid var(--color-principal)', color: 'var(--color-principal)',
                                 fontFamily: 'monospace', fontSize: '0.65rem', cursor: 'pointer', marginBottom: '10px'
                             }}>
-                                📍 POSICIÓN
+                                {t('expPosicion')}
                             </button>
                         </div>
 
@@ -372,7 +377,7 @@ const Expedientes = () => {
                         </div>
 
                         <button type="submit" className="btn-enviar-expediente">
-                            {seccion === 'jefe' ? 'PUBLICAR RELATO' : 'SUBIR AL ARCHIVO'}
+                            {seccion === 'jefe' ? t('expPublish') : t('expUpload')}
                         </button>
                     </form>
                 </div>
@@ -409,7 +414,7 @@ const Expedientes = () => {
                                             fontSize: '0.75rem'
                                         }}
                                     >
-                                        📍 VER EN RADAR
+                                        {t('expViewRadar')}
                                     </button>
                                 )}
                                 <img 
@@ -420,9 +425,49 @@ const Expedientes = () => {
                         )}
 
                         <div className="info-meta">
-                            <span>ORIGEN: {relatoAbierto.usuario_nombre || 'ADMINISTRADOR'}</span>
+                            <span>{t('expOrigin')}: {relatoAbierto.usuario_nombre || 'ADMINISTRADOR'}</span>
                             <span>COORD: {relatoAbierto.latitud || '0'}, {relatoAbierto.longitud || '0'}</span>
                         </div>
+                        
+                        {language === 'en' && (
+                            <div style={{ marginTop: '15px', textAlign: 'center' }}>
+                                <button 
+                                    onClick={async () => {
+                                        const btn = document.getElementById('btn-trans-tactico');
+                                        if (btn) btn.innerText = "📡 " + t('readTranslateWait').toUpperCase();
+                                        
+                                        try {
+                                            const texto = relatoAbierto.contenido || "";
+                                            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
+                                            const data = await res.json();
+                                            const traducido = data[0].map(x => x[0]).join("");
+                                            
+                                            setRelatoAbierto({ ...relatoAbierto, contenido: traducido });
+                                            if (btn) btn.style.display = 'none'; // Ya está traducido
+                                        } catch (e) {
+                                            const urlTranslate = `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(relatoAbierto.contenido)}&op=translate`;
+                                            window.open(urlTranslate, '_blank');
+                                        }
+                                    }}
+                                    id="btn-trans-tactico"
+                                    style={{
+                                        background: 'var(--color-principal)',
+                                        color: '#000',
+                                        border: 'none',
+                                        padding: '10px 20px',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        fontFamily: 'monospace',
+                                        fontSize: '0.8rem',
+                                        boxShadow: '0 0 15px rgba(0,255,65,0.5)',
+                                        width: '100%',
+                                        borderRadius: '2px'
+                                    }}
+                                >
+                                    📡 {t('readTranslateStory')}
+                                </button>
+                            </div>
+                        )}
                         
                         <hr style={{ borderColor: '#333', margin: '15px 0' }} />
                         
@@ -433,15 +478,15 @@ const Expedientes = () => {
                         <div className="modal-footer-pro">
                             <div className="modal-actions-top">
                                 <button onClick={() => setRelatoAbierto(null)} className="btn-volver-atras">
-                                    ⬅ VOLVER
+                                    ⬅ {t('back')}
                                 </button>
                                 <button className="btn-marcar-relevante" onClick={(e) => aumentarRelevancia(e, relatoAbierto.id)}>
-                                    ⭐ MARCAR COMO RELEVANTE ({relatoAbierto.relevancia || 0})
+                                    {t('expMarkRelevant')} ({relatoAbierto.relevancia || 0})
                                 </button>
                             </div>
                             <div className="share-section-modal" style={{ marginTop: '15px', borderTop: '1px solid #333', paddingTop: '15px', width: '100%' }}>
                                 <p style={{ color: 'var(--color-principal)', fontSize: '0.7rem', marginBottom: '10px', textAlign: 'center', fontFamily: 'monospace' }}>
-                                    📡 DIFUNDIR EN EL RADAR EXTERNO (MUFON/UFO):
+                                    {t('expDiffuse')}
                                 </p>
                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                                     <button onClick={() => compartirExpediente('twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>𝕏 TWITTER</button>

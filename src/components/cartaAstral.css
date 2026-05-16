@@ -84,6 +84,42 @@
     box-shadow: 0 0 15px rgba(var(--rgb-principal), 0.2);
 }
 
+.date-selector-3col {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1.2fr;
+    gap: 10px;
+}
+
+.date-selector-3col select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 14px 10px;
+    font-family: inherit;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    cursor: pointer;
+    appearance: none; /* Quitar flecha nativa para estilo más búnker */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
+
+.date-selector-3col select:focus {
+    outline: none;
+    border-color: var(--color-principal);
+    background-color: rgba(var(--rgb-principal), 0.1);
+}
+
+.date-selector-3col select option {
+    background: #0a0f19;
+    color: white;
+}
+
 .input-with-btn {
     display: flex;
     gap: 12px;

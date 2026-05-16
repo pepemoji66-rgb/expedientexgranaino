@@ -18,6 +18,7 @@ import {
 import ControlMusica from './ControlMusica';
 import logoBunker from '../assets/logo_bunker.jpeg';
 import { ADMIN_EMAIL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 import './TopNavbar.css';
 
 // Componente blindado para el traductor para evitar re-renders innecesarios
@@ -52,26 +53,27 @@ const GoogleTranslator = memo(() => {
 
 const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     const location = useLocation();
+    const { language, toggleLanguage, t } = useLanguage();
 
     const menuItems = [
-        { path: "/", label: "INICIO", icon: <Home size={16} /> },
-        { path: "/galeria", label: "GALERÍA", icon: <Image size={16} /> },
-        { path: "/videos", label: "VÍDEOS", icon: <Video size={16} /> },
-        { path: "/noticias", label: "NOTICIAS", icon: <Newspaper size={16} /> },
-        { path: "/audios", label: "AUDIOS", icon: <Mic size={16} /> },
-        { path: "/expedientes", label: "EXPEDIENTES", icon: <FileText size={16} /> },
-        { path: "/lugares", label: "MAPA", icon: <Map size={16} /> },
+        { path: "/", label: t('navHome'), icon: <Home size={16} /> },
+        { path: "/galeria", label: t('navGallery'), icon: <Image size={16} /> },
+        { path: "/videos", label: t('navVideos'), icon: <Video size={16} /> },
+        { path: "/noticias", label: t('navNews'), icon: <Newspaper size={16} /> },
+        { path: "/audios", label: t('navAudios'), icon: <Mic size={16} /> },
+        { path: "/expedientes", label: t('navFiles'), icon: <FileText size={16} /> },
+        { path: "/lugares", label: t('navMap'), icon: <Map size={16} /> },
     ];
 
     if (userAuth) {
         menuItems.push(
-            { path: "/horoscopo", label: "HORÓSCOPO", icon: <Sparkles size={16} /> },
-            { path: "/tarot", label: "TAROT", icon: <Sparkles size={16} /> },
-            { path: "/carta-astral", label: "ASTRAL", icon: <Sparkles size={16} /> }
+            { path: "/horoscopo", label: t('navHoroscope'), icon: <Sparkles size={16} /> },
+            { path: "/tarot", label: t('navTarot'), icon: <Sparkles size={16} /> },
+            { path: "/carta-astral", label: t('navAstral'), icon: <Sparkles size={16} /> }
         );
     }
 
-    menuItems.push({ path: "/chat", label: "CHAT", icon: <MessageSquare size={16} /> });
+    menuItems.push({ path: "/chat", label: t('navChat'), icon: <MessageSquare size={16} /> });
 
     return (
         <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>
@@ -101,9 +103,22 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                 {/* TACTICAL TOOLS & USER AREA */}
                 <div className="top-navbar-actions">
                     <div className="tactical-tools">
-                        <div className="tool-item translator-tool skiptranslate">
-                            <Languages size={14} className="tool-icon" />
-                            <GoogleTranslator />
+                        <div className="language-selector-bunker skiptranslate">
+                            <button 
+                                onClick={() => language !== 'es' && toggleLanguage()} 
+                                className={`lang-text-btn ${language === 'es' ? 'active' : ''}`}
+                                title="Español"
+                            >
+                                ESP
+                            </button>
+                            <div className="lang-separator"></div>
+                            <button 
+                                onClick={() => language !== 'en' && toggleLanguage()} 
+                                className={`lang-text-btn ${language === 'en' ? 'active' : ''}`}
+                                title="English"
+                            >
+                                ENG
+                            </button>
                         </div>
                         <div className="tool-item music-tool">
                             <ControlMusica />
@@ -115,17 +130,17 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {(userAuth.rol === 'admin' || userAuth.email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase()) && (
                                     <Link to="/panel-mando" className="btn-access-tactical" style={{ borderColor: 'var(--color-principal)', color: 'var(--color-principal)', height: '32px', display: 'flex', alignItems: 'center' }}>
-                                        PANEL
+                                        {t('sysControlPanel').replace('⚡ ', '')}
                                     </Link>
                                 )}
-                                <Link to="/acceso" className="btn-access-tactical" style={{ height: '32px', display: 'flex', alignItems: 'center' }}>MI PERFIL</Link>
-                                <button onClick={cerrarSesion} className="btn-logout-mini" title="DESCONECTAR AGENTE">
+                                <Link to="/acceso" className="btn-access-tactical" style={{ height: '32px', display: 'flex', alignItems: 'center' }}>{t('navProfile')}</Link>
+                                <button onClick={cerrarSesion} className="btn-logout-mini" title={t('sysLogoutBtn')}>
                                     <LogOut size={14} />
-                                    <span className="desktop-only">SALIR</span>
+                                    <span className="desktop-only">{t('navLogout')}</span>
                                 </button>
                             </div>
                         ) : (
-                            <Link to="/acceso" className="btn-access-tactical">ACCESO</Link>
+                            <Link to="/acceso" className="btn-access-tactical">{t('navLogin')}</Link>
                         )}
                     </div>
 

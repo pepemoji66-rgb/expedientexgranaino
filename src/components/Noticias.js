@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Forms from './Forms';
+import { useLanguage } from '../context/LanguageContext';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './noticias.css';
 import API_BASE_URL from '../config';
 import NoticiasExternas from './NoticiasExternas';
 
 const Noticias = ({ userAuth }) => {
+    const { t } = useLanguage();
     // --- CONFIGURACIÓN DE SEÑAL MAESTRA ---
 
     const [noticias, setNoticias] = useState([]);
@@ -123,12 +125,12 @@ const Noticias = ({ userAuth }) => {
         try {
             // Enviamos propuesta al búnker (Sector Galería)
             await axios.post(`${API_BASE_URL}/api/galeria/proponer-noticia`, formData);
-            alert("📡 REPORTE ENVIADO AL BÚNKER. ESPERE VALIDACIÓN DEL ALTO MANDO.");
+            alert(t('newsReportSent'));
             setNuevaNoticia({ titulo: '', cuerpo: '', nivel_alerta: 'Bajo', ubicacion: '', latitud: null, longitud: null, fuente_url: '' });
             setImagen(null);
             obtenerNoticias();
         } catch (err) {
-            alert("❌ Transmisión interrumpida. Compruebe su conexión.");
+            alert(t('newsError'));
         }
     };
 
@@ -150,14 +152,14 @@ const Noticias = ({ userAuth }) => {
     if (cargando) return (
         <div className="cargando-bunker">
             <div className="radar-loader"></div>
-            <p>SINTONIZANDO FRECUENCIAS DEL SECTOR X...</p>
+            <p>{t('newsSystemScanning')}</p>
         </div>
     );
 
     return (
         <section className="noticias-page">
             <header className="header-noticias">
-                <h1 className="titulo-noticias">📡 TELETIPO DE ALERTAS GLOBALES (MUNDIAL)</h1>
+                <h1 className="titulo-noticias">{t('newsGlobalAlerts')}</h1>
                 <div className="linea-decorativa"></div>
             </header>
 
@@ -170,7 +172,7 @@ const Noticias = ({ userAuth }) => {
                                     src={getUrlImagen(item.imagen_url)}
                                     alt={item.titulo}
                                     className="noticia-miniatura"
-                                    onError={(e) => { e.target.src = "https://placehold.co/400x250/000/00ff41?text=ARCHIVO+SIN+IMAGEN"; }}
+                                    onError={(e) => { e.target.src = `https://placehold.co/400x250/000/00ff41?text=${t('newsNoImage')}`; }}
                                 />
                             </div>
                             <div className="noticia-contenido">
@@ -187,20 +189,20 @@ const Noticias = ({ userAuth }) => {
                 ) : (
                     <div className="no-noticias-bunker">
                         <div className="radar-buscando"></div>
-                        <p>SIN ALERTAS LOCALES ACTIVAS. RASTREANDO FRECUENCIAS SECUNDARIAS...</p>
+                        <p>{t('newsNoAlerts')}</p>
                     </div>
                 )}
             </div>
 
             {/* SECCIÓN DE INTELIGENCIA EXTERNA (PARA QUE NO SE VEA SOLO) */}
             <div className="inteligencia-externa-container">
-                <h2 className="titulo-seccion-secundaria">🌐 INTELIGENCIA EXTERNA (CANALES RECOMENDADOS)</h2>
+                <h2 className="titulo-seccion-secundaria">{t('newsExternalIntel')}</h2>
                 <div className="grid-inteligencia">
                     {inteligenciaExterna.map((link, idx) => (
                         <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="card-externa" style={{ borderColor: link.color }}>
                             <h4 style={{ color: link.color }}>{link.label || link.titulo}</h4>
                             <p>{link.desc}</p>
-                            <span className="link-arrow" style={{ color: link.color }}>ACCEDER ➔</span>
+                            <span className="link-arrow" style={{ color: link.color }}>{t('newsAccess')} ➔</span>
                         </a>
                     ))}
                 </div>
@@ -211,45 +213,45 @@ const Noticias = ({ userAuth }) => {
 
             {totalPaginas > 1 && (
                 <div className="paginacion-bunker">
-                    <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(paginaActual - 1); window.scrollTo(0, 0); }}>ATRÁS</button>
+                    <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(paginaActual - 1); window.scrollTo(0, 0); }}>{t('newsPrev')}</button>
                     <span className="pagi-info">{paginaActual} / {totalPaginas}</span>
-                    <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(paginaActual + 1); window.scrollTo(0, 0); }}>SIGUIENTE</button>
+                    <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(paginaActual + 1); window.scrollTo(0, 0); }}>{t('newsNext')}</button>
                 </div>
             )}
 
             {userAuth && (
                 <div className="contenedor-form-noticia">
-                    <Forms title="REPORTAR SUCESO" onSubmit={enviarPropuesta} onClear={() => { }}>
-                        <input type="text" placeholder="TITULAR DEL SUCESO" value={nuevaNoticia.titulo} onChange={e => setNuevaNoticia({ ...nuevaNoticia, titulo: e.target.value })} required />
+                    <Forms title={t('reportEvidence')} onSubmit={enviarPropuesta} onClear={() => { }}>
+                        <input type="text" placeholder={t('newsTitle')} value={nuevaNoticia.titulo} onChange={e => setNuevaNoticia({ ...nuevaNoticia, titulo: e.target.value })} required />
                         <div className="form-grupo-tactico">
-                            <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>📍 UBICACIÓN (BUSCADOR GPS):</label>
+                            <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>{t('newsLocation')}</label>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <input
                                     type="text"
-                                    placeholder="Ej: NASA, Area 51, Granada..."
+                                    placeholder={t('newsLocationPlaceholder')}
                                     value={nuevaNoticia.ubicacion}
                                     onChange={e => setNuevaNoticia({ ...nuevaNoticia, ubicacion: e.target.value })}
                                     required
                                 />
                                 <button type="button" onClick={() => buscarDireccion(nuevaNoticia.ubicacion)} style={{ background: 'var(--color-principal)', color: '#000', border: 'none', padding: '0 15px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                    {buscandoLoc ? '...' : 'BUSCAR'}
+                                    {buscandoLoc ? '...' : t('newsSearch')}
                                 </button>
                             </div>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
                             <div>
-                                <label style={{ color: 'var(--color-principal)', fontSize: '0.6rem' }}>LATITUD</label>
+                                <label style={{ color: 'var(--color-principal)', fontSize: '0.6rem' }}>{t('latLong')}</label>
                                 <input type="number" step="any" value={nuevaNoticia.latitud || ''} onChange={e => setNuevaNoticia({ ...nuevaNoticia, latitud: e.target.value })} />
                             </div>
                             <div>
-                                <label style={{ color: 'var(--color-principal)', fontSize: '0.6rem' }}>LONGITUD</label>
+                                <label style={{ color: 'var(--color-principal)', fontSize: '0.6rem' }}>{t('latLong')}</label>
                                 <input type="number" step="any" value={nuevaNoticia.longitud || ''} onChange={e => setNuevaNoticia({ ...nuevaNoticia, longitud: e.target.value })} />
                             </div>
                         </div>
 
                         <div style={{ marginTop: '15px' }}>
-                            <label style={{ color: '#00d4ff', fontSize: '0.7rem' }}>🌐 ENLACE A FUENTE (OPCIONAL):</label>
+                            <label style={{ color: '#00d4ff', fontSize: '0.7rem' }}>{t('newsSource')}</label>
                             <input
                                 type="url"
                                 placeholder="https://www.nasa.gov/..."
@@ -260,18 +262,21 @@ const Noticias = ({ userAuth }) => {
                         </div>
 
                         <div style={{ marginTop: '15px' }}>
-                            <label className="label-file">📷 ADJUNTAR EVIDENCIA VISUAL:</label>
+                            <label className="label-file">{t('newsVisual')}</label>
                             <input type="file" onChange={e => setImagen(e.target.files[0])} />
                         </div>
 
-                        <select value={nuevaNoticia.nivel_alerta} onChange={e => setNuevaNoticia({ ...nuevaNoticia, nivel_alerta: e.target.value })} style={{ marginTop: '15px' }}>
-                            <option value="Bajo">Nivel: BAJO</option>
-                            <option value="Medio">Nivel: MEDIO</option>
-                            <option value="Alto">Nivel: ALTO</option>
-                            <option value="CRÍTICO">Nivel: CRÍTICO</option>
-                        </select>
+                        <div style={{ marginTop: '15px' }}>
+                            <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem', display: 'block', marginBottom: '5px' }}>{t('newsLevel')}</label>
+                            <select value={nuevaNoticia.nivel_alerta} onChange={e => setNuevaNoticia({ ...nuevaNoticia, nivel_alerta: e.target.value })}>
+                                <option value="Bajo">Nivel: {t('newsLevelLow').toUpperCase()}</option>
+                                <option value="Medio">Nivel: {t('newsLevelMed').toUpperCase()}</option>
+                                <option value="Alto">Nivel: {t('newsLevelHigh').toUpperCase()}</option>
+                                <option value="CRÍTICO">Nivel: {t('newsLevelCrit').toUpperCase()}</option>
+                            </select>
+                        </div>
 
-                        <textarea placeholder="DESCRIBA LOS DETALLES DEL AVISTAMIENTO O SUCESO..." value={nuevaNoticia.cuerpo} onChange={e => setNuevaNoticia({ ...nuevaNoticia, cuerpo: e.target.value })} required style={{ marginTop: '15px' }} />
+                        <textarea placeholder={t('newsDesc')} value={nuevaNoticia.cuerpo} onChange={e => setNuevaNoticia({ ...nuevaNoticia, cuerpo: e.target.value })} required style={{ marginTop: '15px' }} />
                     </Forms>
                 </div>
             )}

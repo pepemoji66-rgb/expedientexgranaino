@@ -85,6 +85,12 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// --- LOG DE OPERACIONES ---
+app.use((req, res, next) => {
+    console.log(`📡 [${new Date().toLocaleTimeString()}] REQUERIMIENTO: ${req.method} ${req.url}`);
+    next();
+});
+
 // --- 5. CONFIGURACIÓN DE CARPETAS Y STORAGE ---
 const storageLocal = (folder) => multer.diskStorage({
     destination: (req, file, cb) => cb(null, folder),

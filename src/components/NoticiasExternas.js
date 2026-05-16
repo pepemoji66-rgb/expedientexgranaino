@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 import './noticias_externas.css';
 
 const NoticiasExternas = () => {
+    const { t } = useLanguage();
     const [noticias, setNoticias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(false);
@@ -42,9 +44,9 @@ const NoticiasExternas = () => {
             const diff = ahora - fecha;
             const horas = Math.floor(diff / (1000 * 60 * 60));
             
-            if (horas < 1) return 'Hace menos de 1 hora';
-            if (horas < 24) return `Hace ${horas}h`;
-            if (horas < 48) return 'Ayer';
+            if (horas < 1) return t('extLessHour');
+            if (horas < 24) return t('extHours').replace('{h}', horas);
+            if (horas < 48) return t('extYesterday');
             return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
         } catch {
             return '';
@@ -54,7 +56,7 @@ const NoticiasExternas = () => {
     if (cargando) return (
         <div className="radar-externo-widget cargando">
             <div className="radar-ext-loader"></div>
-            <span>Escaneando frecuencias internacionales...</span>
+            <span>{t('extScanning')}</span>
         </div>
     );
 
@@ -65,9 +67,9 @@ const NoticiasExternas = () => {
             <div className="radar-ext-header">
                 <div className="radar-ext-badge">
                     <span className="radar-ext-pulse">📡</span>
-                    <span className="radar-ext-label">RADAR DE INTELIGENCIA EXTERNA</span>
+                    <span className="radar-ext-label">{t('extRadarTitle')}</span>
                 </div>
-                <span className="radar-ext-count">{noticias.length} señales</span>
+                <span className="radar-ext-count">{noticias.length} {t('extSignals')}</span>
             </div>
 
             {/* FILTROS POR CATEGORÍA */}
@@ -117,7 +119,7 @@ const NoticiasExternas = () => {
                                 rel="noopener noreferrer"
                                 className="btn-ext-leer"
                             >
-                                LEER FUENTE ➔
+                                {t('extReadSource')} ➔
                             </a>
                         </div>
                         

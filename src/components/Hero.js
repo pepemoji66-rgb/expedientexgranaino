@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 import './Hero.css';
 
 // Importamos las imágenes para el carrusel
@@ -10,6 +11,7 @@ import imgEvidencias from '../assets/galeria_evidencias.png';
 import imgRelatos from '../assets/misterio_relatos.png';
 
 const Hero = ({ userAuth }) => {
+    const { t, toggleLanguage, language } = useLanguage();
     const [currentSlide, setCurrentSlide] = useState(0);
     const [ultimoExpediente, setUltimoExpediente] = useState(null);
     const [ultimaNoticia, setUltimaNoticia] = useState(null);
@@ -34,85 +36,102 @@ const Hero = ({ userAuth }) => {
         fetchUltimos();
     }, []);
 
-    const baseSlides = [
-        {
-            id: 0,
-            image: imgEspacio,
-            subtitle: "GLOBAL",
-            title: "EXPEDIENTEXGRANAINO",
-            tagline: "OBSERVER NETWORK",
-            infoTitle: "LA RED DE OBSERVADORES DE EXPEDIENTEXGRANAINO",
-            infoText: "Forma parte del próximo gran acontecimiento. Una red exclusiva para entusiastas de los OVNIS y la ufología técnica.",
-            highlight: "¡SOLO PARA MIEMBROS DEL BÚNKER!",
-            btnText: "Informar Avistamiento",
-            btnLink: "/expedientes"
-        },
-        {
-            id: 1,
-            image: imgEvidencias,
-            subtitle: "DIVISIÓN",
-            title: "MULTIMEDIA Y EVIDENCIAS",
-            tagline: "ARCHIVO CLASIFICADO",
-            infoTitle: "REPOSITORIO DE PRUEBAS GRÁFICAS",
-            infoText: "Explora nuestra galería de fotos y vídeos analizados por el mando central. Evidencias de lo inexplicable en alta resolución.",
-            highlight: "ACCESO TOTAL A ARCHIVOS DESCLASIFICADOS",
-            btnText: "Explorar Galería",
-            btnLink: "/galeria"
-        },
-        {
-            id: 2,
-            image: imgRelatos,
-            subtitle: "INTELIGENCIA",
-            title: "RELATOS Y MISTERIOS",
-            tagline: "HISTORIA OCULTA",
-            infoTitle: "EL ARCHIVO DEL INVESTIGADOR",
-            infoText: "Sumérgete en los relatos más impactantes y misterios históricos que desafían la lógica. La verdad está escrita en estas páginas.",
-            highlight: "COMPARTE TU EXPERIENCIA CON NOSOTROS",
-            btnText: "Leer Relatos",
-            btnLink: "/noticias"
-        },
-        {
-            id: 3,
-            image: imgEspacio,
-            subtitle: "ASCENSO TÁCTICO",
-            title: "SISTEMA DE RANGOS AGENTE",
-            tagline: "EVOLUCIÓN EN LA RED",
-            infoTitle: "JERARQUÍA DEL BÚNKER",
-            infoText: "Tu lealtad y actividad son monitorizadas. Sube de rango automáticamente: Agente > Cabo > Sargento > Teniente > Capitán. ¡Alcanza el estatus de élite!",
-            highlight: "MÁS VISITAS = MAYOR RANGO TÁCTICO",
-            btnText: "Ver Mi Perfil",
-            btnLink: "/acceso"
-        },
-        {
-            id: 4,
-            image: imgEspacio,
-            subtitle: "RECLUTAMIENTO",
-            title: "REGISTRO 100% ANÓNIMO",
-            tagline: "PROTEGEMOS TU IDENTIDAD",
-            infoTitle: "ÚNETE A LA RED GLOBAL SIN RASTRO",
-            infoText: "Hemos actualizado nuestros protocolos de seguridad. Ahora puedes darte de alta en el Búnker de ExpedienteXGranaino usando solo un Alias. Cero datos personales.",
-            highlight: "TU PRIVACIDAD ES NUESTRA PRIORIDAD MÁXIMA",
-            btnText: "Registrarse Ahora",
-            btnLink: "/acceso"
-        }
-    ];
 
-    const [slides, setSlides] = useState(baseSlides);
+
+    const getSlides = () => {
+        return [
+            {
+                id: 'bilingual',
+                image: imgEspacio,
+                subtitle: t('slideBilingualSubtitle'),
+                title: t('slideBilingualTitle'),
+                tagline: t('slideBilingualTagline'),
+                infoTitle: t('slideBilingualInfoTitle'),
+                infoText: t('slideBilingualInfoText'),
+                highlight: t('slideBilingualHighlight'),
+                btnText: t('slideBilingualBtn'),
+                btnLink: "#",
+                onClick: (e) => { e.preventDefault(); toggleLanguage(); }
+            },
+            {
+                id: 0,
+                image: imgEspacio,
+                subtitle: "GLOBAL",
+                title: "EXPEDIENTEXGRANAINO",
+                tagline: t('heroObserverNetwork'),
+                infoTitle: t('heroObserverTitle'),
+                infoText: t('heroObserverText'),
+                highlight: t('heroObserverHighlight'),
+                btnText: t('heroReport'),
+                btnLink: "/expedientes"
+            },
+            {
+                id: 1,
+                image: imgEvidencias,
+                subtitle: "DIVISIÓN",
+                title: t('heroGalleryTitle'),
+                tagline: "ARCHIVO CLASIFICADO",
+                infoTitle: t('heroGalleryTitle'),
+                infoText: t('heroGalleryDesc'),
+                highlight: "ACCESO TOTAL A ARCHIVOS DESCLASIFICADOS",
+                btnText: t('heroGalleryBtn'),
+                btnLink: "/galeria"
+            },
+            {
+                id: 2,
+                image: imgRelatos,
+                subtitle: "INTELIGENCIA",
+                title: t('heroStoriesTitle'),
+                tagline: "HISTORIA OCULTA",
+                infoTitle: t('heroStoriesTitle'),
+                infoText: t('heroStoriesDesc'),
+                highlight: "COMPARTE TU EXPERIENCIA CON NOSOTROS",
+                btnText: t('heroStoriesBtn'),
+                btnLink: "/noticias"
+            },
+            {
+                id: 3,
+                image: imgEspacio,
+                subtitle: "ASCENSO TÁCTICO",
+                title: t('heroRankTitle'),
+                tagline: "EVOLUCIÓN EN LA RED",
+                infoTitle: t('heroRankTitle'),
+                infoText: t('heroRankDesc'),
+                highlight: "MÁS VISITAS = MAYOR RANGO TÁCTICO",
+                btnText: t('heroRankBtn'),
+                btnLink: "/acceso"
+            },
+            {
+                id: 4,
+                image: imgEspacio,
+                subtitle: "RECLUTAMIENTO",
+                title: t('heroRegisterTitle'),
+                tagline: "PROTEGEMOS TU IDENTIDAD",
+                infoTitle: t('heroRegisterTitle'),
+                infoText: t('heroRegisterDesc'),
+                highlight: "TU PRIVACIDAD ES NUESTRA PRIORIDAD MÁXIMA",
+                btnText: t('heroRegisterBtn'),
+                btnLink: "/acceso"
+            }
+        ];
+    };
+
+    const [slides, setSlides] = useState(getSlides());
 
     useEffect(() => {
-        let nuevosSlides = [...baseSlides];
+        let nuevosSlides = getSlides();
         
         if (ultimaNoticia) {
             const slideNoticia = {
                 id: 'nueva-not',
                 image: ultimaNoticia.imagen_url || imgRelatos,
-                subtitle: "ULTIMA NOTICIA",
+                subtitle: t('heroLatestNews'),
                 title: (ultimaNoticia.titulo || 'NUEVA NOTICIA').toUpperCase(),
                 tagline: "ACTUALIDAD EN EL BÚNKER",
                 infoTitle: "NUEVO ARCHIVO DISPONIBLE",
                 infoText: "Se ha detectado nueva actividad en el sector de noticias. Accede al informe completo.",
                 highlight: "¡MANTENTE AL TANTO DE LOS ÚLTIMOS SUCESOS!",
-                btnText: "Leer Noticia",
+                btnText: t('heroNewsBtn'),
                 btnLink: "/noticias"
             };
             nuevosSlides = [slideNoticia, ...nuevosSlides];
@@ -124,20 +143,20 @@ const Hero = ({ userAuth }) => {
                 image: ultimoExpediente.imagen_url 
                     ? (ultimoExpediente.imagen_url.startsWith('http') ? ultimoExpediente.imagen_url : `${API_BASE_URL}/imagenes/${ultimoExpediente.imagen_url}`)
                     : imgEspacio,
-                subtitle: "ULTIMA HORA",
+                subtitle: t('heroLatestExp'),
                 title: (ultimoExpediente.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
                 tagline: "NUEVO EXPEDIENTE DESCLASIFICADO",
                 infoTitle: "ARCHIVO RECIENTE",
                 infoText: `El agente ${(ultimoExpediente.usuario_nombre || 'Desconocido').toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
                 highlight: "NUEVA EVIDENCIA DISPONIBLE EN EL ARCHIVO",
-                btnText: "Abrir Informe",
+                btnText: t('heroExpBtn'),
                 btnLink: "/expedientes"
             };
             nuevosSlides = [nuevoSlide, ...nuevosSlides];
         }
         
         setSlides(nuevosSlides);
-    }, [ultimoExpediente, ultimaNoticia]);
+    }, [ultimoExpediente, ultimaNoticia, language]); // Escuchamos language para refrescar textos
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -167,7 +186,7 @@ const Hero = ({ userAuth }) => {
                             to={(ultimaNoticia?.id || 0) > (ultimoExpediente?.id || 0) ? "/noticias" : "/expedientes"} 
                             className="btn-nuevo-archivo-blink"
                         >
-                            <span className="blink-dot"></span> NUEVO ARCHIVO
+                            <span className="blink-dot"></span> {t('heroNewFile')}
                         </Link>
                     )}
                     
@@ -192,16 +211,16 @@ const Hero = ({ userAuth }) => {
                     )}
 
                     <Link to="/expedientes" className="btn-mufon-red">
-                        REPORTAR EXPERIENCIA
+                        {t('heroNavReport')}
                     </Link>
                     <Link to="/acceso" className="btn-mufon-red">
-                        REGISTRO GRATUITO
+                        {t('heroNavReg')}
                     </Link>
                     <Link to="/galeria" className="btn-mufon-black">
-                        APORTAR MULTIMEDIA
+                        {t('heroNavMedia')}
                     </Link>
                     <Link to="/acceso" className="btn-mufon-outline">
-                        ACCESO AGENTES
+                        {t('heroNavAccess')}
                     </Link>
                 </div>
             </div>
@@ -220,9 +239,15 @@ const Hero = ({ userAuth }) => {
                         {activeSlide.infoText}<br />
                         <span className="highlight-mufon">{activeSlide.highlight}</span>
                     </p>
-                    <Link to={activeSlide.btnLink} className="btn-explore-mufon">
-                        {activeSlide.btnText}
-                    </Link>
+                    {activeSlide.onClick ? (
+                        <button onClick={activeSlide.onClick} className="btn-explore-mufon">
+                            {activeSlide.btnText}
+                        </button>
+                    ) : (
+                        <Link to={activeSlide.btnLink} className="btn-explore-mufon">
+                            {activeSlide.btnText}
+                        </Link>
+                    )}
                 </div>
             </div>
 

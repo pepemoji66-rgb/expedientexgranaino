@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import './lugares.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import API_BASE_URL from '../config';
 
 const crearIconoPulsante = (esResaltado = false) => new L.divIcon({
@@ -34,6 +35,7 @@ const ActualizadorMapa = ({ centro, idResaltado }) => {
 };
 
 const Lugares = () => {
+    const { t } = useLanguage();
     const location = useLocation();
     const navigate = useNavigate();
     const [puntos, setPuntos] = useState([]);
@@ -140,6 +142,7 @@ const Lugares = () => {
             else if (m.tipo === 'expediente') navigate(`/leer-historia/${m.id}`);
             else navigate('/galeria'); // Fallback
         };
+        const { t } = useLanguage();
 
         const goToNext = (e) => {
             e.stopPropagation();
@@ -165,7 +168,7 @@ const Lugares = () => {
             <div className="contenedor-img-popup" onClick={handleImageClick} style={{ cursor: 'pointer' }}>
                 <div className="overlay-ampliar-radar">
                     <Maximize2 size={20} />
-                    <span>AMPLIAR EN SECCIÓN</span>
+                    <span>{t('mapExpand')}</span>
                 </div>
                 {puntos.length > 1 && (
                     <div className="controles-radar-popup">
@@ -183,7 +186,7 @@ const Lugares = () => {
                     className="img-radar-popup"
                     onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = `https://placehold.co/200x120/000/00d4ff?text=ERROR+DE+CARGA`;
+                        e.target.src = `https://placehold.co/200x120/000/00d4ff?text=${t('mapError')}`;
                     }}
                 />
             </div>
@@ -223,18 +226,18 @@ const Lugares = () => {
                                     <div className="popup-bunker-v2">
                                         <div className="popup-header-tactico">
                                             <span className="status-online">
-                                                {m.tipo === 'expediente' ? '📜 RELATO' : 
-                                                 m.tipo === 'noticia' ? '📰 NOTICIA' : 
-                                                 m.tipo === 'lugar' ? '📍 LUGAR' : '📸 EVIDENCIA'}
+                                                {m.tipo === 'expediente' ? t('mapDossier') : 
+                                                 m.tipo === 'noticia' ? t('mapNews') : 
+                                                 m.tipo === 'lugar' ? t('mapPlace') : t('mapEvidence')}
                                             </span>
-                                            <h4 className="titulo-popup-neon">{m.titulo || m.nombre || 'EVIDENCIA'}</h4>
+                                            <h4 className="titulo-popup-neon">{m.titulo || m.nombre || t('mapEvidence').replace('📸 ', '')}</h4>
                                         </div>
                                         <div className="agente-tag">
-                                            {m.tipo === 'expediente' ? 'AUTOR' : 'AGENTE'}: {m.agente || m.usuario_nombre || 'SISTEMA'}
+                                            {m.tipo === 'expediente' ? t('mapAuthor') : t('mapAgent')}: {m.agente || m.usuario_nombre || t('mapSystem')}
                                         </div>
                                         {renderContenidoPopup(m, idx)}
                                         <div className="descripcion-popup-container">
-                                            <p className="descripcion-popup">{m.descripcion || m.contenido || "Sin descripción adicional en el archivo."}</p>
+                                            <p className="descripcion-popup">{m.descripcion || m.contenido || t('mapNoDesc')}</p>
                                         </div>
                                         <div className="popup-footer-tactico">
                                             COORD: {parseFloat(m.latitud).toFixed(4)}, {parseFloat(m.longitud).toFixed(4)}
@@ -250,12 +253,12 @@ const Lugares = () => {
             {/* BOTÓN DE LOCALIZACIÓN RÁPIDA (OPCIONAL) */}
             <div className="ui-radar-status">
                 <div className="status-item">
-                    <span className="label">OBJETIVOS:</span>
+                    <span className="label">{t('mapObjectives')}:</span>
                     <span className="value">{puntos.length}</span>
                 </div>
                 <div className="status-item">
-                    <span className="label">SISTEMA:</span>
-                    <span className="value pulse">ACTIVO</span>
+                    <span className="label">{t('mapSystemLabel')}:</span>
+                    <span className="value pulse">{t('mapActive')}</span>
                 </div>
             </div>
         </section>

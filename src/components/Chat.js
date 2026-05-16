@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import io from 'socket.io-client';
+import axios from 'axios';
+import { useLanguage } from '../context/LanguageContext';
 import './chat.css';
 import { API_BASE_URL, ADMIN_EMAIL } from '../config';
 
 const Chat = ({ usuarioActivo }) => {
+    const { t, language } = useLanguage();
     const [mensaje, setMensaje] = useState('');
     const [historial, setHistorial] = useState([]);
     const [conectado, setConectado] = useState(false);
@@ -117,12 +120,12 @@ const Chat = ({ usuarioActivo }) => {
             <div className="chat-header-tactico">
                 <div className="header-info">
                     <div className="dot-online" style={{ backgroundColor: conectado ? 'var(--color-principal)' : '#ff4444' }}></div>
-                    <span>FRECUENCIA: {esAdmin ? 'COMANDANCIA' : 'USUARIOS'} {conectado ? '(EN LÍNEA)' : '(DESCONECTADO)'}</span>
+                    <span>{t('chatFrequency')} {esAdmin ? 'COMANDANCIA' : 'USUARIOS'} {conectado ? t('chatOnline') : t('chatOffline')}</span>
                 </div>
 
                 {esAdmin && (
                     <button onClick={limpiarChatTotal} className="btn-reset-chat">
-                        🗑️ REINICIAR
+                        🗑️ {t('chatReset')}
                     </button>
                 )}
             </div>
@@ -149,9 +152,7 @@ const Chat = ({ usuarioActivo }) => {
                                         btn.innerText = '⌛';
 
                                         const getLang = () => {
-                                            const cookie = document.cookie.split('; ').find(row => row.startsWith('googtrans='));
-                                            if (cookie) return cookie.split('/').pop();
-                                            return 'es'; 
+                                            return language; 
                                         };
 
                                         try {
@@ -182,7 +183,7 @@ const Chat = ({ usuarioActivo }) => {
                     ))
                 ) : (
                     <div className="sin-mensajes">
-                        <p>📡 Buscando señales en la frecuencia...</p>
+                        <p>{t('chatSearching')}</p>
                     </div>
                 )}
             </div>
@@ -190,7 +191,7 @@ const Chat = ({ usuarioActivo }) => {
             <form className="chat-input-form" onSubmit={manejarEnvio}>
                 <input
                     type="text"
-                    placeholder={esAdmin ? "Escribir orden..." : "Escribir mensaje..."}
+                    placeholder={esAdmin ? t('chatWriteOrder') : t('chatWriteMessage')}
                     value={mensaje}
                     onChange={(e) => setMensaje(e.target.value)}
                 />
@@ -199,7 +200,7 @@ const Chat = ({ usuarioActivo }) => {
                         🔄
                     </button>
                     <button type="submit" className="btn-enviar-chat">
-                        {esAdmin ? 'EMITIR' : 'TRANSMITIR'}
+                        {esAdmin ? t('chatEmit') : t('chatTransmit')}
                     </button>
                 </div>
             </form>
