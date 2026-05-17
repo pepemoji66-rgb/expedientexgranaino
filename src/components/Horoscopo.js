@@ -7,30 +7,31 @@ import { useLanguage } from '../context/LanguageContext';
 import './horoscopo.css';
 
 const Horoscopo = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [predicciones, setPredicciones] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
 
     const signos = [
-        { nombre: 'Aries', icono: '♈' },
-        { nombre: 'Tauro', icono: '♉' },
-        { nombre: 'Géminis', icono: '♊' },
-        { nombre: 'Cáncer', icono: '♋' },
-        { nombre: 'Leo', icono: '♌' },
-        { nombre: 'Virgo', icono: '♍' },
-        { nombre: 'Libra', icono: '♎' },
-        { nombre: 'Escorpio', icono: '♏' },
-        { nombre: 'Sagitario', icono: '♐' },
-        { nombre: 'Capricornio', icono: '♑' },
-        { nombre: 'Acuario', icono: '♒' },
-        { nombre: 'Piscis', icono: '♓' }
+        { nombre: 'Aries',       nombreEn: 'Aries',       icono: '♈' },
+        { nombre: 'Tauro',       nombreEn: 'Taurus',      icono: '♉' },
+        { nombre: 'Géminis',     nombreEn: 'Gemini',      icono: '♊' },
+        { nombre: 'Cáncer',      nombreEn: 'Cancer',      icono: '♋' },
+        { nombre: 'Leo',         nombreEn: 'Leo',         icono: '♌' },
+        { nombre: 'Virgo',       nombreEn: 'Virgo',       icono: '♍' },
+        { nombre: 'Libra',       nombreEn: 'Libra',       icono: '♎' },
+        { nombre: 'Escorpio',    nombreEn: 'Scorpio',     icono: '♏' },
+        { nombre: 'Sagitario',   nombreEn: 'Sagittarius', icono: '♐' },
+        { nombre: 'Capricornio', nombreEn: 'Capricorn',   icono: '♑' },
+        { nombre: 'Acuario',     nombreEn: 'Aquarius',    icono: '♒' },
+        { nombre: 'Piscis',      nombreEn: 'Pisces',      icono: '♓' }
     ];
 
     useEffect(() => {
         const obtenerHoroscopo = async () => {
+            setCargando(true);
             try {
-                const res = await axios.get(`${API_BASE_URL}/api/horoscopo`);
+                const res = await axios.get(`${API_BASE_URL}/api/horoscopo?lang=${language}`);
                 setPredicciones(res.data);
                 setCargando(false);
             } catch (err) {
@@ -41,7 +42,7 @@ const Horoscopo = () => {
         };
 
         obtenerHoroscopo();
-    }, []);
+    }, [language]);
 
     if (cargando) return (
         <div className="horoscopo-container cargando">
@@ -74,13 +75,16 @@ const Horoscopo = () => {
 
             <div className="signos-grid">
                 {signos.map((s) => {
-                    const prediccion = predicciones.find(p => p.signo.toLowerCase() === s.nombre.toLowerCase())?.prediccion;
+                    const displayName = language === 'en' ? s.nombreEn : s.nombre;
+                    const prediccion = predicciones.find(
+                        p => p.signo.toLowerCase() === s.nombre.toLowerCase()
+                    )?.prediccion;
                     return (
                         <div key={s.nombre} className="signo-card">
                             <div className="signo-icono">{s.icono}</div>
-                            <h3>{s.nombre.toUpperCase()}</h3>
+                            <h3>{displayName.toUpperCase()}</h3>
                             <div className="divider"></div>
-                            <p>{prediccion || "Buscando en los archivos del destino..."}</p>
+                            <p>{prediccion || t('horoscopoLoading')}</p>
                         </div>
                     );
                 })}
