@@ -164,20 +164,20 @@ module.exports = (db, genAI) => {
             const results = await db.query("SELECT * FROM horoscopos WHERE fecha = ?", [today]);
 
             if (results.length >= 12) {
-                const todosValidos = results.every(r => {
-                    const pred = (r[dbField] || r.prediccion || '');
-                    return pred.length > 80;
-                });
+                const preds = results.map(r => (r[dbField] || r.prediccion || '').trim());
+                const prediccionesUnicas = new Set(preds.filter(p => p.length > 30));
+                const hayDuplicados = prediccionesUnicas.size < results.length * 0.7;
+                const todosLargos = preds.every(p => p.length > 80);
 
-                if (todosValidos) {
-                    console.log(`🔮 Horóscopo (${lang}) recuperado de la BD.`);
+                if (todosLargos && !hayDuplicados) {
+                    console.log(`🔮 Horóscopo (${lang}) recuperado de la BD (${prediccionesUnicas.size} únicos).`);
                     return res.json(results.map(r => ({
                         signo: r.signo,
                         prediccion: r[dbField] || r.prediccion
                     })));
                 }
-                // Datos incompletos → regenerar
-                console.log("⚠️ Horóscopo incompleto en DB. Regenerando...");
+                // Duplicados o datos inválidos → limpiar y regenerar
+                console.log(`⚠️ Horóscopo inválido en DB (únicos: ${prediccionesUnicas.size}/${results.length}). Regenerando...`);
                 await db.execute("DELETE FROM horoscopos WHERE fecha = ?", [today]);
             }
 
@@ -229,11 +229,12 @@ REQUIREMENTS:
                         const horoscopos = JSON.parse(jsonPuro);
 
                         if (horoscopos.length >= 12) {
+                            // Borrar los de hoy y guardar los nuevos con ambos idiomas
                             await db.execute("DELETE FROM horoscopos WHERE fecha = ?", [today]);
                             for (const h of horoscopos) {
                                 if (lang === 'en') {
                                     await db.execute(
-                                        "INSERT INTO horoscopos (signo, prediccion, prediccion_en, fecha) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE prediccion_en = VALUES(prediccion_en)",
+                                        "INSERT INTO horoscopos (signo, prediccion, prediccion_en, fecha) VALUES (?, ?, ?, ?)",
                                         [h.signo, h.prediccion, h.prediccion, today]
                                     );
                                 } else {

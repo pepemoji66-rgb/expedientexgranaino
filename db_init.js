@@ -182,8 +182,28 @@ module.exports = async (db) => {
             id INT AUTO_INCREMENT PRIMARY KEY, 
             signo VARCHAR(50), 
             prediccion TEXT, 
+            prediccion_en TEXT,
             fecha DATE
         )`);
+
+        // Parche: añadir prediccion_en si no existe
+        try {
+            await db.execute("ALTER TABLE horoscopos ADD COLUMN prediccion_en TEXT");
+            console.log("🩹 PARCHE APLICADO: Columna 'prediccion_en' añadida a horoscopos.");
+        } catch (e) { /* Ya existe */ }
+
+        // Limpieza preventiva: borrar hoy si hay predicciones duplicadas entre signos
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const rows = await db.query("SELECT prediccion FROM horoscopos WHERE fecha = ?", [today]);
+            if (rows.length >= 2) {
+                const set = new Set(rows.map(r => r.prediccion));
+                if (set.size < rows.length * 0.8) {
+                    await db.execute("DELETE FROM horoscopos WHERE fecha = ?", [today]);
+                    console.log("🧹 LIMPIEZA: Horóscopo duplicado detectado y borrado. Se regenerará.");
+                }
+            }
+        } catch (e) { }
 
         await db.execute(`CREATE TABLE IF NOT EXISTS efemerides (
             id INT AUTO_INCREMENT PRIMARY KEY,
