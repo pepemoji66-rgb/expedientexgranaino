@@ -87,13 +87,19 @@ const Audios = ({ userAuth }) => {
             <div className="lista-audios-limpia">
                 {Array.isArray(audios) && audios.length > 0 ? (
                     audios.map((aud) => {
-                        const audioSrc = aud.ruta && aud.ruta.startsWith('http')
-                            ? aud.ruta
-                            : `${API_BASE_URL}/audios/${aud.ruta}`;
+                        const rutaRaw = aud.ruta || '';
 
-                        const esIframe = aud.ruta && aud.ruta.includes('<iframe');
-                        const esYoutube = aud.ruta && (aud.ruta.includes('youtube.com') || aud.ruta.includes('youtu.be'));
-                        const esSoloEnlace = aud.ruta && aud.ruta.startsWith('http') && !esIframe && !esYoutube && !aud.ruta.toLowerCase().endsWith('.mp3') && !aud.ruta.toLowerCase().endsWith('.wav');
+                        // URL de Cloudinary u otro proveedor → es audio reproducible directamente
+                        const esCloudinary = rutaRaw.includes('cloudinary.com') || rutaRaw.includes('/video/upload/') || rutaRaw.includes('/audio/upload/');
+                        const esExtensionAudio = /\.(mp3|wav|ogg|m4a|aac|flac)($|\?)/i.test(rutaRaw);
+                        const esIframe = rutaRaw.includes('<iframe');
+                        const esYoutube = rutaRaw.includes('youtube.com') || rutaRaw.includes('youtu.be');
+                        const esAudioReproducible = esCloudinary || esExtensionAudio;
+                        const esSoloEnlace = rutaRaw.startsWith('http') && !esIframe && !esYoutube && !esAudioReproducible;
+
+                        const audioSrc = rutaRaw.startsWith('http')
+                            ? rutaRaw
+                            : `${API_BASE_URL}/uploads/audios/${rutaRaw}`;
 
                         return (
                             <div key={aud.id} className="audio-item-card">
@@ -118,15 +124,17 @@ const Audios = ({ userAuth }) => {
 
                                         {esIframe || esYoutube ? (
                                             <div style={{ width: '100%', overflow: 'hidden', borderRadius: '4px' }}>
-                                                {renderizarTextoConMedios(aud.ruta)}
+                                                {renderizarTextoConMedios(rutaRaw)}
                                             </div>
                                         ) : esSoloEnlace ? (
-                                            <a href={aud.ruta} target="_blank" rel="noreferrer" className="btn-enlace-externo">
+                                            <a href={rutaRaw} target="_blank" rel="noreferrer" className="btn-enlace-externo">
                                                 {t('audioExternal')}
                                             </a>
                                         ) : (
-                                            <audio controls crossOrigin="anonymous" className="reproductor-bunker">
+                                            <audio controls className="reproductor-bunker">
                                                 <source src={audioSrc} type="audio/mpeg" />
+                                                <source src={audioSrc} type="audio/wav" />
+                                                <source src={audioSrc} type="audio/ogg" />
                                                 {t('audioCompatible')}
                                             </audio>
                                         )}
