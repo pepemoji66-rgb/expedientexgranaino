@@ -169,6 +169,13 @@ app.get('/api/noticias/ultima', async (req, res) => {
     } catch (err) { res.status(200).json(null); }
 });
 
+app.get('/api/noticias/ultimas', async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM noticias ORDER BY id DESC LIMIT 3");
+        res.json(result);
+    } catch (err) { res.status(200).json([]); }
+});
+
 app.delete('/api/usuarios/:id', async (req, res) => {
     try {
         await db.execute("DELETE FROM usuarios WHERE id = ?", [req.params.id]);

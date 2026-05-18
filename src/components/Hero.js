@@ -13,21 +13,21 @@ import imgRelatos from '../assets/misterio_relatos.png';
 const Hero = ({ userAuth }) => {
     const { t, toggleLanguage, language } = useLanguage();
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [ultimoExpediente, setUltimoExpediente] = useState(null);
-    const [ultimaNoticia, setUltimaNoticia] = useState(null);
+    const [ultimosExpedientes, setUltimosExpedientes] = useState([]);
+    const [ultimasNoticias, setUltimasNoticias] = useState([]);
 
     useEffect(() => {
         const fetchUltimos = async () => {
             try {
-                // Rastrear último expediente
-                const resExp = await fetch(`${API_BASE_URL}/api/expedientes/ultimo`);
+                // Rastrear últimos expedientes
+                const resExp = await fetch(`${API_BASE_URL}/api/expedientes/ultimos`);
                 const dataExp = await resExp.json();
-                if (dataExp && dataExp.id) setUltimoExpediente(dataExp);
+                if (Array.isArray(dataExp)) setUltimosExpedientes(dataExp);
 
-                // Rastrear última noticia
-                const resNot = await fetch(`${API_BASE_URL}/api/noticias/ultima`);
+                // Rastrear últimas noticias
+                const resNot = await fetch(`${API_BASE_URL}/api/noticias/ultimas`);
                 const dataNot = await resNot.json();
-                if (dataNot && dataNot.id) setUltimaNoticia(dataNot);
+                if (Array.isArray(dataNot)) setUltimasNoticias(dataNot);
 
             } catch (err) {
                 console.error("Error al captar últimas actualizaciones para Hero:", err);
@@ -119,44 +119,56 @@ const Hero = ({ userAuth }) => {
     const [slides, setSlides] = useState(getSlides());
 
     useEffect(() => {
-        let nuevosSlides = getSlides();
-        
-        if (ultimaNoticia) {
-            const slideNoticia = {
-                id: 'nueva-not',
-                image: ultimaNoticia.imagen_url || imgRelatos,
-                subtitle: t('heroLatestNews'),
-                title: (ultimaNoticia.titulo || 'NUEVA NOTICIA').toUpperCase(),
-                tagline: "ACTUALIDAD EN EL BÚNKER",
-                infoTitle: "NUEVO ARCHIVO DISPONIBLE",
-                infoText: "Se ha detectado nueva actividad en el sector de noticias. Accede al informe completo.",
-                highlight: "¡MANTENTE AL TANTO DE LOS ÚLTIMOS SUCESOS!",
-                btnText: t('heroNewsBtn'),
-                btnLink: "/noticias"
-            };
-            nuevosSlides = [slideNoticia, ...nuevosSlides];
-        }
+        let alertasRecientes = [];
 
-        if (ultimoExpediente) {
-            const nuevoSlide = {
-                id: 'nuevo-exp',
-                image: ultimoExpediente.imagen_url 
-                    ? (ultimoExpediente.imagen_url.startsWith('http') ? ultimoExpediente.imagen_url : `${API_BASE_URL}/imagenes/${ultimoExpediente.imagen_url}`)
-                    : imgEspacio,
-                subtitle: t('heroLatestExp'),
-                title: (ultimoExpediente.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
-                tagline: "NUEVO EXPEDIENTE DESCLASIFICADO",
-                infoTitle: "ARCHIVO RECIENTE",
-                infoText: `El agente ${(ultimoExpediente.usuario_nombre || 'Desconocido').toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
-                highlight: "NUEVA EVIDENCIA DISPONIBLE EN EL ARCHIVO",
-                btnText: t('heroExpBtn'),
-                btnLink: "/expedientes"
-            };
-            nuevosSlides = [nuevoSlide, ...nuevosSlides];
-        }
+        // Mapear noticias
+        ultimasNoticias.forEach(noticia => {
+            alertasRecientes.push({
+                _timestamp: new Date(noticia.fecha || Date.now()).getTime(),
+                slideData: {
+                    id: `nueva-not-${noticia.id}`,
+                    image: noticia.imagen_url || imgRelatos,
+                    subtitle: t('heroLatestNews'),
+                    title: (noticia.titulo || 'NUEVA NOTICIA').toUpperCase(),
+                    tagline: "ACTUALIDAD EN EL BÚNKER",
+                    infoTitle: "NUEVO ARCHIVO DISPONIBLE",
+                    infoText: "Se ha detectado nueva actividad en el sector de noticias. Accede al informe completo.",
+                    highlight: "¡MANTENTE AL TANTO DE LOS ÚLTIMOS SUCESOS!",
+                    btnText: t('heroNewsBtn'),
+                    btnLink: "/noticias"
+                }
+            });
+        });
+
+        // Mapear expedientes (solo si tienen imagen si es posible, pero por defecto los mapeamos)
+        ultimosExpedientes.forEach(expediente => {
+            alertasRecientes.push({
+                _timestamp: new Date(expediente.fecha || Date.now()).getTime(),
+                slideData: {
+                    id: `nuevo-exp-${expediente.id}`,
+                    image: expediente.imagen_url 
+                        ? (expediente.imagen_url.startsWith('http') ? expediente.imagen_url : `${API_BASE_URL}/imagenes/${expediente.imagen_url}`)
+                        : imgEspacio,
+                    subtitle: t('heroLatestExp'),
+                    title: (expediente.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
+                    tagline: "NUEVO EXPEDIENTE DESCLASIFICADO",
+                    infoTitle: "ARCHIVO RECIENTE",
+                    infoText: `El agente ${(expediente.usuario_nombre || 'Desconocido').toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
+                    highlight: "NUEVA EVIDENCIA DISPONIBLE EN EL ARCHIVO",
+                    btnText: t('heroExpBtn'),
+                    btnLink: "/expedientes"
+                }
+            });
+        });
+
+        // Ordenar por más reciente y coger solo los 2 últimos para no saturar el slider
+        alertasRecientes.sort((a, b) => b._timestamp - a._timestamp);
+        const top2Alertas = alertasRecientes.slice(0, 2).map(item => item.slideData);
+
+        // Prepend a los slides originales
+        setSlides([...top2Alertas, ...getSlides()]);
         
-        setSlides(nuevosSlides);
-    }, [ultimoExpediente, ultimaNoticia, language]); // Escuchamos language para refrescar textos
+    }, [ultimosExpedientes, ultimasNoticias, language]); // Escuchamos language para refrescar textos
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -181,9 +193,9 @@ const Hero = ({ userAuth }) => {
             {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
             <div className="hero-top-actions">
                 <div className="action-buttons-group">
-                    {(ultimoExpediente || ultimaNoticia) && (
+                    {(ultimosExpedientes.length > 0 || ultimasNoticias.length > 0) && (
                         <Link 
-                            to={(ultimaNoticia?.id || 0) > (ultimoExpediente?.id || 0) ? "/noticias" : "/expedientes"} 
+                            to={(ultimasNoticias[0]?.id || 0) > (ultimosExpedientes[0]?.id || 0) ? "/noticias" : "/expedientes"} 
                             className="btn-nuevo-archivo-blink"
                         >
                             <span className="blink-dot"></span> {t('heroNewFile')}

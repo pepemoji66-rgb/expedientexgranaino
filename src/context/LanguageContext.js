@@ -98,6 +98,12 @@ const translations = {
         slideBilingualInfoText: "Hemos desclasificado nuestra interfaz para agentes internacionales. Ahora puedes navegar por todo el búnker en Español e Inglés.",
         slideBilingualHighlight: "¡CONECTA CON LA RED GLOBAL!",
         slideBilingualBtn: "CAMBIAR IDIOMA",
+        // Efemerides
+        efemeridesTitle: "HOY EN LA HISTORIA X",
+        efemeridesLoading: "Desclasificando archivos históricos...",
+        efemeridesExpand: "[+] DESCLASIFICAR INFORME COMPLETO",
+        efemeridesCollapse: "[-] CLASIFICAR ARCHIVO",
+        efemeridesFooter: "ARCHIVO DESCLASIFICADO — EXPEDIENTEXGRANAINO",
         // About Us
         aboutTitle: "📂 DOSSIER DEL PROYECTO",
         aboutWhatIs: "¿QUÉ ES EXPEDIENTEX GRANAINO?",
@@ -472,6 +478,12 @@ const translations = {
         slideBilingualInfoText: "We have declassified our interface for international agents. You can now navigate the entire bunker in Spanish and English.",
         slideBilingualHighlight: "CONNECT WITH THE GLOBAL NETWORK!",
         slideBilingualBtn: "SWITCH LANGUAGE",
+        // Efemerides
+        efemeridesTitle: "TODAY IN X-HISTORY",
+        efemeridesLoading: "Declassifying historical files...",
+        efemeridesExpand: "[+] DECLASSIFY FULL REPORT",
+        efemeridesCollapse: "[-] CLASSIFY ARCHIVE",
+        efemeridesFooter: "DECLASSIFIED ARCHIVE — EXPEDIENTEXGRANAINO",
         // About Us
         aboutTitle: "📂 PROJECT DOSSIER",
         aboutWhatIs: "WHAT IS EXPEDIENTEX GRANAINO?",

@@ -34,6 +34,17 @@ module.exports = (db, upload) => {
         }
     });
 
+    // Obtener los ÚLTIMOS expedientes publicados
+    router.get('/ultimos', async (req, res) => {
+        try {
+            const sql = "SELECT * FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo') ORDER BY fecha DESC LIMIT 3";
+            const results = await db.query(sql);
+            res.json(results);
+        } catch (err) {
+            res.status(500).json({ error: "Error al captar señales de expedientes." });
+        }
+    });
+
     // Incrementar Relevancia (Likes)
     router.post('/relevancia/:id', async (req, res) => {
         try {

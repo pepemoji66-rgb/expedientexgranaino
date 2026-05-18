@@ -25,7 +25,7 @@ const ActualizadorMapa = ({ centro, idResaltado }) => {
     const map = useMap();
     useEffect(() => {
         if (idResaltado && centro) {
-            map.flyTo(centro, 10, { animate: true, duration: 1.2 }); // Velocidad de vuelo equilibrada
+            map.flyTo(centro, 5, { animate: true, duration: 3.5 }); // Zoom satélite más amplio y vuelo más lento
         } else {
             map.setView(centro || [37.1773, -3.5986], 2); // Si falla, Granada por defecto
         }
