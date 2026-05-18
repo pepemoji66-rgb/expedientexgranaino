@@ -50,10 +50,19 @@ module.exports = (db, upload) => {
     // 2. REGISTRAR NUEVA PSICOFONÍA (POST)
     router.post('/subir-audio', upload.single('audio'), async (req, res) => {
             const { titulo, agente, latitud, longitud, ruta_externa, imagen_url } = req.body;
-            const ruta = req.file ? req.file.filename : (ruta_externa || null);
+            let ruta = req.file ? (req.file.path || req.file.filename) : (ruta_externa || null);
     
             if (!ruta) return res.status(400).json({ error: "No se ha detectado el archivo de audio o enlace." });
     
+            // Si es URL de Cloudinary y no tiene extensión, forzar .mp3
+            if (req.file && ruta.includes('cloudinary.com')) {
+                const path = require('path');
+                const ext = path.extname(req.file.originalname).toLowerCase() || '.mp3';
+                if (!ruta.includes('.mp3') && !ruta.includes('.wav') && !ruta.includes('.ogg')) {
+                    ruta = ruta + ext;
+                }
+            }
+
             try {
                 const userResult = await db.query("SELECT aprobado FROM usuarios WHERE nombre = ?", [agente]);
                 
@@ -62,6 +71,7 @@ module.exports = (db, upload) => {
                 }
     
                 const sql = "INSERT INTO audios (titulo, ruta, agente, latitud, longitud, aprobado, fecha_subida, imagen_url) VALUES (?, ?, ?, ?, ?, 0, NOW(), ?)";
+
                 await db.execute(sql, [titulo, ruta, agente, latitud || 0, longitud || 0, imagen_url || null]);
             
             res.json({ mensaje: "✅ Frecuencia captada y enviada a revisión.", archivo: ruta });

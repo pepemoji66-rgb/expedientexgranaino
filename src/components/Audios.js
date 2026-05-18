@@ -87,7 +87,13 @@ const Audios = ({ userAuth }) => {
             <div className="lista-audios-limpia">
                 {Array.isArray(audios) && audios.length > 0 ? (
                     audios.map((aud) => {
-                        const rutaRaw = aud.ruta || '';
+                        let rutaRaw = aud.ruta || '';
+
+                        // PARCHE PARA AUDIOS ANTIGUOS O SUBIDOS DESDE EL FRONTEND
+                        // Si solo se guardó el public_id (ej: expedientex_audios/123)
+                        if (!rutaRaw.startsWith('http') && rutaRaw.startsWith('expedientex_audios/')) {
+                            rutaRaw = `https://res.cloudinary.com/dx37worwx/video/upload/v1/${rutaRaw}`;
+                        }
 
                         // URL de Cloudinary u otro proveedor → es audio reproducible directamente
                         const esCloudinary = rutaRaw.includes('cloudinary.com') || rutaRaw.includes('/video/upload/') || rutaRaw.includes('/audio/upload/');
@@ -101,6 +107,7 @@ const Audios = ({ userAuth }) => {
                         let audioSrc = rutaRaw.startsWith('http')
                             ? rutaRaw
                             : `${API_BASE_URL}/uploads/audios/${rutaRaw}`;
+
 
                         if (esCloudinary && !esExtensionAudio) {
                             audioSrc = audioSrc + '.mp3';
