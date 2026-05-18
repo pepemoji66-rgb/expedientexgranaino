@@ -95,21 +95,25 @@ const Audios = ({ userAuth }) => {
                             rutaRaw = `https://res.cloudinary.com/dx37worwx/video/upload/v1/${rutaRaw}`;
                         }
 
-                        // URL de Cloudinary u otro proveedor → es audio reproducible directamente
+                        // Detección de tipos
                         const esCloudinary = rutaRaw.includes('cloudinary.com') || rutaRaw.includes('/video/upload/') || rutaRaw.includes('/audio/upload/');
+                        const esImagen = /\.(jpg|jpeg|png|gif|webp)($|\?)/i.test(rutaRaw) || rutaRaw.includes('/image/upload/');
                         const esExtensionAudio = /\.(mp3|wav|ogg|m4a|aac|flac)($|\?)/i.test(rutaRaw);
                         const esIframe = rutaRaw.includes('<iframe');
                         const esYoutube = rutaRaw.includes('youtube.com') || rutaRaw.includes('youtu.be');
-                        const esAudioReproducible = esCloudinary || esExtensionAudio;
+                        
+                        // Solo intentamos reproducir si es audio (o un Cloudinary que no sea una imagen)
+                        const esAudioReproducible = (esCloudinary && !esImagen) || esExtensionAudio;
+                        
+                        // Si es http y no es iframe, ni youtube, ni audio reproducible, es un simple enlace
                         const esSoloEnlace = rutaRaw.startsWith('http') && !esIframe && !esYoutube && !esAudioReproducible;
 
-                        // Normalizar URL: si es Cloudinary sin extensión, añadir .mp3
+                        // Normalizar URL: si es Cloudinary, no es imagen, y no tiene extensión, añadir .mp3
                         let audioSrc = rutaRaw.startsWith('http')
                             ? rutaRaw
                             : `${API_BASE_URL}/uploads/audios/${rutaRaw}`;
 
-
-                        if (esCloudinary && !esExtensionAudio) {
+                        if (esCloudinary && !esImagen && !esExtensionAudio) {
                             audioSrc = audioSrc + '.mp3';
                         }
 

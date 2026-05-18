@@ -10,7 +10,8 @@ async function run() {
         database: process.env.DB_NAME,
         ssl: { rejectUnauthorized: false }
     });
-    const [rows] = await db.query("SELECT id, titulo, ruta, imagen_url FROM audios ORDER BY id DESC LIMIT 5");
+    const [rows] = await db.query("SELECT id, titulo, ruta, imagen_url FROM audios ORDER BY id DESC");
+
     console.log(JSON.stringify(rows, null, 2));
     await db.end();
 }
