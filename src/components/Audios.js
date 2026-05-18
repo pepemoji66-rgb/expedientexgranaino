@@ -97,9 +97,15 @@ const Audios = ({ userAuth }) => {
                         const esAudioReproducible = esCloudinary || esExtensionAudio;
                         const esSoloEnlace = rutaRaw.startsWith('http') && !esIframe && !esYoutube && !esAudioReproducible;
 
-                        const audioSrc = rutaRaw.startsWith('http')
+                        // Normalizar URL: si es Cloudinary sin extensión, añadir .mp3
+                        let audioSrc = rutaRaw.startsWith('http')
                             ? rutaRaw
                             : `${API_BASE_URL}/uploads/audios/${rutaRaw}`;
+
+                        if (esCloudinary && !esExtensionAudio) {
+                            audioSrc = audioSrc + '.mp3';
+                        }
+
 
                         return (
                             <div key={aud.id} className="audio-item-card">

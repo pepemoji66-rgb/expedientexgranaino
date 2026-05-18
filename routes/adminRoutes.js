@@ -26,11 +26,12 @@ module.exports = (db) => {
 
   const storageCloud = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
+    params: async (req, file) => ({
         folder: 'admin_uploads',
-        resource_type: 'auto',
-        public_id: (req, file) => `${Date.now()}-${file.originalname.split('.')[0]}`
-    }
+        resource_type: file.mimetype.includes('audio') ? 'video' : 'auto',
+        public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
+        format: file.mimetype.includes('audio') ? 'mp3' : undefined
+    })
   });
 
   const upload = multer({ 
@@ -47,7 +48,16 @@ module.exports = (db) => {
     }
 
     // Usamos path (URL completa de Cloudinary) o filename (nombre local) o url externa
-    const nombreArchivo = req.file ? (req.file.path || req.file.filename) : (url_externa || null);
+    let nombreArchivo = req.file ? (req.file.path || req.file.filename) : (url_externa || null);
+
+    // PARCHE CLOUDINARY: para audios, si la URL no tiene extensión, añadirla
+    // Cloudinary devuelve URLs sin .mp3 para archivos de audio, el browser no puede reproducirlos
+    if (req.file && nombreArchivo && nombreArchivo.includes('cloudinary.com') && tipo === 'audios') {
+        const ext = path.extname(req.file.originalname).toLowerCase() || '.mp3';
+        if (!nombreArchivo.includes('.mp3') && !nombreArchivo.includes('.wav') && !nombreArchivo.includes('.ogg')) {
+            nombreArchivo = nombreArchivo + ext;
+        }
+    }
 
     // Mapeo inteligente de columnas según tu DB de Aiven
     let sql = "";
