@@ -499,3 +499,82 @@ input, textarea, select {
 .blink {
   animation: blink 2s infinite;
 }
+
+/* =============================================
+   BLOQUES SEO - INDEXABLES POR BOTS
+   Visibles pero integrados en la estética del búnker
+   ============================================= */
+.seo-bunker-block {
+    max-width: 900px;
+    margin: 40px auto 20px auto;
+    padding: 30px 35px;
+    background: rgba(0, 212, 255, 0.02);
+    border: 1px solid rgba(0, 212, 255, 0.08);
+    border-left: 3px solid rgba(0, 212, 255, 0.2);
+    font-family: 'Courier New', Courier, monospace;
+    color: rgba(160, 180, 190, 0.55);
+    font-size: 0.82rem;
+    line-height: 1.75;
+    letter-spacing: 0.3px;
+}
+
+.seo-bunker-title {
+    font-size: 0.7rem !important;
+    letter-spacing: 3px !important;
+    text-transform: uppercase;
+    color: rgba(0, 212, 255, 0.25) !important;
+    text-shadow: none !important;
+    margin-bottom: 14px !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.06);
+    padding-bottom: 8px;
+}
+
+.seo-bunker-block p {
+    margin-bottom: 12px;
+    color: rgba(140, 160, 170, 0.5);
+}
+
+.seo-bunker-block strong {
+    color: rgba(0, 212, 255, 0.4);
+    font-weight: 700;
+}
+
+/* Variante para la sección Hero (sobre fondo de imagen) */
+.hero-global-mufon .seo-bunker-block {
+    position: relative;
+    z-index: 5;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    border-top: 1px solid rgba(0, 212, 255, 0.06);
+    border-left: none;
+    padding: 20px 10%;
+}
+
+/* Variante chat: fuera del contenedor con overflow */
+.seo-chat-block {
+    width: 100%;
+    max-width: 600px;
+    margin: 10px auto 0 auto;
+    border-left: 3px solid rgba(0, 212, 255, 0.15);
+}
+
+/* Variante radio */
+.seo-radio-block {
+    width: 100%;
+    max-width: 1400px;
+}
+
+@media (max-width: 768px) {
+    .seo-bunker-block {
+        padding: 20px;
+        font-size: 0.75rem;
+        margin: 20px auto;
+    }
+    .hero-global-mufon .seo-bunker-block {
+        padding: 20px 5%;
+    }
+}

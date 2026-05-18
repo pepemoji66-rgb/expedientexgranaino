@@ -441,6 +441,144 @@ io.on('connection', (socket) => {
     });
 });
 
+// ==============================================
+// PRE-RENDER SSR PARA BOTS (AdSense / Googlebot)
+// Inyecta contenido HTML rico antes de servir el SPA
+// ==============================================
+
+const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo) => {
+    // Reemplazamos el title genérico por uno específico de página
+    html = html.replace(
+        /<title>[^<]*<\/title>/,
+        `<title>${titulo}</title>`
+    );
+
+    // Inyectamos meta description
+    html = html.replace(
+        '</head>',
+        `<meta name="description" content="${descripcion}" />
+<meta name="keywords" content="OVNI Granada, fenómenos paranormales, ufología Andalucía, avistamientos UFO, psicofonías, misterio, investigación paranormal, Expediente X" />
+<meta property="og:title" content="${titulo}" />
+<meta property="og:description" content="${descripcion}" />
+</head>`
+    );
+
+    // Inyectamos el bloque de contenido estático ANTES del div#root
+    // para que el bot lo vea aunque no ejecute JavaScript
+    html = html.replace(
+        '<div id="root"></div>',
+        `<div id="root"></div>
+<noscript id="seo-static-content">
+${contenidoSeo}
+</noscript>`
+    );
+
+    return html;
+};
+
+// Página de Inicio (/) - SEO enriquecido
+app.get('/', (req, res) => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) return res.sendFile(indexPath);
+
+        const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">EXPEDIENTE X GRANAÍNO — Investigación OVNI y Fenómenos Paranormales en Granada</h1>
+    <p><strong>Expediente X Granaíno</strong> es la plataforma líder de investigación ufológica y fenómenos paranormales del sur de España.
+    Desde nuestro búnker digital monitorizamos en <strong>tiempo real alertas OVNI</strong>, avistamientos aéreos no identificados,
+    crónicas del misterio y eventos inexplicables que ocurren en la provincia de Granada y su área de influencia.
+    Nuestros agentes sobre el terreno documentan cada caso con coordenadas GPS, fotografías de evidencia y relatos detallados
+    para construir el mayor archivo de <strong>casos históricos en Granada</strong> jamás compilado por una red civil de investigadores.</p>
+    <p>La red de observadores analiza constantemente el espacio aéreo, las anomalías electromagnéticas
+    y los fenómenos de energía anómala registrados en Sierra Nevada, la Vega de Granada, la Costa Tropical y la comarca de Guadix.
+    Cada expediente clasificado recibe una valoración de relevancia táctica por parte de la comunidad,
+    asegurando que los <strong>fenómenos paranormales</strong> más significativos queden debidamente registrados.
+    Únete a nuestra red y contribuye con tus propios avistamientos, fotografías y testimonios anónimos.</p>
+    <p>Explora nuestra galería de evidencias clasificadas, escucha las frecuencias de radio del búnker donde se registran
+    <strong>psicofonías</strong> y comunicaciones anómalas, y consulta nuestros expedientes históricos sobre
+    los casos más relevantes de <strong>ufología en Andalucía</strong>. La verdad está ahí fuera, y nosotros la documentamos.
+    Alertas OVNI en tiempo real, análisis de ondas paranormales, dossiers sobre lugares de poder en Granada y
+    crónicas del misterio que desafían cualquier explicación convencional. Bienvenido al archivo más oscuro de la red.</p>
+</article>`;
+
+        const pagina = inyectarContenidoSEO(
+            html,
+            'Expediente X Granaíno | Investigación OVNI y Fenómenos Paranormales en Granada',
+            'La plataforma de investigación ufológica más completa del sur de España. Alertas OVNI en tiempo real, psicofonías, casos históricos en Granada y crónicas del misterio.',
+            contenidoSeo
+        );
+        res.send(pagina);
+    });
+});
+
+// Sección de Audios/Radio (/audios) - SEO enriquecido
+app.get('/audios', (req, res) => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) return res.sendFile(indexPath);
+
+        const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">Frecuencia de Radio del Búnker — Alertas OVNI, Psicofonías y Monitorización de Ondas</h1>
+    <p>La sección de <strong>Radio del Búnker Expediente X Granaíno</strong> es una frecuencia de audio exclusiva donde nuestra red
+    de investigadores transmite y archiva grabaciones de campo obtenidas durante operaciones de monitoreo de fenómenos anómalos.
+    Aquí encontrarás <strong>alertas de radio en tiempo real</strong> sobre avistamientos OVNI, actividad paranormal detectada
+    en localizaciones de Granada y comunicaciones de emergencia entre agentes sobre el terreno.
+    Cada archivo de audio está geolocalizado y catalogado con las coordenadas exactas del punto de captura.</p>
+    <p>Entre los registros disponibles se incluyen <strong>psicofonías</strong> capturadas en lugares con alta actividad paranormal,
+    testimonios directos de testigos de avistamientos en Sierra Nevada y la Costa Tropical de Granada,
+    debates tácticos entre investigadores sobre la naturaleza de las anomalías detectadas,
+    y transmisiones de <strong>monitoreo de ondas electromagnéticas</strong> en zonas de poder identificadas por el equipo.
+    La importancia de la <strong>monitorización de ondas paranormales</strong> radica en su capacidad para detectar patrones
+    de actividad que preceden a los avistamientos masivos, dando a los investigadores una ventaja táctica fundamental.</p>
+</article>`;
+
+        const pagina = inyectarContenidoSEO(
+            html,
+            'Radio del Búnker | Psicofonías y Alertas OVNI — Expediente X Granaíno',
+            'Escucha psicofonías, alertas OVNI en tiempo real y debates entre investigadores en la frecuencia de radio del Búnker Expediente X Granaíno.',
+            contenidoSeo
+        );
+        res.send(pagina);
+    });
+});
+
+// Sección de Chat (/chat) - SEO enriquecido
+app.get('/chat', (req, res) => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) return res.sendFile(indexPath);
+
+        const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">Sala de Comunicaciones en Tiempo Real — Búnker Expediente X Granaíno</h1>
+    <p>El <strong>canal de chat del Búnker Expediente X Granaíno</strong> es la sala de comunicaciones tácticas en tiempo real
+    donde los investigadores y agentes registrados intercambian información sobre
+    <strong>avistamientos OVNI</strong>, fenómenos paranormales y anomalías detectadas en Granada y sus alrededores.
+    La frecuencia permanece activa las 24 horas, permitiendo que la comunidad reaccione de forma inmediata
+    ante cualquier alerta de campo transmitida por los agentes sobre el terreno.
+    Los mensajes son monitorizados y archivados para su análisis posterior como parte del expediente colectivo.</p>
+    <p>Esta sala de debate es el corazón operativo de la red: aquí se coordinan las investigaciones de
+    <strong>ufología en Andalucía</strong>, se comentan en directo los casos más recientes de
+    <strong>crónicas del misterio</strong> publicados en el archivo, y se comparten coordenadas y evidencias
+    entre los miembros de la comunidad. El sistema de traducción integrado con Inteligencia Artificial
+    permite que investigadores internacionales participen sin barreras idiomáticas,
+    convirtiendo este canal en un punto de encuentro global para la investigación de
+    <strong>fenómenos paranormales y casos históricos</strong> de la provincia de Granada.</p>
+</article>`;
+
+        const pagina = inyectarContenidoSEO(
+            html,
+            'Chat Táctico | Sala de Comunicaciones OVNI — Expediente X Granaíno',
+            'Canal de comunicaciones en tiempo real para investigadores de fenómenos paranormales en Granada. Debate sobre avistamientos OVNI, psicofonías y anomalías.',
+            contenidoSeo
+        );
+        res.send(pagina);
+    });
+});
+
+// Ruta de captura general: el resto de páginas del SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });

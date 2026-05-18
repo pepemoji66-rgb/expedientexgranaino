@@ -142,6 +142,27 @@ const Audios = ({ userAuth }) => {
                 )}
             </div>
 
+            {/* BLOQUE SEO FRECUENCIA DE RADIO - INDEXABLE POR BOTS */}
+            <div className="seo-bunker-block seo-radio-block" aria-label="Frecuencia de Radio del Búnker">
+                <h2 className="seo-bunker-title">Frecuencia de Radio del Búnker: Alertas y Psicofonías</h2>
+                <p>
+                    La sección de <strong>Radio del Búnker Expediente X Granaíno</strong> es una frecuencia de audio exclusiva donde nuestra red
+                    de investigadores transmite y archiva grabaciones de campo obtenidas durante operaciones de monitoreo de fenómenos anómalos.
+                    Aquí encontrarás <strong>alertas de radio en tiempo real</strong> sobre avistamientos OVNI, actividad paranormal detectada
+                    en localizaciones de Granada y comunicaciones de emergencia entre agentes sobre el terreno.
+                    Cada archivo de audio está geolocalizado y catalogado con las coordenadas exactas del punto de captura.
+                </p>
+                <p>
+                    Entre los registros disponibles se incluyen <strong>psicofonías</strong> capturadas en lugares con alta actividad paranormal,
+                    testimonios directos de testigos de avistamientos en Sierra Nevada y la Costa Tropical de Granada,
+                    debates tácticos entre investigadores sobre la naturaleza de las anomalías detectadas,
+                    y transmisiones de <strong>monitoreo de ondas electromagnéticas</strong> en zonas de poder identificadas por el equipo.
+                    La importancia de la <strong>monitorización de ondas paranormales</strong> radica en su capacidad para detectar patrones
+                    de actividad que preceden a los avistamientos masivos, dando a los investigadores una ventaja táctica fundamental.
+                    Sube tus propias grabaciones y contribuye al archivo sonoro más completo de fenómenología paranormal de Andalucía.
+                </p>
+            </div>
+
             <div style={{ height: '50px' }}></div>
 
             {userAuth && (

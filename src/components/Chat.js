@@ -116,96 +116,123 @@ const Chat = ({ usuarioActivo }) => {
     };
 
     return (
-        <div className="chat-container-root">
-            <div className="chat-header-tactico">
-                <div className="header-info">
-                    <div className="dot-online" style={{ backgroundColor: conectado ? 'var(--color-principal)' : '#ff4444' }}></div>
-                    <span>{t('chatFrequency')} {esAdmin ? 'COMANDANCIA' : 'USUARIOS'} {conectado ? t('chatOnline') : t('chatOffline')}</span>
-                </div>
+        <div className="chat-page-wrapper" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 20px 40px 20px' }}>
 
-                {esAdmin && (
-                    <button onClick={limpiarChatTotal} className="btn-reset-chat">
-                        🗑️ {t('chatReset')}
-                    </button>
-                )}
+            {/* BLOQUE SEO SALA DE COMUNICACIONES - INDEXABLE POR BOTS */}
+            <div className="seo-bunker-block seo-chat-block" aria-label="Sala de comunicaciones del Búnker">
+                <h2 className="seo-bunker-title">Sala de Comunicaciones en Tiempo Real — Búnker Expediente X</h2>
+                <p>
+                    El <strong>canal de chat del Búnker Expediente X Granaíno</strong> es la sala de comunicaciones tácticas en tiempo real
+                    donde los investigadores y agentes registrados de nuestra red intercambian información sobre
+                    <strong>avistamientos OVNI</strong>, fenómenos paranormales y anomalías detectadas en Granada y sus alrededores.
+                    La frecuencia permanece activa las 24 horas, permitiendo que la comunidad reaccione de forma inmediata
+                    ante cualquier alerta de campo transmitida por los agentes sobre el terreno.
+                    Los mensajes son monitorizados y archivados para su análisis posterior como parte del expediente colectivo.
+                </p>
+                <p>
+                    Esta sala de debate es el corazón operativo de la red: aquí se coordinan las investigaciones de
+                    <strong>ufología en Andalucía</strong>, se comentan en directo los casos más recientes de
+                    <strong>crónicas del misterio</strong> publicados en el archivo, y se comparten coordenadas y evidencias
+                    entre los miembros de la comunidad. El sistema de traducción integrado con Inteligencia Artificial
+                    permite que investigadores internacionales participen en el debate sin barreras idiomáticas,
+                    convirtiendo este canal en un punto de encuentro global para la investigación de
+                    <strong>fenómenos paranormales y casos históricos</strong> de la provincia de Granada.
+                    Regístrate para transmitir. La verdad necesita voces.
+                </p>
             </div>
 
-            <div className="chat-messages-area" ref={scrollRef}>
-                {Array.isArray(historial) && historial.length > 0 ? (
-                    historial.map((m, idx) => (
-                        <div key={m.id || idx} className={`mensaje-wrapper ${m.nombre_usuario === usuarioActivo?.nombre ? 'propio' : 'ajeno'} ${m.rol_usuario === 'admin' ? 'es-admin' : ''}`}>
-                            <div className="mensaje-burbuja">
-                                <div className="mensaje-info">
-                                    <span className="mensaje-autor">
-                                        {m.rol_usuario === 'admin' ? '⭐ ' : ''}{m.nombre_usuario}
-                                    </span>
-                                    <span className="mensaje-hora">
-                                        {m.fecha ? new Date(m.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                                    </span>
-                                </div>
-                                <p className="mensaje-texto">{m.mensaje}</p>
-                                <button 
-                                    className="btn-descifrar-chat" 
-                                    onClick={async (e) => {
-                                        const btn = e.currentTarget;
-                                        const originalText = m.mensaje;
-                                        btn.innerText = '⌛';
-
-                                        const getLang = () => {
-                                            return language; 
-                                        };
-
-                                        try {
-                                            const res = await axios.post(`${API_BASE_URL}/api/traducir-tactico`, { 
-                                                texto: originalText,
-                                                idioma: getLang()
-                                            });
-                                            const burbuja = btn.closest('.mensaje-burbuja');
-                                            let tradBox = burbuja.querySelector('.traduccion-chat');
-                                            if (!tradBox) {
-                                                tradBox = document.createElement('div');
-                                                tradBox.className = 'traduccion-chat fade-in';
-                                                burbuja.appendChild(tradBox);
-                                            }
-                                            tradBox.innerHTML = `🤖 [${getLang().toUpperCase()}]: ${res.data.respuesta}`;
-                                            btn.style.display = 'none';
-                                        } catch {
-                                            btn.innerText = '❌';
-                                        }
-
-                                    }}
-                                >
-                                    🤖
-                                </button>
-
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <div className="sin-mensajes">
-                        <p>{t('chatSearching')}</p>
+            <div className="chat-container-root">
+                <div className="chat-header-tactico">
+                    <div className="header-info">
+                        <div className="dot-online" style={{ backgroundColor: conectado ? 'var(--color-principal)' : '#ff4444' }}></div>
+                        <span>{t('chatFrequency')} {esAdmin ? 'COMANDANCIA' : 'USUARIOS'} {conectado ? t('chatOnline') : t('chatOffline')}</span>
                     </div>
-                )}
-            </div>
 
-            <form className="chat-input-form" onSubmit={manejarEnvio}>
-                <input
-                    type="text"
-                    placeholder={esAdmin ? t('chatWriteOrder') : t('chatWriteMessage')}
-                    value={mensaje}
-                    onChange={(e) => setMensaje(e.target.value)}
-                />
-                <div className="grupo-botones-chat">
-                    <button type="button" className="btn-refrescar-chat" onClick={cargarHistorial} title="Refrescar señal">
-                        🔄
-                    </button>
-                    <button type="submit" className="btn-enviar-chat">
-                        {esAdmin ? t('chatEmit') : t('chatTransmit')}
-                    </button>
+                    {esAdmin && (
+                        <button onClick={limpiarChatTotal} className="btn-reset-chat">
+                            🗑️ {t('chatReset')}
+                        </button>
+                    )}
                 </div>
-            </form>
+
+                <div className="chat-messages-area" ref={scrollRef}>
+                    {Array.isArray(historial) && historial.length > 0 ? (
+                        historial.map((m, idx) => (
+                            <div key={m.id || idx} className={`mensaje-wrapper ${m.nombre_usuario === usuarioActivo?.nombre ? 'propio' : 'ajeno'} ${m.rol_usuario === 'admin' ? 'es-admin' : ''}`}>
+                                <div className="mensaje-burbuja">
+                                    <div className="mensaje-info">
+                                        <span className="mensaje-autor">
+                                            {m.rol_usuario === 'admin' ? '⭐ ' : ''}{m.nombre_usuario}
+                                        </span>
+                                        <span className="mensaje-hora">
+                                            {m.fecha ? new Date(m.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                                        </span>
+                                    </div>
+                                    <p className="mensaje-texto">{m.mensaje}</p>
+                                    <button 
+                                        className="btn-descifrar-chat" 
+                                        onClick={async (e) => {
+                                            const btn = e.currentTarget;
+                                            const originalText = m.mensaje;
+                                            btn.innerText = '⌛';
+
+                                            const getLang = () => {
+                                                return language; 
+                                            };
+
+                                            try {
+                                                const res = await axios.post(`${API_BASE_URL}/api/traducir-tactico`, { 
+                                                    texto: originalText,
+                                                    idioma: getLang()
+                                                });
+                                                const burbuja = btn.closest('.mensaje-burbuja');
+                                                let tradBox = burbuja.querySelector('.traduccion-chat');
+                                                if (!tradBox) {
+                                                    tradBox = document.createElement('div');
+                                                    tradBox.className = 'traduccion-chat fade-in';
+                                                    burbuja.appendChild(tradBox);
+                                                }
+                                                tradBox.innerHTML = `🤖 [${getLang().toUpperCase()}]: ${res.data.respuesta}`;
+                                                btn.style.display = 'none';
+                                            } catch {
+                                                btn.innerText = '❌';
+                                            }
+
+                                        }}
+                                    >
+                                        🤖
+                                    </button>
+
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="sin-mensajes">
+                            <p>{t('chatSearching')}</p>
+                        </div>
+                    )}
+                </div>
+
+                <form className="chat-input-form" onSubmit={manejarEnvio}>
+                    <input
+                        type="text"
+                        placeholder={esAdmin ? t('chatWriteOrder') : t('chatWriteMessage')}
+                        value={mensaje}
+                        onChange={(e) => setMensaje(e.target.value)}
+                    />
+                    <div className="grupo-botones-chat">
+                        <button type="button" className="btn-refrescar-chat" onClick={cargarHistorial} title="Refrescar señal">
+                            🔄
+                        </button>
+                        <button type="submit" className="btn-enviar-chat">
+                            {esAdmin ? t('chatEmit') : t('chatTransmit')}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
 
 export default Chat;
+
