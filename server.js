@@ -463,14 +463,17 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo) => {
 </head>`
     );
 
+    // Eliminamos el aviso por defecto de React para que el bot de Google (y AdSense) no lo lea como prioritario
+    html = html.replace(/<noscript>You need to enable JavaScript to run this app\.<\/noscript>/ig, '');
+
     // Inyectamos el bloque de contenido estático ANTES del div#root
-    // para que el bot lo vea aunque no ejecute JavaScript
+    // para que el bot lo vea con máxima prioridad y sin bloqueos
     html = html.replace(
         '<div id="root"></div>',
-        `<div id="root"></div>
-<noscript id="seo-static-content">
+        `<noscript id="seo-static-content">
 ${contenidoSeo}
-</noscript>`
+</noscript>
+<div id="root"></div>`
     );
 
     return html;
