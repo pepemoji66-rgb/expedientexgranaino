@@ -160,14 +160,14 @@ module.exports = (db, genAI) => {
             const lang = req.query.lang === 'en' ? 'en' : 'es';
             const dbField = lang === 'en' ? 'prediccion_en' : 'prediccion';
 
-            // 1. Intentar obtener de la DB (verificamos que hay 12 signos con contenido)
+            // 1. Intentar obtener de la DB para el idioma solicitado
             const results = await db.query("SELECT * FROM horoscopos WHERE fecha = ?", [today]);
 
             if (results.length >= 12) {
-                const preds = results.map(r => (r[dbField] || r.prediccion || '').trim());
+                const preds = results.map(r => (r[dbField] || '').trim());
                 const prediccionesUnicas = new Set(preds.filter(p => p.length > 30));
-                const hayDuplicados = prediccionesUnicas.size < results.length * 0.7;
                 const todosLargos = preds.every(p => p.length > 80);
+                const hayDuplicados = prediccionesUnicas.size < results.length * 0.7;
 
                 if (todosLargos && !hayDuplicados) {
                     console.log(`🔮 Horóscopo (${lang}) recuperado de la BD (${prediccionesUnicas.size} únicos).`);
@@ -176,12 +176,14 @@ module.exports = (db, genAI) => {
                         prediccion: r[dbField] || r.prediccion
                     })));
                 }
-                // Duplicados o datos inválidos → limpiar y regenerar
-                console.log(`⚠️ Horóscopo inválido en DB (únicos: ${prediccionesUnicas.size}/${results.length}). Regenerando...`);
-                await db.execute("DELETE FROM horoscopos WHERE fecha = ?", [today]);
+
+                // El idioma solicitado está vacío/inválido pero puede que el otro exista
+                // → Solo regeneramos el idioma que falta, sin borrar el otro
+                console.log(`⚠️ Horóscopo (${lang}) inválido o vacío en DB. Generando solo ese idioma...`);
             }
 
             // 2. Intentar con Gemini IA
+            let horoscoposGenerados = null;
             try {
                 console.log(`✨ Intentando sintonizar IA (Gemini) para idioma: ${lang}...`);
                 const modelosAProbar = ["gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-1.0-pro"];
@@ -226,26 +228,9 @@ REQUIREMENTS:
                     const fin = text.lastIndexOf(']') + 1;
                     if (inicio !== -1 && fin > inicio) {
                         const jsonPuro = text.substring(inicio, fin);
-                        const horoscopos = JSON.parse(jsonPuro);
-
-                        if (horoscopos.length >= 12) {
-                            // Borrar los de hoy y guardar los nuevos con ambos idiomas
-                            await db.execute("DELETE FROM horoscopos WHERE fecha = ?", [today]);
-                            for (const h of horoscopos) {
-                                if (lang === 'en') {
-                                    await db.execute(
-                                        "INSERT INTO horoscopos (signo, prediccion, prediccion_en, fecha) VALUES (?, ?, ?, ?)",
-                                        [h.signo, h.prediccion, h.prediccion, today]
-                                    );
-                                } else {
-                                    await db.execute(
-                                        "INSERT INTO horoscopos (signo, prediccion, fecha) VALUES (?, ?, ?)",
-                                        [h.signo, h.prediccion, today]
-                                    );
-                                }
-                            }
-                            console.log(`✅ Horóscopo IA (${lang}) guardado en BD.`);
-                            return res.json(horoscopos);
+                        const parsed = JSON.parse(jsonPuro);
+                        if (parsed.length >= 12) {
+                            horoscoposGenerados = parsed;
                         }
                     }
                 }
@@ -253,24 +238,56 @@ REQUIREMENTS:
                 console.log("📡 IA no disponible. Activando generador local...");
             }
 
-            // 3. Generador local de emergencia
-            console.log(`🔧 Usando generador local para idioma: ${lang}`);
-            const horoscopos = generarHoroscopoLocal(lang);
-
-            await db.execute("DELETE FROM horoscopos WHERE fecha = ?", [today]);
-            for (const h of horoscopos) {
-                await db.execute(
-                    "INSERT INTO horoscopos (signo, prediccion, fecha) VALUES (?, ?, ?)",
-                    [h.signo, h.prediccion, today]
-                );
+            // 3. Fallback: generador local
+            if (!horoscoposGenerados) {
+                console.log(`🔧 Usando generador local para idioma: ${lang}`);
+                horoscoposGenerados = generarHoroscopoLocal(lang);
             }
-            res.json(horoscopos);
+
+            // 4. Guardar / actualizar en DB sin machacar el otro idioma
+            const existentes = await db.query("SELECT signo FROM horoscopos WHERE fecha = ?", [today]);
+            const signosExistentes = existentes.map(r => r.signo.toLowerCase());
+
+            for (const h of horoscoposGenerados) {
+                const prediccionTexto = h.prediccion;
+                if (signosExistentes.includes(h.signo.toLowerCase())) {
+                    // Ya existe la fila → solo actualizar la columna del idioma solicitado
+                    if (lang === 'en') {
+                        await db.execute(
+                            "UPDATE horoscopos SET prediccion_en = ? WHERE fecha = ? AND signo = ?",
+                            [prediccionTexto, today, h.signo]
+                        );
+                    } else {
+                        await db.execute(
+                            "UPDATE horoscopos SET prediccion = ? WHERE fecha = ? AND signo = ?",
+                            [prediccionTexto, today, h.signo]
+                        );
+                    }
+                } else {
+                    // No existe → insertar fila nueva con ambas columnas
+                    if (lang === 'en') {
+                        await db.execute(
+                            "INSERT INTO horoscopos (signo, prediccion, prediccion_en, fecha) VALUES (?, '', ?, ?)",
+                            [h.signo, prediccionTexto, today]
+                        );
+                    } else {
+                        await db.execute(
+                            "INSERT INTO horoscopos (signo, prediccion, prediccion_en, fecha) VALUES (?, ?, '', ?)",
+                            [h.signo, prediccionTexto, today]
+                        );
+                    }
+                }
+            }
+
+            console.log(`✅ Horóscopo (${lang}) guardado/actualizado en BD.`);
+            res.json(horoscoposGenerados.map(h => ({ signo: h.signo, prediccion: h.prediccion })));
 
         } catch (err) {
             console.error("❌ Fallo en la frecuencia astral:", err.message);
             res.status(500).json({ error: "Fallo crítico en el radar astral." });
         }
     });
+
 
     return router;
 };
