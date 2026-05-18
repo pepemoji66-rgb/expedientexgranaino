@@ -160,26 +160,34 @@ module.exports = (db, genAI) => {
             const lang = req.query.lang === 'en' ? 'en' : 'es';
             const dbField = lang === 'en' ? 'prediccion_en' : 'prediccion';
 
+            // Keywords que identifican el idioma del texto
+            const keywordsEs = ['Salud:', 'Dinero:', 'Amor:'];
+            const keywordsEn = ['Health:', 'Money:', 'Love:'];
+            const expectedKeywords = lang === 'en' ? keywordsEn : keywordsEs;
+
             // 1. Intentar obtener de la DB para el idioma solicitado
             const results = await db.query("SELECT * FROM horoscopos WHERE fecha = ?", [today]);
 
             if (results.length >= 12) {
                 const preds = results.map(r => (r[dbField] || '').trim());
-                const prediccionesUnicas = new Set(preds.filter(p => p.length > 30));
                 const todosLargos = preds.every(p => p.length > 80);
+                const prediccionesUnicas = new Set(preds.filter(p => p.length > 30));
                 const hayDuplicados = prediccionesUnicas.size < results.length * 0.7;
+                // Validación de idioma: al menos la mitad tienen la keyword esperada
+                const enIdiomaCorreco = preds.filter(p =>
+                    expectedKeywords.some(kw => p.includes(kw))
+                ).length >= 6;
 
-                if (todosLargos && !hayDuplicados) {
-                    console.log(`🔮 Horóscopo (${lang}) recuperado de la BD (${prediccionesUnicas.size} únicos).`);
+                if (todosLargos && !hayDuplicados && enIdiomaCorreco) {
+                    console.log(`🔮 Horóscopo (${lang}) recuperado de la BD — idioma verificado.`);
                     return res.json(results.map(r => ({
                         signo: r.signo,
-                        prediccion: r[dbField] || r.prediccion
+                        prediccion: r[dbField]
                     })));
                 }
 
-                // El idioma solicitado está vacío/inválido pero puede que el otro exista
-                // → Solo regeneramos el idioma que falta, sin borrar el otro
-                console.log(`⚠️ Horóscopo (${lang}) inválido o vacío en DB. Generando solo ese idioma...`);
+                // Contenido inválido o en idioma equivocado → regenerar solo esa columna
+                console.log(`⚠️ Horóscopo (${lang}) en BD inválido o en idioma incorrecto. Regenerando columna...`);
             }
 
             // 2. Intentar con Gemini IA
