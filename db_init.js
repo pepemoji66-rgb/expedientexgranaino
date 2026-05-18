@@ -192,18 +192,27 @@ module.exports = async (db) => {
             console.log("🩹 PARCHE APLICADO: Columna 'prediccion_en' añadida a horoscopos.");
         } catch (e) { /* Ya existe */ }
 
-        // Limpieza preventiva: borrar hoy si hay predicciones duplicadas entre signos
+        // Limpieza preventiva: borrar hoy si hay predicciones duplicadas O en idioma incorrecto
         try {
             const today = new Date().toISOString().split('T')[0];
-            const rows = await db.query("SELECT prediccion FROM horoscopos WHERE fecha = ?", [today]);
+            const rows = await db.query("SELECT prediccion, prediccion_en FROM horoscopos WHERE fecha = ?", [today]);
             if (rows.length >= 2) {
-                const set = new Set(rows.map(r => r.prediccion));
-                if (set.size < rows.length * 0.8) {
+                const predsEs = rows.map(r => r.prediccion || '');
+                const set = new Set(predsEs);
+                const hayDuplicados = set.size < rows.length * 0.8;
+                // Detectar si la columna española tiene texto inglés (bug anterior)
+                const hayInglesEnEspanol = predsEs.filter(p =>
+                    p.includes('Health:') || p.includes('Money:') || p.includes('Love:')
+                ).length >= 3;
+
+                if (hayDuplicados || hayInglesEnEspanol) {
                     await db.execute("DELETE FROM horoscopos WHERE fecha = ?", [today]);
-                    console.log("🧹 LIMPIEZA: Horóscopo duplicado detectado y borrado. Se regenerará.");
+                    const razon = hayInglesEnEspanol ? 'idioma incorrecto detectado' : 'predicciones duplicadas';
+                    console.log(`🧹 LIMPIEZA: Horóscopo borrado (${razon}). Se regenerará correctamente.`);
                 }
             }
         } catch (e) { }
+
 
         await db.execute(`CREATE TABLE IF NOT EXISTS efemerides (
             id INT AUTO_INCREMENT PRIMARY KEY,
