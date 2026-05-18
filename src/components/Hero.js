@@ -270,30 +270,59 @@ const Hero = ({ userAuth }) => {
                 ))}
             </div>
 
-            {/* BLOQUE SEO - INDEXABLE POR BOTS - NO INTERFIERE EN EL DISEÑO */}
-            <div className="seo-bunker-block" aria-label="Información sobre Expediente X Granaíno">
-                <h2 className="seo-bunker-title">Investigación OVNI y Fenómenos Paranormales en Granada</h2>
-                <p>
-                    <strong>Expediente X Granaíno</strong> es la plataforma de investigación ufológica y fenómenos paranormales más completa del sur de España.
-                    Desde nuestro búnker digital monitorizamos en <strong>tiempo real alertas OVNI</strong>, avistamientos aéreos no identificados,
-                    crónicas del misterio y eventos inexplicables que ocurren en la provincia de Granada y su área de influencia.
-                    Nuestros agentes sobre el terreno documentan cada caso con coordenadas GPS, fotografías de evidencia y relatos detallados
-                    para construir el mayor archivo de <strong>casos históricos en Granada</strong> jamás compilado.
-                </p>
-                <p>
-                    La red de observadores de Expediente X Granaíno analiza constantemente el espacio aéreo, las anomalías electromagnéticas
-                    y los fenómenos de energía anómala registrados en Sierra Nevada, la Vega de Granada, la Costa Tropical y la comarca de Guadix.
-                    Cada expediente clasificado en nuestro sistema recibe una valoración de relevancia táctica por parte de la comunidad,
-                    asegurando que los <strong>fenómenos paranormales</strong> más significativos queden debidamente registrados para la historia.
-                    Únete a nuestra red de investigación y contribuye con tus propios avistamientos, fotografías y testimonios.
-                </p>
-                <p>
-                    Explora nuestra galería de evidencias clasificadas, escucha las frecuencias de radio del búnker donde se registran
-                    <strong>psicofonías</strong> y comunicaciones anómalas, y consulta nuestros expedientes históricos sobre
-                    los casos más relevantes de <strong>ufología en Andalucía</strong>. La verdad está ahí fuera, y nosotros la documentamos.
-                    Alertas OVNI en tiempo real, análisis de ondas paranormales, dossiers sobre lugares de poder en Granada y
-                    crónicas del misterio que desafían cualquier explicación convencional. Bienvenido al archivo más oscuro de la red.
-                </p>
+            {/* BLOQUE SEO - INDEXABLE POR BOTS - BILINGÜE */}
+            <div className="seo-bunker-block" aria-label={language === 'en' ? "About Expediente X Granaíno" : "Información sobre Expediente X Granaíno"}>
+                <h2 className="seo-bunker-title">
+                    {language === 'en'
+                        ? "UFO Investigation & Paranormal Phenomena in Granada, Spain"
+                        : "Investigación OVNI y Fenómenos Paranormales en Granada"}
+                </h2>
+                {language === 'en' ? (
+                    <>
+                        <p>
+                            <strong>Expediente X Granaíno</strong> is the leading UFO and paranormal phenomena investigation platform in southern Spain.
+                            From our digital bunker we monitor <strong>real-time UFO alerts</strong>, unidentified aerial sightings,
+                            chronicles of mystery and unexplained events occurring in the province of Granada and its surrounding areas.
+                            Our field agents document every case with GPS coordinates, photographic evidence and detailed reports,
+                            building the largest archive of <strong>historical cases in Granada</strong> ever compiled by a civilian research network.
+                        </p>
+                        <p>
+                            Our observer network constantly analyzes aerial anomalies and electromagnetic phenomena recorded over Sierra Nevada,
+                            the Granada Valley, the Tropical Coast and the Guadix region. Each classified dossier receives a tactical relevance score
+                            from our community, ensuring the most significant <strong>paranormal phenomena</strong> are properly documented for history.
+                            Join our investigation network and contribute your own sightings, photographs and anonymous testimonies.
+                        </p>
+                        <p>
+                            Explore our classified evidence gallery, listen to the bunker's audio frequencies and consult our historical dossiers
+                            covering the most relevant <strong>UFO cases in Andalusia</strong>. The truth is out there — and we document it.
+                            Real-time UFO alerts, paranormal wave analysis, dossiers on power locations in Granada
+                            and chronicles of mystery that defy any conventional explanation. Welcome to the darkest archive on the net.
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <p>
+                            <strong>Expediente X Granaíno</strong> es la plataforma de investigación ufológica y fenómenos paranormales más completa del sur de España.
+                            Desde nuestro búnker digital monitorizamos en <strong>tiempo real alertas OVNI</strong>, avistamientos aéreos no identificados,
+                            crónicas del misterio y eventos inexplicables que ocurren en la provincia de Granada y su área de influencia.
+                            Nuestros agentes sobre el terreno documentan cada caso con coordenadas GPS, fotografías de evidencia y relatos detallados
+                            para construir el mayor archivo de <strong>casos históricos en Granada</strong> jamás compilado.
+                        </p>
+                        <p>
+                            La red de observadores analiza constantemente el espacio aéreo, las anomalías electromagnéticas
+                            y los fenómenos de energía anómala registrados en Sierra Nevada, la Vega de Granada, la Costa Tropical y la comarca de Guadix.
+                            Cada expediente clasificado recibe una valoración de relevancia táctica por parte de la comunidad,
+                            asegurando que los <strong>fenómenos paranormales</strong> más significativos queden debidamente registrados para la historia.
+                            Únete a nuestra red de investigación y contribuye con tus propios avistamientos, fotografías y testimonios.
+                        </p>
+                        <p>
+                            Explora nuestra galería de evidencias clasificadas y consulta nuestros expedientes históricos sobre
+                            los casos más relevantes de <strong>ufología en Andalucía</strong>. La verdad está ahí fuera, y nosotros la documentamos.
+                            Alertas OVNI en tiempo real, análisis de ondas paranormales, dossiers sobre lugares de poder en Granada y
+                            crónicas del misterio que desafían cualquier explicación convencional. Bienvenido al archivo más oscuro de la red.
+                        </p>
+                    </>
+                )}
             </div>
         </section>
     );

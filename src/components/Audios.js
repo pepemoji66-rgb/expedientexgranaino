@@ -7,7 +7,7 @@ import './audios.css';
 import API_BASE_URL from '../config';
 
 const Audios = ({ userAuth }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     // RED DE SEGURIDAD: Siempre inicializamos como array vacío
     const [audios, setAudios] = useState([]);
     const [titulo, setTitulo] = useState('');
@@ -142,25 +142,52 @@ const Audios = ({ userAuth }) => {
                 )}
             </div>
 
-            {/* BLOQUE SEO FRECUENCIA DE RADIO - INDEXABLE POR BOTS */}
-            <div className="seo-bunker-block seo-radio-block" aria-label="Frecuencia de Radio del Búnker">
-                <h2 className="seo-bunker-title">Frecuencia de Radio del Búnker: Alertas y Psicofonías</h2>
-                <p>
-                    La sección de <strong>Radio del Búnker Expediente X Granaíno</strong> es una frecuencia de audio exclusiva donde nuestra red
-                    de investigadores transmite y archiva grabaciones de campo obtenidas durante operaciones de monitoreo de fenómenos anómalos.
-                    Aquí encontrarás <strong>alertas de radio en tiempo real</strong> sobre avistamientos OVNI, actividad paranormal detectada
-                    en localizaciones de Granada y comunicaciones de emergencia entre agentes sobre el terreno.
-                    Cada archivo de audio está geolocalizado y catalogado con las coordenadas exactas del punto de captura.
-                </p>
-                <p>
-                    Entre los registros disponibles se incluyen <strong>psicofonías</strong> capturadas en lugares con alta actividad paranormal,
-                    testimonios directos de testigos de avistamientos en Sierra Nevada y la Costa Tropical de Granada,
-                    debates tácticos entre investigadores sobre la naturaleza de las anomalías detectadas,
-                    y transmisiones de <strong>monitoreo de ondas electromagnéticas</strong> en zonas de poder identificadas por el equipo.
-                    La importancia de la <strong>monitorización de ondas paranormales</strong> radica en su capacidad para detectar patrones
-                    de actividad que preceden a los avistamientos masivos, dando a los investigadores una ventaja táctica fundamental.
-                    Sube tus propias grabaciones y contribuye al archivo sonoro más completo de fenómenología paranormal de Andalucía.
-                </p>
+            {/* BLOQUE SEO FRECUENCIA DE RADIO - INDEXABLE POR BOTS - BILINGÜE */}
+            <div className="seo-bunker-block seo-radio-block" aria-label={t ? (t('navAudios') + " - Bunker") : "Frecuencia de Audio"}>
+                <h2 className="seo-bunker-title">
+                    {t('language') === 'en' || (typeof language !== 'undefined' && language === 'en')
+                        ? "Bunker Audio Frequency — Field Recordings & Anomalous Signals"
+                        : "Frecuencia de Audio del Búnker — Grabaciones de Campo y Señales Anómalas"}
+                </h2>
+                {(typeof language !== 'undefined' && language === 'en') ? (
+                    <>
+                        <p>
+                            The <strong>Bunker Audio section of Expediente X Granaíno</strong> is an exclusive audio frequency where our network
+                            of investigators transmits and archives field recordings obtained during monitoring operations of anomalous phenomena.
+                            Here you will find <strong>real-time radio alerts</strong> about UFO sightings, paranormal activity detected
+                            in locations across Granada, and emergency communications between field agents.
+                            Each audio file is geolocated and catalogued with the exact coordinates of the capture point.
+                        </p>
+                        <p>
+                            Available recordings include <strong>anomalous audio captured in locations with high paranormal activity</strong>,
+                            direct testimonies from sighting witnesses in Sierra Nevada and the Tropical Coast of Granada,
+                            tactical debates among investigators about the nature of detected anomalies,
+                            and <strong>electromagnetic wave monitoring transmissions</strong> in power zones identified by the team.
+                            The importance of <strong>paranormal wave monitoring</strong> lies in its ability to detect activity patterns
+                            preceding mass sightings, giving investigators a crucial tactical advantage.
+                            Upload your own recordings and contribute to the most complete anomalous phenomenology sound archive in Andalusia.
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <p>
+                            La sección de <strong>Audio del Búnker Expediente X Granaíno</strong> es una frecuencia de audio exclusiva donde nuestra red
+                            de investigadores transmite y archiva grabaciones de campo obtenidas durante operaciones de monitoreo de fenómenos anómalos.
+                            Aquí encontrarás <strong>alertas de radio en tiempo real</strong> sobre avistamientos OVNI, actividad paranormal detectada
+                            en localizaciones de Granada y comunicaciones de emergencia entre agentes sobre el terreno.
+                            Cada archivo de audio está geolocalizado y catalogado con las coordenadas exactas del punto de captura.
+                        </p>
+                        <p>
+                            Entre los registros disponibles se incluyen <strong>grabaciones de audio anómalo capturadas en lugares con alta actividad paranormal</strong>,
+                            testimonios directos de testigos de avistamientos en Sierra Nevada y la Costa Tropical de Granada,
+                            debates tácticos entre investigadores sobre la naturaleza de las anomalías detectadas,
+                            y transmisiones de <strong>monitoreo de ondas electromagnéticas</strong> en zonas de poder identificadas por el equipo.
+                            La importancia de la <strong>monitorización de ondas paranormales</strong> radica en su capacidad para detectar patrones
+                            de actividad que preceden a los avistamientos masivos, dando a los investigadores una ventaja táctica fundamental.
+                            Sube tus propias grabaciones y contribuye al archivo sonoro más completo de fenomenología paranormal de Andalucía.
+                        </p>
+                    </>
+                )}
             </div>
 
             <div style={{ height: '50px' }}></div>

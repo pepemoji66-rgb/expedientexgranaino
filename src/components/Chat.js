@@ -118,27 +118,56 @@ const Chat = ({ usuarioActivo }) => {
     return (
         <div className="chat-page-wrapper" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 20px 40px 20px' }}>
 
-            {/* BLOQUE SEO SALA DE COMUNICACIONES - INDEXABLE POR BOTS */}
-            <div className="seo-bunker-block seo-chat-block" aria-label="Sala de comunicaciones del Búnker">
-                <h2 className="seo-bunker-title">Sala de Comunicaciones en Tiempo Real — Búnker Expediente X</h2>
-                <p>
-                    El <strong>canal de chat del Búnker Expediente X Granaíno</strong> es la sala de comunicaciones tácticas en tiempo real
-                    donde los investigadores y agentes registrados de nuestra red intercambian información sobre
-                    <strong>avistamientos OVNI</strong>, fenómenos paranormales y anomalías detectadas en Granada y sus alrededores.
-                    La frecuencia permanece activa las 24 horas, permitiendo que la comunidad reaccione de forma inmediata
-                    ante cualquier alerta de campo transmitida por los agentes sobre el terreno.
-                    Los mensajes son monitorizados y archivados para su análisis posterior como parte del expediente colectivo.
-                </p>
-                <p>
-                    Esta sala de debate es el corazón operativo de la red: aquí se coordinan las investigaciones de
-                    <strong>ufología en Andalucía</strong>, se comentan en directo los casos más recientes de
-                    <strong>crónicas del misterio</strong> publicados en el archivo, y se comparten coordenadas y evidencias
-                    entre los miembros de la comunidad. El sistema de traducción integrado con Inteligencia Artificial
-                    permite que investigadores internacionales participen en el debate sin barreras idiomáticas,
-                    convirtiendo este canal en un punto de encuentro global para la investigación de
-                    <strong>fenómenos paranormales y casos históricos</strong> de la provincia de Granada.
-                    Regístrate para transmitir. La verdad necesita voces.
-                </p>
+            {/* BLOQUE SEO SALA DE COMUNICACIONES - INDEXABLE POR BOTS - BILINGÜE */}
+            <div className="seo-bunker-block seo-chat-block" aria-label={language === 'en' ? "Bunker Communications Room" : "Sala de comunicaciones del Búnker"}>
+                <h2 className="seo-bunker-title">
+                    {language === 'en'
+                        ? "Real-Time Communications Room — Expediente X Granaíno Bunker"
+                        : "Sala de Comunicaciones en Tiempo Real — Búnker Expediente X"}
+                </h2>
+                {language === 'en' ? (
+                    <>
+                        <p>
+                            The <strong>chat channel of the Expediente X Granaíno Bunker</strong> is the real-time tactical communications room
+                            where our registered investigators and agents exchange information about
+                            <strong>UFO sightings</strong>, paranormal phenomena and anomalies detected in Granada and surrounding areas.
+                            The frequency stays active 24 hours a day, allowing the community to react immediately
+                            to any field alert transmitted by agents on the ground.
+                            Messages are monitored and archived for later analysis as part of the collective dossier.
+                        </p>
+                        <p>
+                            This debate room is the operational heart of the network: here investigations on
+                            <strong>UFO research in Andalusia</strong> are coordinated, the most recent cases of
+                            <strong>mystery chronicles</strong> published in the archive are discussed in real time, and coordinates and evidence
+                            are shared among community members. The integrated Artificial Intelligence translation system
+                            allows international investigators to participate without language barriers,
+                            making this channel a global meeting point for the investigation of
+                            <strong>paranormal phenomena and historical cases</strong> from the province of Granada.
+                            Register to transmit. The truth needs voices.
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <p>
+                            El <strong>canal de chat del Búnker Expediente X Granaíno</strong> es la sala de comunicaciones tácticas en tiempo real
+                            donde los investigadores y agentes registrados de nuestra red intercambian información sobre
+                            <strong>avistamientos OVNI</strong>, fenómenos paranormales y anomalías detectadas en Granada y sus alrededores.
+                            La frecuencia permanece activa las 24 horas, permitiendo que la comunidad reaccione de forma inmediata
+                            ante cualquier alerta de campo transmitida por los agentes sobre el terreno.
+                            Los mensajes son monitorizados y archivados para su análisis posterior como parte del expediente colectivo.
+                        </p>
+                        <p>
+                            Esta sala de debate es el corazón operativo de la red: aquí se coordinan las investigaciones de
+                            <strong>ufología en Andalucía</strong>, se comentan en directo los casos más recientes de
+                            <strong>crónicas del misterio</strong> publicados en el archivo, y se comparten coordenadas y evidencias
+                            entre los miembros de la comunidad. El sistema de traducción integrado con Inteligencia Artificial
+                            permite que investigadores internacionales participen en el debate sin barreras idiomáticas,
+                            convirtiendo este canal en un punto de encuentro global para la investigación de
+                            <strong>fenómenos paranormales y casos históricos</strong> de la provincia de Granada.
+                            Regístrate para transmitir. La verdad necesita voces.
+                        </p>
+                    </>
+                )}
             </div>
 
             <div className="chat-container-root">
