@@ -53,8 +53,9 @@ const Lugares = () => {
             const lng = parseFloat(location.state.lng);
             if (!isNaN(lat) && !isNaN(lng)) {
                 setCentroMapa([lat, lng]);
-                // Sincronizamos el prefijo del ID para que el mapa lo reconozca
-                if (location.state.noticiaId) setIdResaltado(`noticia-${location.state.noticiaId}`);
+                if (location.state.noticiaId) {
+                    setIdResaltado(location.state.noticiaId);
+                }
             }
         }
     }, [location.state]);
@@ -203,7 +204,24 @@ const Lugares = () => {
                         attribution='&copy; Esri'
                     />
                     {puntos.map((m, idx) => {
-                        const esEste = idResaltado && String(idResaltado) === String(m.id);
+                        let esEste = false;
+                        if (idResaltado) {
+                            const strIdRes = String(idResaltado);
+                            const strMId = String(m.id);
+                            
+                            if (strIdRes === strMId) esEste = true;
+                            else if (strIdRes === `noticia-${strMId}` || `noticia-${strIdRes}` === strMId) esEste = true;
+                            else if (strIdRes === `exp-${strMId}` || `exp-${strIdRes}` === strMId) esEste = true;
+                            else if (strIdRes.replace(/\D/g, '') === strMId.replace(/\D/g, '')) {
+                                // Match numérico fuerte, chequeamos coord para asegurar
+                                if (location.state && parseFloat(m.latitud).toFixed(3) === parseFloat(location.state.lat).toFixed(3)) {
+                                    esEste = true;
+                                } else if (!location.state) { // Por si viene de localStorage
+                                    esEste = true;
+                                }
+                            }
+                        }
+
                         return (
                             <Marker
                                 key={`punto-${m.id || idx}`}

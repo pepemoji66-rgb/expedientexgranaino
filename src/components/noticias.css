@@ -153,3 +153,76 @@
     background: #fff;
     color: #000;
 }
+
+/* --- INTELIGENCIA EXTERNA (CANALES RECOMENDADOS) --- */
+.inteligencia-externa-container {
+    margin: 60px 0;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.titulo-seccion-secundaria {
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
+}
+
+.grid-inteligencia {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card-externa {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    border-left: 4px solid;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-externa:hover {
+    transform: translateY(-5px);
+    background: rgba(20, 20, 20, 0.8);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.card-externa h4 {
+    font-size: 1.1rem;
+    margin: 0 0 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 1px;
+}
+
+.card-externa p {
+    font-size: 0.85rem;
+    color: #aaa;
+    line-height: 1.5;
+    margin: 0 0 15px 0;
+    flex-grow: 1;
+}
+
+.link-arrow {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    align-self: flex-start;
+    transition: margin-left 0.3s ease;
+}
+
+.card-externa:hover .link-arrow {
+    margin-left: 5px;
+}
+
