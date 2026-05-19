@@ -194,6 +194,14 @@ const Noticias = ({ userAuth }) => {
                 )}
             </div>
 
+            {totalPaginas > 1 && (
+                <div className="paginacion-bunker">
+                    <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(paginaActual - 1); window.scrollTo(0, 0); }}>{t('newsPrev')}</button>
+                    <span className="pagi-info">{paginaActual} / {totalPaginas}</span>
+                    <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(paginaActual + 1); window.scrollTo(0, 0); }}>{t('newsNext')}</button>
+                </div>
+            )}
+
             {/* SECCIÓN DE INTELIGENCIA EXTERNA (PARA QUE NO SE VEA SOLO) */}
             <div className="inteligencia-externa-container">
                 <h2 className="titulo-seccion-secundaria">{t('newsExternalIntel')}</h2>
@@ -211,13 +219,7 @@ const Noticias = ({ userAuth }) => {
             {/* FEED RSS EN VIVO - NOTICIAS EXTERNAS */}
             <NoticiasExternas />
 
-            {totalPaginas > 1 && (
-                <div className="paginacion-bunker">
-                    <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(paginaActual - 1); window.scrollTo(0, 0); }}>{t('newsPrev')}</button>
-                    <span className="pagi-info">{paginaActual} / {totalPaginas}</span>
-                    <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(paginaActual + 1); window.scrollTo(0, 0); }}>{t('newsNext')}</button>
-                </div>
-            )}
+
 
             {userAuth && (
                 <div className="contenedor-form-noticia">
