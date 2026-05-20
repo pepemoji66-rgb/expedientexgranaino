@@ -94,7 +94,7 @@ const CartaAstral = () => {
         setError('');
         try {
             const res = await axios.post(`${API_BASE_URL}/api/carta-astral/mi-carta`, {
-                email: userAuth.email,
+                email: userAuth?.email || 'anonimo@bunker.com',
                 fecha_nacimiento: fecha,
                 hora_nacimiento: hora,
                 ciudad_nacimiento: ciudad,
@@ -109,16 +109,7 @@ const CartaAstral = () => {
         }
     };
 
-    if (!userAuth) {
-        return (
-            <div className="carta-astral-page">
-                <div className="mensaje-no-auth">
-                    <h2>{t('accessDenied')}</h2>
-                    <p>{t('loginRequired')}</p>
-                </div>
-            </div>
-        );
-    }
+
 
     return (
         <div className="carta-astral-page">
