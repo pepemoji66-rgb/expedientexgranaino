@@ -54,6 +54,18 @@ const Hero = ({ userAuth }) => {
                 onClick: (e) => { e.preventDefault(); toggleLanguage(); }
             },
             {
+                id: 'archipeg-promo',
+                image: imgEspacio,
+                subtitle: language === 'en' ? "PRIVATE SOFTWARE" : "SOFTWARE OFFLINE",
+                title: "ARCHIPEG V3",
+                tagline: language === 'en' ? "YOUR DIGITAL BUNKER" : "TU BÚNKER DIGITAL",
+                infoTitle: language === 'en' ? "PROTECT YOUR LEGACY" : "PROTEGE TU LEGADO",
+                infoText: language === 'en' ? "Download the sovereign offline software to organize and protect your UFO files completely out of the cloud." : "Descarga el software soberano sin conexión para organizar y blindar tus archivos ufológicos fuera de la red.",
+                highlight: language === 'en' ? "100% PRIVATE • SECURE • NO CLOUD" : "100% PRIVADO • SEGURO • SIN NUBE",
+                btnText: language === 'en' ? "GET ARCHIPEG" : "ADQUIRIR ARCHIPEG",
+                btnLink: "/archipeg"
+            },
+            {
                 id: 0,
                 image: imgEspacio,
                 subtitle: "GLOBAL",
