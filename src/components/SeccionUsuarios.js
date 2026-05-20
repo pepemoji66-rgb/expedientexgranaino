@@ -6,7 +6,7 @@ import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
 
 const Seccionusuarios = ({ setAuth }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [esLogin, setEsLogin] = useState(true);
     const [datos, setDatos] = useState({
         nombre: '',
@@ -69,6 +69,14 @@ const Seccionusuarios = ({ setAuth }) => {
                 onClear={() => setDatos({ nombre: '', email: '', password: '', ciudad: '', edad: '' })}
                 btnText={cargando ? t('loading') : (esLogin ? t('loginTitle') : t('registerTitle'))}
             >
+                <div style={{ background: 'rgba(255,177,0,0.1)', border: '1px solid #ffb100', padding: '15px', marginBottom: '20px', borderRadius: '5px', textAlign: 'center' }}>
+                    <p style={{ color: '#ffb100', fontSize: '0.8rem', fontFamily: 'monospace', margin: 0 }}>
+                        {language === 'en' 
+                            ? "⚠️ ATTENTION: Reading content is public. However, to upload graphic material, video, audio or stories, you must be logged in. All accounts are subject to validation and approval by the Central Administrator."
+                            : "⚠️ ATENCIÓN: La lectura de contenido es pública. Sin embargo, para subir material gráfico, vídeo, audio o relatos, es obligatorio estar registrado. Todas las cuentas están sujetas a validación y aprobación por parte del Administrador Central."}
+                    </p>
+                </div>
+
                 {!esLogin && (
                     <div className="form-group">
                         <label htmlFor="nombre">{t('namePlaceholder')}</label>
