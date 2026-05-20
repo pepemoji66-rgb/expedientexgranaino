@@ -14,7 +14,8 @@ const PanelAdmin = () => {
         expedientes: [],
         lugares: [],
         chat: [],
-        comentarios: []
+        comentarios: [],
+        archipeg: []
     });
 
     const [cargando, setCargando] = useState(false);
@@ -52,7 +53,7 @@ const PanelAdmin = () => {
     const cargarDatos = useCallback(async () => {
         setCargando(true);
         try {
-            const [resU, resV, resE, resI, resL, resN, resA, resC, resCOM] = await Promise.allSettled([
+            const [resU, resV, resE, resI, resL, resN, resA, resC, resCOM, resARCH] = await Promise.allSettled([
                 axios.get(`${API_BASE_URL}/api/usuarios`),
                 axios.get(`${API_BASE_URL}/api/videos/todos`),
                 axios.get(`${API_BASE_URL}/api/expedientes/todos`),
@@ -61,7 +62,8 @@ const PanelAdmin = () => {
                 axios.get(`${API_BASE_URL}/api/galeria/admin/todas-noticias`),
                 axios.get(`${API_BASE_URL}/api/audios`),
                 axios.get(`${API_BASE_URL}/api/chat-historial`),
-                axios.get(`${API_BASE_URL}/api/admin/todos-comentarios`)
+                axios.get(`${API_BASE_URL}/api/admin/todos-comentarios`),
+                axios.get(`${API_BASE_URL}/api/archipeg/solicitudes`)
             ]);
 
             const parse = (res) => {
@@ -81,7 +83,8 @@ const PanelAdmin = () => {
                 noticias: parse(resN),
                 audios: parse(resA),
                 chat: parse(resC).reverse(),
-                comentarios: parse(resCOM)
+                comentarios: parse(resCOM),
+                archipeg: parse(resARCH)
             });
         } catch (err) {
             console.error("❌ Error en la recepción de datos", err);
@@ -114,7 +117,6 @@ const PanelAdmin = () => {
             let url = `${API_BASE_URL}/api`;
 
             const mapping = {
-
                 usuarios: { base: '/usuarios', approve: '/usuarios/aprobar' },
                 expedientes: { base: '/expedientes/borrar-expediente', approve: '/expedientes/aprobar-expediente' },
                 videos: { base: '/videos', approve: '/videos/aprobar' },
@@ -123,13 +125,21 @@ const PanelAdmin = () => {
                 lugares: { base: '/expedientes/borrar-lugar', approve: '/expedientes/aprobar' },
                 audios: { base: '/audios', approve: '/audios/aprobar' }, 
                 chat: { base: '/borrar-mensaje' },
-                comentarios: { base: '/comentarios' }
+                comentarios: { base: '/comentarios' },
+                archipeg: { base: '/archipeg/solicitudes', approve: '/archipeg/solicitudes' }
             };
 
             const route = mapping[tipo];
             if (!route) throw new Error("Tipo de sector no reconocido");
 
-            const finalUrl = accion === 'aprobar' ? `${url}${route.approve}/${id}` : `${url}${route.base}/${id}`;
+            let finalUrl = '';
+            if (tipo === 'archipeg') {
+                finalUrl = accion === 'aprobar' 
+                    ? `${url}/archipeg/solicitudes/${id}/aprobar` 
+                    : `${url}/archipeg/solicitudes/${id}`;
+            } else {
+                finalUrl = accion === 'aprobar' ? `${url}${route.approve}/${id}` : `${url}${route.base}/${id}`;
+            }
 
             if (accion === 'aprobar') {
                 await axios.put(finalUrl);
@@ -137,7 +147,7 @@ const PanelAdmin = () => {
                 await axios.delete(finalUrl);
             }
 
-            alert(`✅ REGISTRO ${accion === 'aprobar' ? 'PUBLICADO' : 'ELIMINADO'}`);
+            alert(`✅ REGISTRO ${accion === 'aprobar' ? 'APROBADO / PROCESADO' : 'ELIMINADO'}`);
             cargarDatos();
         } catch (err) {
             console.error("❌ Error en la operación:", err);
@@ -373,6 +383,7 @@ const PanelAdmin = () => {
                     if (t === 'imagenes') label = 'FOTOS';
                     if (t === 'noticias') label = 'NOTICIAS';
                     if (t === 'expedientes') label = 'RELATOS';
+                    if (t === 'archipeg') label = '💻 ARCHIPEG';
                     
                     return (
                         <button key={t} className={tab === t ? 'active' : ''} onClick={() => { setTab(t); setPaginaActual(1); }}>
@@ -429,7 +440,8 @@ const PanelAdmin = () => {
                                         item.aprobado === 1 || 
                                         item.estado === 'publica' || 
                                         item.estado === 'aprobado' ||
-                                        item.estado === 'publico'
+                                        item.estado === 'publico' ||
+                                        item.estado === 'enviado'
                                     );
                                     
                                     return (
@@ -562,6 +574,25 @@ const PanelAdmin = () => {
                                                 )}
                                                 {tab === 'chat' && <div className="msg-preview">"{item.mensaje}"</div>}
                                                 {tab === 'comentarios' && <div className="msg-preview">"{item.mensaje}" <br/><small>Por: {item.agente}</small></div>}
+                                                {tab === 'archipeg' && (
+                                                    <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
+                                                        <strong>📧 Email:</strong> {item.email} <br />
+                                                        <strong>💻 Versión:</strong> <span style={{
+                                                            padding: '2px 6px',
+                                                            borderRadius: '3px',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 'bold',
+                                                            backgroundColor: item.tipo === 'pro' ? '#ffb100' : '#00d4ff',
+                                                            color: '#000'
+                                                        }}>{item.tipo.toUpperCase()}</span> <br />
+                                                        <strong>📅 Solicitado:</strong> {new Date(item.fecha).toLocaleString()} <br />
+                                                        {item.fecha_envio && (
+                                                            <>
+                                                                <strong>🚀 Enviado:</strong> {new Date(item.fecha_envio).toLocaleString()}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                )}
 
                                             </td>
                                             <td>

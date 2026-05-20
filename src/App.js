@@ -318,7 +318,7 @@ function App() {
                <Route path="/legal" element={<AvisoLegal />} />
                <Route path="/sobre-nosotros" element={<SobreNosotros />} />
                <Route path="/especial-atarfe" element={<AtarfeDossier />} />
-               <Route path="/archipeg" element={<Archipeg />} />
+               <Route path="/archipeg" element={<Archipeg userAuth={userAuth} />} />
 
             </Routes>
           </div>

@@ -33,6 +33,7 @@ const cartaAstralRoutes = require('./routes/carta_astral');
 const tarotRoutes = require('./routes/tarot');
 const efemeridesRoutes = require('./routes/efemerides');
 const noticiasExternasRoutes = require('./routes/noticias_externas');
+const archipegRoutes = require('./routes/archipeg');
 
 
 // --- 2.5 INICIALIZACIÓN DE LA IA Y CLOUDINARY ---
@@ -400,6 +401,7 @@ app.use('/api/carta-astral', cartaAstralRoutes(db, genAI));
 app.use('/api/tarot', tarotRoutes(db, genAI));
 app.use('/api/efemerides', efemeridesRoutes(db, genAI));
 app.use('/api/noticias-externas', noticiasExternasRoutes(db, genAI));
+app.use('/api/archipeg', archipegRoutes(db));
 
 // --- SERVIDORES ESTÁTICOS ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

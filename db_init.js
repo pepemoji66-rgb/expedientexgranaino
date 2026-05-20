@@ -245,6 +245,19 @@ module.exports = async (db) => {
             aprobado INT DEFAULT 1
         )`);
 
+        await db.execute(`CREATE TABLE IF NOT EXISTS archipeg_solicitudes (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario_id INT,
+            nombre VARCHAR(255),
+            email VARCHAR(255),
+            tipo VARCHAR(50),
+            estado VARCHAR(50) DEFAULT 'pendiente',
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+            fecha_envio DATETIME NULL,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
+        )`);
+        console.log("🩹 TABLA: archipeg_solicitudes inicializada en MySQL.");
+
         await db.execute(`CREATE TABLE IF NOT EXISTS visitas (
             id INT PRIMARY KEY, 
             cuenta INT DEFAULT 0

@@ -160,14 +160,24 @@ module.exports = (db) => {
             console.log(`📝 Intentando registrar agente: ${finalNombre} (${finalEmail})`);
 
             // Verificación previa para evitar el error 500 por duplicados
-            const existe = await db.query("SELECT id FROM usuarios WHERE email = ? OR nombre = ?", [finalEmail, finalNombre]);
-            if (existe && existe.length > 0) {
-                console.warn(`⚠️ Intento de duplicado: ${finalEmail} o ${finalNombre}`);
+            const existeEmail = await db.query("SELECT id FROM usuarios WHERE email = ?", [finalEmail]);
+            if (existeEmail && existeEmail.length > 0) {
+                console.warn(`⚠️ Intento de registro con email duplicado: ${finalEmail}`);
                 return res.status(400).json({ 
-                    error: "Identificación duplicada", 
-                    detalle: "El email o el nombre ya están registrados en el búnker." 
+                    error: "Email duplicado", 
+                    detalle: "El correo electrónico ya está registrado en el búnker. Si es tuyo, inicia sesión." 
                 });
             }
+
+            const existeNombre = await db.query("SELECT id FROM usuarios WHERE nombre = ?", [finalNombre]);
+            if (existeNombre && existeNombre.length > 0) {
+                console.warn(`⚠️ Intento de registro con nombre de agente duplicado: ${finalNombre}`);
+                return res.status(400).json({ 
+                    error: "Nombre duplicado", 
+                    detalle: "El alias o nombre de agente ya está en uso en el búnker. Por favor, elige otro nombre distintivo." 
+                });
+            }
+
 
             // REGISTRO AUTOMÁTICO: Ahora se registran como 'aprobado = 1' para acceso inmediato
             const sql = "INSERT INTO usuarios (nombre, email, password, ciudad, edad, rol, rango, aprobado, fecha_registro, visitas) VALUES (?, ?, ?, ?, ?, 'agente', 'Agente en Prácticas', 1, NOW(), 0)";
