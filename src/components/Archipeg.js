@@ -291,8 +291,12 @@ const Archipeg = ({ userAuth }) => {
                                         <span>{language === 'en' ? "REQUEST IN PROCESS - PENDING" : "SOLICITUD EN CURSO - PENDIENTE"}</span>
                                     </div>
                                 ) : (
-                                    <div className="status-badge approved">
+                                    <div className="status-badge approved" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <span>✅ {language === 'en' ? "APPROVED - CHECK YOUR EMAIL" : "APROBADO - REVISA TU CORREO"}</span>
+                                        <a href="https://drive.google.com/file/d/1q8F9zO7qQ9OEqMshbPrOhyyPU3wQvJJj/view?usp=drive_link" target="_blank" rel="noopener noreferrer" className="btn-demo" style={{ textDecoration: 'none', background: '#28a745', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Download size={18} style={{ marginRight: '8px' }}/>
+                                            {language === 'en' ? "DOWNLOAD .EXE NOW" : "DESCARGAR .EXE AHORA"}
+                                        </a>
                                     </div>
                                 )}
                             </div>
@@ -334,8 +338,12 @@ const Archipeg = ({ userAuth }) => {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="status-badge approved">
-                                        <span>🎉 ¡LICENCIA PRO ACTIVA! REVISA TU CORREO</span>
+                                    <div className="status-badge approved" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <span>🎉 {language === 'en' ? "PRO LICENSE ACTIVE! CHECK EMAIL" : "¡LICENCIA PRO ACTIVA! REVISA TU CORREO"}</span>
+                                        <a href="https://drive.google.com/file/d/1q8F9zO7qQ9OEqMshbPrOhyyPU3wQvJJj/view?usp=drive_link" target="_blank" rel="noopener noreferrer" className="btn-pro" style={{ textDecoration: 'none', background: '#28a745', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Download size={18} style={{ marginRight: '8px' }}/>
+                                            {language === 'en' ? "DOWNLOAD PRO .EXE NOW" : "DESCARGAR .EXE PRO AHORA"}
+                                        </a>
                                     </div>
                                 )}
                             </div>
