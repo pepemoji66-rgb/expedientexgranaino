@@ -90,19 +90,19 @@ const Archipeg = () => {
                         </p>
                         
                         <div className="payment-instructions">
-                            <h4>{language === 'en' ? "HOW TO GET IT:" : "INSTRUCCIONES DE COMPRA:"}</h4>
+                            <h4>{language === 'en' ? "HOW TO GET IT:" : "CÓMO CONSEGUIRLO:"}</h4>
                             <ol>
                                 <li>
-                                    <Smartphone className="inst-icon" size={18}/> 
-                                    {language === 'en' ? "Make a Bizum of 5€ to the number:" : "Haz un Bizum de 5€ al número:"} <strong>[TU NÚMERO DE BIZUM]</strong>
+                                    <Mail className="inst-icon" size={18}/> 
+                                    {language === 'en' ? "Send an email requesting the PRO version." : "Envía un correo solicitando la versión PRO."}
                                 </li>
                                 <li>
-                                    <Mail className="inst-icon" size={18}/> 
-                                    {language === 'en' ? "In the concept, put 'Archipeg + Your Email'." : "En el concepto pon 'Archipeg + Tu Correo Electrónico'."}
+                                    <Smartphone className="inst-icon" size={18}/> 
+                                    {language === 'en' ? "We will reply with secure payment instructions." : "Te responderemos con las instrucciones de pago seguro."}
                                 </li>
                                 <li>
                                     <Lock className="inst-icon" size={18}/> 
-                                    {language === 'en' ? "We will send the full EXE to your email." : "Te enviaremos el EXE completo a tu correo para reclamaciones y soporte."}
+                                    {language === 'en' ? "After verification, we will send the full EXE." : "Tras verificarlo, te enviaremos el EXE completo a tu correo."}
                                 </li>
                             </ol>
                         </div>
