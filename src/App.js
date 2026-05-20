@@ -31,6 +31,7 @@ import TopNavbar from './components/TopNavbar';
 import CookieBanner from './components/CookieBanner';
 import SobreNosotros from './components/SobreNosotros';
 import AtarfeDossier from './components/AtarfeDossier';
+import Archipeg from './components/Archipeg';
 import { useLanguage } from './context/LanguageContext';
 
 
@@ -213,8 +214,8 @@ function App() {
                 { path: "/horoscopo", label: t('navHoroscope') },
                 { path: "/tarot", label: t('navTarot') },
                 { path: "/carta-astral", label: t('navAstral') },
-                { path: "/chat", label: t('navChat') }
-
+                { path: "/chat", label: t('navChat') },
+                { path: "/archipeg", label: "💻 ARCHIPEG V3" }
               ].map((route) => (
                 <li key={route.path} style={{ marginBottom: '15px' }}>
                   <Link to={route.path} onClick={toggleMenu} className="nav-link" style={{
@@ -317,6 +318,7 @@ function App() {
                <Route path="/legal" element={<AvisoLegal />} />
                <Route path="/sobre-nosotros" element={<SobreNosotros />} />
                <Route path="/especial-atarfe" element={<AtarfeDossier />} />
+               <Route path="/archipeg" element={<Archipeg />} />
 
             </Routes>
           </div>
