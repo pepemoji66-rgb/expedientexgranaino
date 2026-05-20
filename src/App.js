@@ -210,14 +210,10 @@ function App() {
                 { path: "/expedientes", label: t('navFiles') },
                 { path: "/especial-atarfe", label: t('sysSidebarDossier') },
                 { path: "/lugares", label: t('navMap') },
-                ...(userAuth ? [
-                  { path: "/horoscopo", label: t('navHoroscope') },
-                  { path: "/tarot", label: t('navTarot') },
-                  { path: "/carta-astral", label: t('navAstral') }
-                ] : []),
-
+                { path: "/horoscopo", label: t('navHoroscope') },
+                { path: "/tarot", label: t('navTarot') },
+                { path: "/carta-astral", label: t('navAstral') },
                 { path: "/chat", label: t('navChat') }
-
 
               ].map((route) => (
                 <li key={route.path} style={{ marginBottom: '15px' }}>
