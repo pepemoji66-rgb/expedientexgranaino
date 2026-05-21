@@ -8,7 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 import './expedientes.css'; 
 
 const Expedientes = () => {
-    const { language, t } = useLanguage();
+    const { language, t, forceTranslationUpdate } = useLanguage();
     const [seccion, setSeccion] = useState('jefe'); // Priorizamos relatos del jefe
     const [datos, setDatos] = useState([]);
     const [relatoAbierto, setRelatoAbierto] = useState(null);
@@ -52,8 +52,9 @@ const Expedientes = () => {
             setDatos([]);
         } finally {
             setCargando(false);
+            if (forceTranslationUpdate) forceTranslationUpdate();
         }
-    }, [seccion]);
+    }, [seccion, forceTranslationUpdate]);
 
     useEffect(() => {
         cargarDatos();

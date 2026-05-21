@@ -9,7 +9,7 @@ import API_BASE_URL from '../config';
 import NoticiasExternas from './NoticiasExternas';
 
 const Noticias = ({ userAuth }) => {
-    const { t } = useLanguage();
+    const { t, forceTranslationUpdate } = useLanguage();
     // --- CONFIGURACIÓN DE SEÑAL MAESTRA ---
 
     const [noticias, setNoticias] = useState([]);
@@ -73,8 +73,9 @@ const Noticias = ({ userAuth }) => {
             setNoticias([]);
         } finally {
             setCargando(false);
+            if (forceTranslationUpdate) forceTranslationUpdate();
         }
-    }, [API_BASE_URL]);
+    }, [API_BASE_URL, forceTranslationUpdate]);
 
     useEffect(() => {
         obtenerNoticias();

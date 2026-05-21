@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
 const LanguageContext = createContext();
 
@@ -794,8 +794,26 @@ export const LanguageProvider = ({ children }) => {
         }
     };
 
+    const forceTranslationUpdate = useCallback(() => {
+        if (language !== 'es') {
+            setTimeout(() => {
+                try {
+                    const googleCombo = document.querySelector('.goog-te-combo');
+                    if (googleCombo) {
+                        googleCombo.value = 'es';
+                        googleCombo.dispatchEvent(new Event('change'));
+                        setTimeout(() => {
+                            googleCombo.value = language;
+                            googleCombo.dispatchEvent(new Event('change'));
+                        }, 300);
+                    }
+                } catch (e) {}
+            }, 500);
+        }
+    }, [language]);
+
     return (
-        <LanguageContext.Provider value={{ language, setLanguage, t, toggleLanguage }}>
+        <LanguageContext.Provider value={{ language, setLanguage, t, toggleLanguage, forceTranslationUpdate }}>
             {children}
         </LanguageContext.Provider>
     );

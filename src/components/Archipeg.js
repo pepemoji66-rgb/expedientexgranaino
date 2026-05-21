@@ -334,7 +334,7 @@ const Archipeg = ({ userAuth }) => {
                                         <div className="radar-ping"></div>
                                         <div className="pending-pro-details">
                                             <strong>{language === 'en' ? "PENDING PAYMENT VALIDATION" : "PENDIENTE DE COMPROBAR PAGO"}</strong>
-                                            <p>{language === 'en' ? "Please complete your 5€ payment via our secure Ko-fi link. Once validated, your EXE download link will be emailed automatically." : "Realiza tu donación/pago de 5€ a través de nuestro enlace seguro de Ko-fi. En cuanto se verifique, se te enviará el EXE al correo al instante."}</p>
+                                            <p>{language === 'en' ? "Please complete your 5€ payment via our secure Ko-fi link. Once validated, your EXE download link will be emailed automatically." : "Realiza tu adquisición/pago de 5€ a través de nuestro enlace seguro de Ko-fi. En cuanto se verifique, se te enviará el EXE al correo al instante."}</p>
                                         </div>
                                     </div>
                                 ) : (

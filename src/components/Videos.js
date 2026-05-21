@@ -9,7 +9,7 @@ import './videos.css';
 import API_BASE_URL, { ADMIN_EMAIL } from '../config';
 
 const Videos = ({ userAuth }) => {
-    const { t } = useLanguage();
+    const { t, forceTranslationUpdate } = useLanguage();
     const isAdmin = userAuth && (userAuth.rol === 'admin' || (userAuth.email && userAuth.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()));
     // API_BASE_URL is handled via config.js (process.env or Render fallback)
 
@@ -72,6 +72,8 @@ const Videos = ({ userAuth }) => {
         } catch (err) {
             console.error("❌ Error al cargar vídeos del búnker:", err);
             setVideos([]);
+        } finally {
+            if (forceTranslationUpdate) forceTranslationUpdate();
         }
     };
 
