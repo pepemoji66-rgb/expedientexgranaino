@@ -7,7 +7,7 @@ import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
 
 const LecturaHistoria = () => {
-    const { language, t } = useLanguage();
+    const { language, t, forceTranslationUpdate } = useLanguage();
     const { id } = useParams();
     const navigate = useNavigate();
     const [historia, setHistoria] = useState(null);
@@ -56,6 +56,7 @@ const LecturaHistoria = () => {
             console.error("❌ Error al recuperar el relato del búnker", err);
         } finally {
             setCargando(false);
+            if (forceTranslationUpdate) forceTranslationUpdate();
         }
     };
 
@@ -249,7 +250,14 @@ const LecturaHistoria = () => {
                                         const data = await res.json();
                                         const traducido = data[0].map(x => x[0]).join("");
                                         
-                                        setHistoria({ ...historia, contenido: traducido, cuerpo: traducido });
+                                        let tituloTraducido = historia.titulo;
+                                        if (historia.titulo) {
+                                            const resTitulo = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(historia.titulo)}`);
+                                            const dataTitulo = await resTitulo.json();
+                                            tituloTraducido = dataTitulo[0].map(x => x[0]).join("");
+                                        }
+
+                                        setHistoria({ ...historia, contenido: traducido, cuerpo: traducido, titulo: tituloTraducido });
                                         btn.style.display = 'none';
                                     } catch (err) {
                                         const urlTranslate = `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(historia.contenido || historia.cuerpo)}&op=translate`;
