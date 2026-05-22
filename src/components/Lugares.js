@@ -17,8 +17,29 @@ const crearIconoPulsante = (esResaltado = false) => new L.divIcon({
     popupAnchor: [0, -12]
 });
 
+const crearIconoCasos = (esResaltado = false) => new L.divIcon({
+    className: `marcador-contenedor ${esResaltado ? 'resaltado' : ''}`,
+    html: `<div style="font-size: 16px; line-height: 16px; text-align: center; filter: drop-shadow(0 0 6px red); ${esResaltado ? 'animation: pulse-red 1.5s infinite;' : ''}">💀</div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10]
+});
+
+const crearIconoEmoji = (emoji, esResaltado = false) => new L.divIcon({
+    className: `marcador-contenedor ${esResaltado ? 'resaltado' : ''}`,
+    html: `<div style="font-size: 16px; line-height: 16px; text-align: center; filter: drop-shadow(0 0 6px ${esResaltado ? 'red' : 'rgba(0,255,65,0.8)'}); ${esResaltado ? 'animation: pulse-red 1.5s infinite;' : ''}">${emoji}</div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10]
+});
+
 const iconos = {
-    hallazgos: (resaltar) => crearIconoPulsante(resaltar)
+    hallazgos: (resaltar) => crearIconoPulsante(resaltar),
+    caso: (resaltar) => crearIconoCasos(resaltar),
+    expediente: (resaltar) => crearIconoEmoji('📁', resaltar),
+    noticia: (resaltar) => crearIconoEmoji('📰', resaltar),
+    foto: (resaltar) => crearIconoEmoji('📸', resaltar),
+    lugar: (resaltar) => crearIconoEmoji('📍', resaltar)
 };
 
 const ActualizadorMapa = ({ centro, idResaltado }) => {
@@ -65,14 +86,16 @@ const Lugares = () => {
             setCargando(true);
             const resultados = await Promise.allSettled([
                 axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
-                axios.get(`${API_BASE_URL}/api/expedientes`)
+                axios.get(`${API_BASE_URL}/api/expedientes`),
+                axios.get(`${API_BASE_URL}/api/casos`)
             ]);
 
             const noticias = resultados[0].status === 'fulfilled' ? (resultados[0].value.data.data || resultados[0].value.data || []).map(p => ({ ...p, id: `noticia-${p.id}`, tipo: 'noticia' })) : [];
             const expedientes = resultados[1].status === 'fulfilled' ? (resultados[1].value.data || []).map(p => ({ ...p, id: p.id, tipo: 'expediente' })) : [];
+            const casos = resultados[2].status === 'fulfilled' ? (resultados[2].value.data || []).map(p => ({ ...p, id: `caso-${p.id}`, tipo: 'caso' })) : [];
 
-            // Prioridad: 1. Expedientes (Relatos), 2. Noticias
-            const todosLosPuntos = [...expedientes, ...noticias].filter(p => 
+            // Prioridad: 1. Casos, 2. Expedientes, 3. Noticias
+            const todosLosPuntos = [...casos, ...expedientes, ...noticias].filter(p => 
                 p && p.latitud && p.longitud && 
                 parseFloat(p.latitud) !== 0 && parseFloat(p.longitud) !== 0
             );
@@ -141,6 +164,7 @@ const Lugares = () => {
             else if (m.tipo === 'lugar') navigate('/lugares'); // O una vista de detalle si existiera
             else if (m.tipo === 'video') navigate('/videos');
             else if (m.tipo === 'expediente') navigate(`/leer-historia/${m.id}`);
+            else if (m.tipo === 'caso') navigate(`/casos-abiertos?id=${m.id.replace('caso-', '')}`);
             else navigate('/galeria'); // Fallback
         };
         const { t } = useLanguage();
@@ -212,6 +236,7 @@ const Lugares = () => {
                             if (strIdRes === strMId) esEste = true;
                             else if (strIdRes === `noticia-${strMId}` || `noticia-${strIdRes}` === strMId) esEste = true;
                             else if (strIdRes === `exp-${strMId}` || `exp-${strIdRes}` === strMId) esEste = true;
+                            else if (strIdRes === `caso-${strMId}` || `caso-${strIdRes}` === strMId) esEste = true;
                             else if (strIdRes.replace(/\D/g, '') === strMId.replace(/\D/g, '')) {
                                 // Match numérico fuerte, chequeamos coord para asegurar
                                 if (location.state && parseFloat(m.latitud).toFixed(3) === parseFloat(location.state.lat).toFixed(3)) {
@@ -226,7 +251,7 @@ const Lugares = () => {
                             <Marker
                                 key={`punto-${m.id || idx}`}
                                 position={[parseFloat(m.latitud), parseFloat(m.longitud)]}
-                                icon={iconos.hallazgos(esEste)}
+                                icon={iconos[m.tipo] ? iconos[m.tipo](esEste) : iconos.hallazgos(esEste)}
                                 zIndexOffset={esEste ? 1000 : 0}
                                 eventHandlers={{
                                     click: () => { 
@@ -244,7 +269,8 @@ const Lugares = () => {
                                     <div className="popup-bunker-v2">
                                         <div className="popup-header-tactico">
                                             <span className="status-online">
-                                                {m.tipo === 'expediente' ? t('mapDossier') : 
+                                                {m.tipo === 'caso' ? '💀 TRUE CRIME' : 
+                                                 m.tipo === 'expediente' ? t('mapDossier') : 
                                                  m.tipo === 'noticia' ? t('mapNews') : 
                                                  m.tipo === 'lugar' ? t('mapPlace') : t('mapEvidence')}
                                             </span>

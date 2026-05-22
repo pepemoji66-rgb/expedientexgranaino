@@ -13,7 +13,7 @@ const PanelAdmin = () => {
         audios: [],
         expedientes: [],
         lugares: [],
-        chat: [],
+        casos_abiertos: [],
         comentarios: [],
         archipeg: []
     });
@@ -61,7 +61,7 @@ const PanelAdmin = () => {
                 axios.get(`${API_BASE_URL}/api/lugares`),
                 axios.get(`${API_BASE_URL}/api/galeria/admin/todas-noticias`),
                 axios.get(`${API_BASE_URL}/api/audios`),
-                axios.get(`${API_BASE_URL}/api/chat-historial`),
+                axios.get(`${API_BASE_URL}/api/casos`),
                 axios.get(`${API_BASE_URL}/api/admin/todos-comentarios`),
                 axios.get(`${API_BASE_URL}/api/archipeg/solicitudes`)
             ]);
@@ -82,7 +82,7 @@ const PanelAdmin = () => {
                 lugares: parse(resL),
                 noticias: parse(resN),
                 audios: parse(resA),
-                chat: parse(resC).reverse(),
+                casos_abiertos: parse(resC),
                 comentarios: parse(resCOM),
                 archipeg: parse(resARCH)
             });
@@ -198,6 +198,7 @@ const PanelAdmin = () => {
             if (tab === 'noticias') endpoint = `${API_BASE_URL}/api/galeria/noticias/${id}`;
             if (tab === 'imagenes') endpoint = `${API_BASE_URL}/api/galeria/imagenes/${id}`;
             if (tab === 'lugares') endpoint = `${API_BASE_URL}/api/expedientes/lugares/${id}`;
+            if (tab === 'casos_abiertos') endpoint = `${API_BASE_URL}/api/casos/${id}`;
             
             let payload;
             let config = {};
@@ -295,7 +296,7 @@ const PanelAdmin = () => {
             return;
         }
 
-        const esTexto = tipoSubida === 'expedientes';
+        const esTexto = tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos';
 
         // PROTOCOLO DE VALIDACIÓN REFORZADO
         if (esTexto) {
@@ -319,7 +320,7 @@ const PanelAdmin = () => {
         if (tipoSubida === 'noticias' && editForm.fuente_url) formData.append('fuente_url', editForm.fuente_url);
         
         // Coordenadas para Lugares, Relatos y Noticias
-        if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias') {
+        if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos') {
             formData.append('latitud', editForm.latitud || 0);
             formData.append('longitud', editForm.longitud || 0);
             formData.append('ubicacion', editForm.ubicacion || '');
@@ -383,6 +384,7 @@ const PanelAdmin = () => {
                     if (t === 'imagenes') label = 'FOTOS';
                     if (t === 'noticias') label = 'NOTICIAS';
                     if (t === 'expedientes') label = 'RELATOS';
+                    if (t === 'casos_abiertos') label = '💀 CASOS ABIERTOS';
                     if (t === 'archipeg') label = '💻 ARCHIPEG';
                     
                     return (
@@ -600,7 +602,7 @@ const PanelAdmin = () => {
                                                     {!esAprobado && tab !== 'chat' && (
                                                         <button className="btn-ok" onClick={() => gestionar(id, 'aprobar', tab)}>OK</button>
                                                     )}
-                                                    {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares') && (
+                                                    {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares' || tab === 'casos_abiertos') && (
                                                         <button className="btn-edit" onClick={() => handleEditar(item)}>EDIT</button>
                                                     )}
                                                     {esAprobado && (tab === 'expedientes' || tab === 'noticias' || tab === 'imagenes') && (
@@ -660,6 +662,7 @@ const PanelAdmin = () => {
                                     <option value="audios">AUDIOS (PODCAST)</option>
                                     <option value="lugares">LUGARES (MAPA)</option>
                                     <option value="expedientes">RELATOS</option>
+                                    <option value="casos_abiertos">💀 CASOS ABIERTOS</option>
                                 </select>
                             </div>
 
@@ -703,7 +706,7 @@ const PanelAdmin = () => {
                                 </div>
                             )}
 
-                        {tipoSubida === 'expedientes' || tipoSubida === 'noticias' ? (
+                        {tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' ? (
                             <div className="form-group-admin">
                                 <label>CONTENIDO / DESCRIPCIÓN:</label>
                                 <textarea 
@@ -717,7 +720,7 @@ const PanelAdmin = () => {
                         ) : null}
 
                         <div className="form-group-admin">
-                            <label>ARCHIVO ADJUNTO {tipoSubida === 'expedientes' ? '(OPCIONAL)' : ''}:</label>
+                            <label>ARCHIVO ADJUNTO {(tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos') ? '(OPCIONAL)' : ''}:</label>
                             <input type="file" onChange={e => setArchivoSubida(e.target.files[0])} />
                         </div>
 
@@ -744,7 +747,7 @@ const PanelAdmin = () => {
                             />
                         </div>
                         
-                        {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias') && (
+                        {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos') && (
                             <div style={{ background: 'rgba(177,137,4,0.1)', padding: '15px', marginBottom: '15px', border: '1px solid #b18904' }}>
                                 <label style={{ display: 'block', color: '#b18904', fontSize: '0.8rem', marginBottom: '10px' }}>🛰️ RASTREO GPS:</label>
                                 <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>

@@ -66,6 +66,18 @@ const Hero = ({ userAuth }) => {
                 btnLink: "/archipeg"
             },
             {
+                id: 'casos-abiertos',
+                image: imgRelatos,
+                subtitle: language === 'en' ? "UNSOLVED CASES" : "CASOS ABIERTOS",
+                title: "TRUE CRIME",
+                tagline: language === 'en' ? "CRIMES & MYSTERIES" : "CRÍMENES & MISTERIOS",
+                infoTitle: language === 'en' ? "UNRESOLVED MYSTERIES" : "MISTERIOS SIN RESOLVER",
+                infoText: language === 'en' ? "Delve into the unsolved cases. Real crimes, unexplained disappearances, and mysteries that defy logic." : "Adéntrate en los casos abiertos. Crímenes reales, desapariciones inexplicables y misterios que desafían la lógica.",
+                highlight: language === 'en' ? "CLASSIFIED FILES" : "ARCHIVOS CLASIFICADOS",
+                btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
+                btnLink: "/casos-abiertos"
+            },
+            {
                 id: 0,
                 image: imgEspacio,
                 subtitle: "GLOBAL",

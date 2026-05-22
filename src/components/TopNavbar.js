@@ -72,8 +72,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
             { path: "/carta-astral", label: t('navAstral'), icon: <Sparkles size={16} /> }
         );
     }
-
-    menuItems.push({ path: "/chat", label: t('navChat'), icon: <MessageSquare size={16} /> });
+    menuItems.push({ path: "/casos-abiertos", label: "💀 TRUE CRIME", icon: <FileText size={16} /> });
 
     return (
         <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>

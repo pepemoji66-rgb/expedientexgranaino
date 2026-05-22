@@ -34,6 +34,7 @@ const tarotRoutes = require('./routes/tarot');
 const efemeridesRoutes = require('./routes/efemerides');
 const noticiasExternasRoutes = require('./routes/noticias_externas');
 const archipegRoutes = require('./routes/archipeg');
+const casosAbiertosRoutes = require('./routes/casosAbiertos');
 
 
 // --- 2.5 INICIALIZACIÓN DE LA IA Y CLOUDINARY ---
@@ -324,25 +325,6 @@ app.delete('/api/comentarios/:id', async (req, res) => {
     }
 });
 
-app.get('/api/chat-historial', async (req, res) => {
-    try {
-        const results = await db.query("SELECT * FROM chat_mensajes ORDER BY id DESC LIMIT 100");
-        res.json(results.reverse());
-    } catch (err) {
-        console.error("❌ ERROR EN EL BÚNKER (CHAT):", err);
-        res.status(200).json([]);
-    }
-});
-
-app.delete('/api/borrar-mensaje/:id', async (req, res) => {
-    try {
-        await db.execute("DELETE FROM chat_mensajes WHERE id = ?", [req.params.id]);
-        res.json({ mensaje: "Mensaje borrado del flujo." });
-    } catch (err) {
-        res.status(500).json({ error: "No se pudo borrar el mensaje" });
-    }
-});
-
 app.post('/api/chat-ia', async (req, res) => {
     const { pregunta } = req.body;
     if (!pregunta) return res.status(400).json({ respuesta: "Falta señal de entrada, hermano." });
@@ -402,6 +384,7 @@ app.use('/api/tarot', tarotRoutes(db, genAI));
 app.use('/api/efemerides', efemeridesRoutes(db, genAI));
 app.use('/api/noticias-externas', noticiasExternasRoutes(db, genAI));
 app.use('/api/archipeg', archipegRoutes(db));
+app.use('/api/casos', casosAbiertosRoutes(uploadArchivos));
 
 // --- SERVIDORES ESTÁTICOS ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -418,36 +401,9 @@ app.use('/audios-ambiente', express.static(path.join(__dirname, 'public/audios')
 
 app.use(express.static(path.join(__dirname, 'build')));
 
-// --- 9. CHAT (SOCKET.IO) ---
+// --- 9. SOCKET.IO (SIN CHAT) ---
 io.on('connection', (socket) => {
-    socket.on('enviar_mensaje', async (data) => {
-        const { nombre_usuario, mensaje, rol_usuario, tipo, destinatario } = data;
-        const sql = "INSERT INTO chat_mensajes (nombre_usuario, mensaje, rol_usuario, tipo, destinatario, fecha) VALUES (?, ?, ?, ?, ?, NOW())";
-        try {
-            const [result] = await db.execute(sql, [nombre_usuario, mensaje, rol_usuario, tipo, destinatario || null]);
-            io.emit('recibir_mensaje', { id: Number(result.lastInsertRowid), ...data, fecha: new Date() });
-
-            // ALERTA TELEGRAM: Actividad en el chat (solo si no es el sistema)
-            if (nombre_usuario !== 'SISTEMA') {
-                enviarAlertaTelegram(`📱 CHAT TÁCTICO - ${nombre_usuario}: ${mensaje.substring(0, 100)}`);
-            }
-
-            await podarRegistros('chat_mensajes', 100); // Auto-limpieza chat
-        } catch (err) {
-
-            console.error("Error en socket chat:", err);
-        }
-    });
-
-    socket.on('limpiar_chat_servidor', async () => {
-        try {
-            await db.execute("DELETE FROM chat_mensajes");
-            io.emit('chat_limpiado');
-            console.log("🧹 Frecuencia del chat limpiada por orden superior.");
-        } catch (err) {
-            console.error("Error al limpiar chat:", err);
-        }
-    });
+    // Espacio reservado para futuros módulos en tiempo real
 });
 
 // ==============================================
@@ -556,34 +512,24 @@ app.get('/audios', (req, res) => {
     });
 });
 
-// Sección de Chat (/chat) - SEO enriquecido
-app.get('/chat', (req, res) => {
+// Sección de Casos Abiertos (/casos-abiertos) - SEO enriquecido
+app.get('/casos-abiertos', (req, res) => {
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', (err, html) => {
         if (err) return res.sendFile(indexPath);
 
         const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
-    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">Sala de Comunicaciones en Tiempo Real — Búnker Expediente X Granaíno</h1>
-    <p>El <strong>canal de chat del Búnker Expediente X Granaíno</strong> es la sala de comunicaciones tácticas en tiempo real
-    donde los investigadores y agentes registrados intercambian información sobre
-    <strong>avistamientos OVNI</strong>, fenómenos paranormales y anomalías detectadas en Granada y sus alrededores.
-    La frecuencia permanece activa las 24 horas, permitiendo que la comunidad reaccione de forma inmediata
-    ante cualquier alerta de campo transmitida por los agentes sobre el terreno.
-    Los mensajes son monitorizados y archivados para su análisis posterior como parte del expediente colectivo.</p>
-    <p>Esta sala de debate es el corazón operativo de la red: aquí se coordinan las investigaciones de
-    <strong>ufología en Andalucía</strong>, se comentan en directo los casos más recientes de
-    <strong>crónicas del misterio</strong> publicados en el archivo, y se comparten coordenadas y evidencias
-    entre los miembros de la comunidad. El sistema de traducción integrado con Inteligencia Artificial
-    permite que investigadores internacionales participen sin barreras idiomáticas,
-    convirtiendo este canal en un punto de encuentro global para la investigación de
-    <strong>fenómenos paranormales y casos históricos</strong> de la provincia de Granada.</p>
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">Casos Abiertos / Unsolved Cases — True Crime y Misterio</h1>
+    <p>Adéntrate en los <strong>Casos Abiertos</strong> del Búnker. Una colección de crímenes reales, desapariciones inexplicables y misterios 
+    sin resolver (True Crime) documentados en detalle. Investigaciones que desafían la lógica y donde los principales sospechosos 
+    aún deambulan en las sombras.</p>
 </article>`;
 
         const pagina = inyectarContenidoSEO(
             html,
-            'Chat Táctico | Sala de Comunicaciones OVNI — Expediente X Granaíno',
-            'Canal de comunicaciones en tiempo real para investigadores de fenómenos paranormales en Granada. Debate sobre avistamientos OVNI, psicofonías y anomalías.',
+            'Casos Abiertos (True Crime) | Misterios sin resolver — Expediente X Granaíno',
+            'Explora casos abiertos y misterios sin resolver. Crímenes reales y desapariciones inexplicables documentados en el Búnker de Expediente X Granaíno.',
             contenidoSeo
         );
         res.send(pagina);

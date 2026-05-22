@@ -16,7 +16,7 @@ import Footer from './components/Footer';
 import Videos from './components/Videos';
 import Galeria from './components/Galeria';
 import Lugares from './components/Lugares';
-import Chat from './components/Chat';
+import CasosAbiertos from './components/CasosAbiertos';
 import Noticias from './components/Noticias';
 import Audios from './components/Audios';
 import PoliticaPrivacidad from './components/PoliticaPrivacidad';
@@ -214,7 +214,7 @@ function App() {
                 { path: "/horoscopo", label: t('navHoroscope') },
                 { path: "/tarot", label: t('navTarot') },
                 { path: "/carta-astral", label: t('navAstral') },
-                { path: "/chat", label: t('navChat') },
+                { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
                 { path: "/archipeg", label: "💻 ARCHIPEG V3" }
               ].map((route) => (
                 <li key={route.path} style={{ marginBottom: '15px' }}>
@@ -310,7 +310,7 @@ function App() {
 
               <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
               <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
-              <Route path="/chat" element={<Chat usuarioActivo={userAuth} />} />
+              <Route path="/casos-abiertos" element={<CasosAbiertos userAuth={userAuth} />} />
               <Route path="/noticias" element={<Noticias userAuth={userAuth} />} />
               <Route path="/audios" element={<Audios userAuth={userAuth} />} />
               <Route path="/privacidad" element={<PoliticaPrivacidad />} />
