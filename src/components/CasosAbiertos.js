@@ -14,6 +14,20 @@ const CasosAbiertos = ({ userAuth }) => {
     const [paginaActual, setPaginaActual] = useState(1);
     const casosPorPagina = 9;
 
+    // Formulario states
+    const [userAuth, setUserAuth] = useState(null);
+    const [nuevoTitulo, setNuevoTitulo] = useState('');
+    const [nuevoContenido, setNuevoContenido] = useState('');
+    const [latitud, setLatitud] = useState('');
+    const [longitud, setLongitud] = useState('');
+    const [busquedaLugar, setBusquedaLugar] = useState('');
+    const [cargandoSubida, setCargandoSubida] = useState(false);
+
+    useEffect(() => {
+        const sesion = localStorage.getItem('agente_sesion');
+        if (sesion) setUserAuth(JSON.parse(sesion));
+    }, []);
+
     useEffect(() => {
         cargarCasos();
     }, []);
@@ -44,6 +58,70 @@ const CasosAbiertos = ({ userAuth }) => {
             }
         } catch (err) {
             console.error("❌ Error al cargar Casos Abiertos:", err);
+        }
+    };
+
+    const obtenerUbicacion = () => {
+        if (!navigator.geolocation) return alert("GPS NO DISPONIBLE.");
+        navigator.geolocation.getCurrentPosition(pos => {
+            setLatitud(pos.coords.latitude.toFixed(6));
+            setLongitud(pos.coords.longitude.toFixed(6));
+        });
+    };
+
+    const buscarCoordenadas = async () => {
+        if (!busquedaLugar) return;
+        setCargandoSubida(true);
+        try {
+            const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${busquedaLugar}`);
+            if (res.data && res.data.length > 0) {
+                const { lat, lon } = res.data[0];
+                setLatitud(parseFloat(lat).toFixed(6));
+                setLongitud(parseFloat(lon).toFixed(6));
+                alert(`📍 Localización fijada: ${res.data[0].display_name}`);
+            } else {
+                alert("❌ No se ha detectado el sector en el radar.");
+            }
+        } catch (err) {
+            alert("❌ Fallo en la conexión con el satélite geográfico.");
+        } finally {
+            setCargandoSubida(false);
+        }
+    };
+
+    const enviarCaso = async (e) => {
+        e.preventDefault();
+        if (!userAuth) return alert("Identidad no verificada. Inicia sesión como agente.");
+
+        const formData = new FormData();
+        formData.append('titulo', nuevoTitulo);
+        formData.append('contenido', nuevoContenido);
+        formData.append('usuario_nombre', userAuth.nombre);
+        formData.append('latitud', latitud || 0);
+        formData.append('longitud', longitud || 0);
+        
+        const fileInput = document.getElementById('archivo-caso');
+        if (fileInput && fileInput.files[0]) {
+            formData.append('imagen', fileInput.files[0]);
+        }
+
+        try {
+            setCargandoSubida(true);
+            await axios.post(`${API_BASE_URL}/api/casos`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            alert("🚀 CASO ENVIADO CON ÉXITO. EL BÚNKER DEBERÁ APROBARLO ANTES DE HACERSE PÚBLICO.");
+            setNuevoTitulo('');
+            setNuevoContenido('');
+            setLatitud('');
+            setLongitud('');
+            setBusquedaLugar('');
+            if (fileInput) fileInput.value = "";
+        } catch (err) {
+            console.error("Error al subir caso:", err);
+            alert("❌ ERROR AL SUBIR EL CASO.");
+        } finally {
+            setCargandoSubida(false);
         }
     };
 
@@ -168,6 +246,85 @@ const CasosAbiertos = ({ userAuth }) => {
                     <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo(0,0); }}>ATRÁS</button>
                     <span>PÁG {paginaActual} / {totalPaginas}</span>
                     <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0,0); }}>SIGUIENTE</button>
+                </div>
+            )}
+
+            {/* FORMULARIO DE ENVÍO DE CASOS */}
+            {userAuth && (
+                <div className="contenedor-envio-expediente fade-in" style={{ marginTop: '40px', borderTop: '2px solid #333', paddingTop: '40px' }}>
+                    <div style={{ background: 'rgba(255,177,0,0.1)', border: '1px solid #ffb100', padding: '15px', marginBottom: '20px', borderRadius: '5px', textAlign: 'center' }}>
+                        <p style={{ color: '#ffb100', fontSize: '0.9rem', fontFamily: 'monospace', margin: 0 }}>
+                            ⚠️ ATENCIÓN AGENTE: CUALQUIER DOSSIER DE "TRUE CRIME" APORTADO SERÁ CLASIFICADO Y AUDITADO POR LA ADMINISTRACIÓN DEL BÚNKER ANTES DE HACERSE PÚBLICO EN EL MAPA.
+                        </p>
+                    </div>
+                    <h2 className="titulo-neon-p">
+                        {language === 'en' ? 'SUBMIT TRUE CRIME CASE' : 'APORTAR CASO TRUE CRIME'}
+                    </h2>
+                    <form onSubmit={enviarCaso} className="form-expediente">
+                        <input
+                            type="text"
+                            className="input-bunker-exp"
+                            placeholder={language === 'en' ? 'Case Title...' : 'Título del caso...'}
+                            value={nuevoTitulo}
+                            onChange={(e) => setNuevoTitulo(e.target.value)}
+                            required
+                        />
+                        <textarea
+                            className="textarea-bunker-exp"
+                            placeholder={language === 'en' ? 'Case details...' : 'Detalles del caso...'}
+                            value={nuevoContenido}
+                            onChange={(e) => setNuevoContenido(e.target.value)}
+                            required
+                        ></textarea>
+                        
+                        {/* BUSCADOR DE COORDENADAS */}
+                        <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
+                            <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>
+                                {language === 'en' ? 'GPS RADAR SEARCH' : 'RASTREO GPS'}
+                            </label>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <input 
+                                    type="text" 
+                                    value={busquedaLugar} 
+                                    onChange={e => setBusquedaLugar(e.target.value)} 
+                                    placeholder={language === 'en' ? 'Search city or zone...' : 'Buscar ciudad o zona...'}
+                                    className="input-bunker-exp"
+                                    style={{ flex: 1, marginBottom: 0 }}
+                                />
+                                <button type="button" onClick={buscarCoordenadas} style={{ padding: '10px', background: 'var(--color-principal)', color: '#000', border: 'none', padding: '0 15px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                    {language === 'en' ? 'SEARCH' : 'RASTREAR'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', alignItems: 'end', marginBottom: '15px' }}>
+                            <div>
+                                <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>LATITUD</label>
+                                <input type="number" step="any" className="input-bunker-exp" value={latitud} onChange={e => setLatitud(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>LONGITUD</label>
+                                <input type="number" step="any" className="input-bunker-exp" value={longitud} onChange={e => setLongitud(e.target.value)} />
+                            </div>
+                            <button type="button" onClick={obtenerUbicacion} style={{
+                                padding: '10px', background: 'transparent', border: '1px solid var(--color-principal)', color: 'var(--color-principal)',
+                                fontFamily: 'monospace', fontSize: '0.65rem', cursor: 'pointer', marginBottom: '10px'
+                            }}>
+                                {language === 'en' ? 'CURRENT POS' : 'USAR MI POSICIÓN'}
+                            </button>
+                        </div>
+
+                        <div className="form-group-exp">
+                            <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem', display: 'block', marginBottom: '5px' }}>
+                                {language === 'en' ? 'EVIDENCE IMAGE (OPTIONAL)' : 'IMAGEN DE EVIDENCIA (OPCIONAL)'}
+                            </label>
+                            <input type="file" id="archivo-caso" className="input-file-exp" style={{ color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '15px' }} />
+                        </div>
+
+                        <button type="submit" className="btn-enviar-expediente" disabled={cargandoSubida}>
+                            {cargandoSubida ? 'TRANSMITIENDO...' : (language === 'en' ? 'SUBMIT TO BUNKER' : 'ENVIAR AL BÚNKER')}
+                        </button>
+                    </form>
                 </div>
             )}
 

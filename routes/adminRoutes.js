@@ -95,8 +95,10 @@ module.exports = (db) => {
       sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, estado, tipo, imagen_url, latitud, longitud, fecha) VALUES (?, ?, ?, 'aprobado', ?, ?, ?, ?, NOW())";
       params = [titulo, contenido, (tipo_relato === 'jefe' ? 'ADMINISTRADOR' : 'AGENTE'), tipo_relato, nombreArchivo, latitud || 0, longitud || 0];
     } else if (tipo === 'casos_abiertos') {
-      sql = "INSERT INTO casos_abiertos (titulo, contenido, imagen_url, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, 'aprobado', NOW())";
-      params = [titulo, contenido || '', nombreArchivo, latitud || 0, longitud || 0];
+      const titulo_en = req.body.titulo_en || null;
+      const contenido_en = req.body.contenido_en || null;
+      sql = "INSERT INTO casos_abiertos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW())";
+      params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0];
     }
 
     if (!sql) {

@@ -41,8 +41,10 @@ const PanelAdmin = () => {
     // ESTADOS DE FORMULARIO DE SUBIDA
     const [tipoSubida, setTipoSubida] = useState('imagenes');
     const [tituloSubida, setTituloSubida] = useState('');
-    const [archivoSubida, setArchivoSubida] = useState(null);
+    const [tituloEnSubida, setTituloEnSubida] = useState('');
     const [contenidoSubida, setContenidoSubida] = useState('');
+    const [contenidoEnSubida, setContenidoEnSubida] = useState('');
+    const [archivoSubida, setArchivoSubida] = useState(null);
     const [mensajeSubida, setMensajeSubida] = useState('');
     const [busquedaLugar, setBusquedaLugar] = useState('');
     const [archivosCapturas, setArchivosCapturas] = useState([]);
@@ -172,7 +174,9 @@ const PanelAdmin = () => {
         setItemParaEditar(item);
         setEditForm({
             titulo: item.titulo || item.nombre || '',
+            titulo_en: item.titulo_en || '',
             contenido: item.contenido || item.descripcion || item.cuerpo || '',
+            contenido_en: item.contenido_en || '',
             latitud: item.latitud || 0,
             longitud: item.longitud || 0,
             capturas: item.capturas || '',
@@ -317,6 +321,10 @@ const PanelAdmin = () => {
         formData.append('titulo', tituloSubida);
         formData.append('tipo', tipoSubida);
         if (contenidoSubida) formData.append('contenido', contenidoSubida);
+        if (tipoSubida === 'casos_abiertos') {
+            if (tituloEnSubida) formData.append('titulo_en', tituloEnSubida);
+            if (contenidoEnSubida) formData.append('contenido_en', contenidoEnSubida);
+        }
         if (tipoSubida === 'noticias' && editForm.fuente_url) formData.append('fuente_url', editForm.fuente_url);
         
         // Coordenadas para Lugares, Relatos y Noticias
@@ -345,8 +353,10 @@ const PanelAdmin = () => {
             await axios.post(`${API_BASE_URL}/api/admin/admin/upload`, formData);
             setMensajeSubida("✅ REGISTRO CLASIFICADO");
             setTituloSubida('');
+            setTituloEnSubida('');
             setArchivoSubida(null);
             setContenidoSubida('');
+            setContenidoEnSubida('');
             setUrlExternaAdmin('');
             cargarDatos();
         } catch (err) {
@@ -680,6 +690,13 @@ const PanelAdmin = () => {
                                 <label>TÍTULO:</label>
                                 <input type="text" value={tituloSubida} onChange={e => setTituloSubida(e.target.value)} placeholder="Título del registro..." />
                             </div>
+                            
+                            {tipoSubida === 'casos_abiertos' && (
+                                <div className="form-group-admin">
+                                    <label style={{ color: '#00d4ff' }}>TÍTULO (INGLÉS):</label>
+                                    <input type="text" value={tituloEnSubida} onChange={e => setTituloEnSubida(e.target.value)} placeholder="Title in English..." style={{ background: '#000', color: '#00d4ff', border: '1px solid #333' }} />
+                                </div>
+                            )}
                         </div>
                         
                             {tipoSubida === 'noticias' && (
@@ -707,16 +724,30 @@ const PanelAdmin = () => {
                             )}
 
                         {tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' ? (
-                            <div className="form-group-admin">
-                                <label>CONTENIDO / DESCRIPCIÓN:</label>
-                                <textarea 
-                                    className="textarea-bunker-admin"
-                                    value={contenidoSubida} 
-                                    onChange={e => setContenidoSubida(e.target.value)} 
-                                    placeholder="Redacta el informe..."
-                                    style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px' }}
-                                ></textarea>
-                            </div>
+                            <>
+                                <div className="form-group-admin">
+                                    <label>CONTENIDO / DESCRIPCIÓN:</label>
+                                    <textarea 
+                                        className="textarea-bunker-admin"
+                                        value={contenidoSubida} 
+                                        onChange={e => setContenidoSubida(e.target.value)} 
+                                        placeholder="Redacta el informe..."
+                                        style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px' }}
+                                    ></textarea>
+                                </div>
+                                {tipoSubida === 'casos_abiertos' && (
+                                    <div className="form-group-admin" style={{ marginTop: '10px' }}>
+                                        <label style={{ color: '#00d4ff' }}>CONTENIDO (INGLÉS):</label>
+                                        <textarea 
+                                            className="textarea-bunker-admin"
+                                            value={contenidoEnSubida} 
+                                            onChange={e => setContenidoEnSubida(e.target.value)} 
+                                            placeholder="Translate the content to English..."
+                                            style={{ width: '100%', minHeight: '100px', background: '#000', color: '#00d4ff', border: '1px solid #333', padding: '10px' }}
+                                        ></textarea>
+                                    </div>
+                                )}
+                            </>
                         ) : null}
 
                         <div className="form-group-admin">
@@ -811,6 +842,17 @@ const PanelAdmin = () => {
                                 style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
                             />
 
+                            {tab === 'casos_abiertos' && (
+                                <>
+                                    <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>TÍTULO (INGLÉS):</label>
+                                    <input 
+                                        type="text" value={editForm.titulo_en} 
+                                        onChange={e => setEditForm({...editForm, titulo_en: e.target.value})} 
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+                                </>
+                            )}
+
                             {(tab === 'expedientes') && (
                                 <>
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>TIPO DE RELATO:</label>
@@ -829,6 +871,17 @@ const PanelAdmin = () => {
                                         onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
                                         style={{ width: '100%', minHeight: '150px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
                                     />
+                                    
+                                    {tab === 'casos_abiertos' && (
+                                        <>
+                                            <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>CONTENIDO (INGLÉS):</label>
+                                            <textarea 
+                                                value={editForm.contenido_en} 
+                                                onChange={e => setEditForm({...editForm, contenido_en: e.target.value})} 
+                                                style={{ width: '100%', minHeight: '150px', background: '#000', color: '#00d4ff', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
+                                            />
+                                        </>
+                                    )}
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>IMAGEN (OPCIONAL):</label>
                                     <input 
                                         type="file" 
