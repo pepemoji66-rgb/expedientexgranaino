@@ -22,6 +22,8 @@ const Videos = ({ userAuth }) => {
     const [longitud, setLongitud] = useState('');
     const [cargando, setCargando] = useState(false);
     const [capturaExpandida, setCapturaExpandida] = useState(null);
+    const [paginaActual, setPaginaActual] = useState(1);
+    const videosPorPagina = 12;
 
     // --- ESTADOS DE ZOOM Y PAN ---
     const [zoom, setZoom] = useState(1);
@@ -187,6 +189,12 @@ const Videos = ({ userAuth }) => {
         setCapturaExpandida(url);
     };
 
+    const videosRadar = Array.isArray(videos) ? videos.filter(v => !v.url.match(/^[1234]\.mp4$/)) : [];
+    const indexOfLastVideo = paginaActual * videosPorPagina;
+    const indexOfFirstVideo = indexOfLastVideo - videosPorPagina;
+    const videosPaginados = videosRadar.slice(indexOfFirstVideo, indexOfLastVideo);
+    const totalPaginas = Math.ceil(videosRadar.length / videosPorPagina);
+
     return (
         <div className="videos-container fade-in" style={{
             display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: '20px'
@@ -263,8 +271,8 @@ const Videos = ({ userAuth }) => {
             </div>
 
             <div className="grid-videos-pro">
-                {Array.isArray(videos) && videos.length > 0 ? (
-                    videos.filter(v => !v.url.match(/^[1234]\.mp4$/)).map((vid) => (
+                {videosRadar.length > 0 ? (
+                    videosPaginados.map((vid) => (
                         <div key={vid.id} id={`video-${vid.id}`} className="video-card-dossier">
                             <div className="video-frame-wrapper">
                                 {vid.url && !vid.url.includes('http') ? (
@@ -331,6 +339,30 @@ const Videos = ({ userAuth }) => {
                     </div>
                 )}
             </div>
+
+            {totalPaginas > 1 && (
+                <div className="paginacion-radar" style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '40px', marginBottom: '20px' }}>
+                    <button 
+                        onClick={() => { setPaginaActual(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        disabled={paginaActual === 1}
+                        className="btn-mando-pro btn-secondary-pro"
+                        style={{ opacity: paginaActual === 1 ? 0.5 : 1, cursor: paginaActual === 1 ? 'not-allowed' : 'pointer' }}
+                    >
+                        ANTERIOR
+                    </button>
+                    <span style={{ color: 'var(--color-principal)', alignSelf: 'center', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                        PÁG {paginaActual} / {totalPaginas}
+                    </span>
+                    <button 
+                        onClick={() => { setPaginaActual(p => Math.min(totalPaginas, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        disabled={paginaActual === totalPaginas}
+                        className="btn-mando-pro btn-secondary-pro"
+                        style={{ opacity: paginaActual === totalPaginas ? 0.5 : 1, cursor: paginaActual === totalPaginas ? 'not-allowed' : 'pointer' }}
+                    >
+                        SIGUIENTE
+                    </button>
+                </div>
+            )}
 
             {/* FORMULARIO DE CARGA */}
             <div id="formulario-subida" style={{

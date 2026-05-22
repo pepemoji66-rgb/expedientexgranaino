@@ -37,6 +37,10 @@
     /* Evitar desborde en móvil */
     min-width: 0;
     overflow: hidden;
+    /* FIX DESCUADRE: Flexbox para alinear botones abajo */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .video-card-dossier:hover {
@@ -63,6 +67,13 @@
     background: #000;
 }
 
+.video-info-pro {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-top: 15px;
+}
+
 .video-info-pro h3 {
     color: #fff;
     font-size: 1.1rem;
@@ -71,6 +82,7 @@
     letter-spacing: 1px;
     margin-bottom: 15px;
     word-break: break-word;
+    flex-grow: 1; /* Empuja los botones abajo */
 }
 
 .video-meta-pro {
