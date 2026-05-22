@@ -237,14 +237,6 @@ const Lugares = () => {
                             else if (strIdRes === `noticia-${strMId}` || `noticia-${strIdRes}` === strMId) esEste = true;
                             else if (strIdRes === `exp-${strMId}` || `exp-${strIdRes}` === strMId) esEste = true;
                             else if (strIdRes === `caso-${strMId}` || `caso-${strIdRes}` === strMId) esEste = true;
-                            else if (strIdRes.replace(/\D/g, '') === strMId.replace(/\D/g, '')) {
-                                // Match numérico fuerte, chequeamos coord para asegurar
-                                if (location.state && parseFloat(m.latitud).toFixed(3) === parseFloat(location.state.lat).toFixed(3)) {
-                                    esEste = true;
-                                } else if (!location.state) { // Por si viene de localStorage
-                                    esEste = true;
-                                }
-                            }
                         }
 
                         return (
