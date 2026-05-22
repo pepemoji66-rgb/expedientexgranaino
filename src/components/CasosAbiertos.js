@@ -15,18 +15,12 @@ const CasosAbiertos = ({ userAuth }) => {
     const casosPorPagina = 9;
 
     // Formulario states
-    const [userAuth, setUserAuth] = useState(null);
     const [nuevoTitulo, setNuevoTitulo] = useState('');
     const [nuevoContenido, setNuevoContenido] = useState('');
     const [latitud, setLatitud] = useState('');
     const [longitud, setLongitud] = useState('');
     const [busquedaLugar, setBusquedaLugar] = useState('');
     const [cargandoSubida, setCargandoSubida] = useState(false);
-
-    useEffect(() => {
-        const sesion = localStorage.getItem('agente_sesion');
-        if (sesion) setUserAuth(JSON.parse(sesion));
-    }, []);
 
     useEffect(() => {
         cargarCasos();
