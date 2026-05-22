@@ -40,7 +40,16 @@ module.exports = (db) => {
   });
 
   // --- RUTA DE CARGA PARA EL ADMIN ---
-  router.post('/admin/upload', upload.single('archivo'), async (req, res) => {
+  router.post('/admin/upload', (req, res, next) => {
+    upload.single('archivo')(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).send({ message: `⚠️ Límite excedido o error de archivo: ${err.message}` });
+      } else if (err) {
+        return res.status(500).send({ message: `⚠️ Error de Cloudinary/Servidor: El archivo es demasiado pesado o el formato no es válido.` });
+      }
+      next();
+    });
+  }, async (req, res) => {
     const { tipo, titulo, contenido, url_externa, latitud, longitud } = req.body;
     
     if (!req.file && tipo !== 'expedientes' && !url_externa) {
