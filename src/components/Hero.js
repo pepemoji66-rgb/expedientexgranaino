@@ -15,6 +15,7 @@ const Hero = ({ userAuth }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [ultimosExpedientes, setUltimosExpedientes] = useState([]);
     const [ultimasNoticias, setUltimasNoticias] = useState([]);
+    const [ultimosCasos, setUltimosCasos] = useState([]);
 
     useEffect(() => {
         const fetchUltimos = async () => {
@@ -28,6 +29,11 @@ const Hero = ({ userAuth }) => {
                 const resNot = await fetch(`${API_BASE_URL}/api/noticias/ultimas`);
                 const dataNot = await resNot.json();
                 if (Array.isArray(dataNot)) setUltimasNoticias(dataNot);
+
+                // Rastrear últimos casos abiertos
+                const resCasos = await fetch(`${API_BASE_URL}/api/casos-abiertos`);
+                const dataCasos = await resCasos.json();
+                if (Array.isArray(dataCasos)) setUltimosCasos(dataCasos.slice(0, 3));
 
             } catch (err) {
                 console.error("Error al captar últimas actualizaciones para Hero:", err);
@@ -185,6 +191,27 @@ const Hero = ({ userAuth }) => {
             });
         });
 
+        // Mapear Casos Abiertos
+        ultimosCasos.forEach(caso => {
+            alertasRecientes.push({
+                _timestamp: new Date(caso.fecha || Date.now()).getTime(),
+                slideData: {
+                    id: `nuevo-caso-${caso.id}`,
+                    image: caso.imagen_url 
+                        ? (caso.imagen_url.startsWith('http') ? caso.imagen_url : `${API_BASE_URL}/imagenes/${caso.imagen_url}`)
+                        : imgRelatos,
+                    subtitle: language === 'en' ? "NEW TRUE CRIME" : "NUEVO CASO ABIERTO",
+                    title: (caso.titulo || 'MISTERIO SIN RESOLVER').toUpperCase(),
+                    tagline: "CRIMEN Y MISTERIO EN EL BÚNKER",
+                    infoTitle: "ARCHIVO CRIMINAL RECIENTE",
+                    infoText: "Se ha abierto un nuevo expediente criminal o caso sin resolver. Accede al dossier de investigación.",
+                    highlight: "AYUDA A RESOLVER ESTE CASO",
+                    btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
+                    btnLink: "/casos-abiertos"
+                }
+            });
+        });
+
         // Ordenar por más reciente y coger solo los 2 últimos para no saturar el slider
         alertasRecientes.sort((a, b) => b._timestamp - a._timestamp);
         const top2Alertas = alertasRecientes.slice(0, 2).map(item => item.slideData);
@@ -192,7 +219,7 @@ const Hero = ({ userAuth }) => {
         // Prepend a los slides originales
         setSlides([...top2Alertas, ...getSlides()]);
         
-    }, [ultimosExpedientes, ultimasNoticias, language]); // Escuchamos language para refrescar textos
+    }, [ultimosExpedientes, ultimasNoticias, ultimosCasos, language]); // Escuchamos language para refrescar textos
 
     useEffect(() => {
         const timer = setInterval(() => {
