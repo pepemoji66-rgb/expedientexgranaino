@@ -31,7 +31,7 @@ const Hero = ({ userAuth }) => {
                 if (Array.isArray(dataNot)) setUltimasNoticias(dataNot);
 
                 // Rastrear últimos casos abiertos
-                const resCasos = await fetch(`${API_BASE_URL}/api/casos-abiertos`);
+                const resCasos = await fetch(`${API_BASE_URL}/api/casos`);
                 const dataCasos = await resCasos.json();
                 if (Array.isArray(dataCasos)) setUltimosCasos(dataCasos.slice(0, 3));
 
