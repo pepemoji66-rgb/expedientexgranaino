@@ -8,7 +8,7 @@ import './Indice.css';
 
 
 const Indice = ({ userAuth, stats, setTema }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [showDossier, setShowDossier] = React.useState(false);
 
     const coloresDisponibles = [
