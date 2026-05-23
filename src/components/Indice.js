@@ -158,6 +158,21 @@ const Indice = ({ userAuth, stats, setTema }) => {
             {/* === RADAR DE INTELIGENCIA EXTERNA (RSS EN VIVO) === */}
             <NoticiasExternas />
 
+            {/* KO-FI DISCRETO */}
+            <div style={{ textAlign: 'center', margin: '30px 0', opacity: 0.85 }}>
+                <a href="https://ko-fi.com/pepemoji66" target="_blank" rel="noopener noreferrer" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    backgroundColor: 'rgba(255, 94, 91, 0.1)', border: '1px solid rgba(255, 94, 91, 0.3)',
+                    color: '#ff5e5b', padding: '8px 18px', borderRadius: '20px',
+                    textDecoration: 'none', fontSize: '0.85rem', transition: 'all 0.3s ease'
+                }} 
+                onMouseOver={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.backgroundColor = 'rgba(255, 94, 91, 0.2)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.backgroundColor = 'rgba(255, 94, 91, 0.1)'; }}
+                >
+                    ☕ <span>{language === 'en' ? 'Support the project (Ko-fi)' : 'Invítame a un café (Ko-fi)'}</span>
+                </a>
+            </div>
+
             <Comentarios userAuth={userAuth} />
         </div>
     );
