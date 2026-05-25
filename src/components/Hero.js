@@ -151,75 +151,44 @@ const Hero = ({ userAuth }) => {
     useEffect(() => {
         let alertasRecientes = [];
 
-        // Mapear noticias
-        ultimasNoticias.forEach(noticia => {
-            alertasRecientes.push({
-                _timestamp: new Date(noticia.fecha || Date.now()).getTime(),
-                slideData: {
-                    id: `nueva-not-${noticia.id}`,
-                    image: noticia.imagen_url || imgRelatos,
-                    subtitle: t('heroLatestNews'),
-                    title: (noticia.titulo || 'NUEVA NOTICIA').toUpperCase(),
-                    tagline: "ACTUALIDAD EN EL BÚNKER",
-                    infoTitle: "NUEVO ARCHIVO DISPONIBLE",
-                    infoText: "Se ha detectado nueva actividad en el sector de noticias. Accede al informe completo.",
-                    highlight: "¡MANTENTE AL TANTO DE LOS ÚLTIMOS SUCESOS!",
-                    btnText: t('heroNewsBtn'),
-                    btnLink: "/noticias"
-                }
-            });
+        // Slide fijo de Audios Diarios
+        alertasRecientes.push({
+            id: 'novedad-audios',
+            image: imgEvidencias, // usar imagen de evidencias o relatos
+            subtitle: language === 'en' ? "NEW FEATURE" : "NOVEDAD EN EL BÚNKER",
+            title: language === 'en' ? "DAILY AUDIO DOSSIERS" : "AUDIOS DIARIOS",
+            tagline: language === 'en' ? "LISTEN TO THE EVIDENCE" : "ESCUCHA LOS EXPEDIENTES",
+            infoTitle: language === 'en' ? "NEW EXPERIENCES UPLOADED DAILY" : "NUEVOS AUDIOS CADA DÍA",
+            infoText: language === 'en' 
+                ? "Every day we will upload narrated audio files corresponding to the dossiers. Now you can listen to them anywhere instead of just reading." 
+                : "Cada día iremos subiendo los audios correspondientes a los expedientes. Para que no solo tengas que leerlos, sino que también puedas escucharlos donde quieras.",
+            highlight: language === 'en' ? "AVAILABLE IN THE AUDIO SECTION" : "DISPONIBLES EN LA SECCIÓN DE AUDIOS",
+            btnText: language === 'en' ? "LISTEN NOW" : "ESCUCHAR AHORA",
+            btnLink: "/audios"
         });
 
         // Mapear expedientes (solo si tienen imagen si es posible, pero por defecto los mapeamos)
         ultimosExpedientes.forEach(expediente => {
             alertasRecientes.push({
-                _timestamp: new Date(expediente.fecha || Date.now()).getTime(),
-                slideData: {
-                    id: `nuevo-exp-${expediente.id}`,
-                    image: expediente.imagen_url 
-                        ? (expediente.imagen_url.startsWith('http') ? expediente.imagen_url : `${API_BASE_URL}/imagenes/${expediente.imagen_url}`)
-                        : imgEspacio,
-                    subtitle: t('heroLatestExp'),
-                    title: (expediente.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
-                    tagline: "NUEVO EXPEDIENTE DESCLASIFICADO",
-                    infoTitle: "ARCHIVO RECIENTE",
-                    infoText: `El agente ${(expediente.usuario_nombre || 'Desconocido').toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
-                    highlight: "NUEVA EVIDENCIA DISPONIBLE EN EL ARCHIVO",
-                    btnText: t('heroExpBtn'),
-                    btnLink: "/expedientes"
-                }
+                id: `nuevo-exp-${expediente.id}`,
+                image: expediente.imagen_url 
+                    ? (expediente.imagen_url.startsWith('http') ? expediente.imagen_url : `${API_BASE_URL}/imagenes/${expediente.imagen_url}`)
+                    : imgEspacio,
+                subtitle: t('heroLatestExp'),
+                title: (expediente.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
+                tagline: "NUEVO EXPEDIENTE DESCLASIFICADO",
+                infoTitle: "ARCHIVO RECIENTE",
+                infoText: `El agente ${(expediente.usuario_nombre || 'Desconocido').toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
+                highlight: "NUEVA EVIDENCIA DISPONIBLE EN EL ARCHIVO",
+                btnText: t('heroExpBtn'),
+                btnLink: "/expedientes"
             });
         });
-
-        // Mapear Casos Abiertos
-        ultimosCasos.forEach(caso => {
-            alertasRecientes.push({
-                _timestamp: new Date(caso.fecha || Date.now()).getTime(),
-                slideData: {
-                    id: `nuevo-caso-${caso.id}`,
-                    image: caso.imagen_url 
-                        ? (caso.imagen_url.startsWith('http') ? caso.imagen_url : `${API_BASE_URL}/imagenes/${caso.imagen_url}`)
-                        : imgRelatos,
-                    subtitle: language === 'en' ? "NEW TRUE CRIME" : "NUEVO CASO ABIERTO",
-                    title: (caso.titulo || 'MISTERIO SIN RESOLVER').toUpperCase(),
-                    tagline: "CRIMEN Y MISTERIO EN EL BÚNKER",
-                    infoTitle: "ARCHIVO CRIMINAL RECIENTE",
-                    infoText: "Se ha abierto un nuevo expediente criminal o caso sin resolver. Accede al dossier de investigación.",
-                    highlight: "AYUDA A RESOLVER ESTE CASO",
-                    btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
-                    btnLink: "/casos-abiertos"
-                }
-            });
-        });
-
-        // Ordenar por más reciente y coger solo los 2 últimos para no saturar el slider
-        alertasRecientes.sort((a, b) => b._timestamp - a._timestamp);
-        const top2Alertas = alertasRecientes.slice(0, 2).map(item => item.slideData);
 
         // Prepend a los slides originales
-        setSlides([...top2Alertas, ...getSlides()]);
+        setSlides([...alertasRecientes.slice(0, 3), ...getSlides()]);
         
-    }, [ultimosExpedientes, ultimasNoticias, ultimosCasos, language]); // Escuchamos language para refrescar textos
+    }, [ultimosExpedientes, language]); // Escuchamos language para refrescar textos
 
     useEffect(() => {
         const timer = setInterval(() => {
