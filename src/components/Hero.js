@@ -48,6 +48,13 @@ const Hero = ({ userAuth }) => {
                     todasNovedades = todasNovedades.concat(dataVideos.map(x => ({ ...x, type: 'video', timestamp: new Date(x.fecha).getTime() })));
                 }
 
+                // 5. Casos Abiertos (True Crime)
+                const resCasos = await fetch(`${API_BASE_URL}/api/casos`);
+                const dataCasos = await resCasos.json();
+                if (Array.isArray(dataCasos)) {
+                    todasNovedades = todasNovedades.concat(dataCasos.map(x => ({ ...x, type: 'caso', timestamp: new Date(x.fecha).getTime() })));
+                }
+
                 // Ordenar por fecha y coger los 2 más recientes
                 todasNovedades.sort((a, b) => b.timestamp - a.timestamp);
                 setNovedadesGlobales(todasNovedades.slice(0, 2));
@@ -221,6 +228,19 @@ const Hero = ({ userAuth }) => {
                     btnText: language === 'en' ? "WATCH VIDEO" : "VER VÍDEO",
                     btnLink: "/galeria"
                 });
+            } else if (item.type === 'caso') {
+                alertasRecientes.push({
+                    id: `nuevo-caso-${item.id}`,
+                    image: item.imagen_url ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`) : imgRelatos,
+                    subtitle: language === 'en' ? "NEW UNSOLVED CASE" : "NUEVO CASO ABIERTO",
+                    title: (item.titulo || 'TRUE CRIME DOSSIER').toUpperCase(),
+                    tagline: language === 'en' ? "CRIMES & MYSTERIES" : "CRÍMENES Y MISTERIOS",
+                    infoTitle: language === 'en' ? "NEW DOSSIER" : "NUEVO DOSSIER",
+                    infoText: language === 'en' ? "A new true crime dossier has been opened." : "Se ha abierto un nuevo dossier de un crimen o misterio sin resolver.",
+                    highlight: language === 'en' ? "CLASSIFIED FILE" : "ARCHIVO CLASIFICADO",
+                    btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
+                    btnLink: "/casos-abiertos"
+                });
             }
         });
 
@@ -254,7 +274,7 @@ const Hero = ({ userAuth }) => {
                 <div className="action-buttons-group">
                     {novedadesGlobales.length > 0 && (
                         <Link 
-                            to={novedadesGlobales[0].type === 'noticia' ? "/noticias" : novedadesGlobales[0].type === 'audio' ? "/audios" : novedadesGlobales[0].type === 'video' ? "/galeria" : "/expedientes"} 
+                            to={novedadesGlobales[0].type === 'noticia' ? "/noticias" : novedadesGlobales[0].type === 'audio' ? "/audios" : novedadesGlobales[0].type === 'video' ? "/galeria" : novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : "/expedientes"} 
                             className="btn-nuevo-archivo-blink"
                         >
                             <span className="blink-dot"></span> {t('heroNewFile')}
