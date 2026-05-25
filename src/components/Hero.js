@@ -13,27 +13,44 @@ import imgRelatos from '../assets/misterio_relatos.png';
 const Hero = ({ userAuth }) => {
     const { t, toggleLanguage, language } = useLanguage();
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [ultimosExpedientes, setUltimosExpedientes] = useState([]);
-    const [ultimasNoticias, setUltimasNoticias] = useState([]);
-    const [ultimosCasos, setUltimosCasos] = useState([]);
+    const [novedadesGlobales, setNovedadesGlobales] = useState([]);
 
     useEffect(() => {
         const fetchUltimos = async () => {
             try {
-                // Rastrear últimos expedientes
+                let todasNovedades = [];
+
+                // 1. Expedientes
                 const resExp = await fetch(`${API_BASE_URL}/api/expedientes/ultimos`);
                 const dataExp = await resExp.json();
-                if (Array.isArray(dataExp)) setUltimosExpedientes(dataExp);
+                if (Array.isArray(dataExp)) {
+                    todasNovedades = todasNovedades.concat(dataExp.map(x => ({ ...x, type: 'expediente', timestamp: new Date(x.fecha).getTime() })));
+                }
 
-                // Rastrear últimas noticias
+                // 2. Noticias
                 const resNot = await fetch(`${API_BASE_URL}/api/noticias/ultimas`);
                 const dataNot = await resNot.json();
-                if (Array.isArray(dataNot)) setUltimasNoticias(dataNot);
+                if (Array.isArray(dataNot)) {
+                    todasNovedades = todasNovedades.concat(dataNot.map(x => ({ ...x, type: 'noticia', timestamp: new Date(x.fecha).getTime() })));
+                }
 
-                // Rastrear últimos casos abiertos
-                const resCasos = await fetch(`${API_BASE_URL}/api/casos`);
-                const dataCasos = await resCasos.json();
-                if (Array.isArray(dataCasos)) setUltimosCasos(dataCasos.slice(0, 3));
+                // 3. Audios
+                const resAudios = await fetch(`${API_BASE_URL}/api/audios/audios-publicos`);
+                const dataAudios = await resAudios.json();
+                if (Array.isArray(dataAudios)) {
+                    todasNovedades = todasNovedades.concat(dataAudios.map(x => ({ ...x, type: 'audio', timestamp: new Date(x.fecha_subida).getTime() })));
+                }
+
+                // 4. Videos
+                const resVideos = await fetch(`${API_BASE_URL}/api/videos/publicos`);
+                const dataVideos = await resVideos.json();
+                if (Array.isArray(dataVideos)) {
+                    todasNovedades = todasNovedades.concat(dataVideos.map(x => ({ ...x, type: 'video', timestamp: new Date(x.fecha).getTime() })));
+                }
+
+                // Ordenar por fecha y coger los 2 más recientes
+                todasNovedades.sort((a, b) => b.timestamp - a.timestamp);
+                setNovedadesGlobales(todasNovedades.slice(0, 2));
 
             } catch (err) {
                 console.error("Error al captar últimas actualizaciones para Hero:", err);
@@ -151,44 +168,66 @@ const Hero = ({ userAuth }) => {
     useEffect(() => {
         let alertasRecientes = [];
 
-        // Slide fijo de Audios Diarios
-        alertasRecientes.push({
-            id: 'novedad-audios',
-            image: imgEvidencias, // usar imagen de evidencias o relatos
-            subtitle: language === 'en' ? "NEW FEATURE" : "NOVEDAD EN EL BÚNKER",
-            title: language === 'en' ? "DAILY AUDIO DOSSIERS" : "AUDIOS DIARIOS",
-            tagline: language === 'en' ? "LISTEN TO THE EVIDENCE" : "ESCUCHA LOS EXPEDIENTES",
-            infoTitle: language === 'en' ? "NEW EXPERIENCES UPLOADED DAILY" : "NUEVOS AUDIOS CADA DÍA",
-            infoText: language === 'en' 
-                ? "Every day we will upload narrated audio files corresponding to the dossiers. Now you can listen to them anywhere instead of just reading." 
-                : "Cada día iremos subiendo los audios correspondientes a los expedientes. Para que no solo tengas que leerlos, sino que también puedas escucharlos donde quieras.",
-            highlight: language === 'en' ? "AVAILABLE IN THE AUDIO SECTION" : "DISPONIBLES EN LA SECCIÓN DE AUDIOS",
-            btnText: language === 'en' ? "LISTEN NOW" : "ESCUCHAR AHORA",
-            btnLink: "/audios"
-        });
-
-        // Mapear expedientes (solo si tienen imagen si es posible, pero por defecto los mapeamos)
-        ultimosExpedientes.forEach(expediente => {
-            alertasRecientes.push({
-                id: `nuevo-exp-${expediente.id}`,
-                image: expediente.imagen_url 
-                    ? (expediente.imagen_url.startsWith('http') ? expediente.imagen_url : `${API_BASE_URL}/imagenes/${expediente.imagen_url}`)
-                    : imgEspacio,
-                subtitle: t('heroLatestExp'),
-                title: (expediente.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
-                tagline: "NUEVO EXPEDIENTE DESCLASIFICADO",
-                infoTitle: "ARCHIVO RECIENTE",
-                infoText: `El agente ${(expediente.usuario_nombre || 'Desconocido').toUpperCase()} ha aportado nuevas evidencias al Búnker.`,
-                highlight: "NUEVA EVIDENCIA DISPONIBLE EN EL ARCHIVO",
-                btnText: t('heroExpBtn'),
-                btnLink: "/expedientes"
-            });
+        novedadesGlobales.forEach(item => {
+            if (item.type === 'expediente') {
+                alertasRecientes.push({
+                    id: `nuevo-exp-${item.id}`,
+                    image: item.imagen_url ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`) : imgEspacio,
+                    subtitle: t('heroLatestExp') || 'NUEVO EXPEDIENTE',
+                    title: (item.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
+                    tagline: "EXPEDIENTE DESCLASIFICADO",
+                    infoTitle: "ARCHIVO RECIENTE",
+                    infoText: `Nuevas evidencias aportadas al Búnker.`,
+                    highlight: "NUEVA EVIDENCIA DISPONIBLE",
+                    btnText: t('heroExpBtn') || 'VER EXPEDIENTE',
+                    btnLink: "/expedientes"
+                });
+            } else if (item.type === 'noticia') {
+                alertasRecientes.push({
+                    id: `nueva-not-${item.id}`,
+                    image: item.imagen_url ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`) : imgEvidencias,
+                    subtitle: "ÚLTIMA HORA",
+                    title: (item.titulo || 'NOTICIA').toUpperCase(),
+                    tagline: "NOTICIA DE INTELIGENCIA",
+                    infoTitle: "BOLETÍN INFORMATIVO",
+                    infoText: item.cuerpo ? item.cuerpo.replace(/<[^>]+>/g, '').substring(0, 100) + '...' : "Nueva información desclasificada.",
+                    highlight: "INFORMACIÓN DE ALTO NIVEL",
+                    btnText: "LEER NOTICIA",
+                    btnLink: "/noticias"
+                });
+            } else if (item.type === 'audio') {
+                alertasRecientes.push({
+                    id: `nuevo-audio-${item.id}`,
+                    image: item.imagen_url ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`) : imgRelatos,
+                    subtitle: language === 'en' ? "NEW AUDIO DOSSIER" : "NUEVO AUDIO / PODCAST",
+                    title: (item.titulo || 'AUDIO DOSSIER').toUpperCase(),
+                    tagline: language === 'en' ? "LISTEN TO THE EVIDENCE" : "ESCUCHA LA EVIDENCIA",
+                    infoTitle: language === 'en' ? "NEW AUDIO ADDED" : "REGISTRO SONORO AÑADIDO",
+                    infoText: language === 'en' ? "A new audio with testimonies and evidence has been uploaded." : "Se ha subido un nuevo audio con testimonios y pruebas sonoras al archivo central.",
+                    highlight: language === 'en' ? "AVAILABLE IN THE AUDIO SECTION" : "DISPONIBLES EN LA SECCIÓN DE AUDIOS",
+                    btnText: language === 'en' ? "LISTEN NOW" : "ESCUCHAR AHORA",
+                    btnLink: "/audios"
+                });
+            } else if (item.type === 'video') {
+                alertasRecientes.push({
+                    id: `nuevo-video-${item.id}`,
+                    image: imgEvidencias,
+                    subtitle: language === 'en' ? "NEW VIDEO" : "NUEVO VÍDEO",
+                    title: (item.titulo || 'EVIDENCIA EN VÍDEO').toUpperCase(),
+                    tagline: language === 'en' ? "VISUAL EVIDENCE" : "VISUALIZA LAS PRUEBAS",
+                    infoTitle: language === 'en' ? "AUDIOVISUAL MATERIAL" : "MATERIAL AUDIOVISUAL",
+                    infoText: language === 'en' ? "New classified video added to the central archive." : "Nuevo vídeo desclasificado añadido al archivo general. Revisa el material.",
+                    highlight: language === 'en' ? "SENSITIVE FOOTAGE" : "IMÁGENES SENSIBLES",
+                    btnText: language === 'en' ? "WATCH VIDEO" : "VER VÍDEO",
+                    btnLink: "/galeria"
+                });
+            }
         });
 
         // Prepend a los slides originales
-        setSlides([...alertasRecientes.slice(0, 3), ...getSlides()]);
+        setSlides([...alertasRecientes, ...getSlides()]);
         
-    }, [ultimosExpedientes, language]); // Escuchamos language para refrescar textos
+    }, [novedadesGlobales, language]);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -213,9 +252,9 @@ const Hero = ({ userAuth }) => {
             {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
             <div className="hero-top-actions">
                 <div className="action-buttons-group">
-                    {(ultimosExpedientes.length > 0 || ultimasNoticias.length > 0) && (
+                    {novedadesGlobales.length > 0 && (
                         <Link 
-                            to={(ultimasNoticias[0]?.id || 0) > (ultimosExpedientes[0]?.id || 0) ? "/noticias" : "/expedientes"} 
+                            to={novedadesGlobales[0].type === 'noticia' ? "/noticias" : novedadesGlobales[0].type === 'audio' ? "/audios" : novedadesGlobales[0].type === 'video' ? "/galeria" : "/expedientes"} 
                             className="btn-nuevo-archivo-blink"
                         >
                             <span className="blink-dot"></span> {t('heroNewFile')}
