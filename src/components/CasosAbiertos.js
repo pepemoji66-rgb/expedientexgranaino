@@ -26,6 +26,13 @@ const CasosAbiertos = ({ userAuth }) => {
         cargarCasos();
     }, []);
 
+    // Detener Robocop al cerrar el modal
+    useEffect(() => {
+        if (!casoExpandido) {
+            window.speechSynthesis.cancel();
+        }
+    }, [casoExpandido]);
+
     // Desplazamiento automático si hay un ID en la URL (viniendo del mapa)
     useEffect(() => {
         if (casos.length > 0) {
@@ -340,13 +347,48 @@ const CasosAbiertos = ({ userAuth }) => {
                             {casoExpandido.latitud && casoExpandido.latitud !== 0 && (
                                 <button 
                                     className="btn-mapa-caso"
-                                    style={{ display: 'block', marginBottom: '20px', fontSize: '0.85rem' }}
+                                    style={{ display: 'block', marginBottom: '10px', fontSize: '0.85rem' }}
                                     onClick={() => navigate('/lugares', { state: { lat: casoExpandido.latitud, lng: casoExpandido.longitud, noticiaId: 'caso-' + casoExpandido.id } })}
                                     title="Ver en el radar"
                                 >
                                     📍 VER COORDENADAS EN EL RADAR
                                 </button>
                             )}
+                            
+                            {/* BOTÓN ROBOCOP (TTS) */}
+                            <button
+                                onClick={() => {
+                                    if (window.speechSynthesis.speaking) {
+                                        window.speechSynthesis.cancel();
+                                    } else {
+                                        const texto = language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido;
+                                        const textoLimpio = texto.replace(/<[^>]*>?/gm, '');
+                                        const ut = new SpeechSynthesisUtterance(textoLimpio);
+                                        ut.lang = language === 'en' ? 'en-US' : 'es-ES';
+                                        window.speechSynthesis.speak(ut);
+                                    }
+                                }}
+                                style={{
+                                    background: 'transparent',
+                                    color: '#00d4ff',
+                                    border: '1px solid #00d4ff',
+                                    padding: '8px 20px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.8rem',
+                                    width: '100%',
+                                    borderRadius: '2px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    marginBottom: '20px'
+                                }}
+                            >
+                                🔊 {language === 'en' ? 'LISTEN CASE (A.I. VOICE)' : 'ESCUCHAR CASO (VOZ I.A.)'}
+                            </button>
+
                             <p>{language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido}</p>
                         </div>
                     </div>

@@ -60,6 +60,13 @@ const Expedientes = () => {
         cargarDatos();
     }, [cargarDatos]);
 
+    // Detener Robocop al cerrar el modal
+    useEffect(() => {
+        if (!relatoAbierto) {
+            window.speechSynthesis.cancel();
+        }
+    }, [relatoAbierto]);
+
     const obtenerUbicacion = () => {
         if (!navigator.geolocation) return alert("GPS NO DISPONIBLE.");
         navigator.geolocation.getCurrentPosition(pos => {
@@ -462,13 +469,48 @@ const Expedientes = () => {
                                         fontSize: '0.8rem',
                                         boxShadow: '0 0 15px rgba(0,255,65,0.5)',
                                         width: '100%',
-                                        borderRadius: '2px'
+                                        borderRadius: '2px',
+                                        marginBottom: '10px'
                                     }}
                                 >
                                     📡 {t('readTranslateStory')}
                                 </button>
                             </div>
                         )}
+                        
+                        {/* BOTÓN ROBOCOP (TTS) */}
+                        <div style={{ marginTop: language === 'en' ? '0' : '15px', textAlign: 'center' }}>
+                            <button
+                                onClick={() => {
+                                    if (window.speechSynthesis.speaking) {
+                                        window.speechSynthesis.cancel();
+                                    } else {
+                                        const textoLimpio = relatoAbierto.contenido.replace(/<[^>]*>?/gm, '');
+                                        const ut = new SpeechSynthesisUtterance(textoLimpio);
+                                        ut.lang = language === 'en' ? 'en-US' : 'es-ES';
+                                        window.speechSynthesis.speak(ut);
+                                    }
+                                }}
+                                style={{
+                                    background: 'transparent',
+                                    color: '#00d4ff',
+                                    border: '1px solid #00d4ff',
+                                    padding: '8px 20px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.8rem',
+                                    width: '100%',
+                                    borderRadius: '2px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                🔊 {language === 'en' ? 'LISTEN AUDIO (A.I. VOICE)' : 'ESCUCHAR RELATO (VOZ I.A.)'}
+                            </button>
+                        </div>
                         
                         <hr style={{ borderColor: '#333', margin: '15px 0' }} />
                         
