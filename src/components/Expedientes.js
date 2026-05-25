@@ -488,6 +488,20 @@ const Expedientes = () => {
                                         const textoLimpio = relatoAbierto.contenido.replace(/<[^>]*>?/gm, '');
                                         const ut = new SpeechSynthesisUtterance(textoLimpio);
                                         ut.lang = language === 'en' ? 'en-US' : 'es-ES';
+                                        
+                                        // Ajustes de voz de misterio: más lenta y grave
+                                        ut.rate = 0.85; // Velocidad
+                                        ut.pitch = 0.7; // Gravedad
+                                        
+                                        // Intentar pillar voz de hombre (varía según navegador/SO)
+                                        const voces = window.speechSynthesis.getVoices();
+                                        const langPrefix = language === 'en' ? 'en' : 'es';
+                                        const maleNames = ['Pablo', 'Jorge', 'Alvaro', 'David', 'Mark', 'Guy', 'Male'];
+                                        const vozElegida = voces.find(v => v.lang.startsWith(langPrefix) && maleNames.some(name => v.name.includes(name)));
+                                        if (vozElegida) {
+                                            ut.voice = vozElegida;
+                                        }
+
                                         window.speechSynthesis.speak(ut);
                                     }
                                 }}
