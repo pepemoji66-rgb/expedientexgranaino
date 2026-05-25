@@ -91,6 +91,24 @@ module.exports = (db, upload) => {
         }
     });
 
+    // 3b. EDITAR UN AUDIO
+    router.put('/:id', upload.single('imagen'), async (req, res) => {
+        const { titulo, ruta, latitud, longitud, imagen_url } = req.body;
+        // Si subieran una imagen en un archivo adjunto, se cogería req.file.path, pero para audios suele ser un enlace.
+        let imagenFinal = req.file ? req.file.path : (imagen_url || null);
+
+        try {
+            await db.execute(
+                "UPDATE audios SET titulo = ?, ruta = ?, latitud = ?, longitud = ?, imagen_url = ? WHERE id = ?",
+                [titulo, ruta || null, latitud || 0, longitud || 0, imagenFinal, req.params.id]
+            );
+            res.json({ message: "Registro actualizado." });
+        } catch (err) {
+            console.error("❌ ERROR EDIT AUDIO:", err);
+            res.status(500).json({ error: "Fallo al actualizar el audio" });
+        }
+    });
+
     // 4. ELIMINAR UN AUDIO
     router.delete('/:id', async (req, res) => {
         try {

@@ -186,7 +186,9 @@ const PanelAdmin = () => {
             tipo: item.tipo || '',
             ubicacion: item.ubicacion || '',
             nivel_alerta: item.nivel_alerta || 'Bajo',
-            es_atarfe: item.es_atarfe || 0
+            es_atarfe: item.es_atarfe || 0,
+            imagen_url: item.imagen_url || item.url_imagen || item.imagen || '',
+            ruta: item.ruta || item.url_audio || ''
         });
         setArchivoEdit(null);
     };
@@ -203,6 +205,7 @@ const PanelAdmin = () => {
             if (tab === 'imagenes') endpoint = `${API_BASE_URL}/api/galeria/imagenes/${id}`;
             if (tab === 'lugares') endpoint = `${API_BASE_URL}/api/expedientes/lugares/${id}`;
             if (tab === 'casos_abiertos') endpoint = `${API_BASE_URL}/api/casos/${id}`;
+            if (tab === 'audios') endpoint = `${API_BASE_URL}/api/audios/${id}`;
             
             let payload;
             let config = {};
@@ -612,7 +615,7 @@ const PanelAdmin = () => {
                                                     {!esAprobado && tab !== 'chat' && (
                                                         <button className="btn-ok" onClick={() => gestionar(id, 'aprobar', tab)}>OK</button>
                                                     )}
-                                                    {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares' || tab === 'casos_abiertos') && (
+                                                    {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares' || tab === 'casos_abiertos' || tab === 'audios') && (
                                                         <button className="btn-edit" onClick={() => handleEditar(item)}>EDIT</button>
                                                     )}
                                                     {esAprobado && (tab === 'expedientes' || tab === 'noticias' || tab === 'imagenes') && (
@@ -937,6 +940,23 @@ const PanelAdmin = () => {
                                             CARGAR ARCHIVOS
                                         </button>
                                     </div>
+                                </>
+                            )}
+
+                            {tab === 'audios' && (
+                                <>
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>RUTA O ENLACE (AUDIO):</label>
+                                    <input 
+                                        type="text" value={editForm.ruta} 
+                                        onChange={e => setEditForm({...editForm, ruta: e.target.value})} 
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+                                    <label style={{ display: 'block', color: '#ff00ff', fontSize: '0.8rem', marginBottom: '5px' }}>IMAGEN (URL) PARA PODCAST:</label>
+                                    <input 
+                                        type="text" value={editForm.imagen_url} 
+                                        onChange={e => setEditForm({...editForm, imagen_url: e.target.value})} 
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff00ff', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
                                 </>
                             )}
 
