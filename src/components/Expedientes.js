@@ -13,6 +13,8 @@ const Expedientes = () => {
     const [datos, setDatos] = useState([]);
     const [relatoAbierto, setRelatoAbierto] = useState(null);
     const navigate = useNavigate();
+    const [paginaActual, setPaginaActual] = useState(1);
+    const expedientesPorPagina = 9;
     const [nuevoTitulo, setNuevoTitulo] = useState('');
     const [nuevoContenido, setNuevoContenido] = useState('');
     const [latitud, setLatitud] = useState('');
@@ -44,8 +46,10 @@ const Expedientes = () => {
             const res = await axios.get(endpoint);
             if (res.data && Array.isArray(res.data)) {
                 setDatos(res.data);
+                setPaginaActual(1);
             } else {
                 setDatos([]);
+                setPaginaActual(1);
             }
         } catch (err) {
             console.error("❌ Error en la aduana de expedientes:", err);
@@ -181,6 +185,8 @@ const Expedientes = () => {
             link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
         } else if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
+        } else if (red === 'facebook') {
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         }
         
         if (link) {
@@ -196,6 +202,12 @@ const Expedientes = () => {
     };
 
     const isAdmin = userAuth && (userAuth.rol === 'admin' || userAuth.email === 'archipegv2@gmail.com');
+
+    // Lógica de Paginación
+    const indexOfLastExp = paginaActual * expedientesPorPagina;
+    const indexOfFirstExp = indexOfLastExp - expedientesPorPagina;
+    const expedientesActuales = datos.slice(indexOfFirstExp, indexOfLastExp);
+    const totalPaginas = Math.ceil(datos.length / expedientesPorPagina);
 
     return (
         <div className="experiencias-page">
@@ -229,90 +241,51 @@ const Expedientes = () => {
                         <div className="scanner-line"></div>
                         <p>{t('expDecrypt')}</p>
                     </div>
-                ) : isMobile ? (
-                    <div className="grid-expedientes-mobile">
-                        {datos.length > 0 ? (
-                            datos.map(item => (
-                                <div key={item.id} className="card-expediente-mobile" onClick={() => setRelatoAbierto(item)}>
-                                    {item.imagen_url && (
-                                        <div className="card-img-container">
-                                            <img 
-                                                src={item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`} 
-                                                alt="evidencia" 
-                                            />
-                                        </div>
-                                    )}
-                                    <div className="card-body-mobile">
-                                        <span className="card-tag">{item.tipo === 'jefe' ? '🛡️ JEFE' : `👤 ${t('accessLevelAgent')}`}</span>
-                                        <h3 className="card-title-mobile">{item.titulo?.toUpperCase()}</h3>
-                                        <div className="card-footer-mobile">
-                                            <div className="relevancia-mini" onClick={(e) => aumentarRelevancia(e, item.id)}>
-                                                ⭐ <span className="rel-count">{item.relevancia || 0}</span>
-                                            </div>
-                                            <small>{item.usuario_nombre || 'ANÓNIMO'}</small>
-                                            <button className="btn-leer-pro">{t('expOpen')}</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="no-datos">{t('expNoData')}</p>
-                        )}
-                    </div>
                 ) : (
-                    <table className="tabla-pro">
-                        <thead>
-                            <tr>
-                                <th>{t('expStatus')}</th>
-                                <th>{t('expImage')}</th>
-                                <th>{t('findingTitle')}</th>
-                                <th>{t('expLocation')}</th>
-                                <th>{t('expAction')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {datos.length > 0 ? (
-                                datos.map((item) => (
-                                    <tr key={item.id}>
-                                        <td>
-                                            <span className="status-badge-pro">
-                                                {item.tipo === 'jefe' ? '🛡️ JEFE' : `👤 ${t('accessLevelAgent')}`}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {item.imagen_url ? (
+                    <>
+                        <div className="grid-expedientes">
+                            {expedientesActuales.length > 0 ? (
+                                expedientesActuales.map(item => (
+                                    <div key={item.id} className="card-expediente-mobile" onClick={() => setRelatoAbierto(item)}>
+                                        {item.imagen_url && (
+                                            <div className="card-img-container">
                                                 <img 
                                                     src={item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`} 
-                                                    className="img-tabla-preview" 
-                                                    alt="thumb" 
+                                                    alt="evidencia" 
                                                 />
-                                            ) : '---'}
-                                        </td>
-                                        <td className="titulo-celda">{item.titulo ? item.titulo.toUpperCase() : 'SIN TÍTULO'}</td>
-                                        <td className="coord-celda">
-                                            {item.latitud ? `${item.latitud}, ${item.longitud}` : '---'}
-                                        </td>
-                                        <td>
-                                            <div className="btn-group-tabla">
-                                                <button className="btn-relevancia-tabla" onClick={(e) => aumentarRelevancia(e, item.id)}>
-                                                    ⭐ {item.relevancia || 0}
-                                                </button>
-                                                <button className="btn-leer-pro" onClick={() => setRelatoAbierto(item)}>
-                                                    {t('expOpen')}
-                                                </button>
                                             </div>
-                                        </td>
-                                    </tr>
+                                        )}
+                                        <div className="card-body-mobile">
+                                            <span className="card-tag">{item.tipo === 'jefe' ? '🛡️ JEFE' : `👤 ${t('accessLevelAgent')}`}</span>
+                                            <h3 className="card-title-mobile">{item.titulo?.toUpperCase()}</h3>
+                                            
+                                            <div style={{ marginBottom: '15px', color: '#00d4ff', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                                                📍 {item.latitud && item.latitud !== 0 ? `${item.latitud}, ${item.longitud}` : 'ARCHIVO CENTRAL'}
+                                            </div>
+
+                                            <div className="card-footer-mobile">
+                                                <div className="relevancia-mini" onClick={(e) => aumentarRelevancia(e, item.id)}>
+                                                    ⭐ <span className="rel-count">{item.relevancia || 0}</span>
+                                                </div>
+                                                <small>{item.usuario_nombre || 'ANÓNIMO'}</small>
+                                                <button className="btn-leer-pro">{t('expOpen')}</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))
                             ) : (
-                                <tr>
-                                    <td colSpan="5" className="no-datos">
-                                        {t('expNoData')}
-                                    </td>
-                                </tr>
+                                <p className="no-datos">{t('expNoData')}</p>
                             )}
-                        </tbody>
-                    </table>
+                        </div>
+
+                        {totalPaginas > 1 && (
+                            <div className="paginacion-expedientes">
+                                <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo(0,0); }}>ATRÁS</button>
+                                <span>PÁG {paginaActual} / {totalPaginas}</span>
+                                <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0,0); }}>SIGUIENTE</button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -548,6 +521,7 @@ const Expedientes = () => {
                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                                     <button onClick={() => compartirExpediente('twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>𝕏 TWITTER</button>
                                     <button onClick={() => compartirExpediente('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>WHATSAPP</button>
+                                    <button onClick={() => compartirExpediente('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>FACEBOOK</button>
                                     <button onClick={() => compartirExpediente('copy')} className="btn-share-tactico" style={{ background: '#555', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>COPIAR</button>
                                 </div>
                             </div>

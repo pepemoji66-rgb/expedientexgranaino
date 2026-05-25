@@ -373,12 +373,12 @@
     border-radius: 4px;
 }
 
-/* GRID MÓVIL */
-.grid-expedientes-mobile {
+/* GRID EXPEDIENTES (NUEVO DISEÑO) */
+.grid-expedientes {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 15px;
 }
 
 .card-expediente-mobile {
@@ -386,8 +386,15 @@
     border: 1px solid var(--color-principal);
     border-radius: 12px;
     overflow: hidden;
-    transition: 0.3s;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    cursor: pointer;
+}
+
+.card-expediente-mobile:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(var(--rgb-principal), 0.3);
+    border-color: #fff;
 }
 
 .card-expediente-mobile:active {
