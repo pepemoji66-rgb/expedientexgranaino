@@ -93,7 +93,7 @@ const Hero = ({ userAuth }) => {
                 infoText: language === 'en' 
                     ? "Full technical report on the UFO sightings in Granada. Unedited original evidence and direct testimonies."
                     : "Informe técnico completo sobre los avistamientos OVNI en Granada. Evidencias originales sin editar y testimonios directos.",
-                highlight: language === 'en' ? "NEW EVIDENCE UNLOCKED" : "NUEVAS EVIDENCIAS DESBLOQUEADAS",
+                highlight: language === 'en' ? "ORIGINAL EVIDENCE" : "EVIDENCIAS ORIGINALES Y TESTIMONIOS",
                 btnText: language === 'en' ? "ACCESS DOSSIER" : "ACCEDER AL DOSSIER",
                 btnLink: "/especial-atarfe"
             },
