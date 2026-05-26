@@ -191,7 +191,7 @@ const AtarfeDossier = () => {
                     <ul style={{ color: '#ccc', marginBottom: '20px', lineHeight: '1.6' }}>
                         <li><strong>Registro Visual Coordenado:</strong> Dos esferas luminosas en formación coordinada realizando movimientos anómalos en absoluto silencio.</li>
                         <li><strong>Archivo de Vídeo Principal:</strong> FILE: 3.mp4 (ID: #6)</li>
-                        <li><strong>Archivos de Respaldo y Referencia:</strong> FILE: 2.mp4 (ID: #5) y FILE: 3.mp4 (ID: #3). En estos registros visuales de objetos luminosos se utilizaron los tejados de los bloques frontales como referencia métrica y de posición.</li>
+                        <li><strong>Archivos de Respaldo y Referencia:</strong> Registros adicionales en formato de vídeo digital correspondientes a las secuencias FILE: 2.mp4 (ID: #5), FILE: 3.mp4 (ID: #3), FILE: 2.mp4 (ID: #2) y FILE: 1.mp4 (ID: #1). En estos registros visuales de objetos luminosos se utilizaron los tejados de los bloques frontales como referencia métrica y de posición.</li>
                     </ul>
 
                     <div className="videos-atarfe-grid">
