@@ -362,13 +362,18 @@ const CasosAbiertos = ({ userAuth }) => {
                                         window.speechSynthesis.cancel();
                                     } else {
                                         const texto = language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido;
-                                        const textoLimpio = texto.replace(/<[^>]*>?/gm, '');
+                                        // 1. Quitar HTML, 2. Quitar Emojis, 3. Limpiar espacios extra
+                                        const textoLimpio = texto
+                                            .replace(/<[^>]*>?/gm, '')
+                                            .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+                                            .replace(/\s+/g, ' ').trim();
+
                                         const ut = new SpeechSynthesisUtterance(textoLimpio);
                                         ut.lang = language === 'en' ? 'en-US' : 'es-ES';
                                         
-                                        // Ajustes de voz de misterio: más lenta y grave
-                                        ut.rate = 0.85; // Velocidad
-                                        ut.pitch = 0.7; // Gravedad
+                                        // Ajustes de voz de misterio: más lenta y muy grave
+                                        ut.rate = 0.75; // Velocidad más lenta
+                                        ut.pitch = 0.3; // Gravedad (más profundo)
                                         
                                         // Intentar pillar voz de hombre (varía según navegador/SO)
                                         const voces = window.speechSynthesis.getVoices();
