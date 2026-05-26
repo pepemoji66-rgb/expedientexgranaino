@@ -5,7 +5,7 @@ import { renderizarTextoConMedios } from '../utils/renderMedios';
 import API_BASE_URL from '../config';
 import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
-import './expedientes.css'; 
+import './expedientes.css';
 
 const Expedientes = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
@@ -40,9 +40,9 @@ const Expedientes = () => {
         setCargando(true);
         try {
             const endpoint = seccion === 'usuarios'
-                ? `${API_BASE_URL}/api/expedientes/expedientes-publicos` 
+                ? `${API_BASE_URL}/api/expedientes/expedientes-publicos`
                 : `${API_BASE_URL}/api/expedientes/relatos-admin-publicos`;
-            
+
             const res = await axios.get(endpoint);
             if (res.data && Array.isArray(res.data)) {
                 setDatos(res.data);
@@ -110,7 +110,7 @@ const Expedientes = () => {
         formData.append('latitud', latitud || 0);
         formData.append('longitud', longitud || 0);
         formData.append('tipo', seccion === 'jefe' ? 'jefe' : 'agente');
-        
+
         const fileInput = document.getElementById('archivo-expediente');
         if (fileInput && fileInput.files[0]) {
             formData.append('imagen', fileInput.files[0]);
@@ -147,7 +147,7 @@ const Expedientes = () => {
             const res = await axios.post(`${API_BASE_URL}/api/expedientes/relevancia/${id}`);
             if (res.data && res.data.relevancia !== undefined) {
                 // Actualizar localmente el contador
-                setDatos(prevDatos => prevDatos.map(item => 
+                setDatos(prevDatos => prevDatos.map(item =>
                     item.id === id ? { ...item, relevancia: res.data.relevancia } : item
                 ));
                 // Si el modal está abierto, actualizarlo también
@@ -164,7 +164,7 @@ const Expedientes = () => {
         if (!relatoAbierto) return;
         const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}`;
         const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
-        
+
         // Prioridad 1: Web Share API (Móviles)
         if (navigator.share && red !== 'copy' && red !== 'instagram') {
             try {
@@ -188,7 +188,7 @@ const Expedientes = () => {
         } else if (red === 'facebook') {
             link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         }
-        
+
         if (link) {
             window.open(link, '_blank');
         } else if (red === 'copy' || red === 'twitter' || red === 'whatsapp') {
@@ -249,16 +249,16 @@ const Expedientes = () => {
                                     <div key={item.id} className="card-expediente-mobile" onClick={() => setRelatoAbierto(item)}>
                                         {item.imagen_url && (
                                             <div className="card-img-container">
-                                                <img 
-                                                    src={item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`} 
-                                                    alt="evidencia" 
+                                                <img
+                                                    src={item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`}
+                                                    alt="evidencia"
                                                 />
                                             </div>
                                         )}
                                         <div className="card-body-mobile">
                                             <span className="card-tag">{item.tipo === 'jefe' ? '🛡️ JEFE' : `👤 ${t('accessLevelAgent')}`}</span>
                                             <h3 className="card-title-mobile">{item.titulo?.toUpperCase()}</h3>
-                                            
+
                                             <div style={{ marginBottom: '15px', color: '#00d4ff', fontSize: '0.75rem', fontFamily: 'monospace' }}>
                                                 📍 {item.latitud && item.latitud !== 0 ? `${item.latitud}, ${item.longitud}` : 'ARCHIVO CENTRAL'}
                                             </div>
@@ -280,9 +280,9 @@ const Expedientes = () => {
 
                         {totalPaginas > 1 && (
                             <div className="paginacion-expedientes">
-                                <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo(0,0); }}>ATRÁS</button>
+                                <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo(0, 0); }}>ATRÁS</button>
                                 <span>PÁG {paginaActual} / {totalPaginas}</span>
-                                <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0,0); }}>SIGUIENTE</button>
+                                <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0, 0); }}>SIGUIENTE</button>
                             </div>
                         )}
                     </>
@@ -316,15 +316,15 @@ const Expedientes = () => {
                             onChange={(e) => setNuevoContenido(e.target.value)}
                             required
                         ></textarea>
-                        
+
                         {/* BUSCADOR DE COORDENADAS */}
                         <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
                             <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>{t('expRadarSearch')}</label>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <input 
-                                    type="text" 
-                                    value={busquedaLugar} 
-                                    onChange={e => setBusquedaLugar(e.target.value)} 
+                                <input
+                                    type="text"
+                                    value={busquedaLugar}
+                                    onChange={e => setBusquedaLugar(e.target.value)}
                                     placeholder={t('newsLocationPlaceholder')}
                                     className="input-bunker-exp"
                                     style={{ flex: 1, marginBottom: 0 }}
@@ -372,7 +372,7 @@ const Expedientes = () => {
                             <h2 style={{ color: 'var(--color-principal)' }}>{relatoAbierto.titulo}</h2>
                             <button className="btn-cerrar-x" onClick={() => setRelatoAbierto(null)}>×</button>
                         </div>
-                        
+
                         {relatoAbierto.imagen_url && (
                             <div className="img-relato-full" style={{ position: 'relative' }}>
                                 {relatoAbierto.latitud && relatoAbierto.longitud && parseFloat(relatoAbierto.latitud) !== 0 && (
@@ -398,9 +398,9 @@ const Expedientes = () => {
                                         {t('expViewRadar')}
                                     </button>
                                 )}
-                                <img 
-                                    src={relatoAbierto.imagen_url.startsWith('http') ? relatoAbierto.imagen_url : `${API_BASE_URL}/imagenes/${relatoAbierto.imagen_url}`} 
-                                    alt="evidencia" 
+                                <img
+                                    src={relatoAbierto.imagen_url.startsWith('http') ? relatoAbierto.imagen_url : `${API_BASE_URL}/imagenes/${relatoAbierto.imagen_url}`}
+                                    alt="evidencia"
                                 />
                             </div>
                         )}
@@ -409,20 +409,20 @@ const Expedientes = () => {
                             <span>{t('expOrigin')}: {relatoAbierto.usuario_nombre || 'ADMINISTRADOR'}</span>
                             <span>COORD: {relatoAbierto.latitud || '0'}, {relatoAbierto.longitud || '0'}</span>
                         </div>
-                        
+
                         {language === 'en' && (
                             <div style={{ marginTop: '15px', textAlign: 'center' }}>
-                                <button 
+                                <button
                                     onClick={async () => {
                                         const btn = document.getElementById('btn-trans-tactico');
                                         if (btn) btn.innerText = "📡 " + t('readTranslateWait').toUpperCase();
-                                        
+
                                         try {
                                             const texto = relatoAbierto.contenido || "";
                                             const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
                                             const data = await res.json();
                                             const traducido = data[0].map(x => x[0]).join("");
-                                            
+
                                             setRelatoAbierto({ ...relatoAbierto, contenido: traducido });
                                             if (btn) btn.style.display = 'none'; // Ya está traducido
                                         } catch (e) {
@@ -450,7 +450,7 @@ const Expedientes = () => {
                                 </button>
                             </div>
                         )}
-                        
+
                         {/* BOTÓN ROBOCOP (TTS) */}
                         <div style={{ marginTop: language === 'en' ? '0' : '15px', textAlign: 'center' }}>
                             <button
@@ -466,11 +466,11 @@ const Expedientes = () => {
 
                                         const ut = new SpeechSynthesisUtterance(textoLimpio);
                                         ut.lang = language === 'en' ? 'en-US' : 'es-ES';
-                                        
-                                        // Ajustes de voz de misterio: más lenta y muy grave
-                                        ut.rate = 0.88; // Velocidad natural pero pausada
-                                        ut.pitch = 0.45; // Grave de hombre mayor
-                                        
+
+                                        // Ajustes de voz de misterio: optimizados para que no distorsione en móviles
+                                        ut.rate = 0.95; // Velocidad natural para que el procesador del móvil no sufra
+                                        ut.pitch = 0.95; // Tono casi neutro para no saturar el altavoz
+
                                         // Intentar pillar voz de hombre (varía según navegador/SO)
                                         const voces = window.speechSynthesis.getVoices();
                                         const langPrefix = language === 'en' ? 'en' : 'es';
@@ -503,13 +503,13 @@ const Expedientes = () => {
                                 🔊 {language === 'en' ? 'LISTEN AUDIO (A.I. VOICE)' : 'ESCUCHAR RELATO (VOZ I.A.)'}
                             </button>
                         </div>
-                        
+
                         <hr style={{ borderColor: '#333', margin: '15px 0' }} />
-                        
+
                         <div className="texto-relato-modal">
                             {renderizarTextoConMedios(relatoAbierto.contenido)}
                         </div>
-                        
+
                         <div className="modal-footer-pro">
                             <div className="modal-actions-top">
                                 <button onClick={() => setRelatoAbierto(null)} className="btn-volver-atras">

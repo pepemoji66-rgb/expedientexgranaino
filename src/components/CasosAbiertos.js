@@ -100,7 +100,7 @@ const CasosAbiertos = ({ userAuth }) => {
         formData.append('usuario_nombre', userAuth.nombre);
         formData.append('latitud', latitud || 0);
         formData.append('longitud', longitud || 0);
-        
+
         const fileInput = document.getElementById('archivo-caso');
         if (fileInput && fileInput.files[0]) {
             formData.append('imagen', fileInput.files[0]);
@@ -130,7 +130,7 @@ const CasosAbiertos = ({ userAuth }) => {
         const url = `${window.location.origin}/casos-abiertos?id=${caso.id}`;
         const textoTitulo = language === 'en' && caso.titulo_en ? caso.titulo_en : caso.titulo;
         const texto = `💀 UNRESOLVED MYSTERY / CASO ABIERTO: "${textoTitulo?.toUpperCase()}" @PEPE1318057 #TrueCrime #Misterio #ExpedienteXGranaino`;
-        
+
         if (navigator.share && red !== 'copy') {
             try {
                 await navigator.share({
@@ -150,7 +150,7 @@ const CasosAbiertos = ({ userAuth }) => {
         } else if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         }
-        
+
         if (link) {
             window.open(link, '_blank');
         } else {
@@ -184,14 +184,14 @@ const CasosAbiertos = ({ userAuth }) => {
                     casosActuales.map((caso) => {
                         const tituloMostrar = language === 'en' && caso.titulo_en ? caso.titulo_en : caso.titulo;
                         const contenidoMostrar = language === 'en' && caso.contenido_en ? caso.contenido_en : caso.contenido;
-                        
+
                         return (
                             <div key={caso.id} id={`caso-${caso.id}`} className="caso-card">
                                 <div className="caso-imagen-wrapper">
                                     {caso.imagen_url ? (
-                                        <img 
-                                            src={caso.imagen_url.startsWith('http') ? caso.imagen_url : `${API_BASE_URL}/imagenes/${caso.imagen_url}`} 
-                                            alt={tituloMostrar} 
+                                        <img
+                                            src={caso.imagen_url.startsWith('http') ? caso.imagen_url : `${API_BASE_URL}/imagenes/${caso.imagen_url}`}
+                                            alt={tituloMostrar}
                                             className="caso-imagen"
                                         />
                                     ) : (
@@ -201,10 +201,10 @@ const CasosAbiertos = ({ userAuth }) => {
                                     )}
                                     <div className="caso-badge">CLASSIFIED</div>
                                 </div>
-                                
+
                                 <div className="caso-info">
                                     <div className="caso-meta">
-                                        <button 
+                                        <button
                                             className="btn-mapa-caso"
                                             onClick={() => navigate('/lugares', { state: { lat: caso.latitud, lng: caso.longitud, noticiaId: 'caso-' + caso.id } })}
                                             title="Ver en el radar"
@@ -214,11 +214,11 @@ const CasosAbiertos = ({ userAuth }) => {
                                         <span>#{caso.id}</span>
                                     </div>
                                     <h3>{tituloMostrar?.toUpperCase()}</h3>
-                                    
+
                                     <div className="caso-contenido colapsado" dangerouslySetInnerHTML={{ __html: contenidoMostrar }} />
-                                    
-                                    <button 
-                                        className="btn-leer-mas" 
+
+                                    <button
+                                        className="btn-leer-mas"
                                         onClick={() => setCasoExpandido(caso)}
                                     >
                                         {language === 'en' ? 'READ FULL DOSSIER' : 'LEER DOSSIER COMPLETO'}
@@ -242,9 +242,9 @@ const CasosAbiertos = ({ userAuth }) => {
 
             {totalPaginas > 1 && (
                 <div className="paginacion-casos">
-                    <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo(0,0); }}>ATRÁS</button>
+                    <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo(0, 0); }}>ATRÁS</button>
                     <span>PÁG {paginaActual} / {totalPaginas}</span>
-                    <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0,0); }}>SIGUIENTE</button>
+                    <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0, 0); }}>SIGUIENTE</button>
                 </div>
             )}
 
@@ -275,17 +275,17 @@ const CasosAbiertos = ({ userAuth }) => {
                             onChange={(e) => setNuevoContenido(e.target.value)}
                             required
                         ></textarea>
-                        
+
                         {/* BUSCADOR DE COORDENADAS */}
                         <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
                             <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>
                                 {language === 'en' ? 'GPS RADAR SEARCH' : 'RASTREO GPS'}
                             </label>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <input 
-                                    type="text" 
-                                    value={busquedaLugar} 
-                                    onChange={e => setBusquedaLugar(e.target.value)} 
+                                <input
+                                    type="text"
+                                    value={busquedaLugar}
+                                    onChange={e => setBusquedaLugar(e.target.value)}
                                     placeholder={language === 'en' ? 'Search city or zone...' : 'Buscar ciudad o zona...'}
                                     className="input-bunker-exp"
                                     style={{ flex: 1, marginBottom: 0 }}
@@ -335,15 +335,15 @@ const CasosAbiertos = ({ userAuth }) => {
                             <button className="btn-cerrar-modal-caso" onClick={() => setCasoExpandido(null)}>X</button>
                         </div>
                         {casoExpandido.imagen_url && (
-                            <img 
-                                src={casoExpandido.imagen_url.startsWith('http') ? casoExpandido.imagen_url : `${API_BASE_URL}/imagenes/${casoExpandido.imagen_url}`} 
-                                alt="Evidencia" 
+                            <img
+                                src={casoExpandido.imagen_url.startsWith('http') ? casoExpandido.imagen_url : `${API_BASE_URL}/imagenes/${casoExpandido.imagen_url}`}
+                                alt="Evidencia"
                                 className="modal-caso-imagen"
                             />
                         )}
                         <div className="modal-caso-body">
                             {casoExpandido.latitud && casoExpandido.latitud !== 0 && (
-                                <button 
+                                <button
                                     className="btn-mapa-caso"
                                     style={{ display: 'block', marginBottom: '10px', fontSize: '0.85rem' }}
                                     onClick={() => navigate('/lugares', { state: { lat: casoExpandido.latitud, lng: casoExpandido.longitud, noticiaId: 'caso-' + casoExpandido.id } })}
@@ -352,7 +352,7 @@ const CasosAbiertos = ({ userAuth }) => {
                                     📍 VER COORDENADAS EN EL RADAR
                                 </button>
                             )}
-                            
+
                             {/* BOTÓN ROBOCOP (TTS) */}
                             <button
                                 onClick={() => {
@@ -368,11 +368,11 @@ const CasosAbiertos = ({ userAuth }) => {
 
                                         const ut = new SpeechSynthesisUtterance(textoLimpio);
                                         ut.lang = language === 'en' ? 'en-US' : 'es-ES';
-                                        
-                                        // Ajustes de voz de misterio: más lenta y muy grave
-                                        ut.rate = 0.88; // Velocidad natural pero pausada
-                                        ut.pitch = 0.45; // Grave de hombre mayor
-                                        
+
+                                        // Ajustes de voz de misterio: optimizados para que no distorsione en móviles
+                                        ut.rate = 0.95; // Velocidad un poco más natural para que el procesador del móvil no sufra
+                                        ut.pitch = 0.95; // Tono casi neutro (antes estaba en 0.45 y eso rompía el altavoz del móvil)
+
                                         // Intentar pillar voz de hombre (varía según navegador/SO)
                                         const voces = window.speechSynthesis.getVoices();
                                         const langPrefix = language === 'en' ? 'en' : 'es';
