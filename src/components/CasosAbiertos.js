@@ -370,8 +370,8 @@ const CasosAbiertos = ({ userAuth }) => {
                                         ut.lang = language === 'en' ? 'en-US' : 'es-ES';
                                         
                                         // Ajustes de voz de misterio: más lenta y muy grave
-                                        ut.rate = 0.75; // Velocidad más lenta
-                                        ut.pitch = 0.3; // Gravedad (más profundo)
+                                        ut.rate = 0.88; // Velocidad natural pero pausada
+                                        ut.pitch = 0.45; // Grave de hombre mayor
                                         
                                         // Intentar pillar voz de hombre (varía según navegador/SO)
                                         const voces = window.speechSynthesis.getVoices();
