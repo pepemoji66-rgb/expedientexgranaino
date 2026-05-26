@@ -215,9 +215,7 @@ const CasosAbiertos = ({ userAuth }) => {
                                     </div>
                                     <h3>{tituloMostrar?.toUpperCase()}</h3>
                                     
-                                    <div className="caso-contenido colapsado">
-                                        <p>{contenidoMostrar}</p>
-                                    </div>
+                                    <div className="caso-contenido colapsado" dangerouslySetInnerHTML={{ __html: contenidoMostrar }} />
                                     
                                     <button 
                                         className="btn-leer-mas" 
@@ -408,7 +406,7 @@ const CasosAbiertos = ({ userAuth }) => {
                                 🔊 {language === 'en' ? 'LISTEN CASE (A.I. VOICE)' : 'ESCUCHAR CASO (VOZ I.A.)'}
                             </button>
 
-                            <p>{language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido}</p>
+                            <div className="modal-caso-body-html" dangerouslySetInnerHTML={{ __html: language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido }} />
                         </div>
                     </div>
                 </div>
