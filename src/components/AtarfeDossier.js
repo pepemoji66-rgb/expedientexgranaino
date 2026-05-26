@@ -84,34 +84,34 @@ const AtarfeDossier = () => {
     return (
         <div className="atarfe-dossier-container">
             <header className="dossier-header">
-                <div className="stamped-declassified">{t('dossierAtarfeStamp')}</div>
-                <h1 className="dossier-title">{t('dossierAtarfeTitle')}</h1>
-                <p className="dossier-subtitle">{t('dossierAtarfeSubtitle')}</p>
+                <div className="stamped-declassified">CONFIDENCIAL / NIVEL 4</div>
+                <h1 className="dossier-title">🛸 Caso OVNI en Granada: El Incidente Atarfe y Albolote</h1>
                 <div className="dossier-meta">
-                    <span><strong>{t('dossierAtarfeAccessLabel')}</strong> {t('dossierAtarfeAccessValue')}</span>
-                    <span><strong>{t('dossierAtarfeStatusLabel')}</strong> {t('dossierAtarfeStatusValue')}</span>
+                    <span><strong>Nivel de Acceso:</strong> 4 - Archivero Central</span>
+                    <span><strong>Estado de la Investigación:</strong> En análisis internacional por MUFON (Mutual UFO Network).</span>
                 </div>
             </header>
 
             <section className="dossier-intro-section">
                 <div className="warning-box">
-                    <p>{t('dossierAtarfeWarning')} <strong>{t('dossierAtarfeWarningBold')}</strong> {t('dossierAtarfeWarningText')}</p>
+                    <p>⚠️ <strong>Aviso del Búnker:</strong> El siguiente material contiene grabaciones y evidencias originales sin editar. La calidad de los archivos de audio y vídeo responde estrictamente a las condiciones de campo en el momento del avistamiento.</p>
                 </div>
+                
                 <div className="relato-full-content">
-                    <h2 className="relato-title">{t('dossierAtarfeChronicleTitle')}</h2>
+                    <h2 className="relato-title">📅 Crónica del Incidente: El Testimonio Real</h2>
+                    <p>¿Qué ocurrió realmente en el cielo de Granada? Compartimos de forma íntegra el impactante testimonio directo de los testigos que presenciaron este fenómeno anómalo en la provincia.</p>
+                    
+                    <h3 className="section-title-neon" style={{ marginTop: '30px' }}>📍 Fase 1: Agosto 2021 | El avistamiento en Sierra Elvira</h3>
                     <div className="relato-text-block">
-                        <p><strong>{t('dossierAtarfePhase1Label')}</strong></p>
-                        <p>
-                            {t('dossierAtarfePhase1Quote1')} <strong>{t('dossierAtarfePhase1SierraElvira')}</strong>{t('dossierAtarfePhase1Quote1End')}
-                        </p>
-                        <p>
-                            <em>{t('dossierAtarfePhase1Quote2')}</em>
-                        </p>
-                        <hr className="dossier-divider" />
-                        <p><strong>{t('dossierAtarfePhase2Label')}</strong></p>
-                        <p>
-                            {t('dossierAtarfePhase2Quote')} <strong>{t('dossierAtarfePhase2Albolote')}</strong> {t('dossierAtarfePhase2QuoteEnd')}
-                        </p>
+                        <blockquote style={{ borderLeft: '4px solid #b18904', paddingLeft: '15px', color: '#ccc', fontStyle: 'italic', margin: '15px 0' }}>
+                            "Nos encontrábamos mi pareja y yo en la terraza de mi piso, era agosto del 2021. Estábamos tomando una copa de vino cuando observé una especie de avión que me llamó mucho la atención. Estamos acostumbrados a ver aviones por el aeropuerto cercano, pero este era muy raro."
+                        </blockquote>
+                        <blockquote style={{ borderLeft: '4px solid #b18904', paddingLeft: '15px', color: '#ccc', fontStyle: 'italic', margin: '15px 0' }}>
+                            "Al llegar a la altura de Sierra Elvira, se paró en seco. Cambió de dirección, como si fuese marcha atrás, cambió de altura... Fui a por el móvil corriendo, un Huawei, y así grabé el primer vídeo donde se ve un solo objeto."
+                        </blockquote>
+                        <blockquote style={{ borderLeft: '4px solid #b18904', paddingLeft: '15px', color: '#ccc', fontStyle: 'italic', margin: '15px 0' }}>
+                            "Lo analicé en una televisión grande y me quedé alucinado: no se apagó, salió disparado dejando una estela. No había ningún sonido anormal."
+                        </blockquote>
                     </div>
                 </div>
             </section>
@@ -119,8 +119,14 @@ const AtarfeDossier = () => {
             <div className="dossier-grid">
                 {/* FASE 1 */}
                 <div className="dossier-section-block phase-1">
-                    <h3 className="section-title-neon">{t('dossierAtarfePhase1Title')}</h3>
-                    <p className="phase-desc">{t('dossierAtarfePhase1Desc')}</p>
+                    <h2 className="section-title-neon">📁 Evidencias de la Fase 1: El Encuentro Inicial</h2>
+                    <p className="phase-desc">A continuación, mostramos el registro de audio crítico y el debate en caliente sobre la naturaleza de las luces sobre Sierra Elvira. En la grabación se aprecia la sorpresa de los testigos al descartar explicaciones convencionales: "Un dron, los cojones...".</p>
+                    <ul style={{ color: '#ccc', marginBottom: '20px', lineHeight: '1.6' }}>
+                        <li><strong>Archivo de Vídeo:</strong> FILE: 4.mp4 (ID: #7)</li>
+                        <li><strong>Origen:</strong> Video original de la comunidad de ExpedienteXGranaino.</li>
+                        <li><strong>Análisis de Capturas:</strong> Extracciones de vídeo analizadas en pantalla de gran formato. En el análisis visual se observa con claridad la estela de propulsión y maniobras imposibles para la tecnología aeronáutica conocida.</li>
+                    </ul>
+                    
                     <div className="videos-atarfe-grid">
                         {evidencias.videos.filter(v => v.url === '4.mp4').map(vid => (
                             <div key={vid.id} className="atarfe-video-card priority-high">
@@ -133,12 +139,11 @@ const AtarfeDossier = () => {
                                     <video controls preload="metadata">
                                         <source src={`${API_BASE_URL}/videos/${vid.url}`} type="video/mp4" />
                                     </video>
-                                    <div className="watermark-overlay top-left">{t('dossierAtarfeWatermarkTitle')}</div>
-                                    <div className="watermark-overlay bottom-right">{t('dossierAtarfeWatermarkCopyright')}</div>
+                                    <div className="watermark-overlay top-left">EXPEDIENTEXGRANAINO</div>
+                                    <div className="watermark-overlay bottom-right">© ARCHIVO CONFIDENCIAL</div>
                                 </div>
                                 <div className="video-footer-technical">
                                     <h4>{vid.titulo.toUpperCase()}</h4>
-                                    <p>{t('dossierAtarfePhase1EvidenceDesc')}</p>
                                 </div>
                             </div>
                         ))}
@@ -170,8 +175,25 @@ const AtarfeDossier = () => {
 
                 {/* FASE 2 */}
                 <div className="dossier-section-block phase-2">
-                    <h3 className="section-title-neon">{t('dossierAtarfePhase2Title')}</h3>
-                    <p className="phase-desc">{t('dossierAtarfePhase2Desc')}</p>
+                    <h3 className="section-title-neon">📍 Fase 2: Junio 2022 | El Retorno sobre la vertical de Albolote</h3>
+                    <p className="phase-desc">La obsesión lógica tras el primer encuentro llevó a mantener la vigilancia en el cielo granadino. Un año después, el fenómeno volvió a manifestarse de forma múltiple.</p>
+                    <div className="relato-text-block">
+                        <blockquote style={{ borderLeft: '4px solid #b18904', paddingLeft: '15px', color: '#ccc', fontStyle: 'italic', margin: '15px 0' }}>
+                            "Me quedé obsesionado, lo mandé a Cuarto Milenio por WhatsApp y nadie me escuchó. Un año después, en junio de 2022, salí a la terraza a fumar y, como siempre desde el primer incidente, miré al cielo."
+                        </blockquote>
+                        <blockquote style={{ borderLeft: '4px solid #b18904', paddingLeft: '15px', color: '#ccc', fontStyle: 'italic', margin: '15px 0' }}>
+                            "Sobre la vertical de Albolote aparecieron dos objetos similares al primero. Grabé todo lo que pude; se ven los tejados de los bloques de enfrente como referencia. De nuevo, silencio absoluto, solo el tráfico de la calle."
+                        </blockquote>
+                    </div>
+
+                    <h2 className="section-title-neon" style={{ marginTop: '40px' }}>📁 Evidencias de la Fase 2: Avistamiento Dual y Coordinado</h2>
+                    <p className="phase-desc">El segundo encuentro no dejó lugar a dudas. No era un objeto aislado, sino un fenómeno coordinado sobre los bloques de viviendas.</p>
+                    <ul style={{ color: '#ccc', marginBottom: '20px', lineHeight: '1.6' }}>
+                        <li><strong>Registro Visual Coordenado:</strong> Dos esferas luminosas en formación coordinada realizando movimientos anómalos en absoluto silencio.</li>
+                        <li><strong>Archivo de Vídeo Principal:</strong> FILE: 3.mp4 (ID: #6)</li>
+                        <li><strong>Archivos de Respaldo y Referencia:</strong> FILE: 2.mp4 (ID: #5) y FILE: 3.mp4 (ID: #3). En estos registros visuales de objetos luminosos se utilizaron los tejados de los bloques frontales como referencia métrica y de posición.</li>
+                    </ul>
+
                     <div className="videos-atarfe-grid">
                         {evidencias.videos.filter(v => v.url !== '4.mp4').map(vid => (
                             <div key={vid.id} className="atarfe-video-card">
@@ -183,12 +205,11 @@ const AtarfeDossier = () => {
                                     <video controls preload="metadata">
                                         <source src={`${API_BASE_URL}/videos/${vid.url}`} type="video/mp4" />
                                     </video>
-                                    <div className="watermark-overlay top-left">{t('dossierAtarfeWatermarkTitle')}</div>
-                                    <div className="watermark-overlay bottom-right">{t('dossierAtarfeWatermarkCopyright')}</div>
+                                    <div className="watermark-overlay top-left">EXPEDIENTEXGRANAINO</div>
+                                    <div className="watermark-overlay bottom-right">© ARCHIVO CONFIDENCIAL</div>
                                 </div>
                                 <div className="video-footer-technical">
                                     <h4>{vid.titulo.toUpperCase()}</h4>
-                                    <p>{t('dossierAtarfePhase2EvidenceDesc')}</p>
                                 </div>
                             </div>
                         ))}
@@ -198,9 +219,9 @@ const AtarfeDossier = () => {
 
             <footer className="dossier-footer-personal">
                 <div className="mission-statement">
-                    <h3 className="neon-text-blue">{t('dossierAtarfePurposeTitle')}</h3>
-                    <p>{t('dossierAtarfePurposeText')}</p>
-                    <p className="signature">{t('dossierAtarfeSignature')}</p>
+                    <h2 className="neon-text-blue">🔍 Conclusión de la Investigación en el Búnker</h2>
+                    <p>El Incidente Atarfe se consolida como uno de los expedientes de contacto y avistamiento OVNI más documentados de los últimos años en Andalucía. La ausencia de sonido, las paradas en seco y los cambios de dirección descartan aviación comercial o drones convencionales. Actualmente, el caso sigue abierto bajo el escrutinio de analistas de la red internacional MUFON.</p>
+                    <p className="signature">`© INVESTIGACIÓN ATARFE - PROPIEDAD EXCLUSIVA DEL BÚNKER (EXPEDIENTEXGRANAINO)`</p>
                 </div>
             </footer>
 
