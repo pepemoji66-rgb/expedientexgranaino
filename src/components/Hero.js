@@ -84,6 +84,20 @@ const Hero = ({ userAuth }) => {
                 onClick: (e) => { e.preventDefault(); toggleLanguage(); }
             },
             {
+                id: 'especial-atarfe',
+                image: imgEvidencias,
+                subtitle: language === 'en' ? "DECLASSIFIED DOSSIER" : "DOSSIER DESCLASIFICADO",
+                title: "CASO OVNI ATARFE",
+                tagline: language === 'en' ? "THE ATARFE INCIDENT" : "EL INCIDENTE ATARFE Y ALBOLOTE",
+                infoTitle: language === 'en' ? "CONFIDENTIAL ARCHIVE" : "ARCHIVO CONFIDENCIAL / NIVEL 4",
+                infoText: language === 'en' 
+                    ? "Full technical report on the UFO sightings in Granada. Unedited original evidence and direct testimonies."
+                    : "Informe técnico completo sobre los avistamientos OVNI en Granada. Evidencias originales sin editar y testimonios directos.",
+                highlight: language === 'en' ? "NEW EVIDENCE UNLOCKED" : "NUEVAS EVIDENCIAS DESBLOQUEADAS",
+                btnText: language === 'en' ? "ACCESS DOSSIER" : "ACCEDER AL DOSSIER",
+                btnLink: "/especial-atarfe"
+            },
+            {
                 id: 'archipeg-promo',
                 image: imgEspacio,
                 subtitle: language === 'en' ? "PRIVATE SOFTWARE" : "SOFTWARE OFFLINE",
