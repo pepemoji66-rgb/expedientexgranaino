@@ -1,0 +1,31 @@
+{
+  "lugares": {
+    "columna_texto": "descripcion",
+    "registros": [
+      {
+        "id": 1,
+        "descripcion": "Antiguo centro de contención de tisis. Ruinas de alta montaña con atmósfera cargada."
+      },
+      {
+        "id": 2,
+        "descripcion": "Sede del conservatorio. Estructura renacentista blindada con patios de columnas."
+      },
+      {
+        "id": 3,
+        "descripcion": "Centro neurálgico del agua. Gran capacidad de almacenamiento subterráneo bajo bóvedas."
+      },
+      {
+        "id": 4,
+        "descripcion": "Versión granadina del famoso cortijo malagueño."
+      },
+      {
+        "id": 5,
+        "descripcion": "Enclave táctico. Refugio natural con vistas dominantes sobre la cuenca del Genil."
+      },
+      {
+        "id": 6,
+        "descripcion": "Cuartel general universitario. Patios simétricos y archivo central de datos."
+      }
+    ]
+  }
+}

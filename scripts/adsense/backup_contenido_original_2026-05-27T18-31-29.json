@@ -1,0 +1,47 @@
+{
+  "lugares": {
+    "columna_texto": "descripcion",
+    "registros": [
+      {
+        "id": 18,
+        "descripcion": "Registro desde Panel de Mando"
+      },
+      {
+        "id": 19,
+        "descripcion": "Registro desde Panel de Mando"
+      },
+      {
+        "id": 20,
+        "descripcion": "Antiguo centro de contención de tisis. Ruinas de alta montaña con atmósfera cargada."
+      },
+      {
+        "id": 21,
+        "descripcion": "Sede del conservatorio. Estructura renacentista blindada con patios de columnas."
+      },
+      {
+        "id": 22,
+        "descripcion": "Centro neurálgico del agua. Gran capacidad de almacenamiento subterráneo bajo bóvedas."
+      },
+      {
+        "id": 23,
+        "descripcion": "Enclave táctico. Refugio natural con vistas dominantes sobre la cuenca del Genil."
+      },
+      {
+        "id": 24,
+        "descripcion": "Cuartel general universitario. Patios simétricos y archivo central de datos."
+      },
+      {
+        "id": 25,
+        "descripcion": "Puesto de avanzada en el Barranco de Poqueira. Arquitectura de pizarra y cal."
+      },
+      {
+        "id": 26,
+        "descripcion": "Zona de anomalías. El Dragón vigila la entrada al búnker alpujarreño."
+      },
+      {
+        "id": 27,
+        "descripcion": "Techos de terrao. Periscopios térmicos sobre el valle a máxima altitud."
+      }
+    ]
+  }
+}

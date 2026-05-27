@@ -1,0 +1,47 @@
+{
+  "lugares": {
+    "columna_texto": "descripcion",
+    "registros": [
+      {
+        "id": 28,
+        "descripcion": "Lugar con actividad paranormal reportada."
+      },
+      {
+        "id": 29,
+        "descripcion": "Antiguo granero con historias de misterio."
+      },
+      {
+        "id": 30,
+        "descripcion": "Edificio histórico con leyendas de fantasmas."
+      },
+      {
+        "id": 31,
+        "descripcion": "Versión granadina del famoso cortijo malagueño."
+      },
+      {
+        "id": 32,
+        "descripcion": "Antiguo sanatorio antituberculoso abandonado."
+      },
+      {
+        "id": 33,
+        "descripcion": "Sede del conservatorio con ecos del pasado."
+      },
+      {
+        "id": 36,
+        "descripcion": "Lugar de antiguos rituales y avistamientos."
+      },
+      {
+        "id": 37,
+        "descripcion": "Presencias en la biblioteca y los pasillos."
+      },
+      {
+        "id": 38,
+        "descripcion": "Fenómenos en la sierra granadina."
+      },
+      {
+        "id": 39,
+        "descripcion": "Zona de avistamientos reportados."
+      }
+    ]
+  }
+}

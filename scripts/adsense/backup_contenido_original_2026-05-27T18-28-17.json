@@ -1,0 +1,47 @@
+{
+  "lugares": {
+    "columna_texto": "descripcion",
+    "registros": [
+      {
+        "id": 8,
+        "descripcion": "Puesto de avanzada en el Barranco de Poqueira. Arquitectura de pizarra y cal."
+      },
+      {
+        "id": 9,
+        "descripcion": "Zona de anomalías. El Dragón vigila la entrada al búnker alpujarreño."
+      },
+      {
+        "id": 10,
+        "descripcion": "Techos de terrao. Periscopios térmicos sobre el valle a máxima altitud."
+      },
+      {
+        "id": 11,
+        "descripcion": "Fenómenos en la sierra granadina."
+      },
+      {
+        "id": 12,
+        "descripcion": "Zona de avistamientos reportados."
+      },
+      {
+        "id": 13,
+        "descripcion": "Rutas del misterio."
+      },
+      {
+        "id": 14,
+        "descripcion": "Sucesos extraños tras el telón."
+      },
+      {
+        "id": 15,
+        "descripcion": "Testimonios en la costa tropical."
+      },
+      {
+        "id": 16,
+        "descripcion": "Lugar de descanso con energías extrañas."
+      },
+      {
+        "id": 17,
+        "descripcion": "El pueblo de las brujas de Granada."
+      }
+    ]
+  }
+}

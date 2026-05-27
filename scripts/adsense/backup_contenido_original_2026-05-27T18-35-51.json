@@ -1,0 +1,35 @@
+{
+  "lugares": {
+    "columna_texto": "descripcion",
+    "registros": [
+      {
+        "id": 40,
+        "descripcion": "Rutas del misterio."
+      },
+      {
+        "id": 41,
+        "descripcion": "Sucesos extraños tras el telón."
+      },
+      {
+        "id": 42,
+        "descripcion": "Testimonios en la costa tropical."
+      },
+      {
+        "id": 43,
+        "descripcion": "Lugar de descanso con energías extrañas."
+      },
+      {
+        "id": 44,
+        "descripcion": "El pueblo de las brujas de Granada."
+      },
+      {
+        "id": 45,
+        "descripcion": "Registro desde Panel de Mando"
+      },
+      {
+        "id": 46,
+        "descripcion": "Registro desde Panel de Mando"
+      }
+    ]
+  }
+}

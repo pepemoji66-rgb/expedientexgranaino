@@ -1,0 +1,56 @@
+{
+  "expedientes": {
+    "columna_texto": "contenido",
+    "registros": [
+      {
+        "id": 29,
+        "contenido": "Los relatos y los diarios de campo de los investigadores que han estudiado el caso al detalle describen este inmueble como uno de los focos de actividad poltergeist más activos de la zona. Quienes han pasado noches entre sus muros detallan una serie de fenómenos inexplicables que desafían cualquier lógica física.\n\nEntre las manifestaciones más recurrentes se encuentran los golpes secos, sordos y rítmicos en el interior de los tabiques; unos ruidos que, según los testigos, no son fortuitos, sino que parecen responder con pautas inteligentes a las preguntas formuladas por las personas que se encuentran en el lugar. A esto se le suma el desplazamiento espontáneo de objetos pesados, que caen o salen despedidos sin que intervenga ninguna fuerza aparente, y unas bajadas de temperatura repentinas tan extremas que congelan el ambiente en cuestión de segundos, dejando una densa y opresiva sensación de frío que eriza la piel.\n\nEl \"Giro\" Macabro y el secreto bajo el suelo\nLa explicación popular a esta virulenta actividad paranormal se sitúa años atrás, coincidiendo con unas reformas de gran envergadura que se ejecutaron en el edificio cuando este pasó a ser ocupado por una conocida cadena comercial. Durante los trabajos de demolición y adecuación del local, los obreros derribaron un tabique ciego y descubrieron, con horror, la existencia de una habitación oculta que no constaba en ningún plano. En su interior se custodiaba un macabro hallazgo: una gran cantidad de restos óseos humanos.\n\nEs aquí donde la historia oficial se cruza con la leyenda negra. Según los testimonios que se filtraron de aquella obra, los responsables del proyecto, temiendo que el hallazgo arqueológico o judicial paralizase las obras de manera indefinida y supusiese una ruina económica, tomaron una decisión drástica. Se ordenó el silencio absoluto y los cimientos del nuevo establecimiento sepultaron rápidamente aquellos huesos bajo toneladas de hormigón. La tradición local asegura que fue precisamente esa profanación, el ocultamiento y el desprecio a los difuntos lo que terminó por desatar una actividad paranormal sin precedentes que aún hoy sigue manifestándose."
+      }
+    ]
+  },
+  "noticias": {
+    "columna_texto": "cuerpo",
+    "registros": [
+      {
+        "id": 6,
+        "cuerpo": "El caso más famoso de la aviación española cumple décadas. Un vuelo comercial desviado y un piloto de combate que tuvo contacto visual y de radar con un objeto desconocido."
+      },
+      {
+        "id": 7,
+        "cuerpo": "Investigación sobre las luces errantes de Las Albuñuelas. Fenómenos de color rojo y amarillo que aparecen de madrugada en puntos como 'La Puntanilla'."
+      },
+      {
+        "id": 8,
+        "cuerpo": "Se han avistado dos objetos extraños en la localidad granadina de Atarfe"
+      },
+      {
+        "id": 23,
+        "cuerpo": "Toda la banda de radioaficionados ha quedado en silencio en el sector Realejo. Se sospecha de un inhibidor de origen desconocido."
+      },
+      {
+        "id": 25,
+        "cuerpo": "El Escuadrón de Vigilancia Aérea nº9 (EVA 9), situado en la cumbre del Conjuro (Motril), sigue siendo un punto estratégico en el rastreo de ecos no identificados sobre el Mar de Alborán. Históricamente, este sector ha registrado incidentes donde la tecnología de radar ha detectado trayectorias imposibles para la aviación convencional, manteniendo a Granada en el mapa de la investigación anómala mediterránea."
+      },
+      {
+        "id": 26,
+        "cuerpo": "Nuevas investigaciones analizan la conexión entre los avistamientos reportados en Sierra Nevada en la década de los 50 y el trágico accidente del avión militar C-124 Globemaster II en 1966. Durante años, los restos plateados esparcidos por las laderas del Mulhacén alimentaron leyendas de naves estrelladas, convirtiendo al pico más alto de la península en un lugar de peregrinaje para los buscadores de misterios."
+      },
+      {
+        "id": 27,
+        "cuerpo": "El famoso Pub Granero, en el corazón de Granada, vuelve a ser noticia por los testimonios de empleados y clientes que afirman presenciar fenómenos de poltergeist y sombras en su planta superior. Este antiguo granero del siglo XIX guarda secretos que la prensa nacional como el diario ABC ha documentado en crónicas del misterio."
+      },
+      {
+        "id": 28,
+        "cuerpo": "Encuentros en el aire: El informe detalla que pilotos comerciales han reportado casi un choque con un \"objeto cilíndrico\" frente a las costas de Nueva York. No era un dron, no era un avión conocido.\n\nCilindros Metálicos: Varios testigos (incluidos contratistas del gobierno) describen un objeto del tamaño de un avión comercial, con forma de cilindro plateado, que se quedó estático y luego desapareció a una velocidad imposible.\n\nNo solo en el cielo: Se han registrado 49 casos que ocurrieron en el espacio (a más de 100 km de altura), lo que indica que estos \"aparatos\" entran y salen de la atmósfera.\n\nEl \"Enigma de los 21 casos\": De los 757 casos, hay 21 que el Pentágono reconoce que \"no tienen explicación lógica\" con la tecnología humana actual. Estos son los que muestran movimientos que desafían la física.\n\nSatélites de Elon Musk: El informe también aclara que muchos avistamientos (casi 300) eran satélites Starlink, pero que los otros siguen bajo investigación de alta prioridad."
+      },
+      {
+        "id": 29,
+        "cuerpo": "Aqui se puedem ver y reportar los avistamientos uaps"
+      },
+      {
+        "id": 30,
+        "cuerpo": "Archivos críticos de la misión Apolo 17 (1972) revelan fotografías de tres luces en formación triangular sobre la superficie lunar. Los astronautas informaron de objetos angulares y fragmentos brillantes fuera del módulo lunar. El Pentágono admite por primera vez que no hay consenso sobre su origen."
+      }
+    ]
+  }
+}
