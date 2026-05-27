@@ -63,6 +63,9 @@ const LecturaHistoria = () => {
     useEffect(() => {
         window.scrollTo(0, 0); // SUBIDA AUTOMÁTICA AL CARGAR
         obtenerHistoria();
+        return () => {
+            window.speechSynthesis.cancel();
+        };
     }, [id]);
 
     const eliminarEstaHistoria = async () => {
@@ -280,6 +283,57 @@ const LecturaHistoria = () => {
                             </button>
                         </div>
                     )}
+
+                    {/* BOTÓN ROBOCOP (TTS) */}
+                    <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                        <button
+                            onClick={() => {
+                                if (window.speechSynthesis.speaking) {
+                                    window.speechSynthesis.cancel();
+                                } else {
+                                    const textoAConversar = historia.contenido || historia.cuerpo || "";
+                                    const textoLimpio = textoAConversar
+                                        .replace(/<[^>]*>?/gm, '')
+                                        .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+                                        .replace(/\s+/g, ' ').trim();
+
+                                    const ut = new SpeechSynthesisUtterance(textoLimpio);
+                                    ut.lang = language === 'en' ? 'en-US' : 'es-ES';
+                                    ut.rate = 0.95;
+                                    ut.pitch = 0.95;
+
+                                    const voces = window.speechSynthesis.getVoices();
+                                    const langPrefix = language === 'en' ? 'en' : 'es';
+                                    const maleNames = ['Pablo', 'Jorge', 'Alvaro', 'David', 'Mark', 'Guy', 'Male'];
+                                    const vozElegida = voces.find(v => v.lang.startsWith(langPrefix) && maleNames.some(name => v.name.includes(name)));
+                                    if (vozElegida) {
+                                        ut.voice = vozElegida;
+                                    }
+
+                                    window.speechSynthesis.speak(ut);
+                                }
+                            }}
+                            style={{
+                                background: 'transparent',
+                                color: '#00d4ff',
+                                border: '1px solid #00d4ff',
+                                padding: '10px 20px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                fontFamily: 'monospace',
+                                fontSize: '0.8rem',
+                                width: '100%',
+                                borderRadius: '2px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px'
+                            }}
+                        >
+                            🔊 {language === 'en' ? 'LISTEN AUDIO (A.I. VOICE)' : 'ESCUCHAR RELATO (VOZ I.A.)'}
+                        </button>
+                    </div>
+
                     {renderizarTextoConMedios(historia.contenido || historia.cuerpo || t('readNoContent'))}
                     
                     {historia.fuente_url && (
