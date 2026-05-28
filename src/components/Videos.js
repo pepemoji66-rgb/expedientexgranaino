@@ -23,6 +23,7 @@ const Videos = ({ userAuth }) => {
     const [descripcion, setDescripcion] = useState('');
     const [cargando, setCargando] = useState(false);
     const [capturaExpandida, setCapturaExpandida] = useState(null);
+    const [videoAbierto, setVideoAbierto] = useState(null);
     const [paginaActual, setPaginaActual] = useState(1);
     const videosPorPagina = 12;
 
@@ -549,6 +550,58 @@ const Videos = ({ userAuth }) => {
                         <div style={{ background: '#050505', padding: '10px', textAlign: 'center', borderTop: '1px solid #111' }}>
                             <p style={{ color: 'var(--color-principal)', fontSize: '0.7rem', margin: 0, fontFamily: 'monospace' }}>
                                 [ RUEDA: ZOOM ] [ CLIC + ARRASTRAR: PAN ] [ ESC: CERRAR ]
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL DE VÍDEO ABIERTO (TACTICAL OVERLAY CON BOTÓN DE CIERRE COORDENADO) */}
+            {videoAbierto && (
+                <div className="modal-galeria-abierta fade-in" onClick={() => setVideoAbierto(null)} style={{
+                    position: 'fixed', 
+                    top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(0,0,0,0.98)', 
+                    zIndex: 999999,
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    padding: '20px', 
+                    backdropFilter: 'blur(15px)'
+                }}>
+                    <div className="contenido-zoom-pro" onClick={e => e.stopPropagation()} style={{
+                        position: 'relative', width: '90%', height: '90%', background: '#000',
+                        border: '1px solid var(--color-principal)', display: 'flex', flexDirection: 'column', overflow: 'hidden'
+                    }}>
+                        <button onClick={() => setVideoAbierto(null)} style={{
+                            position: 'absolute', top: '15px', right: '15px', background: '#ff4444', border: 'none',
+                            color: '#fff', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', zIndex: 10002,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem'
+                        }}>✖</button>
+                        
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
+                            {videoAbierto.url && videoAbierto.url.startsWith('http') && (videoAbierto.url.includes('youtube.com') || videoAbierto.url.includes('youtu.be')) ? (
+                                <iframe
+                                    src={videoAbierto.url.replace("watch?v=", "embed/").split("&")[0]}
+                                    title={videoAbierto.titulo}
+                                    allowFullScreen
+                                    style={{ width: '100%', height: '80vh', border: 'none' }}
+                                ></iframe>
+                            ) : (
+                                <video 
+                                    src={videoAbierto.url.startsWith('http') ? videoAbierto.url : `${API_BASE_URL}/videos/${videoAbierto.url}`} 
+                                    controls 
+                                    autoPlay
+                                    style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}
+                                />
+                            )}
+                        </div>
+                        <div style={{ background: '#050505', padding: '15px', textAlign: 'center', borderTop: '1px solid #111' }}>
+                            <h3 style={{ color: '#fff', margin: '0 0 5px 0', fontSize: '1rem', fontFamily: 'monospace' }}>
+                                {videoAbierto.titulo?.toUpperCase()}
+                            </h3>
+                            <p style={{ color: 'var(--color-principal)', fontSize: '0.75rem', margin: 0, fontFamily: 'monospace' }}>
+                                [ CLIC EN LA ✖ O FUERA DEL REPRODUCTOR PARA CERRAR ]
                             </p>
                         </div>
                     </div>
