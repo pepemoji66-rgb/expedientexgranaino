@@ -32,7 +32,7 @@ module.exports = (db, upload) => {
 
     // --- 3. ENVIAR VÍDEO A REVISIÓN (POST) ---
     router.post('/', async (req, res) => {
-        const { titulo, url, usuario_nombre, latitud, longitud, capturas } = req.body;
+        const { titulo, url, usuario_nombre, latitud, longitud, capturas, descripcion } = req.body;
 
         if (!usuario_nombre) {
             return res.status(400).json({ error: "Identidad necesaria para subir material." });
@@ -46,8 +46,8 @@ module.exports = (db, upload) => {
                 return res.status(403).json({ error: "DENEGADO", message: "Cuenta no validada en el búnker." });
             }
 
-            const sql = "INSERT INTO videos (titulo, url, estado, usuario, latitud, longitud, capturas, fecha) VALUES (?, ?, 'pendiente', ?, ?, ?, ?, NOW())";
-            const [result] = await db.execute(sql, [titulo, url, usuario_nombre, latitud || 0, longitud || 0, capturas || '']);
+            const sql = "INSERT INTO videos (titulo, url, estado, usuario, latitud, longitud, capturas, descripcion, fecha) VALUES (?, ?, 'pendiente', ?, ?, ?, ?, ?, NOW())";
+            const [result] = await db.execute(sql, [titulo, url, usuario_nombre, latitud || 0, longitud || 0, capturas || '', descripcion || '']);
             
             res.json({ message: "📼 Vídeo enviado a revisión, hermano.", id: result.insertId });
         } catch (err) {
@@ -68,11 +68,11 @@ module.exports = (db, upload) => {
 
     // --- 4.5 ACTUALIZAR VÍDEO (PUT) ---
     router.put('/:id', async (req, res) => {
-        const { titulo, url, latitud, longitud, estado, capturas } = req.body;
+        const { titulo, url, latitud, longitud, estado, capturas, descripcion } = req.body;
         try {
             await db.execute(
-                "UPDATE videos SET titulo = ?, url = ?, latitud = ?, longitud = ?, estado = ?, capturas = ? WHERE id = ?",
-                [titulo, url, latitud, longitud, estado, capturas, req.params.id]
+                "UPDATE videos SET titulo = ?, url = ?, latitud = ?, longitud = ?, estado = ?, capturas = ?, descripcion = ? WHERE id = ?",
+                [titulo, url, latitud, longitud, estado, capturas, descripcion || '', req.params.id]
             );
             res.json({ mensaje: "Vídeo actualizado en el búnker." });
         } catch (err) {

@@ -212,7 +212,7 @@ const PanelAdmin = () => {
 
             // Mapeo dinámico para el backend (lugares/imagenes usan nombre/descripcion, otros titulo/contenido)
             const finalData = { ...editForm };
-            if (tab === 'lugares' || tab === 'imagenes' || tab === 'noticias') {
+            if (tab === 'lugares' || tab === 'imagenes' || tab === 'noticias' || tab === 'videos') {
                 if (tab === 'lugares') finalData.nombre = finalData.titulo;
                 if (tab === 'noticias') finalData.cuerpo = finalData.contenido;
                 
@@ -330,8 +330,8 @@ const PanelAdmin = () => {
         }
         if (tipoSubida === 'noticias' && editForm.fuente_url) formData.append('fuente_url', editForm.fuente_url);
         
-        // Coordenadas para Lugares, Relatos y Noticias
-        if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos') {
+        // Coordenadas para Lugares, Relatos, Noticias y Vídeos
+        if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos') {
             formData.append('latitud', editForm.latitud || 0);
             formData.append('longitud', editForm.longitud || 0);
             formData.append('ubicacion', editForm.ubicacion || '');
@@ -726,7 +726,7 @@ const PanelAdmin = () => {
                                 </div>
                             )}
 
-                        {tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' ? (
+                        {tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos' ? (
                             <>
                                 <div className="form-group-admin">
                                     <label>CONTENIDO / DESCRIPCIÓN:</label>
@@ -781,7 +781,7 @@ const PanelAdmin = () => {
                             />
                         </div>
                         
-                        {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos') && (
+                        {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos') && (
                             <div style={{ background: 'rgba(177,137,4,0.1)', padding: '15px', marginBottom: '15px', border: '1px solid #b18904' }}>
                                 <label style={{ display: 'block', color: '#b18904', fontSize: '0.8rem', marginBottom: '10px' }}>🛰️ RASTREO GPS:</label>
                                 <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
@@ -927,6 +927,12 @@ const PanelAdmin = () => {
                                         onChange={e => setEditForm({...editForm, url: e.target.value})} 
                                         style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
                                     />
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CONTENIDO / DESCRIPCIÓN:</label>
+                                    <textarea 
+                                        value={editForm.contenido} 
+                                        onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
+                                        style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
+                                    />
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAPTURAS (URLs):</label>
                                     <textarea 
                                         value={editForm.capturas} 
@@ -1031,7 +1037,7 @@ const PanelAdmin = () => {
                                 </>
                             )}
 
-                            {(tab === 'imagenes' || tab === 'lugares' || tab === 'expedientes' || tab === 'noticias') && (
+                            {(tab === 'imagenes' || tab === 'lugares' || tab === 'expedientes' || tab === 'noticias' || tab === 'videos') && (
                                 <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
                                     <label style={{ display: 'block', color: '#b18904', fontSize: '0.8rem', marginBottom: '10px', fontWeight: 'bold' }}>🛰️ GEOLOCALIZACIÓN ESTRATÉGICA</label>
                                     

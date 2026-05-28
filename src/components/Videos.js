@@ -20,6 +20,7 @@ const Videos = ({ userAuth }) => {
     const [capturas, setCapturas] = useState('');
     const [latitud, setLatitud] = useState('');
     const [longitud, setLongitud] = useState('');
+    const [descripcion, setDescripcion] = useState('');
     const [cargando, setCargando] = useState(false);
     const [capturaExpandida, setCapturaExpandida] = useState(null);
     const [paginaActual, setPaginaActual] = useState(1);
@@ -93,7 +94,8 @@ const Videos = ({ userAuth }) => {
                 usuario_nombre: userAuth.nombre || 'AGENTE',
                 latitud: latitud || 0,
                 longitud: longitud || 0,
-                capturas: capturas
+                capturas: capturas,
+                descripcion: descripcion
             });
 
             alert(t('videoSent'));
@@ -102,6 +104,7 @@ const Videos = ({ userAuth }) => {
             setCapturas('');
             setLatitud('');
             setLongitud('');
+            setDescripcion('');
             cargarVideos(); 
         } catch (err) {
             console.error("Error al subir:", err);
@@ -270,66 +273,102 @@ const Videos = ({ userAuth }) => {
                 📡 REGISTROS DESCLASIFICADOS DEL RADAR
             </div>
 
-            <div className="grid-videos-pro">
+            <div className="grid-videos-pro-premium">
                 {videosRadar.length > 0 ? (
                     videosPaginados.map((vid) => (
-                        <div key={vid.id} id={`video-${vid.id}`} className="video-card-dossier">
-                            <div className="video-frame-wrapper">
-                                {vid.url && !vid.url.includes('http') ? (
-                                    <video 
-                                        controls 
-                                        playsInline 
-                                        preload="metadata" 
-                                        crossOrigin="anonymous" 
-                                        key={vid.url}
-                                        controlsList={isAdmin ? undefined : "nodownload"}
-                                        onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}
-                                    >
-                                        <source src={`${API_BASE_URL}/videos/${vid.url}`} type="video/mp4" />
-                                    </video>
-                                ) : vid.url && (vid.url.includes('youtube.com') || vid.url.includes('youtu.be')) ? (
-                                    <iframe
-                                        src={vid.url.replace("watch?v=", "embed/").split("&")[0]}
-                                        title={vid.titulo}
-                                        allowFullScreen
-                                    ></iframe>
-                                ) : (
-                                    <div className="video-placeholder-dossier" style={{ backgroundImage: `url(${API_BASE_URL}/imagenes/video_default.png)` }}>
-                                        <div className="placeholder-overlay">
-                                            <p style={{ color: '#fff', fontSize: '0.7rem', marginBottom: '15px', fontFamily: 'monospace', borderBottom: '1px solid #333' }}>📡 TRANSMISIÓN EXTERNA</p>
-                                            <a href={vid.url} target="_blank" rel="noreferrer" className="btn-mando-pro btn-primary-pro">ABRIR ARCHIVO</a>
-                                        </div>
-                                    </div>
-                                )}
+                        <div key={vid.id} id={`video-${vid.id}`} className="video-card-premium-bunker">
+                            <div className="video-premium-header">
+                                <span className="technical-code">// DECLASS-PR0{vid.id}</span>
+                                <span className="technical-status-tag blinking-red">DESCLASIFICADO</span>
                             </div>
                             
-                            <div className="video-info-pro">
-                                <div className="video-meta-pro">
-                                    <span>📍 {vid.latitud ? 'COORDENADAS FIJADAS' : 'ARCHIVO CENTRAL'}</span>
-                                    <span>#{vid.id}</span>
-                                </div>
-                                <h3>{vid.titulo ? vid.titulo.toUpperCase() : 'REGISTRO CLASIFICADO'}</h3>
-
-                                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
-                                    <button onClick={() => compartirVideo(vid, 'twitter')} className="btn-mando-pro btn-secondary-pro" style={{ flex: 1 }}>𝕏 TWITTER</button>
-                                    <button onClick={() => compartirVideo(vid, 'whatsapp')} className="btn-mando-pro btn-secondary-pro" style={{ flex: 1 }}>WHATSAPP</button>
-                                    <button onClick={() => compartirVideo(vid, 'instagram')} className="btn-mando-pro btn-secondary-pro" style={{ flex: 1, background: '#e1306c', borderColor: '#e1306c' }}>INSTAGRAM</button>
-                                    <button onClick={() => compartirVideo(vid, 'copy')} className="btn-mando-pro btn-secondary-pro" style={{ width: '40px' }}>📎</button>
-                                </div>
-
-                                {vid.capturas && vid.capturas.trim() !== '' && (
-                                    <div style={{ marginTop: '15px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '10px' }}>
-                                        <p style={{ fontSize: '0.55rem', color: '#888', marginBottom: '8px', fontFamily: 'monospace' }}>🔍 EVIDENCIAS ADJUNTAS:</p>
-                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                            {vid.capturas.split(',').map((url, idx) => (
-                                                <div key={idx} onClick={() => abrirCaptura(url.trim())}
-                                                     style={{ width: '50px', height: '50px', overflow: 'hidden', border: '1px solid #333', borderRadius: '4px', cursor: 'pointer' }}>
-                                                    <img src={url.trim()} alt="Evidencia" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div className="video-premium-body">
+                                <div className="video-premium-player-col">
+                                    <div className="video-frame-wrapper">
+                                        {vid.url && !vid.url.includes('http') ? (
+                                            <video 
+                                                controls 
+                                                playsInline 
+                                                preload="metadata" 
+                                                crossOrigin="anonymous" 
+                                                key={vid.url}
+                                                controlsList={isAdmin ? undefined : "nodownload"}
+                                                onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}
+                                            >
+                                                <source src={`${API_BASE_URL}/videos/${vid.url}`} type="video/mp4" />
+                                            </video>
+                                        ) : vid.url && (vid.url.includes('youtube.com') || vid.url.includes('youtu.be')) ? (
+                                            <iframe
+                                                src={vid.url.replace("watch?v=", "embed/").split("&")[0]}
+                                                title={vid.titulo}
+                                                allowFullScreen
+                                            ></iframe>
+                                        ) : (
+                                            <div className="video-placeholder-dossier" style={{ backgroundImage: `url(${API_BASE_URL}/imagenes/video_default.png)` }}>
+                                                <div className="placeholder-overlay">
+                                                    <p style={{ color: '#fff', fontSize: '0.7rem', marginBottom: '15px', fontFamily: 'monospace', borderBottom: '1px solid #333' }}>📡 TRANSMISIÓN EXTERNA</p>
+                                                    <a href={vid.url} target="_blank" rel="noreferrer" className="btn-mando-pro btn-primary-pro">ABRIR ARCHIVO</a>
                                                 </div>
-                                            ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                <div className="video-premium-info-col">
+                                    <h3 className="video-premium-title">{vid.titulo ? vid.titulo.toUpperCase() : 'REGISTRO CLASIFICADO'}</h3>
+                                    
+                                    <div className="video-premium-description">
+                                        <span className="desc-label">DESCRIPCIÓN DEL EXPEDIENTE:</span>
+                                        <p className="desc-text">
+                                            {vid.descripcion && vid.descripcion.trim() !== '' 
+                                                ? vid.descripcion 
+                                                : '⚠️ ADVERTENCIA DEL BÚNKER: Pendiente de transcripción y descripción oficial por el analista jefe.'}
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="technical-specs-table">
+                                        <div className="spec-row">
+                                            <span className="spec-name">FECHA REGISTRO:</span>
+                                            <span className="spec-value">[{vid.fecha ? new Date(vid.fecha).toLocaleDateString('es-ES') : 'N/A'}]</span>
+                                        </div>
+                                        <div className="spec-row">
+                                            <span className="spec-name">UBICACIÓN GPS:</span>
+                                            <span className="spec-value">
+                                                {vid.latitud && vid.longitud && (parseFloat(vid.latitud) !== 0 || parseFloat(vid.longitud) !== 0) 
+                                                    ? `[LAT: ${parseFloat(vid.latitud).toFixed(4)}, LON: ${parseFloat(vid.longitud).toFixed(4)}]`
+                                                    : <span style={{ color: '#ff4444' }}>[SIN SEÑAL GPS / EN RASTREO]</span>}
+                                            </span>
+                                        </div>
+                                        <div className="spec-row">
+                                            <span className="spec-name">AGENTE REGISTRADOR:</span>
+                                            <span className="spec-value">[{vid.usuario ? vid.usuario.toUpperCase() : 'AGENTE ANÓNIMO'}]</span>
+                                        </div>
+                                        <div className="spec-row">
+                                            <span className="spec-name">NIVEL ACCESO:</span>
+                                            <span className="spec-value" style={{ color: 'var(--color-principal)', fontWeight: 'bold' }}>[NIVEL 3 - CENTRAL]</span>
                                         </div>
                                     </div>
-                                )}
+
+                                    {vid.capturas && vid.capturas.trim() !== '' && (
+                                        <div className="video-premium-evidences">
+                                            <span className="evidences-label">EVIDENCIAS DIGITALES ADJUNTAS:</span>
+                                            <div className="evidences-grid-mini">
+                                                {vid.capturas.split(',').map((url, idx) => (
+                                                    <div key={idx} onClick={() => abrirCaptura(url.trim())} className="evidence-thumb-wrapper">
+                                                        <img src={url.trim()} alt="Evidencia" />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="video-premium-actions">
+                                        <button onClick={() => compartirVideo(vid, 'twitter')} className="btn-premium-dock">𝕏 TWITTER</button>
+                                        <button onClick={() => compartirVideo(vid, 'whatsapp')} className="btn-premium-dock">WHATSAPP</button>
+                                        <button onClick={() => compartirVideo(vid, 'instagram')} className="btn-premium-dock btn-dock-ig">INSTAGRAM</button>
+                                        <button onClick={() => compartirVideo(vid, 'copy')} className="btn-premium-dock btn-dock-copy">📎 COPIAR</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ))
@@ -407,6 +446,18 @@ const Videos = ({ userAuth }) => {
                                     width: '100%', marginBottom: '20px', padding: '12px',
                                     background: '#000', color: 'var(--color-principal)', border: '1px solid #333',
                                     fontFamily: 'monospace', minHeight: '60px', resize: 'vertical'
+                                }}
+                            />
+
+                            <label style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace' }}>DESCRIPCIÓN DEL VÍDEO (OPCIONAL):</label>
+                            <textarea
+                                placeholder="Escribe aquí una descripción o transcripción de lo que se observa en el vídeo..."
+                                value={descripcion}
+                                onChange={(e) => setDescripcion(e.target.value)}
+                                style={{
+                                    width: '100%', marginBottom: '20px', padding: '12px',
+                                    background: '#000', color: 'var(--color-principal)', border: '1px solid #333',
+                                    fontFamily: 'monospace', minHeight: '80px', resize: 'vertical'
                                 }}
                             />
 

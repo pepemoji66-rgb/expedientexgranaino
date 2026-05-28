@@ -66,8 +66,14 @@ module.exports = async (db) => {
             fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
             latitud DOUBLE DEFAULT 0,
             longitud DOUBLE DEFAULT 0,
-            capturas TEXT
+            capturas TEXT,
+            descripcion TEXT
         )`);
+
+        try {
+            await db.execute("ALTER TABLE videos ADD COLUMN descripcion TEXT");
+            console.log("🩹 PARCHE APLICADO: Columna 'descripcion' añadida a videos.");
+        } catch (e) {}
 
         await db.execute(`CREATE TABLE IF NOT EXISTS imagenes (
             id INT AUTO_INCREMENT PRIMARY KEY,

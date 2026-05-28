@@ -73,8 +73,9 @@ module.exports = (db) => {
     let params = [];
 
     if (tipo === 'videos') {
-      sql = "INSERT INTO videos (titulo, url, estado, fecha) VALUES (?, ?, 'aprobado', NOW())";
-      params = [titulo, nombreArchivo];
+      const { contenido, latitud, longitud } = req.body;
+      sql = "INSERT INTO videos (titulo, url, estado, latitud, longitud, descripcion, fecha) VALUES (?, ?, 'aprobado', ?, ?, ?, NOW())";
+      params = [titulo, nombreArchivo, latitud || 0, longitud || 0, contenido || ''];
     } else if (tipo === 'audios') {
       const { imagen_url } = req.body;
       sql = "INSERT INTO audios (titulo, ruta, aprobado, fecha_subida, imagen_url) VALUES (?, ?, 1, NOW(), ?)";
