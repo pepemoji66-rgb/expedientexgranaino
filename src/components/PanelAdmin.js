@@ -212,6 +212,18 @@ const PanelAdmin = () => {
 
             // Mapeo dinámico para el backend (lugares/imagenes usan nombre/descripcion, otros titulo/contenido)
             const finalData = { ...editForm };
+
+            // AUTO-UPLOAD CAPTURAS DE VÍDEOS: si hay capturas seleccionadas pero no cargadas, las subimos automáticamente
+            if (tab === 'videos' && archivosCapturas && archivosCapturas.length > 0) {
+                const formData = new FormData();
+                Array.from(archivosCapturas).forEach(file => {
+                    formData.append('capturas', file);
+                });
+                const resCapturas = await axios.post(`${API_BASE_URL}/api/videos/${id}/capturas`, formData);
+                finalData.capturas = resCapturas.data.urls;
+                setArchivosCapturas([]);
+            }
+
             if (tab === 'lugares' || tab === 'imagenes' || tab === 'noticias' || tab === 'videos') {
                 if (tab === 'lugares') finalData.nombre = finalData.titulo;
                 if (tab === 'noticias') finalData.cuerpo = finalData.contenido;
