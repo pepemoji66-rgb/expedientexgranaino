@@ -305,12 +305,20 @@ const Videos = ({ userAuth }) => {
                                                 allowFullScreen
                                             ></iframe>
                                         ) : (
-                                            <div className="video-placeholder-dossier" style={{ backgroundImage: `url(${API_BASE_URL}/imagenes/video_default.png)` }}>
-                                                <div className="placeholder-overlay">
-                                                    <p style={{ color: '#fff', fontSize: '0.7rem', marginBottom: '15px', fontFamily: 'monospace', borderBottom: '1px solid #333' }}>📡 TRANSMISIÓN EXTERNA</p>
-                                                    <a href={vid.url} target="_blank" rel="noreferrer" className="btn-mando-pro btn-primary-pro">ABRIR ARCHIVO</a>
-                                                </div>
-                                            </div>
+                                            (() => {
+                                                const primerCaptura = vid.capturas && vid.capturas.trim() !== '' ? vid.capturas.split(',')[0].trim() : '';
+                                                const bgUrl = primerCaptura 
+                                                    ? (primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`)
+                                                    : `${API_BASE_URL}/imagenes/video_default.png`;
+                                                return (
+                                                    <div className="video-placeholder-dossier" style={{ backgroundImage: `url(${bgUrl})` }}>
+                                                        <div className="placeholder-overlay">
+                                                            <p style={{ color: '#fff', fontSize: '0.7rem', marginBottom: '15px', fontFamily: 'monospace', borderBottom: '1px solid #333' }}>📡 TRANSMISIÓN EXTERNA</p>
+                                                            <a href={vid.url} target="_blank" rel="noreferrer" className="btn-mando-pro btn-primary-pro">ABRIR ARCHIVO</a>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()
                                         )}
                                     </div>
                                 </div>

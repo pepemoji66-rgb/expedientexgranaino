@@ -230,9 +230,12 @@ const Hero = ({ userAuth }) => {
                     btnLink: "/audios"
                 });
             } else if (item.type === 'video') {
+                const primerCaptura = item.capturas && item.capturas.trim() !== '' ? item.capturas.split(',')[0].trim() : '';
                 alertasRecientes.push({
                     id: `nuevo-video-${item.id}`,
-                    image: imgEvidencias,
+                    image: primerCaptura 
+                        ? (primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`) 
+                        : imgEvidencias,
                     subtitle: language === 'en' ? "NEW VIDEO" : "NUEVO VÍDEO",
                     title: (item.titulo || 'EVIDENCIA EN VÍDEO').toUpperCase(),
                     tagline: language === 'en' ? "VISUAL EVIDENCE" : "VISUALIZA LAS PRUEBAS",
