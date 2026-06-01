@@ -9,7 +9,9 @@ import './expedientes.css';
 
 const Expedientes = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
-    const [seccion, setSeccion] = useState('jefe'); // Priorizamos relatos del jefe
+    const [busqueda, setBusqueda] = useState('');
+    const [filtroActivo, setFiltroActivo] = useState('todos');
+    const [tipoRegistro, setTipoRegistro] = useState('agente');
     const [datos, setDatos] = useState([]);
     const [relatoAbierto, setRelatoAbierto] = useState(null);
     const navigate = useNavigate();
@@ -25,6 +27,8 @@ const Expedientes = () => {
 
     const [userAuth, setUserAuth] = useState(null);
 
+    const isAdmin = userAuth && (userAuth.rol === 'admin' || userAuth.email === 'archipegv2@gmail.com');
+
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
@@ -36,21 +40,36 @@ const Expedientes = () => {
         if (sesion) setUserAuth(JSON.parse(sesion));
     }, []);
 
+    useEffect(() => {
+        if (isAdmin) {
+            setTipoRegistro('jefe');
+        } else {
+            setTipoRegistro('agente');
+        }
+    }, [isAdmin]);
+
+    useEffect(() => {
+        setPaginaActual(1);
+    }, [busqueda, filtroActivo]);
+
     const cargarDatos = useCallback(async () => {
         setCargando(true);
         try {
-            const endpoint = seccion === 'usuarios'
-                ? `${API_BASE_URL}/api/expedientes/expedientes-publicos`
-                : `${API_BASE_URL}/api/expedientes/relatos-admin-publicos`;
+            const [resAgentes, resJefe] = await Promise.all([
+                axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`),
+                axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`)
+            ]);
 
-            const res = await axios.get(endpoint);
-            if (res.data && Array.isArray(res.data)) {
-                setDatos(res.data);
-                setPaginaActual(1);
-            } else {
-                setDatos([]);
-                setPaginaActual(1);
-            }
+            const agentesData = Array.isArray(resAgentes.data) ? resAgentes.data : [];
+            const jefeData = Array.isArray(resJefe.data) ? resJefe.data : [];
+
+            // Combinar todos los relatos
+            const todos = [...agentesData, ...jefeData];
+
+            // Ordenarlos por fecha descendente
+            todos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            setDatos(todos);
         } catch (err) {
             console.error("❌ Error en la aduana de expedientes:", err);
             setDatos([]);
@@ -58,7 +77,7 @@ const Expedientes = () => {
             setCargando(false);
             if (forceTranslationUpdate) forceTranslationUpdate();
         }
-    }, [seccion, forceTranslationUpdate]);
+    }, [forceTranslationUpdate]);
 
     useEffect(() => {
         cargarDatos();
@@ -109,7 +128,7 @@ const Expedientes = () => {
         formData.append('usuario_nombre', userAuth.nombre);
         formData.append('latitud', latitud || 0);
         formData.append('longitud', longitud || 0);
-        formData.append('tipo', seccion === 'jefe' ? 'jefe' : 'agente');
+        formData.append('tipo', tipoRegistro);
 
         const fileInput = document.getElementById('archivo-expediente');
         if (fileInput && fileInput.files[0]) {
@@ -120,9 +139,6 @@ const Expedientes = () => {
             await axios.post(`${API_BASE_URL}/api/expedientes/subir-expediente`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert(t('successAuth') + ": " + t('expUpload').replace('SUBIR AL ', ''));
-            // Wait, I should add a specific key for this.
-            // Actually, let's use a simpler one.
             alert("🚀 " + t('expUpload'));
             setNuevoTitulo('');
             setNuevoContenido('');
@@ -201,13 +217,34 @@ const Expedientes = () => {
         }
     };
 
-    const isAdmin = userAuth && (userAuth.rol === 'admin' || userAuth.email === 'archipegv2@gmail.com');
+    // Filtrado por buscador y píldoras
+    const datosFiltrados = datos.filter(item => {
+        // Filtro por tipo (píldoras)
+        if (filtroActivo === 'jefe' && item.tipo !== 'jefe') return false;
+        if (filtroActivo === 'agente' && item.tipo === 'jefe') return false;
+
+        // Filtro por búsqueda
+        if (busqueda.trim() !== '') {
+            const query = busqueda.toLowerCase();
+            const titulo = (item.titulo || '').toLowerCase();
+            const contenido = (item.contenido || '').toLowerCase();
+            const autor = (item.usuario_nombre || '').toLowerCase();
+            return titulo.includes(query) || contenido.includes(query) || autor.includes(query);
+        }
+
+        return true;
+    });
+
+    // Conteos para píldoras
+    const countTodos = datos.length;
+    const countJefe = datos.filter(d => d.tipo === 'jefe').length;
+    const countAgentes = datos.filter(d => d.tipo !== 'jefe').length;
 
     // Lógica de Paginación
     const indexOfLastExp = paginaActual * expedientesPorPagina;
     const indexOfFirstExp = indexOfLastExp - expedientesPorPagina;
-    const expedientesActuales = datos.slice(indexOfFirstExp, indexOfLastExp);
-    const totalPaginas = Math.ceil(datos.length / expedientesPorPagina);
+    const expedientesActuales = datosFiltrados.slice(indexOfFirstExp, indexOfLastExp);
+    const totalPaginas = Math.ceil(datosFiltrados.length / expedientesPorPagina);
 
     return (
         <div className="experiencias-page">
@@ -219,23 +256,46 @@ const Expedientes = () => {
                 <p>{t('expProtocol')}</p>
             </div>
 
-            <div className="botones-superiores">
+            {/* BUSCADOR DE EXPEDIENTES FUTURISTA */}
+            <div className="buscador-expedientes-container">
+                <div className="buscador-wrapper">
+                    <span className="buscador-icono">🔍</span>
+                    <input
+                        type="text"
+                        className="input-buscador-neon"
+                        placeholder={t('expSearchPlaceholder')}
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                    />
+                    {busqueda && (
+                        <button className="btn-limpiar-busqueda" onClick={() => setBusqueda('')}>×</button>
+                    )}
+                </div>
+            </div>
+
+            {/* PÍLDORAS DE FILTRADO DINÁMICO */}
+            <div className="filtros-expedientes-pills">
                 <button
-                    className={`btn-main ${seccion === 'usuarios' ? 'active' : ''}`}
-                    onClick={() => setSeccion('usuarios')}
+                    className={`pill-filtro ${filtroActivo === 'todos' ? 'active' : ''}`}
+                    onClick={() => setFiltroActivo('todos')}
                 >
-                    {t('expAgentReports')}
+                    {t('expFilterAll')} <span className="pill-count">{countTodos}</span>
                 </button>
                 <button
-                    className={`btn-main admin-main ${seccion === 'jefe' ? 'active' : ''}`}
-                    onClick={() => setSeccion('jefe')}
+                    className={`pill-filtro pill-admin ${filtroActivo === 'jefe' ? 'active' : ''}`}
+                    onClick={() => setFiltroActivo('jefe')}
                 >
-                    {t('expAdminStories')}
+                    {t('expFilterAdmin')} <span className="pill-count">{countJefe}</span>
+                </button>
+                <button
+                    className={`pill-filtro ${filtroActivo === 'agente' ? 'active' : ''}`}
+                    onClick={() => setFiltroActivo('agente')}
+                >
+                    {t('expFilterAgent')} <span className="pill-count">{countAgentes}</span>
                 </button>
             </div>
 
-
-            <div className={`tabla-container-pro ${seccion === 'jefe' ? 'admin-border' : ''}`}>
+            <div className={`tabla-container-pro ${filtroActivo === 'jefe' ? 'admin-border' : ''}`}>
                 {cargando ? (
                     <div className="cargando-expedientes">
                         <div className="scanner-line"></div>
@@ -289,8 +349,8 @@ const Expedientes = () => {
                 )}
             </div>
 
-            {/* Formulario visible para agentes en su sección o para el Admin en la suya */}
-            {(seccion === 'usuarios' || (seccion === 'jefe' && isAdmin)) && (
+            {/* Formulario visible para cualquier agente verificado */}
+            {userAuth && (
                 <div className="contenedor-envio-expediente">
                     <div style={{ background: 'rgba(255,177,0,0.1)', border: '1px solid #ffb100', padding: '15px', marginBottom: '20px', borderRadius: '5px', textAlign: 'center' }}>
                         <p style={{ color: '#ffb100', fontSize: '0.8rem', fontFamily: 'monospace', margin: 0 }}>
@@ -298,9 +358,42 @@ const Expedientes = () => {
                         </p>
                     </div>
                     <h2 className="titulo-neon-p">
-                        {seccion === 'jefe' ? t('expWriteAdmin') : t('expWriteReport')}
+                        {tipoRegistro === 'jefe' ? t('expWriteAdmin') : t('expWriteReport')}
                     </h2>
                     <form onSubmit={enviarExpediente} className="form-expediente">
+                        {/* Selector para administradores */}
+                        {isAdmin && (
+                            <div className="selector-tipo-registro" style={{ marginBottom: '20px', background: 'rgba(0, 212, 255, 0.05)', padding: '15px', borderRadius: '6px', border: '1px dashed rgba(0, 212, 255, 0.3)' }}>
+                                <label style={{ color: 'var(--color-principal)', fontSize: '0.75rem', display: 'block', marginBottom: '10px', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                    📡 RANGO DE PUBLICACIÓN (ALTO MANDO DETECTADO):
+                                </label>
+                                <div style={{ display: 'flex', gap: '20px' }}>
+                                    <label style={{ color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                        <input
+                                            type="radio"
+                                            name="tipo_registro"
+                                            value="agente"
+                                            checked={tipoRegistro === 'agente'}
+                                            onChange={() => setTipoRegistro('agente')}
+                                            style={{ cursor: 'pointer', accentColor: 'var(--color-principal)' }}
+                                        />
+                                        👤 {t('expFilterAgent')}
+                                    </label>
+                                    <label style={{ color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                        <input
+                                            type="radio"
+                                            name="tipo_registro"
+                                            value="jefe"
+                                            checked={tipoRegistro === 'jefe'}
+                                            onChange={() => setTipoRegistro('jefe')}
+                                            style={{ cursor: 'pointer', accentColor: 'var(--color-principal)' }}
+                                        />
+                                        🛡️ {t('expFilterAdmin')}
+                                    </label>
+                                </div>
+                            </div>
+                        )}
+
                         <input
                             type="text"
                             className="input-bunker-exp"
@@ -358,7 +451,7 @@ const Expedientes = () => {
                         </div>
 
                         <button type="submit" className="btn-enviar-expediente">
-                            {seccion === 'jefe' ? t('expPublish') : t('expUpload')}
+                            {tipoRegistro === 'jefe' ? t('expPublish') : t('expUpload')}
                         </button>
                     </form>
                 </div>

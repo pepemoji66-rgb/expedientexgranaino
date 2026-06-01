@@ -139,6 +139,10 @@ const translations = {
         expUpload: "SUBIR AL ARCHIVO",
         expDecrypt: "DESCRIPTANDO SEÑAL...",
         expNoData: "📡 FRECUENCIA LIMPIA. NINGUNA ACTIVIDAD DETECTADA.",
+        expSearchPlaceholder: "Buscar por título, contenido o alias de agente...",
+        expFilterAll: "📁 VER TODO",
+        expFilterAdmin: "🛡️ ALTO MANDO",
+        expFilterAgent: "👤 AGENTES DE CAMPO",
         // App / System
         sysLogoutConfirm: "¿FINALIZAR TURNO DE GUARDIA, AGENTE?",
         sysLogoutBtn: "DESCONECTAR AGENTE",
@@ -519,6 +523,10 @@ const translations = {
         expUpload: "UPLOAD TO ARCHIVE",
         expDecrypt: "DECRYPTING SIGNAL...",
         expNoData: "📡 CLEAN FREQUENCY. NO ACTIVITY DETECTED.",
+        expSearchPlaceholder: "Search by title, content or agent alias...",
+        expFilterAll: "📁 VIEW ALL",
+        expFilterAdmin: "🛡️ HIGH COMMAND",
+        expFilterAgent: "👤 FIELD AGENTS",
         // App / System
         sysLogoutConfirm: "FINISH GUARD SHIFT, AGENT?",
         sysLogoutBtn: "DISCONNECT AGENT",
