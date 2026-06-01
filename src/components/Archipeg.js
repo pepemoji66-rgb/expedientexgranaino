@@ -154,6 +154,14 @@ const Archipeg = ({ userAuth }) => {
         setAudioStarted(false);
     };
 
+    // NUEVA FUNCIÓN: Cierra y desplaza suavemente al portal de compra
+    const adquirirYIr = () => {
+        cerrarPresentacion();
+        setTimeout(() => {
+            document.getElementById('portal-adquisicion')?.scrollIntoView({ behavior: 'smooth' });
+        }, 120);
+    };
+
     const startExperience = () => {
         if (audioRef.current) {
             audioRef.current.play()
@@ -227,7 +235,7 @@ const Archipeg = ({ userAuth }) => {
                 )}
 
                 {/* ZONA DE DESCARGA Y COMPRA CON ACCESO RESTRINGIDO */}
-                <h3 className="section-heading">{language === 'en' ? "ACQUISITION PORTAL" : "PORTAL DE ADQUISICIÓN"}</h3>
+                <h3 id="portal-adquisicion" className="section-heading">{language === 'en' ? "ACQUISITION PORTAL" : "PORTAL DE ADQUISICIÓN"}</h3>
 
                 {/* AVISO IMPORTANTE DE WINDOWS SMARTSCREEN */}
                 <div className="windows-warning-container">
@@ -334,7 +342,7 @@ const Archipeg = ({ userAuth }) => {
                                         <div className="radar-ping"></div>
                                         <div className="pending-pro-details">
                                             <strong>{language === 'en' ? "PENDING PAYMENT VALIDATION" : "PENDIENTE DE COMPROBAR PAGO"}</strong>
-                                            <p>{language === 'en' ? "Please complete your 5€ payment via our secure Ko-fi link. Once validated, your EXE download link will be emailed automatically." : "Realiza tu adquisición/pago de 5€ a través de nuestro enlace seguro de Ko-fi. En cuanto se verifique, se te enviará el EXE al correo al instante."}</p>
+                                            <p>{language === 'en' ? "Please complete your 5€ payment via our secure Stripe link. Once validated, your EXE download link will be emailed automatically." : "Realiza tu adquisición/pago de 5€ a través de nuestro enlace seguro de Stripe. En cuanto se verifique, se te enviará el EXE al correo al instante."}</p>
                                         </div>
                                     </div>
                                 ) : (
@@ -350,23 +358,50 @@ const Archipeg = ({ userAuth }) => {
 
                             <div className="payment-instructions">
                                 <h4>{language === 'en' ? "HOW TO GET IT:" : "CÓMO CONSEGUIRLO:"}</h4>
-                                <ol>
-                                    <li>
-                                        <Mail className="inst-icon" size={18}/> 
-                                        {language === 'en' ? "Click 'Request Pro' above to register your interest." : "Pulsa en 'Solicitar Edición Pro' para registrar tu interés."}
-                                    </li>
-                                    <li>
-                                        <Lock className="inst-icon" size={18}/> 
-                                        {language === 'en' ? "Make your 5€ payment securely via Ko-fi (Card/Apple Pay/PayPal):" : "Realiza el pago seguro de 5€ mediante Ko-fi (Tarjeta/Apple Pay/PayPal):"}
-                                        <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                                            <a href="https://ko-fi.com/archipegexpedientexgranaino" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#FF5E5B', color: 'white', padding: '8px 16px', borderRadius: '20px', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'Outfit, sans-serif' }}>
-                                                ☕ Adquirir en Ko-fi
-                                            </a>
+                                <ol className="steps-list">
+                                    <li className="step-item">
+                                        <span className="step-badge">1</span>
+                                        <div className="step-content">
+                                            <span className="step-title">
+                                                {language === 'en' ? "Register Your Request" : "Registrar Solicitud"}
+                                            </span>
+                                            <p className="step-desc">
+                                                {language === 'en' 
+                                                    ? "Click 'Request Pro Version' above to register your interest in our Bunker database." 
+                                                    : "Haz clic en 'Solicitar Edición Pro' arriba para registrar tu interés en la base de datos."}
+                                            </p>
                                         </div>
                                     </li>
-                                    <li>
-                                        <Download className="inst-icon" size={18}/> 
-                                        {language === 'en' ? "After admin verification, the official full EXE is sent to your email." : "Tras la verificación, te llegará el instalador EXE completo a tu correo."}
+                                    <li className="step-item">
+                                        <span className="step-badge">2</span>
+                                        <div className="step-content">
+                                            <span className="step-title">
+                                                {language === 'en' ? "Secure Payment via Stripe" : "Pago Seguro mediante Stripe"}
+                                            </span>
+                                            <p className="step-desc">
+                                                {language === 'en' 
+                                                    ? "Complete your 5€ payment securely. IMPORTANT: Use the exact same email address on Stripe as registered in the Bunker so we can validate it instantly!" 
+                                                    : "Realiza el pago seguro de 5€. IMPORTANTE: ¡Indica el mismo correo electrónico al pagar en Stripe que usas en el Búnker para poder validarlo al instante!"}
+                                            </p>
+                                            <div style={{ marginTop: '12px', textAlign: 'center' }}>
+                                                <a href="https://buy.stripe.com/5kQ28r4UU9jT9YndSl3Ru00" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#635BFF', color: 'white', padding: '10px 20px', borderRadius: '20px', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'Outfit, sans-serif', boxShadow: '0 4px 12px rgba(99, 91, 255, 0.3)' }}>
+                                                    💳 Adquirir con Stripe
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li className="step-item">
+                                        <span className="step-badge">3</span>
+                                        <div className="step-content">
+                                            <span className="step-title">
+                                                {language === 'en' ? "Instant Delivery" : "Entrega al Instante"}
+                                            </span>
+                                            <p className="step-desc">
+                                                {language === 'en' 
+                                                    ? "Once payment is verified, the official download link for the full .EXE will be emailed to you." 
+                                                    : "En cuanto verifiquemos el pago, te llegará el enlace oficial de descarga del instalador .EXE completo a tu correo."}
+                                            </p>
+                                        </div>
                                     </li>
                                 </ol>
                             </div>
@@ -448,7 +483,7 @@ const Archipeg = ({ userAuth }) => {
                                 {index === slides.length - 1 && (
                                     <button className="btn-start" onClick={(e) => {
                                         e.stopPropagation();
-                                        cerrarPresentacion();
+                                        adquirirYIr();
                                     }}>
                                         {language === 'en' ? "ENTRAR A ARCHIPEG" : "ADQUIRIR ARCHIPEG V3"}
                                     </button>
