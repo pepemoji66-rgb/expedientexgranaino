@@ -217,6 +217,115 @@ const AtarfeDossier = () => {
                 </div>
             </div>
 
+            {/* PANEL DE DIFUSIÓN TÁCTICA */}
+            <div className="dossier-share-panel" style={{
+                maxWidth: '800px',
+                margin: '40px auto 20px',
+                background: 'rgba(0, 212, 255, 0.03)',
+                border: '1px dashed rgba(0, 212, 255, 0.3)',
+                padding: '25px',
+                borderRadius: '8px',
+                textAlign: 'center',
+                boxShadow: '0 0 15px rgba(0, 212, 255, 0.05)'
+            }}>
+                <h3 style={{
+                    color: 'var(--color-principal)',
+                    fontSize: '1rem',
+                    fontFamily: 'monospace',
+                    marginBottom: '15px',
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase'
+                }}>
+                    📡 DIFUNDIR ESTE DOSSIER EN LA RED DE MISTERIO
+                </h3>
+                <p style={{
+                    color: '#888',
+                    fontSize: '0.8rem',
+                    fontFamily: 'monospace',
+                    marginBottom: '20px'
+                }}>
+                    Copia el enlace de este expediente desclasificado o compártelo directamente en las frecuencias externas:
+                </p>
+                <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap'
+                }}>
+                    <button
+                        onClick={() => {
+                            const url = `${window.location.origin}/especial-atarfe`;
+                            const texto = `🛸 ¡INFORME DESCLASIFICADO! El Increíble Incidente OVNI de Atarfe y Albolote (Granada). Revisa las evidencias en el Búnker de @PEPE1318057:`;
+                            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`, '_blank');
+                        }}
+                        style={{
+                            background: '#000',
+                            color: '#fff',
+                            border: '1px solid #333',
+                            padding: '10px 20px',
+                            fontWeight: 'bold',
+                            fontFamily: 'monospace',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            borderRadius: '4px',
+                            transition: '0.3s'
+                        }}
+                        className="btn-share-atarfe"
+                    >
+                        𝕏 TWITTER / X
+                    </button>
+                    <button
+                        onClick={() => {
+                            const url = `${window.location.origin}/especial-atarfe`;
+                            const texto = `🛸 ¡INFORME DESCLASIFICADO! El Increíble Incidente OVNI de Atarfe y Albolote (Granada). Revisa las evidencias en el Búnker: ${url}`;
+                            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+                        }}
+                        style={{
+                            background: '#25D366',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '10px 20px',
+                            fontWeight: 'bold',
+                            fontFamily: 'monospace',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            borderRadius: '4px',
+                            transition: '0.3s'
+                        }}
+                        className="btn-share-atarfe"
+                    >
+                        WHATSAPP
+                    </button>
+                    <button
+                        onClick={async () => {
+                            const url = `${window.location.origin}/especial-atarfe`;
+                            try {
+                                await navigator.clipboard.writeText(url);
+                                alert("📎 ¡ENLACE DEL DOSSIER COPIADO AL PORTAPAPELES! Listo para pegar en tus foros y páginas de misterio.");
+                            } catch (err) {
+                                alert("❌ No se pudo copiar automáticamente. Copia la URL del navegador.");
+                            }
+                        }}
+                        style={{
+                            background: 'var(--color-principal)',
+                            color: '#000',
+                            border: 'none',
+                            padding: '10px 22px',
+                            fontWeight: '900',
+                            fontFamily: 'monospace',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            borderRadius: '4px',
+                            boxShadow: '0 0 15px rgba(0, 212, 255, 0.3)',
+                            transition: '0.3s'
+                        }}
+                        className="btn-share-atarfe-copy"
+                    >
+                        📎 COPIAR ENLACE DEL DOSSIER
+                    </button>
+                </div>
+            </div>
+
             <footer className="dossier-footer-personal">
                 <div className="mission-statement">
                     <h2 className="neon-text-blue">🔍 Conclusión de la Investigación en el Búnker</h2>
