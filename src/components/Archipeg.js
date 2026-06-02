@@ -259,12 +259,30 @@ const Archipeg = ({ userAuth }) => {
                 {!userAuth ? (
                     <div className="archipeg-bunker-lock">
                         <Lock size={48} className="lock-icon" />
-                        <h3>{language === 'en' ? "ACCESS RESTRICTED: AGENT AUTHENTICATION REQUIRED" : "ACCESO RESTRINGIDO: SE REQUIERE AUTENTICACIÓN DE AGENTE"}</h3>
-                        <p>
-                            {language === 'en'
-                                ? "To request, purchase, or download Archipeg software versions, you must be a registered and approved agent of the Expediente X Granaíno Bunker."
-                                : "Para solicitar, adquirir o descargar las versiones de Archipeg, debes formar parte del búnker de agentes autorizados de Expediente X Granaíno."}
-                        </p>
+                        <h3>{language === 'en' ? "IDENTIFICATION REQUIRED TO ACQUIRE ARCHIPEG" : "IDENTIFICACIÓN REQUERIDA PARA ADQUIRIR ARCHIPEG"}</h3>
+                        
+                        <div style={{ background: 'rgba(255, 68, 68, 0.1)', border: '1px solid #ff4444', padding: '15px', borderRadius: '8px', marginBottom: '20px', textAlign: 'left', fontSize: '0.85rem' }}>
+                            <p style={{ margin: '0 0 10px 0', color: '#ff8888', fontWeight: 'bold' }}>
+                                ⚠️ {language === 'en' ? "OBLIGATORY FOR YOUR LICENSE DELIVERY:" : "OBLIGATORIO PARA EL ENVÍO DE TU LICENCIA:"}
+                            </p>
+                            <p style={{ margin: 0, color: '#ddd', fontFamily: 'Outfit, sans-serif', lineHeight: '1.5' }}>
+                                {language === 'en'
+                                    ? "To buy Archipeg, it is essential to have an active session in the Bunker. This ensures the system can correctly link the purchase and automatically send the download link (.EXE) to your registered email address (make sure it is a valid, active email)."
+                                    : "Para comprar el programa es imprescindible iniciar sesión en el Búnker. Así, el sistema podrá vincular correctamente la compra y enviarte automáticamente la licencia y el instalador (.EXE) a tu dirección de correo de registro (asegúrate de registrar un correo válido y activo)."}
+                            </p>
+                        </div>
+
+                        <div style={{ background: 'rgba(255, 177, 0, 0.1)', border: '1px solid #ffb100', padding: '15px', borderRadius: '8px', marginBottom: '25px', textAlign: 'left', fontSize: '0.85rem' }}>
+                            <p style={{ margin: '0 0 10px 0', color: '#ffb100', fontWeight: 'bold' }}>
+                                🍏 {language === 'en' ? "APPLE / MOBILE COMPATIBILITY NOTICE:" : "AVISO DE COMPATIBILIDAD (APPLE / MÓVIL):"}
+                            </p>
+                            <p style={{ margin: 0, color: '#ddd', fontFamily: 'Outfit, sans-serif', lineHeight: '1.5' }}>
+                                {language === 'en'
+                                    ? "Archipeg is a native desktop application for Windows PCs (.EXE). It is NOT compatible with Apple computers (macOS), mobile phones (iPhone, Android) or iPads. Please register and purchase only if you will run it on a Windows computer."
+                                    : "Archipeg es un programa nativo para ordenadores Windows (.EXE). NO es compatible con ordenadores Apple (macOS), teléfonos móviles (iPhone, Android) ni iPads. Por favor, regístrate y adquiere el programa únicamente si lo vas a usar en un ordenador Windows."}
+                            </p>
+                        </div>
+
                         <div className="bunker-lock-buttons">
                             <Link to="/acceso" className="btn-bunker-login">{language === 'en' ? "LOGIN TO BUNKER" : "ENTRAR AL BÚNKER"}</Link>
                             <Link to="/acceso" className="btn-bunker-register">{language === 'en' ? "REGISTER NEW AGENT" : "REGISTRARSE EN EL BÚNKER"}</Link>
@@ -327,6 +345,17 @@ const Archipeg = ({ userAuth }) => {
                                     ? "Unlock the absolute control of your digital life forever. Single payment, no subscriptions." 
                                     : "Desbloquea el control absoluto de tu vida digital para siempre. Pago único, sin suscripciones mensuales."}
                             </p>
+
+                            <div style={{ background: 'rgba(255, 177, 0, 0.1)', border: '1px solid #ffb100', padding: '12px 15px', borderRadius: '6px', marginBottom: '20px', fontSize: '0.8rem', textAlign: 'left', lineHeight: '1.4', fontFamily: 'Outfit, sans-serif' }}>
+                                <p style={{ margin: '0 0 5px 0', color: '#ffb100', fontWeight: 'bold' }}>
+                                    ⚠️ {language === 'en' ? "WINDOWS EXCLUSIVE (.EXE)" : "EXCLUSIVO PARA ORDENADORES WINDOWS (.EXE)"}
+                                </p>
+                                <p style={{ margin: 0, color: '#ccc' }}>
+                                    {language === 'en'
+                                        ? "This software is NOT compatible with Mac/macOS, iPhone, Android, or iPad. If purchasing from an Apple or mobile device, the license will be emailed to you to be downloaded and installed on your Windows PC."
+                                        : "Este programa NO es compatible con ordenadores Mac/macOS, iPhone, Android ni iPad. Si compras desde un dispositivo Apple o móvil, la licencia se enviará a tu correo de registro para que la descargues e instales en tu ordenador Windows."}
+                                </p>
+                            </div>
                             
                             <div className="status-container">
                                 {!solicitudPro ? (
@@ -387,6 +416,11 @@ const Archipeg = ({ userAuth }) => {
                                                 <a href="https://buy.stripe.com/5kQ28r4UU9jT9YndSl3Ru00" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#635BFF', color: 'white', padding: '10px 20px', borderRadius: '20px', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'Outfit, sans-serif', boxShadow: '0 4px 12px rgba(99, 91, 255, 0.3)' }}>
                                                     💳 Adquirir con Stripe
                                                 </a>
+                                            </div>
+                                            <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#ffb100', textAlign: 'center', fontFamily: 'Outfit, sans-serif' }}>
+                                                ℹ️ {language === 'en' 
+                                                    ? "If you pay via Apple Pay / Safari on iOS, please check your mailbox afterwards on your Windows PC to download the program." 
+                                                    : "Si pagas mediante Apple Pay / Safari en tu iPhone o iPad, recuerda revisar tu bandeja de correo después en tu ordenador Windows para descargar el instalador."}
                                             </div>
                                         </div>
                                     </li>
