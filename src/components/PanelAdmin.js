@@ -432,7 +432,8 @@ const PanelAdmin = () => {
         try {
             setCargando(true);
             setMensajeSubida("🛰️ Transmitiendo al búnker...");
-            await axios.post(`${API_BASE_URL}/api/admin/admin/upload`, formData);
+            const resUpload = await axios.post(`${API_BASE_URL}/api/admin/admin/upload`, formData);
+            const urlImagenCargada = resUpload.data?.ruta || '';
             setMensajeSubida("✅ REGISTRO CLASIFICADO");
 
             // --- PUBLICAR EN REDES SOCIALES AUTOMÁTICAMENTE ---
@@ -454,7 +455,7 @@ const PanelAdmin = () => {
                             titulo: tituloSubida,
                             contenido: contenidoSubida || '',
                             url: urlContenido,
-                            imagen_url: '',
+                            imagen_url: urlImagenCargada,
                             plataformas
                         });
 
