@@ -52,6 +52,14 @@ const PanelAdmin = () => {
     const [esAtarfeSubida, setEsAtarfeSubida] = useState(false);
     const [tipoRelatoSubida, setTipoRelatoSubida] = useState('jefe');
 
+    // ESTADOS DE REDES SOCIALES
+    const [modalRedes, setModalRedes] = useState(null); // item a publicar
+    const [redesSeleccionadas, setRedesSeleccionadas] = useState({ twitter: true, facebook: true });
+    const [publicandoRedes, setPublicandoRedes] = useState(false);
+    const [resultadoRedes, setResultadoRedes] = useState(null);
+    const [publicarAlSubir, setPublicarAlSubir] = useState(false);
+    const [estadoRedes, setEstadoRedes] = useState(null);
+
     const cargarDatos = useCallback(async () => {
         setCargando(true);
         try {
@@ -95,6 +103,16 @@ const PanelAdmin = () => {
         }
     }, []);
 
+    // Cargar estado de las plataformas al montar
+    const cargarEstadoRedes = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/social/estado`);
+            setEstadoRedes(res.data);
+        } catch (err) {
+            console.log('📡 Estado de redes no disponible');
+        }
+    }, []);
+
     useEffect(() => {
         // SEGURIDAD NIVEL 5: Verificación interna de sesión
         const sesion = localStorage.getItem('agente_sesion');
@@ -109,8 +127,9 @@ const PanelAdmin = () => {
         }
 
         cargarDatos();
+        cargarEstadoRedes();
         setPaginaActual(1);
-    }, [tab, cargarDatos]);
+    }, [tab, cargarDatos, cargarEstadoRedes]);
 
     const gestionar = async (id, accion, tipo) => {
         if (!window.confirm(`¿Confirmar orden de ${accion.toUpperCase()} para el ID #${id}?`)) return;
@@ -307,6 +326,54 @@ const PanelAdmin = () => {
         }
     };
 
+    // --- FUNCIÓN: PUBLICAR EN REDES SOCIALES ---
+    const publicarEnRedes = async (item) => {
+        const plataformas = [];
+        if (redesSeleccionadas.twitter) plataformas.push('twitter');
+        if (redesSeleccionadas.facebook) plataformas.push('facebook');
+
+        if (plataformas.length === 0) {
+            alert('⚠️ Selecciona al menos una plataforma.');
+            return;
+        }
+
+        setPublicandoRedes(true);
+        setResultadoRedes(null);
+
+        try {
+            // Construir la URL pública del contenido
+            let urlContenido = 'https://expedientexgranaino.com';
+            if (item.id) {
+                const seccion = tab === 'expedientes' ? 'leer-historia' : tab === 'noticias' ? 'noticias' : tab === 'imagenes' ? 'galeria' : tab === 'videos' ? 'videos' : tab === 'casos_abiertos' ? 'casos-abiertos' : '';
+                if (seccion === 'leer-historia') {
+                    urlContenido = `https://expedientexgranaino.com/${seccion}/${item.id}`;
+                } else if (seccion) {
+                    urlContenido = `https://expedientexgranaino.com/${seccion}`;
+                }
+            }
+
+            const res = await axios.post(`${API_BASE_URL}/api/social/publicar`, {
+                titulo: item.titulo || item.nombre || 'Nuevo Expediente',
+                contenido: item.contenido || item.descripcion || item.cuerpo || '',
+                url: urlContenido,
+                imagen_url: item.imagen_url || item.url_imagen || item.imagen || '',
+                plataformas
+            });
+
+            setResultadoRedes(res.data);
+        } catch (err) {
+            console.error('❌ Error publicando en redes:', err);
+            setResultadoRedes({
+                mensaje: '❌ Error de conexión con el servidor.',
+                resultados: [],
+                exitosas: 0,
+                fallidas: 1
+            });
+        } finally {
+            setPublicandoRedes(false);
+        }
+    };
+
     const manejarSubidaAdmin = async (e) => {
         e.preventDefault();
         
@@ -367,6 +434,42 @@ const PanelAdmin = () => {
             setMensajeSubida("🛰️ Transmitiendo al búnker...");
             await axios.post(`${API_BASE_URL}/api/admin/admin/upload`, formData);
             setMensajeSubida("✅ REGISTRO CLASIFICADO");
+
+            // --- PUBLICAR EN REDES SOCIALES AUTOMÁTICAMENTE ---
+            if (publicarAlSubir) {
+                setMensajeSubida("✅ REGISTRO CLASIFICADO — 📡 Publicando en redes sociales...");
+                try {
+                    let urlContenido = 'https://expedientexgranaino.com';
+                    const seccionMap = { expedientes: 'expedientes', noticias: 'noticias', imagenes: 'galeria', videos: 'videos', casos_abiertos: 'casos-abiertos' };
+                    if (seccionMap[tipoSubida]) {
+                        urlContenido = `https://expedientexgranaino.com/${seccionMap[tipoSubida]}`;
+                    }
+
+                    const plataformas = [];
+                    if (redesSeleccionadas.twitter) plataformas.push('twitter');
+                    if (redesSeleccionadas.facebook) plataformas.push('facebook');
+
+                    if (plataformas.length > 0) {
+                        const resSocial = await axios.post(`${API_BASE_URL}/api/social/publicar`, {
+                            titulo: tituloSubida,
+                            contenido: contenidoSubida || '',
+                            url: urlContenido,
+                            imagen_url: '',
+                            plataformas
+                        });
+
+                        if (resSocial.data.exitosas > 0) {
+                            setMensajeSubida(`✅ REGISTRO CLASIFICADO + 📡 Publicado en ${resSocial.data.exitosas} red(es)`);
+                        } else {
+                            setMensajeSubida(`✅ REGISTRO CLASIFICADO — ⚠️ Redes: ${resSocial.data.mensaje}`);
+                        }
+                    }
+                } catch (errSocial) {
+                    console.error('⚠️ Error en publicación social post-subida:', errSocial);
+                    setMensajeSubida("✅ REGISTRO CLASIFICADO — ⚠️ Fallo al publicar en redes (revisa claves .env)");
+                }
+            }
+
             setTituloSubida('');
             setTituloEnSubida('');
             setArchivoSubida(null);
@@ -630,29 +733,16 @@ const PanelAdmin = () => {
                                                     {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares' || tab === 'casos_abiertos' || tab === 'audios') && (
                                                         <button className="btn-edit" onClick={() => handleEditar(item)}>EDIT</button>
                                                     )}
-                                                    {esAprobado && (tab === 'expedientes' || tab === 'noticias' || tab === 'imagenes') && (
+                                                    {esAprobado && (tab === 'expedientes' || tab === 'noticias' || tab === 'imagenes' || tab === 'videos' || tab === 'casos_abiertos') && (
                                                         <button 
-                                                            className="btn-social-share" 
+                                                            className="btn-publicar-redes" 
                                                             onClick={() => {
-                                                                const text = `${(item.titulo || item.nombre || "Nuevo Expediente").toUpperCase()}\n\n${(item.contenido || item.descripcion || item.cuerpo || "").substring(0, 200)}...\n\nDescubre más en: https://expedientexgranaino.com\n\n#Granada #Misterio #ExpedienteX`;
-                                                                const imageUrl = item.imagen_url || item.url_imagen || item.imagen;
-                                                                const fullImageUrl = imageUrl?.startsWith('http') ? imageUrl : `${API_BASE_URL}/imagenes/${imageUrl}`;
-                                                                
-                                                                if (navigator.share) {
-                                                                    navigator.share({
-                                                                        title: item.titulo || item.nombre,
-                                                                        text: text,
-                                                                        url: window.location.origin
-                                                                    }).catch(console.error);
-                                                                } else {
-                                                                    alert("📋 CONTENIDO PREPARADO PARA INSTAGRAM:\n\n1. La imagen se ha resaltado.\n2. Copia el texto que aparecerá ahora.\n3. Abre Instagram y pega.");
-                                                                    navigator.clipboard.writeText(text);
-                                                                    alert("✅ Texto copiado al portapapeles. ¡Ya puedes pegarlo en Instagram!");
-                                                                }
+                                                                setModalRedes(item);
+                                                                setResultadoRedes(null);
+                                                                setRedesSeleccionadas({ twitter: true, facebook: true });
                                                             }}
-                                                            style={{ background: '#e1306c', color: 'white', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem' }}
                                                         >
-                                                            📱 REDES
+                                                            📡 REDES
                                                         </button>
                                                     )}
                                                     <button className="btn-del" onClick={() => gestionar(id, 'borrar', tab)}>DEL</button>
@@ -818,7 +908,52 @@ const PanelAdmin = () => {
                             </div>
                         )}
                         
-                        <button type="submit" className="btn-ok-subir" style={{ marginTop: '20px' }}>SUBIR AL BÚNKER</button>
+                        {/* --- CHECKBOX: PUBLICAR EN REDES AL SUBIR --- */}
+                        <div className="redes-al-subir-container">
+                            <div className="redes-al-subir-toggle" onClick={() => setPublicarAlSubir(!publicarAlSubir)}>
+                                <div className={`toggle-switch ${publicarAlSubir ? 'active' : ''}`}>
+                                    <div className="toggle-knob"></div>
+                                </div>
+                                <span className="toggle-label">📡 PUBLICAR EN REDES SOCIALES AL SUBIR</span>
+                            </div>
+                            
+                            {publicarAlSubir && (
+                                <div className="redes-plataformas-subir">
+                                    <label className="plataforma-check">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={redesSeleccionadas.twitter} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, twitter: e.target.checked})}
+                                        />
+                                        <span className="plataforma-icon twitter">𝕏</span> Twitter/X
+                                        {estadoRedes && !estadoRedes.twitter.configurado && !estadoRedes.webhook.configurado && (
+                                            <span className="plataforma-warn">⚠️ Sin claves</span>
+                                        )}
+                                    </label>
+                                    <label className="plataforma-check">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={redesSeleccionadas.facebook} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, facebook: e.target.checked})}
+                                        />
+                                        <span className="plataforma-icon facebook">f</span> Facebook
+                                        {estadoRedes && !estadoRedes.facebook.configurado && !estadoRedes.webhook.configurado && (
+                                            <span className="plataforma-warn">⚠️ Sin claves</span>
+                                        )}
+                                    </label>
+                                    {estadoRedes && estadoRedes.webhook.configurado && (
+                                        <div className="webhook-activo">🔗 Webhook activo (Make/Zapier)</div>
+                                    )}
+                                    {estadoRedes && !estadoRedes.alguno_activo && (
+                                        <div className="redes-aviso-config">⚠️ Configura las claves de las APIs o un webhook en el archivo .env para activar esta función</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <button type="submit" className="btn-ok-subir" style={{ marginTop: '20px' }}>
+                            {publicarAlSubir ? '🚀 SUBIR AL BÚNKER + PUBLICAR EN REDES' : 'SUBIR AL BÚNKER'}
+                        </button>
 
                         {mensajeSubida && <div className="mensaje-status">{mensajeSubida}</div>}
                     </form>
@@ -1099,6 +1234,114 @@ const PanelAdmin = () => {
                     <div className="modal-zoom-content fade-in" onClick={e => e.stopPropagation()}>
                         <button className="btn-cerrar-zoom" onClick={() => setImagenSeleccionada(null)}>✖</button>
                         <img src={imagenSeleccionada} alt="Zoom evidencia" className="img-zoom-full" />
+                    </div>
+                </div>
+            )}
+
+            {/* ========== MODAL DE PUBLICACIÓN EN REDES SOCIALES ========== */}
+            {modalRedes && (
+                <div className="modal-admin-overlay" onClick={() => { if (!publicandoRedes) { setModalRedes(null); setResultadoRedes(null); } }}>
+                    <div className="modal-redes-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-redes-header">
+                            <h3>📡 PUBLICAR EN REDES SOCIALES</h3>
+                            {!publicandoRedes && (
+                                <button className="btn-cerrar-modal" onClick={() => { setModalRedes(null); setResultadoRedes(null); }}>X</button>
+                            )}
+                        </div>
+
+                        <div className="modal-redes-body">
+                            {/* PREVISUALIZACIÓN DEL CONTENIDO */}
+                            <div className="redes-preview">
+                                <div className="redes-preview-titulo">
+                                    🛸 {(modalRedes.titulo || modalRedes.nombre || 'Sin título').toUpperCase()}
+                                </div>
+                                <div className="redes-preview-contenido">
+                                    {(modalRedes.contenido || modalRedes.descripcion || modalRedes.cuerpo || '').substring(0, 150)}
+                                    {(modalRedes.contenido || modalRedes.descripcion || modalRedes.cuerpo || '').length > 150 ? '...' : ''}
+                                </div>
+                                <div className="redes-preview-hashtags">
+                                    #Granada #Misterio #ExpedienteX #OVNI #Paranormal
+                                </div>
+                            </div>
+
+                            {/* SELECCIÓN DE PLATAFORMAS */}
+                            {!resultadoRedes && (
+                                <div className="redes-seleccion">
+                                    <p className="redes-seleccion-titulo">Selecciona las plataformas:</p>
+                                    <label className="plataforma-check-modal">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={redesSeleccionadas.twitter} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, twitter: e.target.checked})}
+                                            disabled={publicandoRedes}
+                                        />
+                                        <span className="plataforma-icon-lg twitter">𝕏</span>
+                                        <div>
+                                            <strong>Twitter / X</strong>
+                                            {estadoRedes && (
+                                                <small className={estadoRedes.twitter.configurado || estadoRedes.webhook.configurado ? 'cfg-ok' : 'cfg-warn'}>
+                                                    {estadoRedes.twitter.configurado ? '✅ API Directa' : estadoRedes.webhook.configurado ? '🔗 Vía Webhook' : '⚠️ Sin configurar'}
+                                                </small>
+                                            )}
+                                        </div>
+                                    </label>
+                                    <label className="plataforma-check-modal">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={redesSeleccionadas.facebook} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, facebook: e.target.checked})}
+                                            disabled={publicandoRedes}
+                                        />
+                                        <span className="plataforma-icon-lg facebook">f</span>
+                                        <div>
+                                            <strong>Facebook</strong>
+                                            {estadoRedes && (
+                                                <small className={estadoRedes.facebook.configurado || estadoRedes.webhook.configurado ? 'cfg-ok' : 'cfg-warn'}>
+                                                    {estadoRedes.facebook.configurado ? '✅ API Directa' : estadoRedes.webhook.configurado ? '🔗 Vía Webhook' : '⚠️ Sin configurar'}
+                                                </small>
+                                            )}
+                                        </div>
+                                    </label>
+                                </div>
+                            )}
+
+                            {/* BOTÓN DE PUBLICAR */}
+                            {!resultadoRedes && (
+                                <button 
+                                    className="btn-lanzar-redes" 
+                                    onClick={() => publicarEnRedes(modalRedes)}
+                                    disabled={publicandoRedes || (!redesSeleccionadas.twitter && !redesSeleccionadas.facebook)}
+                                >
+                                    {publicandoRedes ? (
+                                        <><span className="spinner-redes"></span> TRANSMITIENDO...</>
+                                    ) : (
+                                        '🚀 LANZAR PUBLICACIÓN'
+                                    )}
+                                </button>
+                            )}
+
+                            {/* RESULTADOS */}
+                            {resultadoRedes && (
+                                <div className="redes-resultados">
+                                    <div className={`redes-resultado-header ${resultadoRedes.exitosas > 0 ? 'exito' : 'fallo'}`}>
+                                        {resultadoRedes.exitosas > 0 ? '✅' : '⚠️'} {resultadoRedes.mensaje}
+                                    </div>
+                                    {resultadoRedes.resultados && resultadoRedes.resultados.map((r, i) => (
+                                        <div key={i} className={`redes-resultado-item ${r.exito ? 'ok' : 'fail'}`}>
+                                            <span className="resultado-plataforma">
+                                                {r.plataforma === 'twitter' ? '𝕏' : r.plataforma === 'facebook' ? 'f' : '🔗'}
+                                            </span>
+                                            <span className="resultado-texto">
+                                                {r.exito ? r.mensaje : r.error}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    <button className="btn-cerrar-resultados" onClick={() => { setModalRedes(null); setResultadoRedes(null); }}>
+                                        CERRAR
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
