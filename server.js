@@ -269,15 +269,14 @@ async function podarRegistros(tabla, limite = 100) {
 
         if (total > limite) {
             console.log(`🧹 LIMPIEZA: El sector ${tabla} excede el límite (${total}/${limite}). Ejecutando poda...`);
-            // Borramos todo lo que NO esté entre los últimos X registros
-            await db.execute(`
-                DELETE FROM ${tabla} 
-                WHERE id NOT IN (
-                    SELECT id FROM ${tabla} 
-                    ORDER BY id DESC 
-                    LIMIT ?
-                )
-            `, [limite]);
+            // Obtenemos el ID del registro en la posición 'limite' (el último que queremos conservar)
+            // Usamos query en vez de execute para dar soporte a LIMIT/OFFSET en mysql2
+            const rows = await db.query(`SELECT id FROM ${tabla} ORDER BY id DESC LIMIT 1 OFFSET ?`, [limite - 1]);
+            if (rows.length > 0) {
+                const limiteId = rows[0].id;
+                await db.execute(`DELETE FROM ${tabla} WHERE id < ?`, [limiteId]);
+                console.log(`🧹 LIMPIEZA: Eliminados registros antiguos con ID menor a ${limiteId} en la tabla ${tabla}`);
+            }
         }
     } catch (err) {
         console.error(`❌ Error en protocolo C-100 para ${tabla}:`, err.message);
