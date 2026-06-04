@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expediente X Granaíno — Modo Cine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --cyan: #00d4ff;
+      --cyan-glow: rgba(0, 212, 255, 0.4);
+      --green: #00ff41;
+      --dark: #020408;
+      --text: #c8d6e5;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* ====== START OVERLAY ====== */
+    #startOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 9999;
+      background: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 25px;
+      cursor: pointer;
+    }
+
+    #startOverlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+
+    #startBtn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--dark);
+      background: linear-gradient(135deg, var(--cyan), #0099cc);
+      border: none;
+      padding: 22px 55px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 40px var(--cyan-glow), 0 0 80px rgba(0, 212, 255, 0.15);
+      transition: all 0.3s ease;
+      animation: pulse-start 2s ease-in-out infinite;
+    }
+
+    #startBtn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 60px var(--cyan-glow), 0 0 120px rgba(0, 212, 255, 0.2);
+    }
+
+    @keyframes pulse-start {
+      0%, 100% { box-shadow: 0 0 30px var(--cyan-glow); }
+      50% { box-shadow: 0 0 60px var(--cyan-glow), 0 0 100px rgba(0, 212, 255, 0.15); }
+    }
+
+    #startOverlay p {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: rgba(200, 214, 229, 0.4);
+      letter-spacing: 3px;
+    }
+
+    #startOverlay .start-logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+      object-fit: cover;
+      margin-bottom: 10px;
+      opacity: 0.7;
+    }
+
+    /* ====== CINEMA CONTAINER ====== */
+    #cinema {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    #cinema.active { opacity: 1; }
+
+    /* ====== SCENES ====== */
+    .scene {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      z-index: 1;
+    }
+
+    .scene.active {
+      opacity: 1;
+      z-index: 10;
+    }
+
+    .scene.fade-out {
+      opacity: 0;
+      z-index: 5;
+    }
+
+    /* --- SCENE 1: INTRO --- */
+    .scene-1 {
+      background: var(--dark);
+    }
+
+    .scene-1 .classified-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--cyan);
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      opacity: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid var(--cyan);
+      width: 0;
+    }
+
+    .scene-1.active .classified-text {
+      animation: typewriter 1.5s steps(22) 0.5s forwards, blink-cursor 0.6s step-end infinite;
+    }
+
+    @keyframes typewriter {
+      to { width: 22ch; opacity: 1; }
+    }
+
+    @keyframes blink-cursor {
+      50% { border-color: transparent; }
+    }
+
+    .scene-1 .logo-cine {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 3px solid rgba(0, 212, 255, 0.4);
+      box-shadow: 0 0 60px var(--cyan-glow), 0 0 120px rgba(0, 212, 255, 0.1);
+      object-fit: cover;
+      margin-bottom: 30px;
+      opacity: 0;
+      transform: scale(0.5);
+    }
+
+    .scene-1.active .logo-cine {
+      animation: logo-appear 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+    }
+
+    @keyframes logo-appear {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .scene-1 .title-cine {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 900;
+      color: #f0f4f8;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      opacity: 0;
+      text-shadow: 0 0 30px var(--cyan-glow);
+    }
+
+    .scene-1.active .title-cine {
+      animation: title-in 1s ease 1.5s forwards;
+    }
+
+    .scene-1 .title-cine .x-glow {
+      color: var(--cyan);
+      text-shadow: 0 0 40px var(--cyan), 0 0 80px var(--cyan-glow);
+      display: inline-block;
+      animation: glitch-x 3s ease-in-out infinite 2s;
+    }
+
+    @keyframes title-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glitch-x {
+      0%, 90%, 100% { transform: none; }
+      92% { transform: translateX(-4px) skewX(-8deg); }
+      94% { transform: translateX(4px) skewX(8deg); }
+      96% { transform: translateX(-2px); }
+    }
+
+    .scene-1 .subtitle-cine {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: var(--cyan);
+      letter-spacing: 4px;
+      margin-top: 10px;
+      opacity: 0;
+    }
+
+    .scene-1.active .subtitle-cine {
+      animation: title-in 0.8s ease 2s forwards;
+    }
+
+    /* --- SCENE 2: ALHAMBRA --- */
+    .scene-2 {
+      background: var(--dark);
+    }
+
+    .scene-2 .bg-image {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.3) saturate(1.3);
+      transform: scale(1);
+      transition: transform 6s ease;
+    }
+
+    .scene-2.active .bg-image {
+      transform: scale(1.1);
+    }
+
+    .scene-2::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(180deg, rgba(2,4,8,0.4) 0%, rgba(2,4,8,0.1) 40%, rgba(2,4,8,0.7) 80%, rgba(2,4,8,1) 100%);
+      z-index: 2;
+    }
+
+    .scene-2 .scene-text {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+    }
+
+    .scene-2 .scene-text h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 3.5rem);
+      font-weight: 900;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 40px rgba(0,0,0,0.8);
+      opacity: 0;
+    }
+
+    .scene-2.active .scene-text h2 {
+      animation: title-in 1s ease 0.5s forwards;
+    }
+
+    .scene-2 .scene-text h2 span {
+      color: var(--cyan);
+      text-shadow: 0 0 30px var(--cyan-glow);
+    }
+
+    /* --- SCENE 3: FEATURES --- */
+    .scene-3 {
+      background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.03) 0%, var(--dark) 70%);
+    }
+
+    .scene-3 .features-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      color: var(--cyan);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 50px;
+      opacity: 0;
+    }
+
+    .scene-3.active .features-title {
+      animation: title-in 0.8s ease 0.2s forwards;
+    }
+
+    .scene-3 .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 900px;
+      padding: 0 30px;
+    }
+
+    .scene-3 .card-cine {
+      background: rgba(5, 15, 30, 0.9);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      border-radius: 12px;
+      padding: 25px 20px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(40px);
+      backdrop-filter: blur(10px);
+    }
+
+    .scene-3.active .card-cine {
+      animation: card-in 0.7s ease forwards;
+    }
+
+    .scene-3.active .card-cine:nth-child(1) { animation-delay: 0.3s; }
+    .scene-3.active .card-cine:nth-child(2) { animation-delay: 0.5s; }
+    .scene-3.active .card-cine:nth-child(3) { animation-delay: 0.7s; }
+    .scene-3.active .card-cine:nth-child(4) { animation-delay: 0.9s; }
+    .scene-3.active .card-cine:nth-child(5) { animation-delay: 1.1s; }
+    .scene-3.active .card-cine:nth-child(6) { animation-delay: 1.3s; }
+
+    @keyframes card-in {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-cine .card-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+    .card-cine .card-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      color: #fff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* --- SCENE 4: MYSTERY --- */
+    .scene-4 {
+      background: var(--dark);
+    }
+
+    .scene-4 .bg-image {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.25) saturate(1.4);
+      transform: scale(1);
+      transition: transform 6s ease;
+    }
+
+    .scene-4.active .bg-image {
+      transform: scale(1.08);
+    }
+
+    .scene-4::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center, rgba(2,4,8,0.3) 0%, rgba(2,4,8,0.9) 100%);
+      z-index: 2;
+    }
+
+    .scene-4 .mystery-content {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      max-width: 800px;
+    }
+
+    .scene-4 .mystery-tags {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .scene-4 .tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--cyan);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 4px;
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    .scene-4.active .tag {
+      animation: tag-in 0.5s ease forwards;
+    }
+
+    .scene-4.active .tag:nth-child(1) { animation-delay: 0.3s; }
+    .scene-4.active .tag:nth-child(2) { animation-delay: 0.6s; }
+    .scene-4.active .tag:nth-child(3) { animation-delay: 0.9s; }
+    .scene-4.active .tag:nth-child(4) { animation-delay: 1.2s; }
+
+    @keyframes tag-in {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .scene-4 .mystery-quote {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      color: var(--cyan);
+      opacity: 0;
+    }
+
+    .scene-4.active .mystery-quote {
+      animation: title-in 0.8s ease 1.8s forwards;
+    }
+
+    /* --- SCENE 5: STATS --- */
+    .scene-5 {
+      background: var(--dark);
+    }
+
+    .scene-5 .stats-container {
+      display: flex;
+      gap: 60px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .scene-5 .stat {
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .scene-5.active .stat {
+      animation: card-in 0.6s ease forwards;
+    }
+
+    .scene-5.active .stat:nth-child(1) { animation-delay: 0.3s; }
+    .scene-5.active .stat:nth-child(2) { animation-delay: 0.6s; }
+    .scene-5.active .stat:nth-child(3) { animation-delay: 0.9s; }
+    .scene-5.active .stat:nth-child(4) { animation-delay: 1.2s; }
+
+    .stat .stat-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 30px var(--cyan-glow);
+      display: block;
+    }
+
+    .stat .stat-lbl {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 8px;
+      display: block;
+    }
+
+    /* --- SCENE 6: CTA --- */
+    .scene-6 {
+      background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.05) 0%, var(--dark) 70%);
+    }
+
+    .scene-6 .cta-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 3.5rem);
+      font-weight: 900;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 30px;
+      opacity: 0;
+    }
+
+    .scene-6.active .cta-text {
+      animation: title-in 1s ease 0.3s forwards;
+    }
+
+    .scene-6 .cta-url {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      color: var(--cyan);
+      letter-spacing: 4px;
+      opacity: 0;
+    }
+
+    .scene-6.active .cta-url {
+      animation: title-in 0.8s ease 1s forwards, pulse-url 2s ease-in-out 2s infinite;
+    }
+
+    @keyframes pulse-url {
+      0%, 100% { text-shadow: 0 0 10px var(--cyan-glow); }
+      50% { text-shadow: 0 0 30px var(--cyan), 0 0 60px var(--cyan-glow); }
+    }
+
+    .scene-6 .cta-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+      margin-bottom: 30px;
+      opacity: 0;
+    }
+
+    .scene-6.active .cta-logo {
+      animation: logo-appear 1s ease 0.2s forwards;
+    }
+
+    /* ====== PROGRESS BAR ====== */
+    #progressBar {
+      position: fixed;
+      bottom: 0; left: 0;
+      width: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      z-index: 100;
+      box-shadow: 0 0 10px var(--cyan-glow);
+      transition: width 0.3s linear;
+    }
+
+    /* ====== SCANLINES ====== */
+    .scanlines {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 50;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.02) 0px,
+        rgba(0, 0, 0, 0.02) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+    }
+
+    /* ====== PARTICLE CANVAS ====== */
+    #particles {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ====== VIGNETTE ====== */
+    .vignette {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 40;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
+    }
+
+    /* ====== CONTROLS ====== */
+    .controls {
+      position: fixed;
+      top: 20px; right: 20px;
+      z-index: 60;
+      display: flex;
+      gap: 10px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    body:hover .controls { opacity: 1; }
+
+    .ctrl-btn {
+      background: rgba(0, 20, 40, 0.8);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      color: var(--cyan);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: var(--cyan);
+    }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 768px) {
+      .scene-3 .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        max-width: 400px;
+      }
+      .card-cine { padding: 15px 12px; }
+      .card-cine .card-icon { font-size: 1.4rem; }
+      .card-cine .card-label { font-size: 0.6rem; }
+      .scene-5 .stats-container { gap: 30px; }
+      .scene-4 .mystery-tags { gap: 10px; }
+      .scene-4 .tag { font-size: 0.7rem; padding: 8px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- OVERLAYS -->
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- START SCREEN -->
+  <div id="startOverlay">
+    <img src="img/logo.jpeg" alt="Logo" class="start-logo">
+    <button id="startBtn">▶ INICIAR PRESENTACIÓN</button>
+    <p>ACTIVAR SONIDO Y MODO CINE</p>
+    <p style="margin-top: 8px; font-size: 0.65rem; color: rgba(200,214,229,0.25);">Pulsa F11 para pantalla completa antes de empezar</p>
+  </div>
+
+  <!-- CONTROLS (visible on hover) -->
+  <div class="controls">
+    <button class="ctrl-btn" id="restartBtn">↺ REINICIAR</button>
+    <button class="ctrl-btn" id="pauseBtn">⏸ PAUSAR</button>
+  </div>
+
+  <!-- CINEMA -->
+  <div id="cinema">
+
+    <!-- SCENE 1: INTRO -->
+    <div class="scene scene-1" id="scene1">
+      <div class="classified-text">ARCHIVO DESCLASIFICADO</div>
+      <img src="img/logo.jpeg" alt="Expediente X Granaíno" class="logo-cine">
+      <h1 class="title-cine">Expediente <span class="x-glow">X</span> Granaíno</h1>
+      <p class="subtitle-cine">» Lo que Granada oculta «</p>
+    </div>
+
+    <!-- SCENE 2: ALHAMBRA -->
+    <div class="scene scene-2" id="scene2">
+      <img src="img/alhambra_ufo.png" alt="Alhambra" class="bg-image">
+      <div class="scene-text">
+        <h2>¿Qué <span>oculta</span> Granada?</h2>
+      </div>
+    </div>
+
+    <!-- SCENE 3: FEATURES -->
+    <div class="scene scene-3" id="scene3">
+      <div class="features-title">» Secciones del búnker «</div>
+      <div class="cards-grid">
+        <div class="card-cine">
+          <span class="card-icon">📁</span>
+          <span class="card-label">Expedientes</span>
+        </div>
+        <div class="card-cine">
+          <span class="card-icon">🎬</span>
+          <span class="card-label">Vídeos</span>
+        </div>
+        <div class="card-cine">
+          <span class="card-icon">🗺️</span>
+          <span class="card-label">Mapa</span>
+        </div>
+        <div class="card-cine">
+          <span class="card-icon">💀</span>
+          <span class="card-label">True Crime</span>
+        </div>
+        <div class="card-cine">
+          <span class="card-icon">🔮</span>
+          <span class="card-label">Tarot</span>
+        </div>
+        <div class="card-cine">
+          <span class="card-icon">📰</span>
+          <span class="card-label">Noticias</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 4: MYSTERY -->
+    <div class="scene scene-4" id="scene4">
+      <img src="img/mysterious_granada.png" alt="Granada Misteriosa" class="bg-image">
+      <div class="mystery-content">
+        <div class="mystery-tags">
+          <div class="tag">Misterios</div>
+          <div class="tag">OVNIs</div>
+          <div class="tag">Leyendas</div>
+          <div class="tag">True Crime</div>
+        </div>
+        <p class="mystery-quote">> La verdad está en Granada_</p>
+      </div>
+    </div>
+
+    <!-- SCENE 5: STATS -->
+    <div class="scene scene-5" id="scene5">
+      <div class="stats-container">
+        <div class="stat">
+          <span class="stat-num" data-target="150">0</span>
+          <span class="stat-lbl">Expedientes</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" data-target="80">0</span>
+          <span class="stat-lbl">Vídeos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" data-target="50">0</span>
+          <span class="stat-lbl">Lugares</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" data-target="10000">0</span>
+          <span class="stat-lbl">Visitas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 6: CTA -->
+    <div class="scene scene-6" id="scene6">
+      <img src="img/logo.jpeg" alt="Logo" class="cta-logo">
+      <div class="cta-text">Entra si te atreves</div>
+      <div class="cta-url">www.expedientexgranaino.com</div>
+    </div>
+
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div id="progressBar"></div>
+
+  <!-- AUDIO -->
+  <audio id="music" preload="auto">
+    <source src="musica.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // ====== PARTICLES ======
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 1.5 + 0.3;
+        this.speedX = (Math.random() - 0.5) * 0.2;
+        this.speedY = (Math.random() - 0.5) * 0.2;
+        this.opacity = Math.random() * 0.5 + 0.1;
+        this.pulse = Math.random() * Math.PI * 2;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.pulse += 0.01;
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+      }
+      draw() {
+        const a = this.opacity * (0.5 + Math.sin(this.pulse) * 0.5);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 212, 255, ${a})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // ====== TIMELINE ======
+    const scenes = [
+      { id: 'scene1', duration: 6000 },  // Intro: 6s
+      { id: 'scene2', duration: 5500 },  // Alhambra: 5.5s
+      { id: 'scene3', duration: 6500 },  // Features: 6.5s
+      { id: 'scene4', duration: 6000 },  // Mystery: 6s
+      { id: 'scene5', duration: 5500 },  // Stats: 5.5s
+      { id: 'scene6', duration: 6500 },  // CTA: 6.5s
+    ];
+
+    const totalDuration = scenes.reduce((sum, s) => sum + s.duration, 0);
+    let currentScene = -1;
+    let startTime = 0;
+    let paused = false;
+    let pausedTime = 0;
+    let timelineInterval = null;
+    let progressInterval = null;
+
+    const music = document.getElementById('music');
+    const progressBar = document.getElementById('progressBar');
+    const cinema = document.getElementById('cinema');
+    const overlay = document.getElementById('startOverlay');
+
+    function showScene(index) {
+      // Fade out current
+      document.querySelectorAll('.scene').forEach(s => {
+        s.classList.remove('active');
+        s.classList.add('fade-out');
+      });
+
+      // Activate new
+      if (index < scenes.length) {
+        const el = document.getElementById(scenes[index].id);
+        el.classList.remove('fade-out');
+        el.classList.add('active');
+        currentScene = index;
+
+        // Trigger stat counter for scene 5
+        if (index === 4) startCounters();
+      }
+    }
+
+    function startCounters() {
+      document.querySelectorAll('.stat-num[data-target]').forEach(el => {
+        const target = parseInt(el.dataset.target);
+        const duration = 2000;
+        const startT = performance.now();
+
+        function update(now) {
+          const elapsed = now - startT;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.floor(eased * target).toLocaleString();
+          if (progress < 1) requestAnimationFrame(update);
+          else el.textContent = target > 999 ? target.toLocaleString() + '+' : target + '+';
+        }
+        requestAnimationFrame(update);
+      });
+    }
+
+    function startTimeline() {
+      startTime = Date.now();
+      let elapsed = 0;
+      let sceneStart = 0;
+
+      showScene(0);
+
+      timelineInterval = setInterval(() => {
+        if (paused) return;
+        elapsed = Date.now() - startTime;
+
+        // Update progress
+        const progress = Math.min((elapsed / totalDuration) * 100, 100);
+        progressBar.style.width = progress + '%';
+
+        // Check scene transitions
+        let accum = 0;
+        for (let i = 0; i < scenes.length; i++) {
+          if (elapsed >= accum && elapsed < accum + scenes[i].duration && currentScene !== i) {
+            showScene(i);
+          }
+          accum += scenes[i].duration;
+        }
+
+        // End
+        if (elapsed >= totalDuration) {
+          clearInterval(timelineInterval);
+          // Fade to black
+          document.querySelectorAll('.scene').forEach(s => {
+            s.classList.remove('active');
+            s.classList.add('fade-out');
+          });
+          progressBar.style.width = '100%';
+
+          // Fade out music
+          const fadeOut = setInterval(() => {
+            if (music.volume > 0.05) {
+              music.volume -= 0.05;
+            } else {
+              music.pause();
+              clearInterval(fadeOut);
+            }
+          }, 200);
+        }
+      }, 50);
+    }
+
+    // ====== START ======
+    document.getElementById('startBtn').addEventListener('click', () => {
+      overlay.classList.add('hidden');
+      cinema.classList.add('active');
+      music.volume = 0.7;
+      music.play().catch(() => {});
+      setTimeout(startTimeline, 500);
+    });
+
+    // Also start on overlay click
+    overlay.addEventListener('click', (e) => {
+      if (e.target !== document.getElementById('startBtn')) {
+        document.getElementById('startBtn').click();
+      }
+    });
+
+    // ====== CONTROLS ======
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      clearInterval(timelineInterval);
+      document.querySelectorAll('.scene').forEach(s => {
+        s.classList.remove('active', 'fade-out');
+      });
+      currentScene = -1;
+      music.currentTime = 0;
+      music.volume = 0.7;
+      music.play().catch(() => {});
+      paused = false;
+      document.getElementById('pauseBtn').textContent = '⏸ PAUSAR';
+      startTimeline();
+    });
+
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      paused = !paused;
+      if (paused) {
+        music.pause();
+        pausedTime = Date.now();
+        document.getElementById('pauseBtn').textContent = '▶ REANUDAR';
+      } else {
+        music.play().catch(() => {});
+        startTime += (Date.now() - pausedTime);
+        document.getElementById('pauseBtn').textContent = '⏸ PAUSAR';
+      }
+    });
+
+    // ====== KEYBOARD SHORTCUTS ======
+    document.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Escape') {
+        document.getElementById('pauseBtn').click();
+        e.preventDefault();
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        document.getElementById('restartBtn').click();
+      }
+    });
+  </script>
+</body>
+</html>

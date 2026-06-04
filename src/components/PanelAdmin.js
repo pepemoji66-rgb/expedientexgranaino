@@ -4,7 +4,7 @@ import './paneladmin.css';
 import { API_BASE_URL, ADMIN_EMAIL } from '../config';
 
 const PanelAdmin = () => {
-    const [tab, setTab] = useState('usuarios');
+    const [tab, setTab] = useState('inicio');
     const [datos, setDatos] = useState({
         usuarios: [],
         noticias: [],
@@ -508,6 +508,9 @@ const PanelAdmin = () => {
             <h2 className="titulo-neon">CONTROL DE MANDO UNIFICADO</h2>
 
             <div className="tabs-admin">
+                <button key="inicio" className={tab === 'inicio' ? 'active' : ''} onClick={() => { setTab('inicio'); setPaginaActual(1); }} style={tab !== 'inicio' ? { borderColor: '#00d4ff', color: '#00d4ff' } : {}}>
+                    🏠 INICIO
+                </button>
                 {Object.keys(datos).map(t => {
                     let label = t.toUpperCase();
                     if (t === 'imagenes') label = 'FOTOS';
@@ -527,7 +530,78 @@ const PanelAdmin = () => {
                 </button>
             </div>
 
-            {tab !== 'subir' ? (
+            {tab === 'inicio' ? (
+                <div className="inicio-dashboard">
+                    <div className="inicio-bienvenida">
+                        <h3>📡 ESTADO DEL BÚNKER</h3>
+                        <p className="inicio-fecha">{new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
+
+                    <div className="inicio-stats-grid">
+                        {[
+                            { icon: '👥', count: datos.usuarios.length, label: 'Agentes', color: '#00ff41' },
+                            { icon: '📁', count: datos.expedientes.length, label: 'Relatos', color: '#00d4ff' },
+                            { icon: '🎬', count: datos.videos.length, label: 'Vídeos', color: '#ff6b6b' },
+                            { icon: '📷', count: datos.imagenes.length, label: 'Fotos', color: '#ffd93d' },
+                            { icon: '📰', count: datos.noticias.length, label: 'Noticias', color: '#6c5ce7' },
+                            { icon: '🎙️', count: datos.audios.length, label: 'Audios', color: '#e17055' },
+                            { icon: '🗺️', count: datos.lugares.length, label: 'Lugares', color: '#00b894' },
+                            { icon: '💀', count: datos.casos_abiertos.length, label: 'Casos', color: '#d63031' },
+                            { icon: '💬', count: datos.comentarios.length, label: 'Comentarios', color: '#0984e3' },
+                            { icon: '💻', count: datos.archipeg.length, label: 'ARCHIPEG', color: '#fdcb6e' }
+                        ].map((stat, i) => (
+                            <div key={i} className="inicio-stat-card" style={{ borderColor: stat.color + '30', color: stat.color }}>
+                                <span className="inicio-stat-icon">{stat.icon}</span>
+                                <span className="inicio-stat-number" style={{ color: stat.color }}>{stat.count}</span>
+                                <span className="inicio-stat-label">{stat.label}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="inicio-promo-section">
+                        <div className="inicio-promo-header">
+                            <h3>🎬 GENERADOR DE VÍDEO PROMOCIONAL</h3>
+                            <p>Lanza la presentación cinematográfica y graba tu pantalla para crear vídeos para redes sociales</p>
+                        </div>
+
+                        <div className="inicio-promo-actions">
+                            <button className="inicio-btn-cine" onClick={() => window.open('/promo/cine.html', '_blank')}>
+                                <span className="btn-cine-icon">▶</span>
+                                <div>
+                                    <strong>MODO CINE</strong>
+                                    <small>Presentación automática para grabar</small>
+                                </div>
+                            </button>
+                            <button className="inicio-btn-landing" onClick={() => window.open('/promo/', '_blank')}>
+                                <span className="btn-cine-icon">🌐</span>
+                                <div>
+                                    <strong>LANDING PROMO</strong>
+                                    <small>Página promocional interactiva</small>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div className="inicio-promo-tip">
+                            <span>💡</span>
+                            <div>
+                                <strong>¿CÓMO GRABAR EL VÍDEO?</strong>
+                                <p>1. Pulsa "MODO CINE" para abrir la presentación</p>
+                                <p>2. Pon la ventana en pantalla completa (F11)</p>
+                                <p>3. Activa la grabación de pantalla (Win+G en Windows, o usa OBS)</p>
+                                <p>4. La presentación se reproduce automáticamente con música 🎵</p>
+                                <p>5. Cuando termine, para la grabación y ya tienes tu vídeo 🎉</p>
+                            </div>
+                        </div>
+
+                        <div className="inicio-promo-preview">
+                            <h4>📺 VISTA PREVIA DE LA LANDING</h4>
+                            <div className="inicio-iframe-container">
+                                <iframe src="/promo/" title="Preview promocional" loading="lazy" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : tab !== 'subir' ? (
                 <>
                     <div className="admin-actions-bar">
                         <div className="buscador-admin">
