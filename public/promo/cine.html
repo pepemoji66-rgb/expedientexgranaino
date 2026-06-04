@@ -520,7 +520,7 @@
     </div>
 
     <button id="startBtn">▶ INICIAR PRESENTACIÓN</button>
-    <p style="margin-top:5px; color:#333;">Duración: ~40 segundos · Música: El Vigía de la Alhambra</p>
+    <p style="margin-top:5px; color:#333;">Duración: ~50 segundos · Música: El Vigía de la Alhambra</p>
   </div>
 
   <!-- ========== COUNTDOWN ========== -->
@@ -649,12 +649,12 @@
     // ====== TIMELINE CONFIG ======
     // Duraciones en ms
     const SCENES = [
-      { id: 'sc1', dur: 6500 },   // Intro
-      { id: 'sc2', dur: 6000 },   // Alhambra
-      { id: 'sc3', dur: 7000 },   // Secciones
-      { id: 'sc4', dur: 6500 },   // Misterio
-      { id: 'sc5', dur: 6000 },   // Stats
-      { id: 'sc6', dur: 7000 },   // CTA
+      { id: 'sc1', dur: 7000 },   // Intro
+      { id: 'sc2', dur: 7000 },   // Alhambra
+      { id: 'sc3', dur: 8500 },   // Secciones
+      { id: 'sc4', dur: 8000 },   // Misterio
+      { id: 'sc5', dur: 7500 },   // Stats
+      { id: 'sc6', dur: 12000 },  // CTA
     ];
     const TOTAL = SCENES.reduce((s,x) => s+x.dur, 0);
 
@@ -741,8 +741,8 @@
           acc += SCENES[i].dur;
         }
 
-        // Arrancar El Vigía en la escena 5 (CTA final) para más drama
-        if (!vigiaStarted && elapsed >= SCENES[0].dur + SCENES[1].dur + SCENES[2].dur + SCENES[3].dur + SCENES[4].dur - 500) {
+        // Arrancar El Vigía en la escena 3 (Secciones) para que se escuche mucho más
+        if (!vigiaStarted && elapsed >= SCENES[0].dur + SCENES[1].dur - 500) {
           vigiaStarted = true;
           fadeOut(audioPrincipal, 1500);
           audioVigia.volume = 0;
