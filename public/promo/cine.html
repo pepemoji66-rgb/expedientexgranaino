@@ -25,6 +25,9 @@
       width: 100vw;
       height: 100vh;
     }
+    body.hide-cursor, body.hide-cursor * {
+      cursor: none !important;
+    }
 
     /* ========== SCANLINES + VIGNETTE ========== */
     .scanlines {
@@ -719,6 +722,7 @@
       startTime = Date.now();
       vigiaStarted = false;
       activarScene(0);
+      resetOcultarCursor();
 
       ticker = setInterval(() => {
         if (paused) return;
@@ -752,6 +756,8 @@
           progressBar.style.width = '100%';
           fadeOut(audioPrincipal, 2000);
           fadeOut(audioVigia, 2000);
+          document.body.classList.remove('hide-cursor');
+          clearTimeout(mouseTimer);
         }
       }, 60);
     }
@@ -785,6 +791,21 @@
       }, 1000);
     }
 
+    // ====== CURSOR OCULTO AUTOMÁTICO ======
+    let mouseTimer = null;
+    function resetOcultarCursor() {
+      if (currentIdx >= 0 && !paused && currentIdx < SCENES.length) {
+        document.body.classList.remove('hide-cursor');
+        clearTimeout(mouseTimer);
+        mouseTimer = setTimeout(() => {
+          if (currentIdx >= 0 && !paused) {
+            document.body.classList.add('hide-cursor');
+          }
+        }, 2000);
+      }
+    }
+    window.addEventListener('mousemove', resetOcultarCursor);
+
     // ====== EVENTOS ======
     document.getElementById('startBtn').addEventListener('click', iniciarCountdown);
 
@@ -795,12 +816,15 @@
         audioPrincipal.pause();
         audioVigia.pause();
         document.getElementById('pauseBtn').textContent = '▶ REANUDAR';
+        document.body.classList.remove('hide-cursor');
+        clearTimeout(mouseTimer);
       } else {
         startTime += Date.now() - pauseAt;
         if (!audioPrincipal.paused) audioPrincipal.play().catch(()=>{});
         else { try { audioPrincipal.play(); } catch(e){} }
         if (!audioVigia.paused && vigiaStarted) { try { audioVigia.play(); } catch(e){} }
         document.getElementById('pauseBtn').textContent = '⏸ PAUSAR';
+        resetOcultarCursor();
       }
     });
 
