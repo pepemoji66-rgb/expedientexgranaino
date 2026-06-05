@@ -470,7 +470,7 @@ const Expedientes = () => {
                             <div className="img-relato-full" style={{ position: 'relative' }}>
                                 {relatoAbierto.latitud && relatoAbierto.longitud && parseFloat(relatoAbierto.latitud) !== 0 && (
                                     <button
-                                        onClick={() => navigate('/lugares', { state: { lat: relatoAbierto.latitud, lng: relatoAbierto.longitud, noticiaId: relatoAbierto.id } })}
+                                        onClick={() => navigate('/lugares', { state: { lat: relatoAbierto.latitud, lng: relatoAbierto.longitud, noticiaId: `exp-${relatoAbierto.id}` } })}
                                         style={{
                                             position: 'absolute',
                                             top: '15px',

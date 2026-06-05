@@ -12,6 +12,7 @@ const LecturaHistoria = () => {
     const navigate = useNavigate();
     const [historia, setHistoria] = useState(null);
     const [esRelatoAdmin, setEsRelatoAdmin] = useState(false);
+    const [esNoticia, setEsNoticia] = useState(false);
     const [cargando, setCargando] = useState(true);
     
     // Recuperamos la identidad del agente para los permisos de borrado
@@ -31,6 +32,7 @@ const LecturaHistoria = () => {
             if (encontradaAdmin) {
                 setHistoria(encontradaAdmin);
                 setEsRelatoAdmin(true);
+                setEsNoticia(false);
             } else {
                 // 2. Si no es de admin, buscamos en los expedientes públicos de usuarios
                 const resPublicos = await axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`);
@@ -39,6 +41,7 @@ const LecturaHistoria = () => {
                 if (encontradaPublica) {
                     setHistoria(encontradaPublica);
                     setEsRelatoAdmin(false);
+                    setEsNoticia(false);
                 } else {
                     // 3. ¡EL PARCHE! Si no es expediente, buscamos en las NOTICIAS
                     const resNoticias = await axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`);
@@ -47,6 +50,7 @@ const LecturaHistoria = () => {
                     if (encontradaNoticia) {
                         setHistoria(encontradaNoticia);
                         setEsRelatoAdmin(false); // Tratamos noticia como registro estándar
+                        setEsNoticia(true);
                     } else {
                         setHistoria(null);
                     }
@@ -126,7 +130,7 @@ const LecturaHistoria = () => {
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {historia.latitud && historia.longitud && (
                             <button
-                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: historia.id } })}
+                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esNoticia ? 'noticia-' : 'exp-') + historia.id } })}
                                 className="forms-btn-submit"
                                 style={{ 
                                     width: 'auto', background: '#fff', color: '#000', 
@@ -183,7 +187,7 @@ const LecturaHistoria = () => {
                         {/* BOTÓN FLOTANTE SOBRE IMAGEN */}
                         {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
                             <button
-                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: historia.id } })}
+                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esNoticia ? 'noticia-' : 'exp-') + historia.id } })}
                                 style={{
                                     position: 'absolute',
                                     top: '30px',

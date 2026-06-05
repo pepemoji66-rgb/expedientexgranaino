@@ -46,7 +46,9 @@ const ActualizadorMapa = ({ centro, idResaltado }) => {
     const map = useMap();
     useEffect(() => {
         if (idResaltado && centro) {
-            map.flyTo(centro, 5, { animate: true, duration: 3.5 }); // Zoom satélite más amplio y vuelo más lento
+            const currentZoom = map.getZoom();
+            const targetZoom = currentZoom > 5 ? currentZoom : 5;
+            map.flyTo(centro, targetZoom, { animate: true, duration: 1.5 }); // Vuelo más rápido y dinámico
         } else {
             map.setView(centro || [37.1773, -3.5986], 2); // Si falla, Granada por defecto
         }
@@ -91,7 +93,7 @@ const Lugares = () => {
             ]);
 
             const noticias = resultados[0].status === 'fulfilled' ? (resultados[0].value.data.data || resultados[0].value.data || []).map(p => ({ ...p, id: `noticia-${p.id}`, tipo: 'noticia' })) : [];
-            const expedientes = resultados[1].status === 'fulfilled' ? (resultados[1].value.data || []).map(p => ({ ...p, id: p.id, tipo: 'expediente' })) : [];
+            const expedientes = resultados[1].status === 'fulfilled' ? (resultados[1].value.data || []).map(p => ({ ...p, id: `exp-${p.id}`, tipo: 'expediente' })) : [];
             const casos = resultados[2].status === 'fulfilled' ? (resultados[2].value.data || []).map(p => ({ ...p, id: `caso-${p.id}`, tipo: 'caso' })) : [];
 
             // Prioridad: 1. Casos, 2. Expedientes, 3. Noticias
@@ -163,7 +165,7 @@ const Lugares = () => {
             else if (m.tipo === 'foto') navigate('/galeria');
             else if (m.tipo === 'lugar') navigate('/lugares'); // O una vista de detalle si existiera
             else if (m.tipo === 'video') navigate('/videos');
-            else if (m.tipo === 'expediente') navigate(`/leer-historia/${m.id}`);
+            else if (m.tipo === 'expediente') navigate(`/leer-historia/${String(m.id).replace('exp-', '')}`);
             else if (m.tipo === 'caso') navigate(`/casos-abiertos?id=${m.id.replace('caso-', '')}`);
             else navigate('/galeria'); // Fallback
         };
@@ -257,7 +259,7 @@ const Lugares = () => {
                                     } 
                                 }}
                             >
-                                <Popup autoClose={true} closeOnClick={true}>
+                                <Popup autoClose={true} closeOnClick={true} autoPan={false}>
                                     <div className="popup-bunker-v2">
                                         <div className="popup-header-tactico">
                                             <span className="status-online">
