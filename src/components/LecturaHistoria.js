@@ -93,6 +93,47 @@ const LecturaHistoria = () => {
         }
     };
 
+    const compartirHistoria = async (red) => {
+        if (!historia) return;
+        const url = window.location.origin + `/leer-historia/${historia.id}`;
+        const textoCompartir = `🛸 ¡AVISTAMIENTO DETECTADO! Mira esto en el Búnker de ExpedienteX: "${(historia.titulo || '').toUpperCase()}" #UFO #Granada #ExpedienteXGranaino`;
+        
+        // Prioridad 1: Web Share API (Móviles)
+        if (navigator.share && red !== 'copy') {
+            try {
+                await navigator.share({
+                    title: 'BÚNKER EXPEDIENTE X',
+                    text: textoCompartir,
+                    url: url,
+                });
+                return;
+            } catch (err) {
+                console.log("Compartir cancelado o no soportado");
+            }
+        }
+
+        // Prioridad 2: Fallback (Escritorio o copia manual)
+        let link = '';
+        if (red === 'twitter') {
+            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
+        } else if (red === 'whatsapp') {
+            link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + ' ' + url)}`;
+        } else if (red === 'facebook') {
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        }
+
+        if (link) {
+            window.open(link, '_blank');
+        } else {
+            try {
+                await navigator.clipboard.writeText(url);
+                alert("📋 ¡Enlace copiado al portapapeles con éxito!");
+            } catch (err) {
+                alert("❌ No se pudo copiar el enlace automáticamente.");
+            }
+        }
+    };
+
     if (cargando) return (
         <div className="admin-dashboard">
             <div className="radar-loader-container" style={{ marginTop: '100px' }}>
@@ -320,6 +361,19 @@ const LecturaHistoria = () => {
                             </a>
                         </div>
                     )}
+
+                    {/* SECCIÓN DE COMPARTIR TÁCTICO */}
+                    <div style={{ marginTop: '35px', paddingTop: '25px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+                        <p style={{ color: 'var(--color-principal)', fontSize: '0.85rem', marginBottom: '15px', fontFamily: 'Courier New', fontWeight: 'bold', letterSpacing: '1px' }}>
+                            📡 {language === 'en' ? 'DIFFUSE EVIDENCES / SHARE NEWS' : 'DIFUNDIR EVIDENCIA / COMPARTIR EN REDES'}
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <button onClick={() => compartirHistoria('twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>𝕏 TWITTER</button>
+                            <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>WHATSAPP</button>
+                            <button onClick={() => compartirHistoria('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>FACEBOOK</button>
+                            <button onClick={() => compartirHistoria('copy')} className="btn-share-tactico" style={{ background: '#555', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📋 COPIAR ENLACE</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
