@@ -53,7 +53,13 @@
 /* RESPONSIVO AJUSTADO */
 @media (max-width: 768px) {
     .mufon-title { font-size: 2rem; }
-    .hero-global-mufon { min-height: 100vh; }
+    .hero-global-mufon { 
+        min-height: 100vh; 
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center 30%;
+        background-color: #020408;
+    }
     .hero-main-content { padding: 80px 5%; align-items: center; text-align: center; }
 }
 

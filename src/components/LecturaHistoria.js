@@ -171,39 +171,12 @@ const LecturaHistoria = () => {
 
                 {/* IMAGEN PRINCIPAL DE LA NOTICIA / EXPEDIENTE */}
                 {(historia.imagen_url || historia.url_imagen) && (
-                    <div className="portada-lectura" style={{ 
-                        marginBottom: '30px', 
-                        textAlign: 'center', 
-                        background: '#050505', 
-                        padding: '15px', 
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '4px',
-                        minHeight: '200px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        position: 'relative' // Necesario para el botón absoluto
-                    }}>
+                    <div className="portada-lectura">
                         {/* BOTÓN FLOTANTE SOBRE IMAGEN */}
                         {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
                             <button
                                 onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esNoticia ? 'noticia-' : 'exp-') + historia.id } })}
-                                style={{
-                                    position: 'absolute',
-                                    top: '30px',
-                                    right: '30px',
-                                    zIndex: 10,
-                                    background: 'rgba(0,255,65,0.9)',
-                                    color: '#000',
-                                    border: 'none',
-                                    padding: '10px 15px',
-                                    borderRadius: '4px',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 0 20px rgba(0,255,65,0.5)',
-                                    fontFamily: 'monospace',
-                                    fontSize: '0.8rem'
-                                }}
+                                className="btn-localizar-portada"
                             >
                                 {t('readLocateRadar')}
                             </button>
@@ -217,13 +190,7 @@ const LecturaHistoria = () => {
                                 : `${API_BASE_URL}/imagenes/${(historia.imagen_url || historia.url_imagen || '').split('/').pop()}`
                             } 
                             alt="Portada de la Evidencia"
-                            style={{ 
-                                maxWidth: '100%', 
-                                maxHeight: '600px', 
-                                objectFit: 'contain', 
-                                boxShadow: '0 0 30px rgba(0,0,0,0.5)',
-                                border: '1px solid #222'
-                            }}
+                            className="lectura-imagen-portada"
                             onLoad={(e) => { e.target.style.opacity = 1; }}
                             onError={(e) => { 
                                 console.error("Fallo carga imagen:", e.target.src);
