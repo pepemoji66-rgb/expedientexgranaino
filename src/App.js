@@ -31,6 +31,7 @@ import CookieBanner from './components/CookieBanner';
 import SobreNosotros from './components/SobreNosotros';
 import AtarfeDossier from './components/AtarfeDossier';
 import Archipeg from './components/Archipeg';
+import MisteriosHistoricos from './components/MisteriosHistoricos';
 import { useLanguage } from './context/LanguageContext';
 
 
@@ -211,6 +212,7 @@ function App() {
                 { path: "/tarot", label: t('navTarot') },
                 { path: "/carta-astral", label: t('navAstral') },
                 { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
+                { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
                 { path: "/archipeg", label: "💻 ARCHIPEG V3" }
               ].map((route) => (
                 <li key={route.path} style={{ marginBottom: '15px' }}>
@@ -307,6 +309,7 @@ function App() {
               <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
               <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
               <Route path="/casos-abiertos" element={<CasosAbiertos userAuth={userAuth} />} />
+              <Route path="/misterios-historicos" element={<MisteriosHistoricos />} />
               <Route path="/noticias" element={<Noticias userAuth={userAuth} />} />
               <Route path="/privacidad" element={<PoliticaPrivacidad />} />
               <Route path="/cookies" element={<PoliticaCookies />} />

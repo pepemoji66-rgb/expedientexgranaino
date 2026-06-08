@@ -52,7 +52,27 @@ const LecturaHistoria = () => {
                         setEsRelatoAdmin(false); // Tratamos noticia como registro estándar
                         setEsNoticia(true);
                     } else {
-                        setHistoria(null);
+                        // 4. Si no es noticia, buscamos en los MISTERIOS HISTÓRICOS
+                        try {
+                            const resMisterios = await axios.get(`${API_BASE_URL}/api/misterios-historicos`);
+                            const encontradaMisterio = resMisterios.data.find(h => h.id == id);
+                            if (encontradaMisterio) {
+                                const hist = { ...encontradaMisterio };
+                                if (language === 'en' && encontradaMisterio.titulo_en) {
+                                    hist.titulo = encontradaMisterio.titulo_en;
+                                }
+                                if (language === 'en' && encontradaMisterio.contenido_en) {
+                                    hist.contenido = encontradaMisterio.contenido_en;
+                                }
+                                setHistoria(hist);
+                                setEsRelatoAdmin(false);
+                                setEsNoticia(false);
+                            } else {
+                                setHistoria(null);
+                            }
+                        } catch (errM) {
+                            setHistoria(null);
+                        }
                     }
                 }
             }

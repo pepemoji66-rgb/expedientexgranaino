@@ -36,6 +36,7 @@ const noticiasExternasRoutes = require('./routes/noticias_externas');
 const archipegRoutes = require('./routes/archipeg');
 const casosAbiertosRoutes = require('./routes/casosAbiertos');
 const socialRoutes = require('./routes/socialRoutes');
+const misteriosHistoricosRoutes = require('./routes/misteriosHistoricos');
 
 
 // --- 2.5 INICIALIZACIÓN DE LA IA Y CLOUDINARY ---
@@ -386,6 +387,7 @@ app.use('/api/noticias-externas', noticiasExternasRoutes(db, genAI));
 app.use('/api/archipeg', archipegRoutes(db));
 app.use('/api/casos', casosAbiertosRoutes(uploadArchivos));
 app.use('/api/social', socialRoutes(db, enviarAlertaTelegram));
+app.use('/api/misterios-historicos', misteriosHistoricosRoutes(uploadArchivos));
 
 // --- SERVIDORES ESTÁTICOS ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

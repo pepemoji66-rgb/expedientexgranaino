@@ -692,7 +692,7 @@ const PanelAdmin = () => {
                                                         </select>
                                                     </div>
                                                 )}
-                                                {tab === 'expedientes' && (
+                                                {(tab === 'expedientes' || tab === 'casos_abiertos') && (
                                                     <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                                         {item.imagen_url && (
                                                             <img 
@@ -1075,6 +1075,66 @@ const PanelAdmin = () => {
                                         onChange={e => setEditForm({...editForm, titulo_en: e.target.value})} 
                                         style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
                                     />
+
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>DESCRIPCIÓN / CASO (ESPAÑOL):</label>
+                                    <textarea 
+                                        value={editForm.contenido} 
+                                        onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
+                                        style={{ width: '100%', minHeight: '150px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
+                                    />
+
+                                    <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>DESCRIPCIÓN / CASO (INGLÉS):</label>
+                                    <textarea 
+                                        value={editForm.contenido_en} 
+                                        onChange={e => setEditForm({...editForm, contenido_en: e.target.value})} 
+                                        style={{ width: '100%', minHeight: '150px', background: '#000', color: '#00d4ff', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
+                                    />
+
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAMBIAR IMAGEN DE PORTADA (OPCIONAL):</label>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*"
+                                        onChange={e => setArchivoEdit(e.target.files[0])} 
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+
+                                    {/* GEOLOCALIZACIÓN ESTRATÉGICA */}
+                                    <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
+                                        <label style={{ display: 'block', color: '#b18904', fontSize: '0.8rem', marginBottom: '10px', fontWeight: 'bold' }}>🛰️ GEOLOCALIZACIÓN ESTRATÉGICA</label>
+                                        
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <label style={{ display: 'block', color: '#888', fontSize: '0.7rem', marginBottom: '5px' }}>CIUDAD / ZONA:</label>
+                                            <input 
+                                                type="text" value={editForm.ubicacion || ''} 
+                                                onChange={e => setEditForm({...editForm, ubicacion: e.target.value})} 
+                                                placeholder="Ej: Granada..."
+                                                style={{ width: '100%', padding: '8px', background: '#000', color: '#fff', border: '1px solid #444' }}
+                                            />
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                                            <input 
+                                                type="text" value={busquedaLugar} 
+                                                onChange={e => setBusquedaLugar(e.target.value)} 
+                                                placeholder="Buscar en el radar..."
+                                                style={{ flex: 1, padding: '10px', background: '#000', color: '#fff', border: '1px solid #333' }}
+                                            />
+                                            <button type="button" onClick={buscarCoordenadas} style={{ padding: '10px', background: '#b18904', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+                                                RASTREAR
+                                            </button>
+                                        </div>
+                                        
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                            <div>
+                                                <label style={{ color: 'var(--color-principal)', fontSize: '0.6rem' }}>LATITUD:</label>
+                                                <input type="number" step="any" value={editForm.latitud} onChange={e => setEditForm({...editForm, latitud: e.target.value})} style={{ width: '100%', padding: '8px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', fontSize: '0.75rem' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: 'var(--color-principal)', fontSize: '0.6rem' }}>LONGITUD:</label>
+                                                <input type="number" step="any" value={editForm.longitud} onChange={e => setEditForm({...editForm, longitud: e.target.value})} style={{ width: '100%', padding: '8px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', fontSize: '0.75rem' }} />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </>
                             )}
 
@@ -1097,16 +1157,6 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', minHeight: '150px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
                                     />
                                     
-                                    {tab === 'casos_abiertos' && (
-                                        <>
-                                            <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>CONTENIDO (INGLÉS):</label>
-                                            <textarea 
-                                                value={editForm.contenido_en} 
-                                                onChange={e => setEditForm({...editForm, contenido_en: e.target.value})} 
-                                                style={{ width: '100%', minHeight: '150px', background: '#000', color: '#00d4ff', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
-                                            />
-                                        </>
-                                    )}
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>IMAGEN (OPCIONAL):</label>
                                     <input 
                                         type="file" 
