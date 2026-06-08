@@ -5,14 +5,25 @@ const db = require('../db');
 module.exports = (upload) => {
     // --- OBTENER TODOS LOS CASOS (PÚBLICOS) ---
     router.get('/', async (req, res) => {
-    try {
-        const casos = await db.query("SELECT * FROM casos_abiertos WHERE estado = 'aprobado' ORDER BY fecha DESC");
-        res.json(casos);
-    } catch (err) {
-        console.error("❌ Error al obtener Casos Abiertos:", err);
-        res.status(500).json({ error: "Error en el servidor" });
-    }
-});
+        try {
+            const casos = await db.query("SELECT * FROM casos_abiertos WHERE estado = 'aprobado' ORDER BY fecha DESC");
+            res.json(casos);
+        } catch (err) {
+            console.error("❌ Error al obtener Casos Abiertos:", err);
+            res.status(500).json({ error: "Error en el servidor" });
+        }
+    });
+
+    // --- OBTENER TODOS LOS CASOS (PARA ADMIN/EDICIÓN) ---
+    router.get('/todos', async (req, res) => {
+        try {
+            const casos = await db.query("SELECT * FROM casos_abiertos ORDER BY fecha DESC");
+            res.json(casos);
+        } catch (err) {
+            console.error("❌ Error al obtener todos los Casos Abiertos:", err);
+            res.status(500).json({ error: "Error en el servidor" });
+        }
+    });
 
     // --- SUBIR UN CASO ABIERTO ---
     router.post('/', upload ? upload.single('imagen') : (req, res, next) => next(), async (req, res) => {
@@ -75,6 +86,18 @@ module.exports = (upload) => {
             res.json({ mensaje: "Caso eliminado con éxito." });
         } catch (err) {
             console.error("❌ Error al eliminar Caso Abierto:", err);
+            res.status(500).json({ error: "Error interno" });
+        }
+    });
+
+    // --- APROBAR CASO ABIERTO ---
+    router.put('/aprobar/:id', async (req, res) => {
+        const { id } = req.params;
+        try {
+            await db.execute("UPDATE casos_abiertos SET estado = 'aprobado' WHERE id = ?", [id]);
+            res.json({ mensaje: "Caso aprobado con éxito." });
+        } catch (err) {
+            console.error("❌ Error al aprobar Caso Abierto:", err);
             res.status(500).json({ error: "Error interno" });
         }
     });

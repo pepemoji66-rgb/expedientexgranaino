@@ -52,7 +52,7 @@ module.exports = (db) => {
   }, async (req, res) => {
     const { tipo, titulo, contenido, url_externa, latitud, longitud } = req.body;
     
-    if (!req.file && tipo !== 'expedientes' && tipo !== 'casos_abiertos' && !url_externa) {
+    if (!req.file && tipo !== 'expedientes' && tipo !== 'casos_abiertos' && tipo !== 'misterios_historicos' && !url_externa) {
       return res.status(400).send({ message: '⚠️ No se ha recibido ningún archivo ni URL.' });
     }
 
@@ -99,6 +99,11 @@ module.exports = (db) => {
       const titulo_en = req.body.titulo_en || null;
       const contenido_en = req.body.contenido_en || null;
       sql = "INSERT INTO casos_abiertos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW())";
+      params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0];
+    } else if (tipo === 'misterios_historicos') {
+      const titulo_en = req.body.titulo_en || null;
+      const contenido_en = req.body.contenido_en || null;
+      sql = "INSERT INTO misterios_historicos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW())";
       params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0];
     }
 

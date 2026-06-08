@@ -10,7 +10,7 @@ const PanelAdmin = () => {
         noticias: [],
         imagenes: [],
         videos: [],
-        audios: [],
+        misterios_historicos: [],
         expedientes: [],
         lugares: [],
         casos_abiertos: [],
@@ -63,15 +63,15 @@ const PanelAdmin = () => {
     const cargarDatos = useCallback(async () => {
         setCargando(true);
         try {
-            const [resU, resV, resE, resI, resL, resN, resA, resC, resCOM, resARCH] = await Promise.allSettled([
+            const [resU, resV, resE, resI, resL, resN, resM, resC, resCOM, resARCH] = await Promise.allSettled([
                 axios.get(`${API_BASE_URL}/api/usuarios`),
                 axios.get(`${API_BASE_URL}/api/videos/todos`),
                 axios.get(`${API_BASE_URL}/api/expedientes/todos`),
                 axios.get(`${API_BASE_URL}/api/galeria/admin/todas-las-imagenes`),
                 axios.get(`${API_BASE_URL}/api/lugares`),
                 axios.get(`${API_BASE_URL}/api/galeria/admin/todas-noticias`),
-                axios.get(`${API_BASE_URL}/api/audios`),
-                axios.get(`${API_BASE_URL}/api/casos`),
+                axios.get(`${API_BASE_URL}/api/misterios-historicos/todos`),
+                axios.get(`${API_BASE_URL}/api/casos/todos`),
                 axios.get(`${API_BASE_URL}/api/admin/todos-comentarios`),
                 axios.get(`${API_BASE_URL}/api/archipeg/solicitudes`)
             ]);
@@ -91,7 +91,7 @@ const PanelAdmin = () => {
                 imagenes: parse(resI),
                 lugares: parse(resL),
                 noticias: parse(resN),
-                audios: parse(resA),
+                misterios_historicos: parse(resM),
                 casos_abiertos: parse(resC),
                 comentarios: parse(resCOM),
                 archipeg: parse(resARCH)
@@ -144,7 +144,8 @@ const PanelAdmin = () => {
                 imagenes: { base: '/galeria/borrar-imagen', approve: '/galeria/admin/aprobar-imagen' },
                 noticias: { base: '/galeria/borrar-noticia', approve: '/galeria/admin/aprobar-noticia' },
                 lugares: { base: '/expedientes/borrar-lugar', approve: '/expedientes/aprobar' },
-                audios: { base: '/audios', approve: '/audios/aprobar' }, 
+                casos_abiertos: { base: '/casos', approve: '/casos/aprobar' },
+                misterios_historicos: { base: '/misterios-historicos', approve: '/misterios-historicos/aprobar' },
                 chat: { base: '/borrar-mensaje' },
                 comentarios: { base: '/comentarios' },
                 archipeg: { base: '/archipeg/solicitudes', approve: '/archipeg/solicitudes' }
@@ -224,7 +225,7 @@ const PanelAdmin = () => {
             if (tab === 'imagenes') endpoint = `${API_BASE_URL}/api/galeria/imagenes/${id}`;
             if (tab === 'lugares') endpoint = `${API_BASE_URL}/api/expedientes/lugares/${id}`;
             if (tab === 'casos_abiertos') endpoint = `${API_BASE_URL}/api/casos/${id}`;
-            if (tab === 'audios') endpoint = `${API_BASE_URL}/api/audios/${id}`;
+            if (tab === 'misterios_historicos') endpoint = `${API_BASE_URL}/api/misterios-historicos/${id}`;
             
             let payload;
             let config = {};
@@ -344,7 +345,7 @@ const PanelAdmin = () => {
             // Construir la URL pública del contenido
             let urlContenido = 'https://expedientexgranaino.com';
             if (item.id) {
-                const seccion = tab === 'expedientes' ? 'leer-historia' : tab === 'noticias' ? 'noticias' : tab === 'imagenes' ? 'galeria' : tab === 'videos' ? 'videos' : tab === 'casos_abiertos' ? 'casos-abiertos' : '';
+                const seccion = tab === 'expedientes' || tab === 'misterios_historicos' ? 'leer-historia' : tab === 'noticias' ? 'noticias' : tab === 'imagenes' ? 'galeria' : tab === 'videos' ? 'videos' : tab === 'casos_abiertos' ? 'casos-abiertos' : '';
                 if (seccion === 'leer-historia') {
                     urlContenido = `https://expedientexgranaino.com/${seccion}/${item.id}`;
                 } else if (seccion) {
@@ -382,7 +383,7 @@ const PanelAdmin = () => {
             return;
         }
 
-        const esTexto = tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos';
+        const esTexto = tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos';
 
         // PROTOCOLO DE VALIDACIÓN REFORZADO
         if (esTexto) {
@@ -403,14 +404,14 @@ const PanelAdmin = () => {
         formData.append('titulo', tituloSubida);
         formData.append('tipo', tipoSubida);
         if (contenidoSubida) formData.append('contenido', contenidoSubida);
-        if (tipoSubida === 'casos_abiertos') {
+        if (tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') {
             if (tituloEnSubida) formData.append('titulo_en', tituloEnSubida);
             if (contenidoEnSubida) formData.append('contenido_en', contenidoEnSubida);
         }
         if (tipoSubida === 'noticias' && editForm.fuente_url) formData.append('fuente_url', editForm.fuente_url);
         
-        // Coordenadas para Lugares, Relatos, Noticias y Vídeos
-        if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos') {
+        // Coordenadas para Lugares, Relatos, Noticias, Vídeos, Casos y Misterios
+        if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos' || tipoSubida === 'videos') {
             formData.append('latitud', editForm.latitud || 0);
             formData.append('longitud', editForm.longitud || 0);
             formData.append('ubicacion', editForm.ubicacion || '');
@@ -422,10 +423,6 @@ const PanelAdmin = () => {
         
         if (tipoSubida === 'expedientes') {
             formData.append('tipo_relato', tipoRelatoSubida);
-        }
-        
-        if (tipoSubida === 'audios' && editForm.imagen_url) {
-            formData.append('imagen_url', editForm.imagen_url);
         }
 
 
@@ -517,6 +514,7 @@ const PanelAdmin = () => {
                     if (t === 'noticias') label = 'NOTICIAS';
                     if (t === 'expedientes') label = 'RELATOS';
                     if (t === 'casos_abiertos') label = '💀 CASOS ABIERTOS';
+                    if (t === 'misterios_historicos') label = '👁️ MISTERIOS';
                     if (t === 'archipeg') label = '💻 ARCHIPEG';
                     
                     return (
@@ -544,7 +542,7 @@ const PanelAdmin = () => {
                             { icon: '🎬', count: datos.videos.length, label: 'Vídeos', color: '#ff6b6b' },
                             { icon: '📷', count: datos.imagenes.length, label: 'Fotos', color: '#ffd93d' },
                             { icon: '📰', count: datos.noticias.length, label: 'Noticias', color: '#6c5ce7' },
-                            { icon: '🎙️', count: datos.audios.length, label: 'Audios', color: '#e17055' },
+                            { icon: '👁️', count: datos.misterios_historicos.length, label: 'Misterios', color: '#ff00ff' },
                             { icon: '🗺️', count: datos.lugares.length, label: 'Lugares', color: '#00b894' },
                             { icon: '💀', count: datos.casos_abiertos.length, label: 'Casos', color: '#d63031' },
                             { icon: '💬', count: datos.comentarios.length, label: 'Comentarios', color: '#0984e3' },
@@ -692,7 +690,7 @@ const PanelAdmin = () => {
                                                         </select>
                                                     </div>
                                                 )}
-                                                {(tab === 'expedientes' || tab === 'casos_abiertos') && (
+                                                {(tab === 'expedientes' || tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                                     <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                                         {item.imagen_url && (
                                                             <img 
@@ -752,29 +750,9 @@ const PanelAdmin = () => {
                                                         <div className="texto-verde" style={{fontSize: '0.75rem', maxWidth: '200px'}}>{item.cuerpo?.substring(0, 80)}...</div>
                                                     )
                                                 )}
-                                                {tab === 'audios' && (item.ruta || item.url_audio) && (
-                                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                        {item.imagen_url && (
-                                                            <img 
-                                                                src={item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`} 
-                                                                className="img-admin-mini-preview" 
-                                                                alt="audio-thumb"
-                                                                onClick={() => setImagenSeleccionada(item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`)}
-                                                            />
-                                                        )}
-                                                        {(item.ruta || item.url_audio).includes('<iframe') ? (
-                                                            <div style={{ width: '150px', overflow: 'hidden' }}>
-                                                                <span style={{fontSize: '0.7rem', color: '#00d4ff'}}>📡 IFRAME AUDIO</span>
-                                                            </div>
-                                                        ) : (item.ruta || item.url_audio).startsWith('http') && !(item.ruta || item.url_audio).toLowerCase().endsWith('.mp3') && !(item.ruta || item.url_audio).toLowerCase().endsWith('.wav') ? (
-                                                            <a href={item.ruta || item.url_audio} target="_blank" rel="noreferrer" style={{color: '#00d4ff', fontSize: '0.7rem', textDecoration: 'none', border: '1px solid #00d4ff', padding: '2px 5px', borderRadius: '3px'}}>🎧 ENLACE</a>
-                                                        ) : (
-                                                            <audio controls crossOrigin="anonymous" style={{ height: '30px', width: '150px' }}>
-                                                                <source src={(item.ruta || item.url_audio).startsWith('http') 
-                                                                    ? (item.ruta || item.url_audio) 
-                                                                    : `${API_BASE_URL}/audios/${item.ruta || item.url_audio}`} type="audio/mpeg" />
-                                                            </audio>
-                                                        )}
+                                                {tab === 'misterios_historicos' && (
+                                                    <div className="texto-verde" style={{fontSize: '0.75rem', maxWidth: '200px'}}>
+                                                        {item.contenido?.substring(0, 80)}...
                                                     </div>
                                                 )}
                                                 {tab === 'chat' && <div className="msg-preview">"{item.mensaje}"</div>}
@@ -805,10 +783,10 @@ const PanelAdmin = () => {
                                                     {!esAprobado && tab !== 'chat' && (
                                                         <button className="btn-ok" onClick={() => gestionar(id, 'aprobar', tab)}>OK</button>
                                                     )}
-                                                    {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares' || tab === 'casos_abiertos' || tab === 'audios') && (
+                                                    {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares' || tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                                         <button className="btn-edit" onClick={() => handleEditar(item)}>EDIT</button>
                                                     )}
-                                                    {esAprobado && (tab === 'expedientes' || tab === 'noticias' || tab === 'imagenes' || tab === 'videos' || tab === 'casos_abiertos') && (
+                                                    {esAprobado && (tab === 'expedientes' || tab === 'noticias' || tab === 'imagenes' || tab === 'videos' || tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                                         <button 
                                                             className="btn-publicar-redes" 
                                                             onClick={() => {
@@ -849,7 +827,7 @@ const PanelAdmin = () => {
                                     <option value="imagenes">FOTOS</option>
                                     <option value="noticias">NOTICIAS</option>
                                     <option value="videos">VÍDEOS</option>
-                                    <option value="audios">AUDIOS (PODCAST)</option>
+                                    <option value="misterios_historicos">👁️ MISTERIOS HISTÓRICOS</option>
                                     <option value="lugares">LUGARES (MAPA)</option>
                                     <option value="expedientes">RELATOS</option>
                                     <option value="casos_abiertos">💀 CASOS ABIERTOS</option>
@@ -871,7 +849,7 @@ const PanelAdmin = () => {
                                 <input type="text" value={tituloSubida} onChange={e => setTituloSubida(e.target.value)} placeholder="Título del registro..." />
                             </div>
                             
-                            {tipoSubida === 'casos_abiertos' && (
+                            {(tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && (
                                 <div className="form-group-admin">
                                     <label style={{ color: '#00d4ff' }}>TÍTULO (INGLÉS):</label>
                                     <input type="text" value={tituloEnSubida} onChange={e => setTituloEnSubida(e.target.value)} placeholder="Title in English..." style={{ background: '#000', color: '#00d4ff', border: '1px solid #333' }} />
@@ -891,19 +869,7 @@ const PanelAdmin = () => {
                                  </div>
                             )}
 
-                            {tipoSubida === 'audios' && (
-                                <div className="form-group-admin" style={{ marginBottom: '15px' }}>
-                                    <label style={{ color: '#ff00ff' }}>🖼️ URL DE IMAGEN PARA EL AUDIO (OPCIONAL):</label>
-                                    <input 
-                                        type="url" value={editForm.imagen_url} 
-                                        onChange={e => setEditForm({...editForm, imagen_url: e.target.value})} 
-                                        placeholder="https://imagen-del-podcast.jpg..." 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff00ff', border: '1px solid #333' }}
-                                     />
-                                </div>
-                            )}
-
-                        {tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos' ? (
+                        {tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos' || tipoSubida === 'videos' ? (
                             <>
                                 <div className="form-group-admin">
                                     <label>CONTENIDO / DESCRIPCIÓN:</label>
@@ -915,7 +881,7 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px' }}
                                     ></textarea>
                                 </div>
-                                {tipoSubida === 'casos_abiertos' && (
+                                {(tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && (
                                     <div className="form-group-admin" style={{ marginTop: '10px' }}>
                                         <label style={{ color: '#00d4ff' }}>CONTENIDO (INGLÉS):</label>
                                         <textarea 
@@ -931,7 +897,7 @@ const PanelAdmin = () => {
                         ) : null}
 
                         <div className="form-group-admin">
-                            <label>ARCHIVO ADJUNTO {(tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos') ? '(OPCIONAL)' : ''}:</label>
+                            <label>ARCHIVO ADJUNTO {(tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') ? '(OPCIONAL)' : ''}:</label>
                             <input type="file" onChange={e => setArchivoSubida(e.target.files[0])} />
                         </div>
 
@@ -958,7 +924,7 @@ const PanelAdmin = () => {
                             />
                         </div>
                         
-                        {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos') && (
+                        {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos' || tipoSubida === 'videos') && (
                             <div style={{ background: 'rgba(177,137,4,0.1)', padding: '15px', marginBottom: '15px', border: '1px solid #b18904' }}>
                                 <label style={{ display: 'block', color: '#b18904', fontSize: '0.8rem', marginBottom: '10px' }}>🛰️ RASTREO GPS:</label>
                                 <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
@@ -1067,7 +1033,7 @@ const PanelAdmin = () => {
                                 style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
                             />
 
-                            {tab === 'casos_abiertos' && (
+                            {(tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                 <>
                                     <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>TÍTULO (INGLÉS):</label>
                                     <input 
@@ -1221,22 +1187,7 @@ const PanelAdmin = () => {
                                 </>
                             )}
 
-                            {tab === 'audios' && (
-                                <>
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>RUTA O ENLACE (AUDIO):</label>
-                                    <input 
-                                        type="text" value={editForm.ruta} 
-                                        onChange={e => setEditForm({...editForm, ruta: e.target.value})} 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
-                                    />
-                                    <label style={{ display: 'block', color: '#ff00ff', fontSize: '0.8rem', marginBottom: '5px' }}>IMAGEN (URL) PARA PODCAST:</label>
-                                    <input 
-                                        type="text" value={editForm.imagen_url} 
-                                        onChange={e => setEditForm({...editForm, imagen_url: e.target.value})} 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff00ff', border: '1px solid #333', marginBottom: '15px' }}
-                                    />
-                                </>
-                            )}
+
 
                             {tab === 'noticias' && (
                                 <>

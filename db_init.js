@@ -267,7 +267,7 @@ module.exports = async (db) => {
             fecha DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        const [rowsMisterios] = await db.query("SELECT COUNT(*) as total FROM misterios_historicos");
+        const rowsMisterios = await db.query("SELECT COUNT(*) as total FROM misterios_historicos");
         if (rowsMisterios[0].total === 0) {
             console.log("🌱 Sembrando misterios históricos por defecto...");
             const misteriosIniciales = [
