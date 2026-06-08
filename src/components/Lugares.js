@@ -39,7 +39,8 @@ const iconos = {
     expediente: (resaltar) => crearIconoEmoji('📁', resaltar),
     noticia: (resaltar) => crearIconoEmoji('📰', resaltar),
     foto: (resaltar) => crearIconoEmoji('📸', resaltar),
-    lugar: (resaltar) => crearIconoEmoji('📍', resaltar)
+    lugar: (resaltar) => crearIconoEmoji('📍', resaltar),
+    misterio: (resaltar) => crearIconoEmoji('👁️', resaltar)
 };
 
 const ActualizadorMapa = ({ centro, idResaltado }) => {
@@ -89,15 +90,17 @@ const Lugares = () => {
             const resultados = await Promise.allSettled([
                 axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
                 axios.get(`${API_BASE_URL}/api/expedientes`),
-                axios.get(`${API_BASE_URL}/api/casos`)
+                axios.get(`${API_BASE_URL}/api/casos`),
+                axios.get(`${API_BASE_URL}/api/misterios-historicos`)
             ]);
 
             const noticias = resultados[0].status === 'fulfilled' ? (resultados[0].value.data.data || resultados[0].value.data || []).map(p => ({ ...p, id: `noticia-${p.id}`, tipo: 'noticia' })) : [];
             const expedientes = resultados[1].status === 'fulfilled' ? (resultados[1].value.data || []).map(p => ({ ...p, id: `exp-${p.id}`, tipo: 'expediente' })) : [];
             const casos = resultados[2].status === 'fulfilled' ? (resultados[2].value.data || []).map(p => ({ ...p, id: `caso-${p.id}`, tipo: 'caso' })) : [];
+            const misterios = resultados[3].status === 'fulfilled' ? (resultados[3].value.data || []).map(p => ({ ...p, id: `misterio-${p.id}`, tipo: 'misterio' })) : [];
 
-            // Prioridad: 1. Casos, 2. Expedientes, 3. Noticias
-            const todosLosPuntos = [...casos, ...expedientes, ...noticias].filter(p => 
+            // Prioridad: 1. Misterios, 2. Casos, 3. Expedientes, 4. Noticias
+            const todosLosPuntos = [...misterios, ...casos, ...expedientes, ...noticias].filter(p => 
                 p && p.latitud && p.longitud && 
                 parseFloat(p.latitud) !== 0 && parseFloat(p.longitud) !== 0
             );
@@ -152,7 +155,7 @@ const Lugares = () => {
         if (!nombreImagen) return `https://placehold.co/200x120/000/${fallbackColor}?text=SIN+IMAGEN`;
         if (nombreImagen.startsWith('http')) return nombreImagen;
         
-        if (item.agente || item.autor || item.tipo === 'foto' || item.tipo === 'noticia') {
+        if (item.agente || item.autor || item.tipo === 'foto' || item.tipo === 'noticia' || item.tipo === 'misterio') {
             return `${API_BASE_URL}/imagenes/${nombreImagen.split('/').pop()}`;
         }
         return `${API_BASE_URL}/lugares/${nombreImagen.split('/').pop()}`;
@@ -167,6 +170,7 @@ const Lugares = () => {
             else if (m.tipo === 'video') navigate('/videos');
             else if (m.tipo === 'expediente') navigate(`/leer-historia/${String(m.id).replace('exp-', '')}`);
             else if (m.tipo === 'caso') navigate(`/casos-abiertos?id=${m.id.replace('caso-', '')}`);
+            else if (m.tipo === 'misterio') navigate(`/leer-historia/${String(m.id).replace('misterio-', '')}`);
             else navigate('/galeria'); // Fallback
         };
         const { t } = useLanguage();
@@ -239,6 +243,7 @@ const Lugares = () => {
                             else if (strIdRes === `noticia-${strMId}` || `noticia-${strIdRes}` === strMId) esEste = true;
                             else if (strIdRes === `exp-${strMId}` || `exp-${strIdRes}` === strMId) esEste = true;
                             else if (strIdRes === `caso-${strMId}` || `caso-${strIdRes}` === strMId) esEste = true;
+                            else if (strIdRes === `misterio-${strMId}` || `misterio-${strIdRes}` === strMId) esEste = true;
                         }
 
                         return (
@@ -264,6 +269,7 @@ const Lugares = () => {
                                         <div className="popup-header-tactico">
                                             <span className="status-online">
                                                 {m.tipo === 'caso' ? '💀 TRUE CRIME' : 
+                                                 m.tipo === 'misterio' ? `👁️ ${t('navMysteries')}` : 
                                                  m.tipo === 'expediente' ? t('mapDossier') : 
                                                  m.tipo === 'noticia' ? t('mapNews') : 
                                                  m.tipo === 'lugar' ? t('mapPlace') : t('mapEvidence')}

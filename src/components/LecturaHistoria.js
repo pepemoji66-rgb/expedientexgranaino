@@ -13,6 +13,7 @@ const LecturaHistoria = () => {
     const [historia, setHistoria] = useState(null);
     const [esRelatoAdmin, setEsRelatoAdmin] = useState(false);
     const [esNoticia, setEsNoticia] = useState(false);
+    const [esMisterio, setEsMisterio] = useState(false);
     const [cargando, setCargando] = useState(true);
     
     // Recuperamos la identidad del agente para los permisos de borrado
@@ -33,6 +34,7 @@ const LecturaHistoria = () => {
                 setHistoria(encontradaAdmin);
                 setEsRelatoAdmin(true);
                 setEsNoticia(false);
+                setEsMisterio(false);
             } else {
                 // 2. Si no es de admin, buscamos en los expedientes públicos de usuarios
                 const resPublicos = await axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`);
@@ -42,6 +44,7 @@ const LecturaHistoria = () => {
                     setHistoria(encontradaPublica);
                     setEsRelatoAdmin(false);
                     setEsNoticia(false);
+                    setEsMisterio(false);
                 } else {
                     // 3. ¡EL PARCHE! Si no es expediente, buscamos en las NOTICIAS
                     const resNoticias = await axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`);
@@ -51,6 +54,7 @@ const LecturaHistoria = () => {
                         setHistoria(encontradaNoticia);
                         setEsRelatoAdmin(false); // Tratamos noticia como registro estándar
                         setEsNoticia(true);
+                        setEsMisterio(false);
                     } else {
                         // 4. Si no es noticia, buscamos en los MISTERIOS HISTÓRICOS
                         try {
@@ -67,6 +71,7 @@ const LecturaHistoria = () => {
                                 setHistoria(hist);
                                 setEsRelatoAdmin(false);
                                 setEsNoticia(false);
+                                setEsMisterio(true);
                             } else {
                                 setHistoria(null);
                             }
@@ -245,7 +250,7 @@ const LecturaHistoria = () => {
                         {/* BOTÓN FLOTANTE SOBRE IMAGEN */}
                         {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
                             <button
-                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esNoticia ? 'noticia-' : 'exp-') + historia.id } })}
+                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + historia.id } })}
                                 className="btn-localizar-portada"
                             >
                                 {t('readLocateRadar')}
