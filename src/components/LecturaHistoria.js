@@ -160,13 +160,22 @@ const LecturaHistoria = () => {
         <div className="admin-dashboard fade-in">
             <div className="glass-card full-width" style={{ textAlign: 'left', marginTop: '50px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="forms-btn-submit"
-                        style={{ width: 'auto', background: '#222', padding: '10px 20px', cursor: 'pointer', border: '1px solid #444', borderRadius: '2px', fontWeight: 'bold' }}
-                    >
-                        ⬅ {t('readBack')}
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="forms-btn-submit"
+                            style={{ width: 'auto', background: '#222', padding: '10px 20px', cursor: 'pointer', border: '1px solid #444', borderRadius: '2px', fontWeight: 'bold' }}
+                        >
+                            ⬅ {t('readBack')}
+                        </button>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="forms-btn-submit"
+                            style={{ width: 'auto', background: 'rgba(0, 212, 255, 0.1)', color: '#00d4ff', padding: '10px 20px', cursor: 'pointer', border: '1px solid #00d4ff', borderRadius: '2px', fontWeight: 'bold' }}
+                        >
+                            🏠 {language === 'en' ? 'BUNKER HOME' : 'VOLVER A INICIO'}
+                        </button>
+                    </div>
 
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {historia.latitud && historia.longitud && (
