@@ -18,7 +18,6 @@ import Galeria from './components/Galeria';
 import Lugares from './components/Lugares';
 import CasosAbiertos from './components/CasosAbiertos';
 import Noticias from './components/Noticias';
-import Audios from './components/Audios';
 import PoliticaPrivacidad from './components/PoliticaPrivacidad';
 import PoliticaCookies from './components/PoliticaCookies';
 import AvisoLegal from './components/AvisoLegal';
@@ -87,7 +86,6 @@ function App() {
   // EL JEFE DEL BÚNKER (Cargado de config/env)
   const toggleMenu = () => setIsOpen(!isOpen);
   //guardado//
-  // --- CARGA DE DATOS DEL RADAR (CONTADORES) ---
   const cargarContadores = useCallback(async () => {
     try {
       console.log("📡 RADAR: Rastreando actividad en el sector...");
@@ -98,7 +96,6 @@ function App() {
         axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
         axios.get(`${API_BASE_URL}/api/expedientes`),
         axios.get(`${API_BASE_URL}/api/lugares-publicos`),
-        axios.get(`${API_BASE_URL}/api/audios/audios-publicos`),
         axios.get(`${API_BASE_URL}/api/visitas`)
       ]);
 
@@ -111,8 +108,8 @@ function App() {
         noticias: Array.isArray(datos[3]) ? datos[3].length : 0,
         expedientes: Array.isArray(datos[4]) ? datos[4].length : 0,
         lugares: Array.isArray(datos[5]) ? datos[5].length : 0,
-        audios: Array.isArray(datos[6]) ? datos[6].length : 0,
-        visitas_totales: datos[7]?.cuenta || 0
+        audios: 0,
+        visitas_totales: datos[6]?.cuenta || 0
       });
 
     } catch (err) {
@@ -207,7 +204,6 @@ function App() {
                 { path: "/galeria", label: t('navGallery') },
                 { path: "/videos", label: t('navVideos') },
                 { path: "/noticias", label: t('navNews') },
-                { path: "/audios", label: t('navAudios') },
                 { path: "/expedientes", label: t('navFiles') },
                 { path: "/especial-atarfe", label: t('sysSidebarDossier') },
                 { path: "/lugares", label: t('navMap') },
@@ -312,7 +308,6 @@ function App() {
               <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
               <Route path="/casos-abiertos" element={<CasosAbiertos userAuth={userAuth} />} />
               <Route path="/noticias" element={<Noticias userAuth={userAuth} />} />
-              <Route path="/audios" element={<Audios userAuth={userAuth} />} />
               <Route path="/privacidad" element={<PoliticaPrivacidad />} />
               <Route path="/cookies" element={<PoliticaCookies />} />
                <Route path="/legal" element={<AvisoLegal />} />

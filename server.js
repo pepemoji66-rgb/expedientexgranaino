@@ -481,36 +481,9 @@ app.get('/', (req, res) => {
     });
 });
 
-// Sección de Audios/Radio (/audios) - SEO enriquecido
+// Sección de Audios/Radio (/audios) - Redireccionada permanente a la home por SEO
 app.get('/audios', (req, res) => {
-    const indexPath = path.join(__dirname, 'build', 'index.html');
-    fs.readFile(indexPath, 'utf8', (err, html) => {
-        if (err) return res.sendFile(indexPath);
-
-        const contenidoSeo = `
-<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
-    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">Frecuencia de Radio del Búnker — Alertas OVNI, Psicofonías y Monitorización de Ondas</h1>
-    <p>La sección de <strong>Radio del Búnker Expediente X Granaíno</strong> es una frecuencia de audio exclusiva donde nuestra red
-    de investigadores transmite y archiva grabaciones de campo obtenidas durante operaciones de monitoreo de fenómenos anómalos.
-    Aquí encontrarás <strong>alertas de radio en tiempo real</strong> sobre avistamientos OVNI, actividad paranormal detectada
-    en localizaciones de Granada y comunicaciones de emergencia entre agentes sobre el terreno.
-    Cada archivo de audio está geolocalizado y catalogado con las coordenadas exactas del punto de captura.</p>
-    <p>Entre los registros disponibles se incluyen <strong>psicofonías</strong> capturadas en lugares con alta actividad paranormal,
-    testimonios directos de testigos de avistamientos en Sierra Nevada y la Costa Tropical de Granada,
-    debates tácticos entre investigadores sobre la naturaleza de las anomalías detectadas,
-    y transmisiones de <strong>monitoreo de ondas electromagnéticas</strong> en zonas de poder identificadas por el equipo.
-    La importancia de la <strong>monitorización de ondas paranormales</strong> radica en su capacidad para detectar patrones
-    de actividad que preceden a los avistamientos masivos, dando a los investigadores una ventaja táctica fundamental.</p>
-</article>`;
-
-        const pagina = inyectarContenidoSEO(
-            html,
-            'Radio del Búnker | Psicofonías y Alertas OVNI — Expediente X Granaíno',
-            'Escucha psicofonías, alertas OVNI en tiempo real y debates entre investigadores en la frecuencia de radio del Búnker Expediente X Granaíno.',
-            contenidoSeo
-        );
-        res.send(pagina);
-    });
+    res.redirect(301, '/');
 });
 
 // Sección de Casos Abiertos (/casos-abiertos) - SEO enriquecido

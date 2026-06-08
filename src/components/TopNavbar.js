@@ -60,7 +60,6 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
         { path: "/galeria", label: t('navGallery'), icon: <Image size={16} /> },
         { path: "/videos", label: t('navVideos'), icon: <Video size={16} /> },
         { path: "/noticias", label: t('navNews'), icon: <Newspaper size={16} /> },
-        { path: "/audios", label: t('navAudios'), icon: <Mic size={16} /> },
         { path: "/expedientes", label: t('navFiles'), icon: <FileText size={16} /> },
         { path: "/lugares", label: t('navMap'), icon: <Map size={16} /> },
     ];

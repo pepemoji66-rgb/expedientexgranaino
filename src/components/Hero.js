@@ -34,12 +34,7 @@ const Hero = ({ userAuth }) => {
                     todasNovedades = todasNovedades.concat(dataNot.map(x => ({ ...x, type: 'noticia', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // 3. Audios
-                const resAudios = await fetch(`${API_BASE_URL}/api/audios/audios-publicos`);
-                const dataAudios = await resAudios.json();
-                if (Array.isArray(dataAudios)) {
-                    todasNovedades = todasNovedades.concat(dataAudios.map(x => ({ ...x, type: 'audio', timestamp: new Date(x.fecha_subida).getTime() })));
-                }
+                // 4. Videos
 
                 // 4. Videos
                 const resVideos = await fetch(`${API_BASE_URL}/api/videos/publicos`);
@@ -216,19 +211,6 @@ const Hero = ({ userAuth }) => {
                     btnText: "LEER NOTICIA",
                     btnLink: "/noticias"
                 });
-            } else if (item.type === 'audio') {
-                alertasRecientes.push({
-                    id: `nuevo-audio-${item.id}`,
-                    image: item.imagen_url ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`) : imgRelatos,
-                    subtitle: language === 'en' ? "NEW AUDIO DOSSIER" : "NUEVO AUDIO / PODCAST",
-                    title: (item.titulo || 'AUDIO DOSSIER').toUpperCase(),
-                    tagline: language === 'en' ? "LISTEN TO THE EVIDENCE" : "ESCUCHA LA EVIDENCIA",
-                    infoTitle: language === 'en' ? "NEW AUDIO ADDED" : "REGISTRO SONORO AÑADIDO",
-                    infoText: language === 'en' ? "A new audio with testimonies and evidence has been uploaded." : "Se ha subido un nuevo audio con testimonios y pruebas sonoras al archivo central.",
-                    highlight: language === 'en' ? "AVAILABLE IN THE AUDIO SECTION" : "DISPONIBLES EN LA SECCIÓN DE AUDIOS",
-                    btnText: language === 'en' ? "LISTEN NOW" : "ESCUCHAR AHORA",
-                    btnLink: "/audios"
-                });
             } else if (item.type === 'video') {
                 const primerCaptura = item.capturas && item.capturas.trim() !== '' ? item.capturas.split(',')[0].trim() : '';
                 alertasRecientes.push({
@@ -291,7 +273,7 @@ const Hero = ({ userAuth }) => {
                 <div className="action-buttons-group">
                     {novedadesGlobales.length > 0 && (
                         <Link 
-                            to={novedadesGlobales[0].type === 'noticia' ? "/noticias" : novedadesGlobales[0].type === 'audio' ? "/audios" : novedadesGlobales[0].type === 'video' ? "/galeria" : novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : "/expedientes"} 
+                            to={novedadesGlobales[0].type === 'noticia' ? "/noticias" : novedadesGlobales[0].type === 'video' ? "/galeria" : novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : "/expedientes"} 
                             className="btn-nuevo-archivo-blink"
                         >
                             <span className="blink-dot"></span> {t('heroNewFile')}
