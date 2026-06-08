@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './lecturahistoria.css';
@@ -10,6 +10,10 @@ const LecturaHistoria = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const src = queryParams.get('src');
+    
     const [historia, setHistoria] = useState(null);
     const [esRelatoAdmin, setEsRelatoAdmin] = useState(false);
     const [esNoticia, setEsNoticia] = useState(false);
@@ -25,6 +29,31 @@ const LecturaHistoria = () => {
         try {
             setCargando(true);
             console.log(`📡 ESCANEANDO ARCHIVO ID: ${id}...`);
+
+            // Si viene especificado que es un misterio histórico, lo buscamos con máxima prioridad
+            if (src === 'misterios') {
+                try {
+                    const resMisterios = await axios.get(`${API_BASE_URL}/api/misterios-historicos`);
+                    const encontradaMisterio = resMisterios.data.find(h => h.id == id);
+                    if (encontradaMisterio) {
+                        const hist = { ...encontradaMisterio };
+                        if (language === 'en' && encontradaMisterio.titulo_en) {
+                            hist.titulo = encontradaMisterio.titulo_en;
+                        }
+                        if (language === 'en' && encontradaMisterio.contenido_en) {
+                            hist.contenido = encontradaMisterio.contenido_en;
+                        }
+                        setHistoria(hist);
+                        setEsRelatoAdmin(false);
+                        setEsNoticia(false);
+                        setEsMisterio(true);
+                        setCargando(false);
+                        return;
+                    }
+                } catch (errM) {
+                    console.error("Error al buscar en misterios:", errM);
+                }
+            }
 
             // 1. Intentamos buscar primero en los Relatos del Administrador
             const resAdmin = await axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`);

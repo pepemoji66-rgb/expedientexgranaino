@@ -78,7 +78,7 @@ const MisteriosHistoricos = () => {
                             <div 
                                 key={m.id} 
                                 className="misterio-card glass-card"
-                                onClick={() => navigate(`/leer-historia/${m.id}`)}
+                                onClick={() => navigate(`/leer-historia/${m.id}?src=misterios`)}
                             >
                                 <div className="card-media-wrap">
                                     {m.imagen_url ? (

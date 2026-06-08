@@ -170,7 +170,7 @@ const Lugares = () => {
             else if (m.tipo === 'video') navigate('/videos');
             else if (m.tipo === 'expediente') navigate(`/leer-historia/${String(m.id).replace('exp-', '')}`);
             else if (m.tipo === 'caso') navigate(`/casos-abiertos?id=${m.id.replace('caso-', '')}`);
-            else if (m.tipo === 'misterio') navigate(`/leer-historia/${String(m.id).replace('misterio-', '')}`);
+            else if (m.tipo === 'misterio') navigate(`/leer-historia/${String(m.id).replace('misterio-', '')}?src=misterios`);
             else navigate('/galeria'); // Fallback
         };
         const { t } = useLanguage();
