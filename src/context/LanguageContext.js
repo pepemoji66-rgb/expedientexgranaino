@@ -784,6 +784,23 @@ export const LanguageProvider = ({ children }) => {
 
     useEffect(() => {
         localStorage.setItem('bunker_lang', language);
+        
+        // Sincronización automática continua con el combo de Google Translate
+        const syncGoogleTranslate = () => {
+            try {
+                const googleCombo = document.querySelector('.goog-te-combo');
+                if (googleCombo && googleCombo.value !== language) {
+                    googleCombo.value = language;
+                    googleCombo.dispatchEvent(new Event('change'));
+                }
+            } catch (e) {
+                // Silencioso
+            }
+        };
+
+        syncGoogleTranslate();
+        const interval = setInterval(syncGoogleTranslate, 2000);
+        return () => clearInterval(interval);
     }, [language]);
 
     const t = (key) => {

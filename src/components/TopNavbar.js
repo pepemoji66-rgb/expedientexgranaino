@@ -120,6 +120,8 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                                 ENG
                             </button>
                         </div>
+                        {/* Componente del traductor de Google oculto en el DOM para la sincronización de idiomas de la API */}
+                        <GoogleTranslator />
                         <div className="tool-item music-tool">
                             <ControlMusica />
                         </div>

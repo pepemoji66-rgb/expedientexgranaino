@@ -225,10 +225,12 @@
    selectores de máxima especificidad
    ============================================ */
 #google_translate_element {
-    height: 22px;
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
     overflow: hidden;
-    display: flex;
-    align-items: center;
+    pointer-events: none;
 }
 
 /* Override raíz: TODOS los hijos del contenedor */
