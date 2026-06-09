@@ -591,12 +591,31 @@ app.get('/casos-abiertos', async (req, res) => {
 </article>`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/assets/Evidencia%20en%20Soportújar.webp`;
+        let description = 'Explora casos abiertos y misterios sin resolver. Crímenes reales y desapariciones inexplicables documentados en el Búnker de Expediente X Granaíno.';
+        let imagenUrl = `${baseImgUrl}/assets/Evidencia%20en%20Soportújar.webp`;
+
+        try {
+            const casos = await db.query(
+                "SELECT id, titulo, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo' OR estado IS NULL) ORDER BY id DESC LIMIT 3"
+            );
+            if (casos && casos.length > 0) {
+                // Generar descripción dinámica con los 3 últimos casos
+                const ultimosTres = casos.map(c => c.titulo).join(' | ');
+                description = `Últimos casos abiertos: ${ultimosTres}. True Crime y misterios sin resolver.`;
+
+                // Usar la imagen del caso más reciente si tiene
+                if (casos[0].imagen_url) {
+                    imagenUrl = resolverImagenUrl(req, casos[0].imagen_url);
+                }
+            }
+        } catch (dbErr) {
+            console.error("Error al obtener casos abiertos para SEO:", dbErr);
+        }
 
         const pagina = inyectarContenidoSEO(
             html,
             'Casos Abiertos (True Crime) | Misterios sin resolver — Expediente X Granaíno',
-            'Explora casos abiertos y misterios sin resolver. Crímenes reales y desapariciones inexplicables documentados en el Búnker de Expediente X Granaíno.',
+            description,
             contenidoSeo,
             imagenUrl,
             paginaUrl
@@ -606,9 +625,9 @@ app.get('/casos-abiertos', async (req, res) => {
 });
 
 // Sección de Misterios Históricos (/misterios-historicos) - SEO enriquecido
-app.get('/misterios-historicos', (req, res) => {
+app.get('/misterios-historicos', async (req, res) => {
     const indexPath = path.join(__dirname, 'build', 'index.html');
-    fs.readFile(indexPath, 'utf8', (err, html) => {
+    fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
 
         const contenidoSeo = `
@@ -618,12 +637,31 @@ app.get('/misterios-historicos', (req, res) => {
 </article>`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/promo/img/mysterious_granada.png`;
+        let description = 'Explora los enigmas y misterios históricos desclasificados. Roswell, Triángulo de las Bermudas, Manuscrito Voynich y más.';
+        let imagenUrl = `${baseImgUrl}/promo/img/mysterious_granada.png`;
+
+        try {
+            const misterios = await db.query(
+                "SELECT id, titulo, imagen_url FROM misterios_historicos ORDER BY id DESC LIMIT 3"
+            );
+            if (misterios && misterios.length > 0) {
+                // Generar descripción dinámica con los 3 últimos misterios
+                const ultimosTres = misterios.map(m => m.titulo).join(' | ');
+                description = `Últimos misterios: ${ultimosTres}. Grandes enigmas de la historia desclasificados.`;
+
+                // Usar la imagen del misterio más reciente si tiene
+                if (misterios[0].imagen_url) {
+                    imagenUrl = resolverImagenUrl(req, misterios[0].imagen_url);
+                }
+            }
+        } catch (dbErr) {
+            console.error("Error al obtener misterios para SEO:", dbErr);
+        }
 
         const pagina = inyectarContenidoSEO(
             html,
             'Misterios Históricos y Grandes Enigmas — Expediente X Granaíno',
-            'Explora los enigmas y misterios históricos desclasificados. Roswell, Triángulo de las Bermudas, Manuscrito Voynich y más.',
+            description,
             contenidoSeo,
             imagenUrl,
             paginaUrl
@@ -915,9 +953,22 @@ app.get('/noticias', async (req, res) => {
     <p>Canal oficial de noticias del búnker. A continuación se listan las últimas informaciones sobre ufología, fenómenos anómalos y sucesos misteriosos registrados en nuestro radar:</p>
     <ul style="list-style-type:none;padding:0;">`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        let description = 'Últimas noticias y alertas de avistamientos OVNI, misterios históricos y ufología en Granada y a nivel mundial.';
+        let imagenUrl = `${baseImgUrl}/assets/incidente-eva9-lujar.png`;
+
         try {
-            const noticias = await db.query("SELECT titulo, cuerpo, nivel_alerta, ubicacion, fecha FROM noticias WHERE estado = 'aprobado' ORDER BY fecha DESC LIMIT 20");
+            const noticias = await db.query("SELECT titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE estado = 'aprobado' ORDER BY fecha DESC LIMIT 20");
             if (noticias && noticias.length > 0) {
+                // Generar descripción dinámica con los 3 últimos titulares
+                const ultimasTres = noticias.slice(0, 3).map(n => n.titulo).join(' | ');
+                description = `Últimas noticias: ${ultimasTres}. Sigue las alertas del búnker.`;
+
+                // Usar la imagen de la noticia más reciente si tiene
+                if (noticias[0].imagen_url) {
+                    imagenUrl = resolverImagenUrl(req, noticias[0].imagen_url);
+                }
+
                 noticias.forEach(n => {
                     const fechaStr = n.fecha ? new Date(n.fecha).toLocaleDateString('es-ES') : '';
                     contenidoSeo += `
@@ -939,13 +990,10 @@ app.get('/noticias', async (req, res) => {
     </ul>
 </article>`;
 
-        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/assets/incidente-eva9-lujar.png`;
-
         const pagina = inyectarContenidoSEO(
             html,
             'Noticias de Ufología y Fenómenos Anómalos — Expediente X Granaíno',
-            'Últimas noticias y alertas de avistamientos OVNI, misterios históricos y ufología en Granada y a nivel mundial.',
+            description,
             contenidoSeo,
             imagenUrl,
             paginaUrl
@@ -1017,11 +1065,24 @@ app.get('/expedientes', async (req, res) => {
     <p>Base de datos desclasificada de crónicas del misterio y reportes de investigación paranormal redactados por agentes autorizados:</p>
     <ul style="list-style-type:none;padding:0;">`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        let description = 'Informes detallados y crónicas de campo sobre avistamientos de OVNIS y misterios sin resolver.';
+        let imagenUrl = `${baseImgUrl}/assets/ovni-mulhacen-1958.png`;
+
         try {
             const expedientes = await db.query(
-                "SELECT titulo, contenido, usuario_nombre, tipo, fecha FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') ORDER BY fecha DESC LIMIT 30"
+                "SELECT titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') ORDER BY fecha DESC LIMIT 30"
             );
             if (expedientes && expedientes.length > 0) {
+                // Generar descripción dinámica con los 3 últimos expedientes
+                const ultimosTres = expedientes.slice(0, 3).map(e => e.titulo || 'Sin título').join(' | ');
+                description = `Últimos expedientes: ${ultimosTres}. Explora los informes desclasificados del búnker.`;
+
+                // Usar la imagen del expediente más reciente si tiene
+                if (expedientes[0].imagen_url) {
+                    imagenUrl = resolverImagenUrl(req, expedientes[0].imagen_url);
+                }
+
                 expedientes.forEach(e => {
                     const fechaStr = e.fecha ? new Date(e.fecha).toLocaleDateString('es-ES') : '';
                     const autor = e.usuario_nombre || (e.tipo === 'jefe' ? 'Administrador' : 'Agente');
@@ -1045,13 +1106,10 @@ app.get('/expedientes', async (req, res) => {
     </ul>
 </article>`;
 
-        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/assets/ovni-mulhacen-1958.png`;
-
         const pagina = inyectarContenidoSEO(
             html,
             'Expedientes y Relatos del Misterio — Expediente X Granaíno',
-            'Informes detallados y crónicas de campo sobre avistamientos de OVNIS y misterios sin resolver.',
+            description,
             contenidoSeo,
             imagenUrl,
             paginaUrl
