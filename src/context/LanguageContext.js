@@ -386,7 +386,9 @@ const translations = {
         dossierAtarfeWatermarkTitle: "VIDEO ORIGINAL EXPEDIENTEXGRANAINO",
         dossierAtarfeWatermarkCopyright: "© INVESTIGACIÓN ATARFE - PROPIEDAD DEL BÚNKER",
         dossierAtarfeModalWatermark1: "ARCHIVO ORIGINAL: EXPEDIENTEXGRANAINO.COM",
-        dossierAtarfeModalWatermark2: "INVESTIGACIÓN ATARFE - PROPIEDAD EXCLUSIVA"
+        dossierAtarfeModalWatermark2: "INVESTIGACIÓN ATARFE - PROPIEDAD EXCLUSIVA",
+        casesDisclaimerTitle: "⚠️ DIRECTIVA DE INVESTIGACIÓN DE CAMPO",
+        casesDisclaimerText: "Los expedientes y misterios presentados en este búnker son fichas analíticas preliminares y resúmenes sintetizados (aproximadamente de unas 400 palabras). Dado que sobre muchos de estos sucesos se han escrito libros enteros y realizado décadas de investigación, instamos a todos los agentes y visitantes a utilizar este archivo como un punto de partida operativo. Le recomendamos encarecidamente contrastar datos, investigar a fondo por su cuenta y utilizar la caja de comentarios para aportar cualquier documento, testimonio o corrección que ayude a la comunidad."
     },
     en: {
         // General
@@ -771,7 +773,9 @@ const translations = {
         dossierAtarfeWatermarkTitle: "ORIGINAL VIDEO EXPEDIENTEXGRANAINO",
         dossierAtarfeWatermarkCopyright: "© ATARFE INVESTIGATION - BUNKER PROPERTY",
         dossierAtarfeModalWatermark1: "ORIGINAL FILE: EXPEDIENTEXGRANAINO.COM",
-        dossierAtarfeModalWatermark2: "ATARFE INVESTIGATION - EXCLUSIVE PROPERTY"
+        dossierAtarfeModalWatermark2: "ATARFE INVESTIGATION - EXCLUSIVE PROPERTY",
+        casesDisclaimerTitle: "⚠️ FIELD INVESTIGATION DIRECTIVE",
+        casesDisclaimerText: "The dossiers and mysteries compiled in this bunker are preliminary analytical briefs and synthesized summaries (approximately 400 words). Since many of these events have inspired entire books and decades of research, we urge all agents and visitors to use this archive as an operational starting point. We strongly recommend cross-referencing facts, conducting your own deep research, and using the comment section to contribute any documents, testimonies, or corrections to help the community."
     }
 };
 

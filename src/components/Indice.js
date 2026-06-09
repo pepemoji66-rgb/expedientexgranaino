@@ -77,6 +77,16 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 </div>
             </div>
 
+            {/* NOTA DE DIRECTIVA DE INVESTIGACIÓN (SEO & UX) */}
+            <div className="cases-disclaimer-box">
+                <div className="disclaimer-header">
+                    <span>{t('casesDisclaimerTitle')}</span>
+                </div>
+                <div className="disclaimer-body">
+                    <p>{t('casesDisclaimerText')}</p>
+                </div>
+            </div>
+
             {/* SECCIÓN DE ACCESO INMEDIATO (UX PRIORITARIA) */}
             <div className="quick-access-gates">
                 <Link to="/lugares" className="gate-card map-gate">

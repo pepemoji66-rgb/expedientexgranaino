@@ -414,20 +414,39 @@ io.on('connection', (socket) => {
 // Inyecta contenido HTML rico antes de servir el SPA
 // ==============================================
 
-const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo) => {
+const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl = null, paginaUrl = null) => {
     // Reemplazamos el title genérico por uno específico de página
     html = html.replace(
         /<title>[^<]*<\/title>/,
         `<title>${titulo}</title>`
     );
 
-    // Inyectamos meta description
+    const desc = (descripcion || '').replace(/"/g, '&quot;');
+    const title = (titulo || '').replace(/"/g, '&quot;');
+    const img = imagenUrl || 'https://expedientexgranaino.com/social-preview.png?v=5.0';
+    const url = paginaUrl || 'https://expedientexgranaino.com/';
+
+    // Limpiamos los tags originales en index.html para evitar duplicaciones
+    html = html.replace(/<meta [^>]*property=["']og:[^"']*["'][^>]*>/gi, '');
+    html = html.replace(/<meta [^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
+    html = html.replace(/<meta [^>]*name=["']description["'][^>]*>/gi, '');
+    html = html.replace(/<meta [^>]*name=["']keywords["'][^>]*>/gi, '');
+
+    // Inyectamos meta description y todos los open graph / twitter tags
     html = html.replace(
         '</head>',
-        `<meta name="description" content="${descripcion}" />
+        `<meta name="description" content="${desc}" />
 <meta name="keywords" content="OVNI Granada, fenómenos paranormales, ufología Andalucía, avistamientos UFO, psicofonías, misterio, investigación paranormal, Expediente X" />
-<meta property="og:title" content="${titulo}" />
-<meta property="og:description" content="${descripcion}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="${url}" />
+<meta property="og:title" content="${title}" />
+<meta property="og:description" content="${desc}" />
+<meta property="og:image" content="${img}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="${url}" />
+<meta name="twitter:title" content="${title}" />
+<meta name="twitter:description" content="${desc}" />
+<meta name="twitter:image" content="${img}" />
 </head>`
     );
 
@@ -445,6 +464,24 @@ ${contenidoSeo}
     );
 
     return html;
+};
+
+const obtenerUrlsRequest = (req) => {
+    const protocol = req.protocol === 'http' || req.protocol === 'https' ? req.protocol : 'https';
+    const host = req.get('host');
+    const paginaUrl = `${protocol}://${host}${req.originalUrl}`;
+    const baseImgUrl = `${protocol}://${host}`;
+    return { paginaUrl, baseImgUrl };
+};
+
+const resolverImagenUrl = (req, rawImg) => {
+    if (!rawImg) return null;
+    if (rawImg.startsWith('http://') || rawImg.startsWith('https://')) {
+        return rawImg;
+    }
+    const fileName = rawImg.split('/').pop();
+    const { baseImgUrl } = obtenerUrlsRequest(req);
+    return `${baseImgUrl}/imagenes/${fileName}`;
 };
 
 // Página de Inicio (/) - SEO enriquecido
@@ -473,11 +510,16 @@ app.get('/', (req, res) => {
     crónicas del misterio que desafían cualquier explicación convencional. Bienvenido al archivo más oscuro de la red.</p>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/social-preview.png?v=5.0`;
+
         const pagina = inyectarContenidoSEO(
             html,
             'Expediente X Granaíno | Investigación OVNI y Fenómenos Paranormales en Granada',
             'La plataforma de investigación ufológica más completa del sur de España. Alertas OVNI en tiempo real, psicofonías, casos históricos en Granada y crónicas del misterio.',
-            contenidoSeo
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
     });
@@ -489,10 +531,56 @@ app.get('/audios', (req, res) => {
 });
 
 // Sección de Casos Abiertos (/casos-abiertos) - SEO enriquecido
-app.get('/casos-abiertos', (req, res) => {
+app.get('/casos-abiertos', async (req, res) => {
+    const casoId = req.query.id;
     const indexPath = path.join(__dirname, 'build', 'index.html');
-    fs.readFile(indexPath, 'utf8', (err, html) => {
+    
+    fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
+
+        let caso = null;
+        if (casoId) {
+            try {
+                const results = await db.query(
+                    "SELECT * FROM casos_abiertos WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo' OR estado IS NULL OR estado = 'pendiente')", 
+                    [casoId]
+                );
+                if (results && results.length > 0) {
+                    caso = results[0];
+                }
+            } catch (dbErr) {
+                console.error("Error al buscar caso abierto para SEO:", dbErr);
+            }
+        }
+
+        if (caso) {
+            const titulo = `${caso.titulo ? caso.titulo.toUpperCase() : 'CASO ABIERTO'} | Casos Abiertos — Expediente X Granaíno`;
+            
+            let cuerpoTexto = caso.contenido || 'Sin contenido adicional.';
+            cuerpoTexto = cuerpoTexto.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+            const desc = cuerpoTexto.length > 160 ? cuerpoTexto.substring(0, 157) + '...' : cuerpoTexto;
+
+            const rawImg = caso.imagen_url;
+            const imagenUrl = resolverImagenUrl(req, rawImg) || resolverImagenUrl(req, 'assets/Evidencia en Soportújar.webp');
+            const { paginaUrl } = obtenerUrlsRequest(req);
+
+            const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#ffb100;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">[CASO CLASIFICADO #${caso.id}] ${caso.titulo ? caso.titulo.toUpperCase() : 'SIN TÍTULO'}</h1>
+    <p><strong>Estado:</strong> Bajo investigación del búnker</p>
+    <div style="white-space:pre-line;">${cuerpoTexto}</div>
+</article>`;
+
+            const pagina = inyectarContenidoSEO(
+                html,
+                titulo,
+                desc,
+                contenidoSeo,
+                imagenUrl,
+                paginaUrl
+            );
+            return res.send(pagina);
+        }
 
         const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
@@ -502,11 +590,43 @@ app.get('/casos-abiertos', (req, res) => {
     aún deambulan en las sombras.</p>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/assets/Evidencia%20en%20Soportújar.webp`;
+
         const pagina = inyectarContenidoSEO(
             html,
             'Casos Abiertos (True Crime) | Misterios sin resolver — Expediente X Granaíno',
             'Explora casos abiertos y misterios sin resolver. Crímenes reales y desapariciones inexplicables documentados en el Búnker de Expediente X Granaíno.',
-            contenidoSeo
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
+        );
+        res.send(pagina);
+    });
+});
+
+// Sección de Misterios Históricos (/misterios-historicos) - SEO enriquecido
+app.get('/misterios-historicos', (req, res) => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) return res.sendFile(indexPath);
+
+        const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">👁️ Misterios Históricos del Planeta — Expediente X Granaíno</h1>
+    <p>Dossier enciclopédico de los enigmas más grandes de la humanidad. El manuscrito Voynich, el incidente Roswell, la colonia Roanoke, el triángulo de las Bermudas o el asesino del Zodiaco. Compilaciones detalladas con coordenadas y archivos desclasificados.</p>
+</article>`;
+
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/promo/img/mysterious_granada.png`;
+
+        const pagina = inyectarContenidoSEO(
+            html,
+            'Misterios Históricos y Grandes Enigmas — Expediente X Granaíno',
+            'Explora los enigmas y misterios históricos desclasificados. Roswell, Triángulo de las Bermudas, Manuscrito Voynich y más.',
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
     });
@@ -535,11 +655,16 @@ app.get('/sobre-nosotros', (req, res) => {
     <p><strong>Valores:</strong> Veracidad, Neutralidad y Comunidad.</p>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/social-preview.png?v=5.0`;
+
         const pagina = inyectarContenidoSEO(
             html,
             'Sobre el Proyecto | Dossier y Origen del Búnker — Expediente X Granaíno',
             'Descubre el origen del Búnker de Expediente X Granaíno, fundado por José Moreno Jiménez. Conoce nuestra misión, visión y metodología de análisis de fenómenos UAP.',
-            contenidoSeo
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
     });
@@ -569,11 +694,16 @@ app.get('/especial-atarfe', (req, res) => {
     <p>Los movimientos aéreos extremos de detención en seco, marcha atrás y aceleración instantánea, junto a la ausencia completa de ruido aéreo en una zona tan próxima al aeropuerto de Granada, descartan el uso de drones domésticos, globos o aviación civil convencional. Actualmente, las grabaciones y capturas de este avistamiento dual están siendo analizadas por especialistas de la organización internacional de ufología MUFON.</p>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/promo/img/alhambra_ufo.png`;
+
         const pagina = inyectarContenidoSEO(
             html,
             'Caso OVNI en Atarfe y Albolote | Dossier Desclasificado — Expediente X Granaíno',
             'Investigación técnica y grabaciones del avistamiento OVNI ocurrido en Atarfe y Albolote (Granada). Testimonio real y análisis de evidencias.',
-            contenidoSeo
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
     });
@@ -809,11 +939,16 @@ app.get('/noticias', async (req, res) => {
     </ul>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/assets/incidente-eva9-lujar.png`;
+
         const pagina = inyectarContenidoSEO(
             html,
             'Noticias de Ufología y Fenómenos Anómalos — Expediente X Granaíno',
             'Últimas noticias y alertas de avistamientos OVNI, misterios históricos y ufología en Granada y a nivel mundial.',
-            contenidoSeo
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
     });
@@ -855,11 +990,16 @@ app.get('/videos', async (req, res) => {
     </ul>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/presentacion_hero.png`;
+
         const pagina = inyectarContenidoSEO(
             html,
             'Galería de Vídeos de Avistamientos y OVNIS — Expediente X Granaíno',
             'Grabaciones originales de avistamientos de OVNIS y anomalías aéreas registradas por nuestra red de observadores.',
-            contenidoSeo
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
     });
@@ -905,11 +1045,16 @@ app.get('/expedientes', async (req, res) => {
     </ul>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/assets/ovni-mulhacen-1958.png`;
+
         const pagina = inyectarContenidoSEO(
             html,
             'Expedientes y Relatos del Misterio — Expediente X Granaíno',
             'Informes detallados y crónicas de campo sobre avistamientos de OVNIS y misterios sin resolver.',
-            contenidoSeo
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
     });
@@ -951,13 +1096,110 @@ app.get('/galeria', async (req, res) => {
     </ul>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/presentacion_hero.png`;
+
         const pagina = inyectarContenidoSEO(
             html,
             'Galería de Evidencias Fotográficas — Expediente X Granaíno',
             'Archivo fotográfico de fenómenos UAP, avistamientos OVNI y anomalías de campo registradas en alta resolución.',
-            contenidoSeo
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
+    });
+});
+
+// Ruta para leer un expediente/noticia/misterio individual con SEO dinámico
+app.get('/leer-historia/:id', async (req, res) => {
+    const id = req.params.id;
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    
+    fs.readFile(indexPath, 'utf8', async (err, html) => {
+        if (err) return res.sendFile(indexPath);
+
+        let historia = null;
+        let esRelatoAdmin = false;
+        let esNoticia = false;
+        let esMisterio = false;
+
+        try {
+            // 1. Buscar en relatos del admin / jefe
+            const relatosAdmin = await db.query(
+                "SELECT * FROM expedientes WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND tipo = 'jefe'",
+                [id]
+            );
+            if (relatosAdmin && relatosAdmin.length > 0) {
+                historia = relatosAdmin[0];
+                esRelatoAdmin = true;
+            } else {
+                // 2. Buscar en expedientes de agentes
+                const expedientesPublicos = await db.query(
+                    "SELECT * FROM expedientes WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND (tipo = 'agente' OR tipo IS NULL)",
+                    [id]
+                );
+                if (expedientesPublicos && expedientesPublicos.length > 0) {
+                    historia = expedientesPublicos[0];
+                } else {
+                    // 3. Buscar en noticias
+                    const noticias = await db.query(
+                        "SELECT * FROM noticias WHERE id = ? AND (estado = 'aprobado' OR estado IS NULL)",
+                        [id]
+                    );
+                    if (noticias && noticias.length > 0) {
+                        historia = noticias[0];
+                        esNoticia = true;
+                    } else {
+                        // 4. Buscar en misterios históricos
+                        const misterios = await db.query(
+                            "SELECT * FROM misterios_historicos WHERE id = ?",
+                            [id]
+                        );
+                        if (misterios && misterios.length > 0) {
+                            historia = misterios[0];
+                            esMisterio = true;
+                        }
+                    }
+                }
+            }
+        } catch (dbErr) {
+            console.error("Error al buscar historia para SEO dinámico:", dbErr);
+        }
+
+        if (historia) {
+            const titulo = `${historia.titulo ? historia.titulo.toUpperCase() : 'EXPEDIENTE'} | Expediente X Granaíno`;
+            
+            // Truncar contenido para la descripción (máximo 160 caracteres)
+            let cuerpoTexto = historia.contenido || historia.cuerpo || 'Sin contenido adicional.';
+            cuerpoTexto = cuerpoTexto.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+            const desc = cuerpoTexto.length > 160 ? cuerpoTexto.substring(0, 157) + '...' : cuerpoTexto;
+
+            // Formar URL de la imagen
+            const rawImg = historia.imagen_url || historia.url_imagen;
+            const imagenUrl = resolverImagenUrl(req, rawImg) || resolverImagenUrl(req, 'social-preview.png');
+            const { paginaUrl } = obtenerUrlsRequest(req);
+
+            const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">${historia.titulo ? historia.titulo.toUpperCase() : 'SIN TÍTULO'}</h1>
+    <p><strong>Clasificación:</strong> ${esRelatoAdmin ? 'Relato del Administrador' : esNoticia ? 'Noticia de Alerta' : esMisterio ? 'Misterio Histórico' : 'Expediente de Agente'}</p>
+    <p><strong>Autor:</strong> ${historia.usuario_nombre || historia.agente || 'Administrador'}</p>
+    <div style="white-space:pre-line;">${cuerpoTexto}</div>
+</article>`;
+
+            const pagina = inyectarContenidoSEO(
+                html,
+                titulo,
+                desc,
+                contenidoSeo,
+                imagenUrl,
+                paginaUrl
+            );
+            res.send(pagina);
+        } else {
+            res.sendFile(indexPath);
+        }
     });
 });
 
