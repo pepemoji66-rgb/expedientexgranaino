@@ -476,12 +476,13 @@ const obtenerUrlsRequest = (req) => {
 
 const resolverImagenUrl = (req, rawImg) => {
     if (!rawImg) return null;
-    if (rawImg.startsWith('http://') || rawImg.startsWith('https://')) {
-        return rawImg;
+    let url = rawImg;
+    if (!rawImg.startsWith('http://') && !rawImg.startsWith('https://')) {
+        const fileName = rawImg.split('/').pop();
+        const { baseImgUrl } = obtenerUrlsRequest(req);
+        url = `${baseImgUrl}/imagenes/${fileName}`;
     }
-    const fileName = rawImg.split('/').pop();
-    const { baseImgUrl } = obtenerUrlsRequest(req);
-    return `${baseImgUrl}/imagenes/${fileName}`;
+    return url.replace(/ /g, '%20');
 };
 
 // Página de Inicio (/) - SEO enriquecido
