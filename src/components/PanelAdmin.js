@@ -237,6 +237,22 @@ const PanelAdmin = () => {
             // Mapeo dinámico para el backend (lugares/imagenes usan nombre/descripcion, otros titulo/contenido)
             const finalData = { ...editForm };
 
+            // Limpiar rutas locales de capturas y url para vídeos
+            if (tab === 'videos') {
+                if (finalData.capturas) {
+                    finalData.capturas = finalData.capturas
+                        .split(',')
+                        .map(u => u.trim())
+                        .filter(u => u && !(u.includes('\\') || u.startsWith('C:') || u.includes('/Users/')))
+                        .join(',');
+                }
+                if (finalData.url) {
+                    if (finalData.url.includes('\\') || finalData.url.startsWith('C:') || finalData.url.includes('/Users/')) {
+                        finalData.url = '';
+                    }
+                }
+            }
+
             // AUTO-UPLOAD CAPTURAS DE VÍDEOS: si hay capturas seleccionadas pero no cargadas, las subimos automáticamente
             if (tab === 'videos' && archivosCapturas && archivosCapturas.length > 0) {
                 const formData = new FormData();
@@ -321,7 +337,11 @@ const PanelAdmin = () => {
             const id = itemParaEditar.id || itemParaEditar._id;
             const res = await axios.post(`${API_BASE_URL}/api/videos/${id}/capturas`, formData);
             
-            setEditForm(prev => ({ ...prev, capturas: res.data.urls }));
+            const urlsLimpias = res.data.urls
+                ? res.data.urls.split(',').map(u => u.trim()).filter(u => u && !(u.includes('\\') || u.startsWith('C:') || u.includes('/Users/'))).join(',')
+                : '';
+
+            setEditForm(prev => ({ ...prev, capturas: urlsLimpias }));
             setArchivosCapturas([]);
             alert("✅ Evidencias fotográficas añadidas al registro.");
         } catch (err) {
