@@ -51,6 +51,10 @@ const PanelAdmin = () => {
     const [urlExternaAdmin, setUrlExternaAdmin] = useState('');
     const [esAtarfeSubida, setEsAtarfeSubida] = useState(false);
     const [tipoRelatoSubida, setTipoRelatoSubida] = useState('jefe');
+    
+    // ESTADOS PARA PORTADA DE VÍDEO EN CREACIÓN
+    const [archivoCapturaSubida, setArchivoCapturaSubida] = useState(null);
+    const [urlCapturaSubida, setUrlCapturaSubida] = useState('');
 
     // ESTADOS DE REDES SOCIALES
     const [modalRedes, setModalRedes] = useState(null); // item a publicar
@@ -398,6 +402,18 @@ const PanelAdmin = () => {
             }
         }
 
+        if (tipoSubida === 'videos') {
+            const esRutaLocal = (val) => val && (val.includes('\\') || val.startsWith('C:') || val.includes('/Users/'));
+            if (esRutaLocal(urlCapturaSubida)) {
+                setMensajeSubida("❌ ERROR: Has introducido una ruta local en la portada. Sube la portada con el selector de archivos.");
+                return;
+            }
+            if (esRutaLocal(urlExternaAdmin)) {
+                setMensajeSubida("❌ ERROR: Has introducido una ruta local en el enlace del vídeo.");
+                return;
+            }
+        }
+
         const formData = new FormData();
         if (archivoSubida) formData.append('archivo', archivoSubida);
         if (urlExternaAdmin) formData.append('url_externa', urlExternaAdmin);
@@ -425,13 +441,26 @@ const PanelAdmin = () => {
             formData.append('tipo_relato', tipoRelatoSubida);
         }
 
+        if (tipoSubida === 'videos' && urlCapturaSubida) {
+            formData.append('capturas', urlCapturaSubida);
+        }
+
 
         try {
             setCargando(true);
             setMensajeSubida("🛰️ Transmitiendo al búnker...");
             const resUpload = await axios.post(`${API_BASE_URL}/api/admin/admin/upload`, formData);
             const urlImagenCargada = resUpload.data?.ruta || '';
+            const newRecordId = resUpload.data?.id;
             setMensajeSubida("✅ REGISTRO CLASIFICADO");
+
+            // Subida consecutiva de la portada del vídeo si se seleccionó archivo
+            if (tipoSubida === 'videos' && newRecordId && archivoCapturaSubida) {
+                setMensajeSubida("🖼️ Subiendo archivo de portada...");
+                const imgFormData = new FormData();
+                imgFormData.append('capturas', archivoCapturaSubida);
+                await axios.post(`${API_BASE_URL}/api/videos/${newRecordId}/capturas`, imgFormData);
+            }
 
             // --- PUBLICAR EN REDES SOCIALES AUTOMÁTICAMENTE ---
             if (publicarAlSubir) {
@@ -474,6 +503,8 @@ const PanelAdmin = () => {
             setContenidoSubida('');
             setContenidoEnSubida('');
             setUrlExternaAdmin('');
+            setArchivoCapturaSubida(null);
+            setUrlCapturaSubida('');
             cargarDatos();
         } catch (err) {
             setMensajeSubida("❌ FALLO EN LA CARGA");
@@ -896,10 +927,70 @@ const PanelAdmin = () => {
                             </>
                         ) : null}
 
-                        <div className="form-group-admin">
-                            <label>ARCHIVO ADJUNTO {(tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') ? '(OPCIONAL)' : ''}:</label>
-                            <input type="file" onChange={e => setArchivoSubida(e.target.files[0])} />
-                        </div>
+                        {tipoSubida === 'videos' ? (
+                            <>
+                                <div style={{ background: 'rgba(0, 212, 255, 0.05)', padding: '15px', border: '1px solid rgba(0, 212, 255, 0.2)', marginBottom: '15px', borderRadius: '5px' }}>
+                                    <label style={{ display: 'block', color: '#00d4ff', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '8px' }}>
+                                        📼 ORIGEN DEL VÍDEO (MP4 O YOUTUBE)
+                                    </label>
+                                    
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <label style={{ fontSize: '0.75rem', color: '#ccc', display: 'block', marginBottom: '4px' }}>Opción A: Subir archivo de vídeo (MP4)</label>
+                                        <input type="file" accept="video/mp4,video/*" onChange={e => setArchivoSubida(e.target.files[0])} style={{ fontSize: '0.8rem', color: '#fff' }} />
+                                        {archivoSubida && <small style={{ color: '#00d4ff', display: 'block', marginTop: '4px' }}>✓ Archivo seleccionado: {archivoSubida.name}</small>}
+                                    </div>
+
+                                    <div style={{ borderTop: '1px solid #222', paddingTop: '10px' }}>
+                                        <label style={{ fontSize: '0.75rem', color: '#ccc', display: 'block', marginBottom: '4px' }}>Opción B: Enlace de YouTube o vídeo externo</label>
+                                        <input 
+                                            type="text" 
+                                            value={urlExternaAdmin} 
+                                            onChange={e => setUrlExternaAdmin(e.target.value)} 
+                                            placeholder="Ej: https://www.youtube.com/watch?v=... o nombre de archivo de vídeo"
+                                            style={{ width: '100%', padding: '8px', background: '#000', color: '#fff', border: '1px solid #333' }}
+                                        />
+                                        {urlExternaAdmin && (urlExternaAdmin.includes('\\') || urlExternaAdmin.startsWith('C:') || urlExternaAdmin.includes('/Users/')) && (
+                                            <small style={{ color: '#ff4444', display: 'block', marginTop: '4px', fontWeight: 'bold' }}>
+                                                ⚠️ ALERTA: Has escrito una ruta de archivo local de tu ordenador. Los enlaces deben ser direcciones web.
+                                            </small>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div style={{ background: 'rgba(255, 177, 0, 0.05)', padding: '15px', border: '1px solid rgba(255, 177, 0, 0.2)', marginBottom: '15px', borderRadius: '5px' }}>
+                                    <label style={{ display: 'block', color: '#ffb100', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '8px' }}>
+                                        🖼️ IMAGEN DE PORTADA / MINIATURA DEL VÍDEO (Captura)
+                                    </label>
+                                    
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <label style={{ fontSize: '0.75rem', color: '#ccc', display: 'block', marginBottom: '4px' }}>Opción A: Subir imagen desde tu ordenador</label>
+                                        <input type="file" accept="image/*" onChange={e => setArchivoCapturaSubida(e.target.files[0])} style={{ fontSize: '0.8rem', color: '#fff' }} />
+                                        {archivoCapturaSubida && <small style={{ color: '#ffb100', display: 'block', marginTop: '4px' }}>✓ Portada seleccionada: {archivoCapturaSubida.name}</small>}
+                                    </div>
+
+                                    <div style={{ borderTop: '1px solid #222', paddingTop: '10px' }}>
+                                        <label style={{ fontSize: '0.75rem', color: '#ccc', display: 'block', marginBottom: '4px' }}>Opción B: URL de la imagen de portada</label>
+                                        <input 
+                                            type="text" 
+                                            value={urlCapturaSubida} 
+                                            onChange={e => setUrlCapturaSubida(e.target.value)} 
+                                            placeholder="Ej: https://expedientexgranaino.com/imagenes/mi_captura.png"
+                                            style={{ width: '100%', padding: '8px', background: '#000', color: '#fff', border: '1px solid #333' }}
+                                        />
+                                        {urlCapturaSubida && (urlCapturaSubida.includes('\\') || urlCapturaSubida.startsWith('C:') || urlCapturaSubida.includes('/Users/')) && (
+                                            <small style={{ color: '#ff4444', display: 'block', marginTop: '4px', fontWeight: 'bold' }}>
+                                                ⚠️ ALERTA: Has escrito una ruta de archivo local de tu ordenador. Para usar esa imagen, selecciónala arriba en "Opción A".
+                                            </small>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="form-group-admin">
+                                <label>ARCHIVO ADJUNTO {(tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') ? '(OPCIONAL)' : ''}:</label>
+                                <input type="file" onChange={e => setArchivoSubida(e.target.files[0])} />
+                            </div>
+                        )}
 
                         {tipoSubida === 'imagenes' && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '15px', background: 'rgba(0,255,65,0.05)', border: '1px solid var(--color-principal)', marginTop: '10px', marginBottom: '10px' }}>
@@ -913,16 +1004,18 @@ const PanelAdmin = () => {
                             </div>
                         )}
                         
-                        <div className="form-group-admin" style={{marginTop: '10px'}}>
-                            <label style={{ color: '#00d4ff' }}>🌐 ENLACE EXTERNO O IFRAME (Opcional):</label>
-                            <textarea 
-                                className="input-bunker" 
-                                value={urlExternaAdmin} 
-                                onChange={e => setUrlExternaAdmin(e.target.value)}
-                                placeholder="Pega aquí el enlace de otra página, código de inserción (iframe), YouTube, etc."
-                                style={{ width: '100%', minHeight: '60px', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333' }}
-                            />
-                        </div>
+                        {tipoSubida !== 'videos' && (
+                            <div className="form-group-admin" style={{marginTop: '10px'}}>
+                                <label style={{ color: '#00d4ff' }}>🌐 ENLACE EXTERNO O IFRAME (Opcional):</label>
+                                <textarea 
+                                    className="input-bunker" 
+                                    value={urlExternaAdmin} 
+                                    onChange={e => setUrlExternaAdmin(e.target.value)}
+                                    placeholder="Pega aquí el enlace de otra página, código de inserción (iframe), YouTube, etc."
+                                    style={{ width: '100%', minHeight: '60px', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333' }}
+                                />
+                            </div>
+                        )}
                         
                         {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos' || tipoSubida === 'videos') && (
                             <div style={{ background: 'rgba(177,137,4,0.1)', padding: '15px', marginBottom: '15px', border: '1px solid #b18904' }}>
@@ -1159,30 +1252,75 @@ const PanelAdmin = () => {
 
                             {tab === 'videos' && (
                                 <>
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>URL VÍDEO:</label>
-                                    <input 
-                                        type="text" value={editForm.url} 
-                                        onChange={e => setEditForm({...editForm, url: e.target.value})} 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
-                                    />
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CONTENIDO / DESCRIPCIÓN:</label>
+                                    {/* SECCIÓN 1: VÍDEO */}
+                                    <div style={{ background: 'rgba(0, 212, 255, 0.05)', padding: '15px', border: '1px solid rgba(0, 212, 255, 0.2)', marginBottom: '20px', borderRadius: '5px' }}>
+                                        <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px' }}>
+                                            📼 ORIGEN DEL VÍDEO (ARCHIVO O YOUTUBE):
+                                        </label>
+                                        <input 
+                                            type="text" value={editForm.url} 
+                                            onChange={e => setEditForm({...editForm, url: e.target.value})} 
+                                            placeholder="Enlace de YouTube o nombre de archivo de vídeo (ej: 1.mp4)"
+                                            style={{ width: '100%', padding: '10px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '5px' }}
+                                        />
+                                        <small style={{ display: 'block', color: '#888', fontSize: '0.7rem', marginBottom: '5px' }}>
+                                            Especifica el enlace de YouTube o el nombre del archivo MP4 que se reproducirá en el búnker.
+                                        </small>
+                                        {editForm.url && (editForm.url.includes('\\') || editForm.url.startsWith('C:') || editForm.url.includes('/Users/')) && (
+                                            <div style={{ background: 'rgba(255, 0, 0, 0.15)', border: '1px solid #ff4444', padding: '8px', marginTop: '8px', color: '#ff4444', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                                ⚠️ ERROR: Has escrito una ruta local (`{editForm.url}`). Las rutas locales de tu disco duro no funcionarán. Debes usar enlaces de Internet o nombres de archivos subidos.
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* SECCIÓN 2: DESCRIPCIÓN */}
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px', fontWeight: 'bold' }}>
+                                        📝 CONTENIDO / DESCRIPCIÓN DEL VÍDEO:
+                                    </label>
                                     <textarea 
                                         value={editForm.contenido} 
                                         onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
-                                        style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
+                                        style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '20px' }}
                                     />
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAPTURAS (URLs):</label>
-                                    <textarea 
-                                        value={editForm.capturas} 
-                                        onChange={e => setEditForm({...editForm, capturas: e.target.value})} 
-                                        style={{ width: '100%', minHeight: '60px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '10px' }}
-                                    />
-                                    <div style={{ marginBottom: '15px', padding: '10px', border: '1px dashed #333' }}>
-                                        <label style={{ display: 'block', color: '#b18904', fontSize: '0.7rem', marginBottom: '5px' }}>SUBIR NUEVAS EVIDENCIAS:</label>
-                                        <input type="file" multiple onChange={e => setArchivosCapturas(e.target.files)} style={{ fontSize: '0.7rem', color: '#ccc' }} />
-                                        <button type="button" onClick={subirCapturasAdicionales} style={{ marginTop: '10px', padding: '5px 10px', fontSize: '0.7rem', background: '#333', color: '#fff', border: '1px solid #555' }}>
-                                            CARGAR ARCHIVOS
-                                        </button>
+
+                                    {/* SECCIÓN 3: PORTADA / MINIATURA */}
+                                    <div style={{ background: 'rgba(255, 177, 0, 0.05)', padding: '15px', border: '1px solid rgba(255, 177, 0, 0.2)', marginBottom: '20px', borderRadius: '5px' }}>
+                                        <label style={{ display: 'block', color: '#ffb100', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px' }}>
+                                            🖼️ PORTADA / MINIATURA REPRESENTATIVA (CAPTURA):
+                                        </label>
+                                        
+                                        <textarea 
+                                            value={editForm.capturas} 
+                                            onChange={e => setEditForm({...editForm, capturas: e.target.value})} 
+                                            placeholder="Enlace o dirección web de la imagen de portada..."
+                                            style={{ width: '100%', minHeight: '60px', background: '#000', color: '#fff', border: '1px solid #333', padding: '10px', marginBottom: '10px' }}
+                                        />
+                                        
+                                        {editForm.capturas && (editForm.capturas.includes('\\') || editForm.capturas.startsWith('C:') || editForm.capturas.includes('/Users/')) && (
+                                            <div style={{ background: 'rgba(255, 0, 0, 0.2)', border: '1px solid #ff4444', padding: '10px', marginBottom: '15px', color: '#ff4444', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                                ⚠️ ATENCIÓN: Has escrito una ruta local de tu ordenador (`{editForm.capturas}`). 
+                                                Las rutas locales NO se cargan en internet. Para colocar esta imagen, usa el botón de abajo "SUBIR Y APLICAR PORTADA" para subir el archivo.
+                                            </div>
+                                        )}
+
+                                        <div style={{ padding: '12px', background: 'rgba(0,0,0,0.5)', border: '1px dashed #555', borderRadius: '4px' }}>
+                                            <label style={{ display: 'block', color: '#ffb100', fontSize: '0.75rem', marginBottom: '8px', fontWeight: 'bold' }}>
+                                                ⚙️ SUBIR PORTADA DESDE EL ORDENADOR:
+                                            </label>
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                onChange={e => setArchivosCapturas(e.target.files)} 
+                                                style={{ fontSize: '0.75rem', color: '#ccc', marginBottom: '10px', display: 'block' }} 
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={subirCapturasAdicionales} 
+                                                style={{ padding: '8px 15px', fontSize: '0.75rem', background: '#ffb100', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold', borderRadius: '3px' }}
+                                            >
+                                                SUBIR Y APLICAR PORTADA
+                                            </button>
+                                        </div>
                                     </div>
                                 </>
                             )}

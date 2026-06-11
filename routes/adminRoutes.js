@@ -73,9 +73,9 @@ module.exports = (db) => {
     let params = [];
 
     if (tipo === 'videos') {
-      const { contenido, latitud, longitud } = req.body;
-      sql = "INSERT INTO videos (titulo, url, estado, latitud, longitud, descripcion, fecha) VALUES (?, ?, 'aprobado', ?, ?, ?, NOW())";
-      params = [titulo, nombreArchivo, latitud || 0, longitud || 0, contenido || ''];
+      const { contenido, latitud, longitud, capturas } = req.body;
+      sql = "INSERT INTO videos (titulo, url, estado, latitud, longitud, descripcion, capturas, fecha) VALUES (?, ?, 'aprobado', ?, ?, ?, ?, NOW())";
+      params = [titulo, nombreArchivo, latitud || 0, longitud || 0, contenido || '', capturas || ''];
     } else if (tipo === 'audios') {
       const { imagen_url } = req.body;
       sql = "INSERT INTO audios (titulo, ruta, aprobado, fecha_subida, imagen_url) VALUES (?, ?, 1, NOW(), ?)";
@@ -112,10 +112,11 @@ module.exports = (db) => {
     }
 
     try {
-      await db.execute(sql, params);
+      const [result] = await db.execute(sql, params);
       res.send({
         message: '¡Archivo clasificado y guardado!',
-        ruta: nombreArchivo
+        ruta: nombreArchivo,
+        id: result ? result.insertId : null
       });
     } catch (err) {
       console.error("❌ Error en DB al subir:", err);
