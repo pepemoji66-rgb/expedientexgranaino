@@ -72,6 +72,7 @@ const Hero = ({ userAuth }) => {
             {
                 id: 'especial-atarfe',
                 image: imgAtarfeReal,
+                backgroundPosition: 'right center',
                 subtitle: language === 'en' ? "DECLASSIFIED DOSSIER" : "DOSSIER DESCLASIFICADO",
                 title: "CASO OVNI ATARFE",
                 tagline: language === 'en' ? "THE ATARFE INCIDENT" : "EL INCIDENTE ATARFE Y ALBOLOTE",
@@ -196,7 +197,10 @@ const Hero = ({ userAuth }) => {
     return (
         <section 
             className="hero-global-mufon" 
-            style={{ backgroundImage: `url(${activeSlide.image})` }}
+            style={{ 
+                backgroundImage: `url(${activeSlide.image})`,
+                backgroundPosition: activeSlide?.backgroundPosition || 'center'
+            }}
         >
             <div className="hero-overlay-dark"></div>
             
