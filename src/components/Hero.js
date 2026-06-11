@@ -34,25 +34,30 @@ const Hero = ({ userAuth }) => {
                     todasNovedades = todasNovedades.concat(dataNot.map(x => ({ ...x, type: 'noticia', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // 4. Videos
-
-                // 4. Videos
+                // 3. Videos
                 const resVideos = await fetch(`${API_BASE_URL}/api/videos/publicos`);
                 const dataVideos = await resVideos.json();
                 if (Array.isArray(dataVideos)) {
                     todasNovedades = todasNovedades.concat(dataVideos.map(x => ({ ...x, type: 'video', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // 5. Casos Abiertos (True Crime)
+                // 4. Casos Abiertos (True Crime)
                 const resCasos = await fetch(`${API_BASE_URL}/api/casos`);
                 const dataCasos = await resCasos.json();
                 if (Array.isArray(dataCasos)) {
                     todasNovedades = todasNovedades.concat(dataCasos.map(x => ({ ...x, type: 'caso', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // Ordenar por fecha y coger los 2 más recientes
+                // 5. Misterios Históricos (Casos Históricos)
+                const resMist = await fetch(`${API_BASE_URL}/api/misterios-historicos`);
+                const dataMist = await resMist.json();
+                if (Array.isArray(dataMist)) {
+                    todasNovedades = todasNovedades.concat(dataMist.map(x => ({ ...x, type: 'misterio', timestamp: new Date(x.fecha).getTime() })));
+                }
+
+                // Ordenar por fecha y coger los 4 más recientes
                 todasNovedades.sort((a, b) => b.timestamp - a.timestamp);
-                setNovedadesGlobales(todasNovedades.slice(0, 2));
+                setNovedadesGlobales(todasNovedades.slice(0, 4));
 
             } catch (err) {
                 console.error("Error al captar últimas actualizaciones para Hero:", err);
@@ -61,23 +66,8 @@ const Hero = ({ userAuth }) => {
         fetchUltimos();
     }, []);
 
-
-
-    const getSlides = () => {
+    const getSlides = () => {
         return [
-            {
-                id: 'bilingual',
-                image: imgEspacio,
-                subtitle: t('slideBilingualSubtitle'),
-                title: t('slideBilingualTitle'),
-                tagline: t('slideBilingualTagline'),
-                infoTitle: t('slideBilingualInfoTitle'),
-                infoText: t('slideBilingualInfoText'),
-                highlight: t('slideBilingualHighlight'),
-                btnText: t('slideBilingualBtn'),
-                btnLink: "#",
-                onClick: (e) => { e.preventDefault(); toggleLanguage(); }
-            },
             {
                 id: 'especial-atarfe',
                 image: imgEvidencias,
@@ -103,78 +93,6 @@ const Hero = ({ userAuth }) => {
                 highlight: language === 'en' ? "100% PRIVATE • SECURE • NO CLOUD" : "100% PRIVADO • SEGURO • SIN NUBE",
                 btnText: language === 'en' ? "GET ARCHIPEG" : "ADQUIRIR ARCHIPEG",
                 btnLink: "/archipeg"
-            },
-            {
-                id: 'casos-abiertos',
-                image: imgRelatos,
-                subtitle: language === 'en' ? "UNSOLVED CASES" : "CASOS ABIERTOS",
-                title: "TRUE CRIME",
-                tagline: language === 'en' ? "CRIMES & MYSTERIES" : "CRÍMENES & MISTERIOS",
-                infoTitle: language === 'en' ? "UNRESOLVED MYSTERIES" : "MISTERIOS SIN RESOLVER",
-                infoText: language === 'en' ? "Delve into the unsolved cases. Real crimes, unexplained disappearances, and mysteries that defy logic." : "Adéntrate en los casos abiertos. Crímenes reales, desapariciones inexplicables y misterios que desafían la lógica.",
-                highlight: language === 'en' ? "CLASSIFIED FILES" : "ARCHIVOS CLASIFICADOS",
-                btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
-                btnLink: "/casos-abiertos"
-            },
-            {
-                id: 0,
-                image: imgEspacio,
-                subtitle: "GLOBAL",
-                title: "EXPEDIENTEXGRANAINO",
-                tagline: t('heroObserverNetwork'),
-                infoTitle: t('heroObserverTitle'),
-                infoText: t('heroObserverText'),
-                highlight: t('heroObserverHighlight'),
-                btnText: t('heroReport'),
-                btnLink: "/expedientes"
-            },
-            {
-                id: 1,
-                image: imgEvidencias,
-                subtitle: "DIVISIÓN",
-                title: t('heroGalleryTitle'),
-                tagline: "ARCHIVO CLASIFICADO",
-                infoTitle: t('heroGalleryTitle'),
-                infoText: t('heroGalleryDesc'),
-                highlight: "ACCESO TOTAL A ARCHIVOS DESCLASIFICADOS",
-                btnText: t('heroGalleryBtn'),
-                btnLink: "/galeria"
-            },
-            {
-                id: 2,
-                image: imgRelatos,
-                subtitle: "INTELIGENCIA",
-                title: t('heroStoriesTitle'),
-                tagline: "HISTORIA OCULTA",
-                infoTitle: t('heroStoriesTitle'),
-                infoText: t('heroStoriesDesc'),
-                highlight: "COMPARTE TU EXPERIENCIA CON NOSOTROS",
-                btnText: t('heroStoriesBtn'),
-                btnLink: "/noticias"
-            },
-            {
-                id: 3,
-                image: imgEspacio,
-                subtitle: "ASCENSO TÁCTICO",
-                title: t('heroRankTitle'),
-                tagline: "EVOLUCIÓN EN LA RED",
-                infoTitle: t('heroRankTitle'),
-                infoText: t('heroRankDesc'),
-                highlight: "MÁS VISITAS = MAYOR RANGO TÁCTICO",
-                btnText: t('heroRankBtn'),
-                btnLink: "/acceso"
-            },
-            {
-                id: 4,
-                image: imgEspacio,
-                subtitle: "RECLUTAMIENTO",
-                title: t('heroRegisterTitle'),
-                tagline: "PROTEGEMOS TU IDENTIDAD",
-                infoTitle: t('heroRegisterTitle'),
-                infoText: t('heroRegisterDesc'),
-                highlight: "TU PRIVACIDAD ES NUESTRA PRIORIDAD MÁXIMA",
-                btnText: t('heroRegisterBtn'),
-                btnLink: "/acceso"
             }
         ];
     };
@@ -240,6 +158,19 @@ const Hero = ({ userAuth }) => {
                     btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
                     btnLink: "/casos-abiertos"
                 });
+            } else if (item.type === 'misterio') {
+                alertasRecientes.push({
+                    id: `nuevo-misterio-${item.id}`,
+                    image: item.imagen_url ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`) : imgRelatos,
+                    subtitle: language === 'en' ? "HISTORICAL MYSTERY" : "MISTERIO HISTÓRICO",
+                    title: (item.titulo || 'MISTERIO DESCLASIFICADO').toUpperCase(),
+                    tagline: language === 'en' ? "UNRESOLVED ENIGMAS" : "ENIGMAS DE LA HISTORIA",
+                    infoTitle: language === 'en' ? "CLASSIFIED HISTORY" : "HISTORIA CLASIFICADA",
+                    infoText: item.contenido ? item.contenido.replace(/<[^>]+>/g, '').substring(0, 100) + '...' : (language === 'en' ? "New historical enigma cataloged." : "Nuevo enigma histórico catalogado."),
+                    highlight: language === 'en' ? "ANCIENT SECRETS" : "SECRETOS DEL PASADO",
+                    btnText: language === 'en' ? "EXPLORE ENIGMAS" : "EXPLORAR ENIGMAS",
+                    btnLink: "/misterios-historicos"
+                });
             }
         });
 
@@ -273,7 +204,13 @@ const Hero = ({ userAuth }) => {
                 <div className="action-buttons-group">
                     {novedadesGlobales.length > 0 && (
                         <Link 
-                            to={novedadesGlobales[0].type === 'noticia' ? "/noticias" : novedadesGlobales[0].type === 'video' ? "/galeria" : novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : "/expedientes"} 
+                            to={
+                                novedadesGlobales[0].type === 'noticia' ? "/noticias" : 
+                                novedadesGlobales[0].type === 'video' ? "/galeria" : 
+                                novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : 
+                                novedadesGlobales[0].type === 'misterio' ? "/misterios-historicos" : 
+                                "/expedientes"
+                            } 
                             className="btn-nuevo-archivo-blink"
                         >
                             <span className="blink-dot"></span> {t('heroNewFile')}
