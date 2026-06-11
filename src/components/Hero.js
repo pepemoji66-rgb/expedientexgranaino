@@ -9,6 +9,7 @@ import './Hero.css';
 import imgEspacio from '../assets/espacio_ufo.png';
 import imgEvidencias from '../assets/galeria_evidencias.png';
 import imgRelatos from '../assets/misterio_relatos.png';
+import imgAtarfeReal from '../assets/atarfe_captura_real.png';
 
 const Hero = ({ userAuth }) => {
     const { t, toggleLanguage, language } = useLanguage();
@@ -70,7 +71,7 @@ const Hero = ({ userAuth }) => {
         return [
             {
                 id: 'especial-atarfe',
-                image: imgEvidencias,
+                image: imgAtarfeReal,
                 subtitle: language === 'en' ? "DECLASSIFIED DOSSIER" : "DOSSIER DESCLASIFICADO",
                 title: "CASO OVNI ATARFE",
                 tagline: language === 'en' ? "THE ATARFE INCIDENT" : "EL INCIDENTE ATARFE Y ALBOLOTE",
