@@ -2,27 +2,58 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
 
 const ControlMusica = () => {
-  // ARRANCA EN OFF — el usuario decide cuándo activar la música
-  const [sonando, setSonando] = useState(false);
+  // Ahora arranca en ON por defecto
+  const [sonando, setSonando] = useState(true);
   const [audio] = useState(new Audio(`${API_BASE_URL}/audios-ambiente/misterio.mp3`));
 
   useEffect(() => {
     audio.volume = 0.2;
     audio.loop = true;
 
-    // NO hacemos autoplay — respetamos la experiencia del usuario
-    return () => { 
-      audio.pause(); 
-    };
-  }, [audio]);
+    if (sonando) {
+      // Intentar reproducir automáticamente
+      audio.play().catch(e => {
+        console.log("Autoplay bloqueado por el navegador. Esperando interacción del usuario para iniciar el audio ambiente...");
+      });
 
-  const toggleMusica = () => {
+      // Registrar listeners para reproducir con la primera interacción del usuario en la web
+      const iniciarEnInteraccion = () => {
+        audio.play().then(() => {
+          // Si se reproduce con éxito, removemos los listeners
+          document.removeEventListener('click', iniciarEnInteraccion);
+          document.removeEventListener('touchstart', iniciarEnInteraccion);
+          document.removeEventListener('keydown', iniciarEnInteraccion);
+        }).catch(e => {
+          console.log("No se pudo iniciar el audio en interacción:", e);
+        });
+      };
+
+      document.addEventListener('click', iniciarEnInteraccion);
+      document.addEventListener('touchstart', iniciarEnInteraccion);
+      document.addEventListener('keydown', iniciarEnInteraccion);
+
+      return () => {
+        audio.pause();
+        document.removeEventListener('click', iniciarEnInteraccion);
+        document.removeEventListener('touchstart', iniciarEnInteraccion);
+        document.removeEventListener('keydown', iniciarEnInteraccion);
+      };
+    } else {
+      audio.pause();
+    }
+  }, [sonando, audio]);
+
+  const toggleMusica = (e) => {
+    // Evitamos propagación para que el clic del botón no interactúe con el document listener
+    e.stopPropagation();
+
     if (sonando) {
       audio.pause();
+      setSonando(false);
     } else {
+      setSonando(true);
       audio.play().catch(e => console.log("Error al activar audio:", e));
     }
-    setSonando(!sonando);
   };
 
   return (
