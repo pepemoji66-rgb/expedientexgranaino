@@ -86,7 +86,7 @@ const Expedientes = () => {
 
     // Detener Robocop al cerrar el modal
     useEffect(() => {
-        if (!relatoAbierto) {
+        if (!relatoAbierto && window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
     }, [relatoAbierto]);
@@ -210,8 +210,19 @@ const Expedientes = () => {
             window.open(link, '_blank');
         } else if (red === 'copy' || red === 'twitter' || red === 'whatsapp') {
             try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
-                alert(t('expCopySuccess'));
+                const fullText = `${texto} ${url}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullText);
+                    alert(t('expCopySuccess'));
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = fullText;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                    alert(t('expCopySuccess'));
+                }
             } catch (err) {
                 alert(t('expCopyError'));
             }
@@ -549,6 +560,10 @@ const Expedientes = () => {
                         <div style={{ marginTop: language === 'en' ? '0' : '15px', textAlign: 'center' }}>
                             <button
                                 onClick={() => {
+                                    if (!window.speechSynthesis) {
+                                        alert("🔊 El sistema de síntesis de voz no está disponible en este navegador o dispositivo.");
+                                        return;
+                                    }
                                     if (window.speechSynthesis.speaking) {
                                         window.speechSynthesis.cancel();
                                     } else {

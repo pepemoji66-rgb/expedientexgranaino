@@ -28,7 +28,7 @@ const CasosAbiertos = ({ userAuth }) => {
 
     // Detener Robocop al cerrar el modal
     useEffect(() => {
-        if (!casoExpandido) {
+        if (!casoExpandido && window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
     }, [casoExpandido]);
@@ -155,10 +155,22 @@ const CasosAbiertos = ({ userAuth }) => {
             window.open(link, '_blank');
         } else {
             try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
-                alert(t('sysLinkCopied') || "📎 ENLACE COPIADO AL PORTAPAPELES.");
+                const texto = `💀 TRUE CRIME: Mira este caso en el Búnker de ExpedienteX: "${(caso.titulo || '').toUpperCase()}"`;
+                const fullText = `${texto} ${url}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullText);
+                    alert("📋 ¡Enlace del caso copiado al portapapeles!");
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = fullText;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                    alert("📋 ¡Enlace del caso copiado al portapapeles!");
+                }
             } catch (err) {
-                alert("❌ ERROR AL COPIAR.");
+                alert("❌ No se pudo copiar el enlace.");
             }
         }
     };
@@ -356,6 +368,10 @@ const CasosAbiertos = ({ userAuth }) => {
                             {/* BOTÓN ROBOCOP (TTS) */}
                             <button
                                 onClick={() => {
+                                    if (!window.speechSynthesis) {
+                                        alert("🔊 El sistema de síntesis de voz no está disponible en este navegador o dispositivo.");
+                                        return;
+                                    }
                                     if (window.speechSynthesis.speaking) {
                                         window.speechSynthesis.cancel();
                                     } else {

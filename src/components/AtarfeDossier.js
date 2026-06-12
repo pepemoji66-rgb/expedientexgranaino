@@ -336,8 +336,18 @@ const AtarfeDossier = () => {
                         onClick={async () => {
                             const url = `${window.location.origin}/especial-atarfe`;
                             try {
-                                await navigator.clipboard.writeText(url);
-                                alert("📎 ¡ENLACE DEL DOSSIER COPIADO AL PORTAPAPELES! Listo para pegar en tus foros y páginas de misterio.");
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    await navigator.clipboard.writeText(url);
+                                    alert("📎 ¡ENLACE DEL DOSSIER COPIADO AL PORTAPAPELES! Listo para pegar en tus foros y páginas de misterio.");
+                                } else {
+                                    const input = document.createElement('textarea');
+                                    input.value = url;
+                                    document.body.appendChild(input);
+                                    input.select();
+                                    document.execCommand('copy');
+                                    document.body.removeChild(input);
+                                    alert("📎 ¡ENLACE DEL DOSSIER COPIADO AL PORTAPAPELES! Listo para pegar en tus foros y páginas de misterio.");
+                                }
                             } catch (err) {
                                 alert("❌ No se pudo copiar automáticamente. Copia la URL del navegador.");
                             }

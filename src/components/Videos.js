@@ -148,7 +148,17 @@ const Videos = ({ userAuth }) => {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         } else if (red === 'instagram') {
             try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
+                const fullText = `${texto} ${url}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullText);
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = fullText;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                }
                 alert("📸 TEXTO Y ENLACE COPIADOS. Abre Instagram y pega tu mensaje en una Historia o Post.");
                 link = `https://www.instagram.com/expedientexgranaino/`;
             } catch (err) {
@@ -160,7 +170,17 @@ const Videos = ({ userAuth }) => {
             window.open(link, '_blank');
         } else if (red === 'copy' || red === 'twitter' || red === 'whatsapp' || red === 'instagram') {
             try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
+                const fullText = `${texto} ${url}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullText);
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = fullText;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                }
                 alert("📎 ENLACE COPIADO AL PORTAPAPELES. ¡LISTO PARA DIFUNDIR!");
             } catch (err) {
                 alert("❌ ERROR AL COPIAR: Intenta compartir manualmente.");
