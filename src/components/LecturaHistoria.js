@@ -5,6 +5,7 @@ import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './lecturahistoria.css';
 import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { safeLocalStorage } from '../utils/storage';
 
 const LecturaHistoria = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
@@ -21,7 +22,7 @@ const LecturaHistoria = () => {
     const [cargando, setCargando] = useState(true);
     
     // Recuperamos la identidad del agente para los permisos de borrado
-    const sesion = localStorage.getItem('agente_sesion');
+    const sesion = safeLocalStorage.getItem('agente_sesion');
     const userAuth = sesion ? JSON.parse(sesion) : null;
     const esJefe = userAuth && (userAuth.rol === 'admin' || userAuth.email === 'archipegv2@gmail.com');
 

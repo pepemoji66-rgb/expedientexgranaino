@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Forms from './Forms';
 import API_BASE_URL from '../config';
+import { safeLocalStorage } from '../utils/storage';
 import { useLanguage } from '../context/LanguageContext';
 
 const Seccionusuarios = ({ setAuth }) => {
@@ -35,7 +36,7 @@ const Seccionusuarios = ({ setAuth }) => {
 
                 if (setAuth) {
                     setAuth(res.data.usuario);
-                    localStorage.setItem('agente_sesion', JSON.stringify(res.data.usuario));
+                    safeLocalStorage.setItem('agente_sesion', JSON.stringify(res.data.usuario));
                 }
                 navigate('/');
             } else {

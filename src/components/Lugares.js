@@ -7,6 +7,7 @@ import './lugares.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { safeLocalStorage } from '../utils/storage';
 import API_BASE_URL from '../config';
 
 const crearIconoPulsante = (esResaltado = false) => new L.divIcon({
@@ -133,7 +134,7 @@ const Lugares = () => {
     }, [cargarDatos]);
     
     useEffect(() => {
-        const resaltado = localStorage.getItem('lugar_a_resaltar');
+        const resaltado = safeLocalStorage.getItem('lugar_a_resaltar');
         if (resaltado) {
             try {
                 const data = JSON.parse(resaltado);
@@ -141,7 +142,7 @@ const Lugares = () => {
                 if (data.latitud && data.longitud && parseFloat(data.latitud) !== 0) {
                     setCentroMapa([parseFloat(data.latitud), parseFloat(data.longitud)]);
                 }
-                localStorage.removeItem('lugar_a_resaltar');
+                safeLocalStorage.removeItem('lugar_a_resaltar');
             } catch (e) {
                 console.error("Error procesando radar:", e);
             }

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
 import API_BASE_URL from '../config';
+import { safeLocalStorage } from '../utils/storage';
 
 const LoginUsuario = ({ setUserAuth }) => {
     const [email, setEmail] = useState('');
@@ -29,7 +30,7 @@ const LoginUsuario = ({ setUserAuth }) => {
 
                 // 1. GUARDAR EN EL ALMACÉN LOCAL (localStorage)
                 // Usamos 'agente_sesion' para que coincida con el resto del sistema
-                localStorage.setItem('agente_sesion', JSON.stringify(agente));
+                safeLocalStorage.setItem('agente_sesion', JSON.stringify(agente));
 
                 // 2. ACTUALIZAR EL ESTADO GLOBAL
                 setUserAuth(agente);

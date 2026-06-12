@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './paneladmin.css';
 import { API_BASE_URL, ADMIN_EMAIL } from '../config';
+import { safeLocalStorage } from '../utils/storage';
 
 const PanelAdmin = () => {
     const [tab, setTab] = useState('inicio');
@@ -119,7 +120,7 @@ const PanelAdmin = () => {
 
     useEffect(() => {
         // SEGURIDAD NIVEL 5: Verificación interna de sesión
-        const sesion = localStorage.getItem('agente_sesion');
+        const sesion = safeLocalStorage.getItem('agente_sesion');
         if (!sesion) {
             window.location.href = '/';
             return;

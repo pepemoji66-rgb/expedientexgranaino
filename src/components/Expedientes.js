@@ -5,6 +5,7 @@ import { renderizarTextoConMedios } from '../utils/renderMedios';
 import API_BASE_URL from '../config';
 import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
+import { safeLocalStorage } from '../utils/storage';
 import './expedientes.css';
 
 const Expedientes = () => {
@@ -36,7 +37,7 @@ const Expedientes = () => {
     }, []);
 
     useEffect(() => {
-        const sesion = localStorage.getItem('agente_sesion');
+        const sesion = safeLocalStorage.getItem('agente_sesion');
         if (sesion) setUserAuth(JSON.parse(sesion));
     }, []);
 

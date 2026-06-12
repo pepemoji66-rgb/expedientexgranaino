@@ -33,7 +33,7 @@ import AtarfeDossier from './components/AtarfeDossier';
 import Archipeg from './components/Archipeg';
 import MisteriosHistoricos from './components/MisteriosHistoricos';
 import { useLanguage } from './context/LanguageContext';
-
+import { safeLocalStorage } from './utils/storage';
 
 import { API_BASE_URL, ADMIN_EMAIL } from './config';
 
@@ -120,14 +120,14 @@ function App() {
 
   useEffect(() => {
     // RECUPERAR SESIÓN: Unificado para evitar el limbo
-    const sesionGuardada = localStorage.getItem('agente_sesion');
+    const sesionGuardada = safeLocalStorage.getItem('agente_sesion');
     if (sesionGuardada) {
       try {
         const datosSesion = JSON.parse(sesionGuardada);
         console.log("🔍 DEPURE: Datos del agente ->", datosSesion);
         setUserAuth(datosSesion);
       } catch (e) {
-        localStorage.removeItem('agente_sesion');
+        safeLocalStorage.removeItem('agente_sesion');
       }
     }
     cargarContadores();
@@ -160,7 +160,7 @@ function App() {
 
   const actualizarAuth = (datos) => {
     if (datos) {
-      localStorage.setItem('agente_sesion', JSON.stringify(datos));
+      safeLocalStorage.setItem('agente_sesion', JSON.stringify(datos));
       setUserAuth(datos);
       cargarContadores();
     }
@@ -168,7 +168,7 @@ function App() {
 
   const cerrarSesion = () => {
     if (window.confirm(t('sysLogoutConfirm'))) {
-      localStorage.removeItem('agente_sesion');
+      safeLocalStorage.removeItem('agente_sesion');
       setUserAuth(null);
       setIsOpen(false);
       window.location.href = '/';

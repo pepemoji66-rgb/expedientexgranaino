@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { safeLocalStorage } from '../utils/storage';
 
 const LanguageContext = createContext();
 
@@ -780,10 +781,10 @@ const translations = {
 };
 
 export const LanguageProvider = ({ children }) => {
-    const [language, setLanguage] = useState(localStorage.getItem('bunker_lang') || 'es');
+    const [language, setLanguage] = useState(safeLocalStorage.getItem('bunker_lang') || 'es');
 
     useEffect(() => {
-        localStorage.setItem('bunker_lang', language);
+        safeLocalStorage.setItem('bunker_lang', language);
         
         // Sincronización automática continua con el combo de Google Translate
         const syncGoogleTranslate = () => {
@@ -810,7 +811,7 @@ export const LanguageProvider = ({ children }) => {
     const toggleLanguage = () => {
         const nextLang = language === 'es' ? 'en' : 'es';
         setLanguage(nextLang);
-        localStorage.setItem('bunker_lang', nextLang);
+        safeLocalStorage.setItem('bunker_lang', nextLang);
 
         // --- SINCRONIZACIÓN TÁCTICA CON GOOGLE TRANSLATE ---
         // Intentamos forzar al widget de Google a traducir si está presente

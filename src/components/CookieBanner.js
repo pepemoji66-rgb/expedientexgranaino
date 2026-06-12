@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { safeLocalStorage } from '../utils/storage';
 import './CookieBanner.css';
 
 const CookieBanner = () => {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        const consentimiento = localStorage.getItem('bunker_cookie_consent');
+        const consentimiento = safeLocalStorage.getItem('bunker_cookie_consent');
         if (!consentimiento) {
             // Mostrar después de un pequeño delay para efecto visual
             const timer = setTimeout(() => setVisible(true), 2000);
@@ -14,12 +15,12 @@ const CookieBanner = () => {
     }, []);
 
     const aceptarCookies = () => {
-        localStorage.setItem('bunker_cookie_consent', 'accepted');
+        safeLocalStorage.setItem('bunker_cookie_consent', 'accepted');
         setVisible(false);
     };
 
     const rechazarCookies = () => {
-        localStorage.setItem('bunker_cookie_consent', 'rejected');
+        safeLocalStorage.setItem('bunker_cookie_consent', 'rejected');
         setVisible(false);
     };
 
