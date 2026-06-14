@@ -5,7 +5,6 @@ import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './lecturahistoria.css';
 import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
-import { safeLocalStorage } from '../utils/storage';
 
 const LecturaHistoria = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
@@ -20,11 +19,6 @@ const LecturaHistoria = () => {
     const [esNoticia, setEsNoticia] = useState(false);
     const [esMisterio, setEsMisterio] = useState(false);
     const [cargando, setCargando] = useState(true);
-    
-    // Recuperamos la identidad del agente para los permisos de borrado
-    const sesion = safeLocalStorage.getItem('agente_sesion');
-    const userAuth = sesion ? JSON.parse(sesion) : null;
-    const esJefe = userAuth && (userAuth.rol === 'admin' || userAuth.email === 'archipegv2@gmail.com');
 
     const obtenerHistoria = async () => {
         try {
@@ -154,27 +148,6 @@ const LecturaHistoria = () => {
         };
     }, [id, language]);
 
-    const eliminarEstaHistoria = async () => {
-        const mensajeConfirm = esRelatoAdmin
-            ? t('readConfirmDeleteAdmin')
-            : t('readConfirmDeleteAgent');
-
-        if (window.confirm(mensajeConfirm)) {
-            try {
-                // Usamos la ruta correspondiente según el tipo de relato
-                const rutaBorrado = esRelatoAdmin 
-                    ? `${API_BASE_URL}/api/expedientes/borrar-relato-admin/${id}` 
-                    : `${API_BASE_URL}/api/expedientes/expedientes/${id}`;
-
-                await axios.delete(rutaBorrado);
-                alert(t('readDeleteSuccess'));
-                navigate(-1);
-            } catch (err) {
-                alert(t('readDeleteError'));
-            }
-        }
-    };
-
     const compartirHistoria = async (red) => {
         if (!historia) return;
         const url = window.location.origin + `/leer-historia/${historia.id}`;
@@ -282,16 +255,6 @@ const LecturaHistoria = () => {
                                 }}
                             >
                                 {t('readViewRadar')}
-                            </button>
-                        )}
-                        
-                        {esJefe && (
-                            <button
-                                onClick={eliminarEstaHistoria}
-                                className="forms-btn-submit"
-                                style={{ width: 'auto', background: '#8b0000', color: 'white', padding: '10px 20px', cursor: 'pointer', border: 'none', borderRadius: '2px', opacity: 0.8 }}
-                            >
-                                🗑️ {t('readDelete')}
                             </button>
                         )}
                     </div>
