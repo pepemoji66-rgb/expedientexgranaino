@@ -365,6 +365,67 @@ const CasosAbiertos = ({ userAuth }) => {
                                 </button>
                             )}
 
+                            {/* BOTÓN TRADUCIR AL VUELO */}
+                            {language === 'en' && (
+                                <button
+                                    onClick={async (e) => {
+                                        const btn = e.currentTarget;
+                                        const originalText = btn.innerText;
+                                        btn.innerText = "📡 " + t('readTranslateWait').toUpperCase();
+                                        btn.disabled = true;
+                                        
+                                        try {
+                                            const texto = casoExpandido.contenido || "";
+                                            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
+                                            const data = await res.json();
+                                            const traducido = data[0].map(x => x[0]).join("");
+                                            
+                                            let tituloTraducido = casoExpandido.titulo;
+                                            if (casoExpandido.titulo) {
+                                                const resTitulo = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(casoExpandido.titulo)}`);
+                                                const dataTitulo = await resTitulo.json();
+                                                tituloTraducido = dataTitulo[0].map(x => x[0]).join("");
+                                            }
+
+                                            setCasoExpandido({ 
+                                                ...casoExpandido, 
+                                                contenido: traducido, 
+                                                contenido_en: traducido, 
+                                                titulo: tituloTraducido, 
+                                                titulo_en: tituloTraducido 
+                                            });
+                                            btn.style.display = 'none';
+                                        } catch (err) {
+                                            console.error("Error al traducir:", err);
+                                            const urlTranslate = `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(casoExpandido.contenido)}&op=translate`;
+                                            window.open(urlTranslate, '_blank');
+                                            btn.innerText = originalText;
+                                            btn.disabled = false;
+                                        }
+                                    }}
+                                    style={{
+                                        background: 'var(--color-principal)',
+                                        color: '#000',
+                                        border: 'none',
+                                        padding: '10px 20px',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        fontFamily: 'monospace',
+                                        fontSize: '0.8rem',
+                                        width: '100%',
+                                        borderRadius: '2px',
+                                        marginBottom: '15px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                        boxShadow: '0 0 15px rgba(0,255,65,0.4)'
+                                    }}
+                                >
+                                    📡 {t('readTranslateStory')}
+                                </button>
+                            )}
+
                             {/* BOTÓN ROBOCOP (TTS) */}
                             <button
                                 onClick={() => {

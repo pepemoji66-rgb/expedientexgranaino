@@ -901,12 +901,7 @@ const PanelAdmin = () => {
                                 <input type="text" value={tituloSubida} onChange={e => setTituloSubida(e.target.value)} placeholder="Título del registro..." />
                             </div>
                             
-                            {(tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && (
-                                <div className="form-group-admin">
-                                    <label style={{ color: '#00d4ff' }}>TÍTULO (INGLÉS):</label>
-                                    <input type="text" value={tituloEnSubida} onChange={e => setTituloEnSubida(e.target.value)} placeholder="Title in English..." style={{ background: '#000', color: '#00d4ff', border: '1px solid #333' }} />
-                                </div>
-                            )}
+
                         </div>
                         
                             {tipoSubida === 'noticias' && (
@@ -933,18 +928,7 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px' }}
                                     ></textarea>
                                 </div>
-                                {(tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && (
-                                    <div className="form-group-admin" style={{ marginTop: '10px' }}>
-                                        <label style={{ color: '#00d4ff' }}>CONTENIDO (INGLÉS):</label>
-                                        <textarea 
-                                            className="textarea-bunker-admin"
-                                            value={contenidoEnSubida} 
-                                            onChange={e => setContenidoEnSubida(e.target.value)} 
-                                            placeholder="Translate the content to English..."
-                                            style={{ width: '100%', minHeight: '100px', background: '#000', color: '#00d4ff', border: '1px solid #333', padding: '10px' }}
-                                        ></textarea>
-                                    </div>
-                                )}
+
                             </>
                         ) : null}
 
@@ -1149,25 +1133,11 @@ const PanelAdmin = () => {
 
                             {(tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                 <>
-                                    <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>TÍTULO (INGLÉS):</label>
-                                    <input 
-                                        type="text" value={editForm.titulo_en} 
-                                        onChange={e => setEditForm({...editForm, titulo_en: e.target.value})} 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
-                                    />
-
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>DESCRIPCIÓN / CASO (ESPAÑOL):</label>
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>DESCRIPCIÓN / CASO:</label>
                                     <textarea 
                                         value={editForm.contenido} 
                                         onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
                                         style={{ width: '100%', minHeight: '150px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
-                                    />
-
-                                    <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>DESCRIPCIÓN / CASO (INGLÉS):</label>
-                                    <textarea 
-                                        value={editForm.contenido_en} 
-                                        onChange={e => setEditForm({...editForm, contenido_en: e.target.value})} 
-                                        style={{ width: '100%', minHeight: '150px', background: '#000', color: '#00d4ff', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
                                     />
 
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAMBIAR IMAGEN DE PORTADA (OPCIONAL):</label>
