@@ -31,19 +31,47 @@ const LecturaHistoria = () => {
             setCargando(true);
             console.log(`📡 ESCANEANDO ARCHIVO ID: ${id}...`);
 
+            const traducirAlVuelo = async (objeto, campoContenido = 'contenido') => {
+                if (language !== 'en') return { ...objeto };
+                
+                let finalTitulo = objeto.titulo;
+                let finalContenido = objeto[campoContenido] || objeto.contenido || objeto.cuerpo || '';
+
+                if (objeto.titulo_en) finalTitulo = objeto.titulo_en;
+                if (objeto.contenido_en) finalContenido = objeto.contenido_en;
+
+                if (!objeto.titulo_en && !objeto.contenido_en) {
+                    try {
+                        const resTrans = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(finalContenido)}`);
+                        const dataTrans = await resTrans.json();
+                        finalContenido = dataTrans[0].map(x => x[0]).join("");
+
+                        if (finalTitulo) {
+                            const resTit = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(finalTitulo)}`);
+                            const dataTit = await resTit.json();
+                            finalTitulo = dataTit[0].map(x => x[0]).join("");
+                        }
+                    } catch (e) {
+                        console.error("Auto translation error:", e);
+                    }
+                }
+
+                return { 
+                    ...objeto, 
+                    titulo: finalTitulo, 
+                    [campoContenido]: finalContenido,
+                    contenido: finalContenido,
+                    cuerpo: finalContenido
+                };
+            };
+
             // Si viene especificado que es un misterio histórico, lo buscamos con máxima prioridad
             if (src === 'misterios') {
                 try {
                     const resMisterios = await axios.get(`${API_BASE_URL}/api/misterios-historicos`);
                     const encontradaMisterio = resMisterios.data.find(h => h.id == id);
                     if (encontradaMisterio) {
-                        const hist = { ...encontradaMisterio };
-                        if (language === 'en' && encontradaMisterio.titulo_en) {
-                            hist.titulo = encontradaMisterio.titulo_en;
-                        }
-                        if (language === 'en' && encontradaMisterio.contenido_en) {
-                            hist.contenido = encontradaMisterio.contenido_en;
-                        }
+                        const hist = await traducirAlVuelo(encontradaMisterio);
                         setHistoria(hist);
                         setEsRelatoAdmin(false);
                         setEsNoticia(false);
@@ -61,7 +89,8 @@ const LecturaHistoria = () => {
             const encontradaAdmin = resAdmin.data.find(h => h.id == id);
 
             if (encontradaAdmin) {
-                setHistoria(encontradaAdmin);
+                const hist = await traducirAlVuelo(encontradaAdmin);
+                setHistoria(hist);
                 setEsRelatoAdmin(true);
                 setEsNoticia(false);
                 setEsMisterio(false);
@@ -71,7 +100,8 @@ const LecturaHistoria = () => {
                 const encontradaPublica = resPublicos.data.find(h => h.id == id);
                 
                 if (encontradaPublica) {
-                    setHistoria(encontradaPublica);
+                    const hist = await traducirAlVuelo(encontradaPublica);
+                    setHistoria(hist);
                     setEsRelatoAdmin(false);
                     setEsNoticia(false);
                     setEsMisterio(false);
@@ -81,7 +111,8 @@ const LecturaHistoria = () => {
                     const encontradaNoticia = resNoticias.data.find(h => h.id == id);
                     
                     if (encontradaNoticia) {
-                        setHistoria(encontradaNoticia);
+                        const hist = await traducirAlVuelo(encontradaNoticia, 'cuerpo');
+                        setHistoria(hist);
                         setEsRelatoAdmin(false); // Tratamos noticia como registro estándar
                         setEsNoticia(true);
                         setEsMisterio(false);
@@ -91,13 +122,7 @@ const LecturaHistoria = () => {
                             const resMisterios = await axios.get(`${API_BASE_URL}/api/misterios-historicos`);
                             const encontradaMisterio = resMisterios.data.find(h => h.id == id);
                             if (encontradaMisterio) {
-                                const hist = { ...encontradaMisterio };
-                                if (language === 'en' && encontradaMisterio.titulo_en) {
-                                    hist.titulo = encontradaMisterio.titulo_en;
-                                }
-                                if (language === 'en' && encontradaMisterio.contenido_en) {
-                                    hist.contenido = encontradaMisterio.contenido_en;
-                                }
+                                const hist = await traducirAlVuelo(encontradaMisterio);
                                 setHistoria(hist);
                                 setEsRelatoAdmin(false);
                                 setEsNoticia(false);
@@ -127,7 +152,7 @@ const LecturaHistoria = () => {
                 window.speechSynthesis.cancel();
             }
         };
-    }, [id]);
+    }, [id, language]);
 
     const eliminarEstaHistoria = async () => {
         const mensajeConfirm = esRelatoAdmin
@@ -328,49 +353,7 @@ const LecturaHistoria = () => {
                     borderRadius: '5px',
                     boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
                 }}>
-                    {language === 'en' && (
-                        <div style={{ marginBottom: '20px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
-                            <button 
-                                onClick={async (e) => {
-                                    const btn = e.currentTarget;
-                                    btn.innerText = "📡 " + t('readTranslateWait').toUpperCase();
-                                    
-                                    try {
-                                        const texto = historia.contenido || historia.cuerpo || "";
-                                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
-                                        const data = await res.json();
-                                        const traducido = data[0].map(x => x[0]).join("");
-                                        
-                                        let tituloTraducido = historia.titulo;
-                                        if (historia.titulo) {
-                                            const resTitulo = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(historia.titulo)}`);
-                                            const dataTitulo = await resTitulo.json();
-                                            tituloTraducido = dataTitulo[0].map(x => x[0]).join("");
-                                        }
 
-                                        setHistoria({ ...historia, contenido: traducido, cuerpo: traducido, titulo: tituloTraducido });
-                                        btn.style.display = 'none';
-                                    } catch (err) {
-                                        const urlTranslate = `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(historia.contenido || historia.cuerpo)}&op=translate`;
-                                        window.open(urlTranslate, '_blank');
-                                    }
-                                }}
-                                style={{
-                                    background: 'var(--color-principal)',
-                                    color: '#000',
-                                    border: 'none',
-                                    padding: '10px 20px',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    fontFamily: 'monospace',
-                                    fontSize: '0.8rem',
-                                    boxShadow: '0 0 15px rgba(0,255,65,0.4)'
-                                }}
-                            >
-                                📡 {t('readTranslateStory')}
-                            </button>
-                        </div>
-                    )}
 
                     {/* BOTÓN ROBOCOP (TTS) */}
                     <div style={{ marginBottom: '20px', textAlign: 'center' }}>

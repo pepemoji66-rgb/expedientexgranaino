@@ -91,6 +91,51 @@ const Expedientes = () => {
         }
     }, [relatoAbierto]);
 
+    // Traducción automática al vuelo en inglés / restauración en español para relatoAbierto
+    useEffect(() => {
+        if (relatoAbierto) {
+            if (language === 'en') {
+                const alreadyTranslated = relatoAbierto.titulo_en || relatoAbierto.contenido_en || (relatoAbierto._translatedLanguage === 'en');
+                if (!alreadyTranslated) {
+                    (async () => {
+                        try {
+                            const texto = relatoAbierto.contenido || "";
+                            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
+                            const data = await res.json();
+                            const traducido = data[0].map(x => x[0]).join("");
+                            
+                            let tituloTraducido = relatoAbierto.titulo;
+                            if (relatoAbierto.titulo) {
+                                const resTitulo = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(relatoAbierto.titulo)}`);
+                                const dataTitulo = await resTitulo.json();
+                                tituloTraducido = dataTitulo[0].map(x => x[0]).join("");
+                            }
+
+                            setRelatoAbierto(prev => {
+                                if (prev && prev.id === relatoAbierto.id) {
+                                    return { 
+                                        ...prev, 
+                                        contenido: traducido, 
+                                        titulo: tituloTraducido,
+                                        _translatedLanguage: 'en'
+                                    };
+                                }
+                                return prev;
+                            });
+                        } catch (err) {
+                            console.error("Auto translation error for relato:", err);
+                        }
+                    })();
+                }
+            } else if (language === 'es') {
+                const relatoOriginal = datos.find(d => d.id === relatoAbierto.id);
+                if (relatoOriginal) {
+                    setRelatoAbierto(relatoOriginal);
+                }
+            }
+        }
+    }, [relatoAbierto?.id, language, datos]);
+
     const obtenerUbicacion = () => {
         if (!navigator.geolocation) return alert("GPS NO DISPONIBLE.");
         navigator.geolocation.getCurrentPosition(pos => {
@@ -514,47 +559,6 @@ const Expedientes = () => {
                             <span>{t('expOrigin')}: {relatoAbierto.usuario_nombre || 'ADMINISTRADOR'}</span>
                             <span>COORD: {relatoAbierto.latitud || '0'}, {relatoAbierto.longitud || '0'}</span>
                         </div>
-
-                        {language === 'en' && (
-                            <div style={{ marginTop: '15px', textAlign: 'center' }}>
-                                <button
-                                    onClick={async () => {
-                                        const btn = document.getElementById('btn-trans-tactico');
-                                        if (btn) btn.innerText = "📡 " + t('readTranslateWait').toUpperCase();
-
-                                        try {
-                                            const texto = relatoAbierto.contenido || "";
-                                            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
-                                            const data = await res.json();
-                                            const traducido = data[0].map(x => x[0]).join("");
-
-                                            setRelatoAbierto({ ...relatoAbierto, contenido: traducido });
-                                            if (btn) btn.style.display = 'none'; // Ya está traducido
-                                        } catch (e) {
-                                            const urlTranslate = `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(relatoAbierto.contenido)}&op=translate`;
-                                            window.open(urlTranslate, '_blank');
-                                        }
-                                    }}
-                                    id="btn-trans-tactico"
-                                    style={{
-                                        background: 'var(--color-principal)',
-                                        color: '#000',
-                                        border: 'none',
-                                        padding: '10px 20px',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                        fontFamily: 'monospace',
-                                        fontSize: '0.8rem',
-                                        boxShadow: '0 0 15px rgba(0,255,65,0.5)',
-                                        width: '100%',
-                                        borderRadius: '2px',
-                                        marginBottom: '10px'
-                                    }}
-                                >
-                                    📡 {t('readTranslateStory')}
-                                </button>
-                            </div>
-                        )}
 
                         {/* BOTÓN ROBOCOP (TTS) */}
                         <div style={{ marginTop: language === 'en' ? '0' : '15px', textAlign: 'center' }}>
