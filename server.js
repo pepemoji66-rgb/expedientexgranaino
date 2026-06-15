@@ -441,7 +441,42 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     html = html.replace(/<meta [^>]*name=["']description["'][^>]*>/gi, '');
     html = html.replace(/<meta [^>]*name=["']keywords["'][^>]*>/gi, '');
 
-    // Inyectamos meta description, OG, Twitter Cards y canonical
+    // Generación de Datos Estructurados (JSON-LD) para SEO
+    let schemaType = "WebSite";
+    if (url.includes('/leer-historia/')) {
+        schemaType = "NewsArticle";
+    }
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": schemaType,
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": url
+        },
+        "headline": title,
+        "description": desc,
+        "image": img,
+        "publisher": {
+            "@type": "Organization",
+            "name": "Expediente X Granaíno",
+            "url": "https://expedientexgranaino.com",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://expedientexgranaino.com/logoexpedientex.jpeg"
+            }
+        }
+    };
+
+    if (schemaType === "NewsArticle") {
+        jsonLd.author = {
+            "@type": "Organization",
+            "name": "Expediente X Granaíno",
+            "url": "https://expedientexgranaino.com"
+        };
+    }
+
+    // Inyectamos meta description, OG, Twitter Cards, canonical y JSON-LD
     html = html.replace(
         '</head>',
         `<meta name="description" content="${desc}" />
@@ -457,6 +492,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
 <meta name="twitter:title" content="${title}" />
 <meta name="twitter:description" content="${desc}" />
 <meta name="twitter:image" content="${img}" />
+<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 </head>`
     );
 
