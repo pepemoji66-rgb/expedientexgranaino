@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const axios = require('axios');
 const bodyParser = require('body-parser');
@@ -80,6 +81,7 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 10000;
 
 // --- 4. MIDDLEWARES ---
+app.use(compression()); // Gzip/Brotli — mejora TTFB y Core Web Vitals
 app.use(cors());
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -402,7 +404,14 @@ app.use('/audios-ambiente', express.static(path.join(__dirname, 'public/audios')
     app.use('/imagenes', express.static(path.join(__dirname, dir)));
 });
 
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'build'), {
+    maxAge: '1y',
+    etag: false,
+    index: false // El SSR sirve el index.html, no el static handler
+}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    maxAge: '7d'
+}));
 
 // --- 9. SOCKET.IO (SIN CHAT) ---
 io.on('connection', (socket) => {
@@ -432,11 +441,12 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     html = html.replace(/<meta [^>]*name=["']description["'][^>]*>/gi, '');
     html = html.replace(/<meta [^>]*name=["']keywords["'][^>]*>/gi, '');
 
-    // Inyectamos meta description y todos los open graph / twitter tags
+    // Inyectamos meta description, OG, Twitter Cards y canonical
     html = html.replace(
         '</head>',
         `<meta name="description" content="${desc}" />
 <meta name="keywords" content="OVNI Granada, fenómenos paranormales, ufología Andalucía, avistamientos UFO, psicofonías, misterio, investigación paranormal, Expediente X" />
+<link rel="canonical" href="${url}" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="${url}" />
 <meta property="og:title" content="${title}" />
@@ -454,12 +464,13 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     html = html.replace(/<noscript>You need to enable JavaScript to run this app\.<\/noscript>/ig, '');
 
     // Inyectamos el bloque de contenido estático ANTES del div#root
-    // para que el bot lo vea con máxima prioridad y sin bloqueos
+    // Visible para bots (AdSense, Googlebot) y revisores humanos
+    // Visually hidden para usuarios que tienen JS activo (React lo oculta al montar)
     html = html.replace(
         '<div id="root"></div>',
-        `<noscript id="seo-static-content">
+        `<div id="seo-static-content" aria-hidden="true" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;font-size:0;">
 ${contenidoSeo}
-</noscript>
+</div>
 <div id="root"></div>`
     );
 
