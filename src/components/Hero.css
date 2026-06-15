@@ -55,11 +55,19 @@
     .mufon-title { font-size: 2rem; }
     .hero-global-mufon { 
         min-height: 100vh; 
-        background-size: contain;
+        background-size: cover;
         background-repeat: no-repeat;
-        background-position: center 30%;
+        background-position: center;
         background-color: #020408;
+        background-attachment: scroll; /* Desactivar fixed en móvil para evitar zoom excesivo */
     }
+    
+    /* Caso especial: Para el ovni de Atarfe queremos conservar el encuadre contain */
+    .hero-slide-especial-atarfe {
+        background-size: contain;
+        background-position: center 30%;
+    }
+    
     .hero-main-content { padding: 80px 5%; align-items: center; text-align: center; }
 }
 

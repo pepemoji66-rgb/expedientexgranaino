@@ -196,9 +196,9 @@ const Hero = ({ userAuth }) => {
 
     return (
         <section 
-            className="hero-global-mufon" 
+            className={`hero-global-mufon hero-slide-${activeSlide?.id}`}
             style={{ 
-                backgroundImage: `url(${activeSlide.image})`,
+                backgroundImage: `url(${activeSlide?.image})`,
                 backgroundPosition: activeSlide?.backgroundPosition || 'center'
             }}
         >
