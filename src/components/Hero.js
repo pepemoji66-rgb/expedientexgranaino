@@ -195,112 +195,114 @@ const Hero = ({ userAuth }) => {
     const activeSlide = slides[currentSlide];
 
     return (
-        <section 
-            className={`hero-global-mufon hero-slide-${activeSlide?.id}`}
-            style={{ 
-                backgroundImage: `url(${activeSlide?.image})`,
-                backgroundPosition: activeSlide?.backgroundPosition || 'center'
-            }}
-        >
-            <div className="hero-overlay-dark"></div>
-            
-            {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
-            <div className="hero-top-actions">
-                <div className="action-buttons-group">
-                    {novedadesGlobales.length > 0 && (
-                        <Link 
-                            to={
-                                novedadesGlobales[0].type === 'noticia' ? "/noticias" : 
-                                novedadesGlobales[0].type === 'video' ? "/galeria" : 
-                                novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : 
-                                novedadesGlobales[0].type === 'misterio' ? "/misterios-historicos" : 
-                                "/expedientes"
-                            } 
-                            className="btn-nuevo-archivo-blink"
-                        >
-                            <span className="blink-dot"></span> {t('heroNewFile')}
+        <div className="hero-global-mufon-wrapper">
+            <section 
+                className={`hero-global-mufon hero-slide-${activeSlide?.id}`}
+                style={{ 
+                    backgroundImage: `url(${activeSlide?.image})`,
+                    backgroundPosition: activeSlide?.backgroundPosition || 'center'
+                }}
+            >
+                <div className="hero-overlay-dark"></div>
+                
+                {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
+                <div className="hero-top-actions">
+                    <div className="action-buttons-group">
+                        {novedadesGlobales.length > 0 && (
+                            <Link 
+                                to={
+                                    novedadesGlobales[0].type === 'noticia' ? "/noticias" : 
+                                    novedadesGlobales[0].type === 'video' ? "/galeria" : 
+                                    novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : 
+                                    novedadesGlobales[0].type === 'misterio' ? "/misterios-historicos" : 
+                                    "/expedientes"
+                                } 
+                                className="btn-nuevo-archivo-blink"
+                            >
+                                <span className="blink-dot"></span> {t('heroNewFile')}
+                            </Link>
+                        )}
+                        
+                        {/* PLACA DE AGENTE INTEGRADA EN PANEL DE MANDOS */}
+                        {userAuth && (
+                            <div className="hero-agent-badge">
+                                <span className="agent-status-led"></span>
+                                <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
+                                {userAuth.rango && (
+                                    <span className="agent-rango-tag">
+                                        {userAuth.rango === 'Agente en Prácticas' ? '🔰 ' :
+                                         userAuth.rango === 'Cabo' ? '🎖️ ' :
+                                         userAuth.rango === 'Cabo 1º' ? '🎖️🎖️ ' :
+                                         userAuth.rango === 'Sargento' ? '⭐ ' :
+                                         userAuth.rango === 'Teniente' ? '⭐⭐ ' :
+                                         userAuth.rango === 'Capitán' ? '⭐⭐⭐ ' :
+                                         userAuth.rango === 'Comandante' ? '🦅 ' : '🛡️ '}
+                                        {userAuth.rango.toUpperCase()}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
+                        <Link to="/expedientes" className="btn-mufon-red">
+                            {t('heroNavReport')}
                         </Link>
-                    )}
-                    
-                    {/* PLACA DE AGENTE INTEGRADA EN PANEL DE MANDOS */}
-                    {userAuth && (
-                        <div className="hero-agent-badge">
-                            <span className="agent-status-led"></span>
-                            <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
-                            {userAuth.rango && (
-                                <span className="agent-rango-tag">
-                                    {userAuth.rango === 'Agente en Prácticas' ? '🔰 ' :
-                                     userAuth.rango === 'Cabo' ? '🎖️ ' :
-                                     userAuth.rango === 'Cabo 1º' ? '🎖️🎖️ ' :
-                                     userAuth.rango === 'Sargento' ? '⭐ ' :
-                                     userAuth.rango === 'Teniente' ? '⭐⭐ ' :
-                                     userAuth.rango === 'Capitán' ? '⭐⭐⭐ ' :
-                                     userAuth.rango === 'Comandante' ? '🦅 ' : '🛡️ '}
-                                    {userAuth.rango.toUpperCase()}
-                                </span>
-                            )}
-                        </div>
-                    )}
-
-                    <Link to="/expedientes" className="btn-mufon-red">
-                        {t('heroNavReport')}
-                    </Link>
-                    <Link to="/acceso" className="btn-mufon-red">
-                        {t('heroNavReg')}
-                    </Link>
-                    <Link to="/galeria" className="btn-mufon-black">
-                        {t('heroNavMedia')}
-                    </Link>
-                    <Link to="/acceso" className="btn-mufon-outline">
-                        {t('heroNavAccess')}
-                    </Link>
-                </div>
-            </div>
-
-            <div className="hero-main-content fade-in-slide" key={currentSlide}>
-                <div className="mufon-logo-container">
-                    <div className="mufon-glow"></div>
-                    <h2 className="mufon-subtitle">{activeSlide.subtitle}</h2>
-                    <h1 className="mufon-title">{activeSlide.title}</h1>
-                    <h3 className="mufon-tagline">{activeSlide.tagline}</h3>
-                </div>
-
-                <div className="hero-info-box">
-                    <h2 className="info-title">{activeSlide.infoTitle}</h2>
-                    <p className="info-text">
-                        {activeSlide.infoText}<br />
-                        <span className="highlight-mufon">{activeSlide.highlight}</span>
-                    </p>
-                    {activeSlide.onClick ? (
-                        <button onClick={activeSlide.onClick} className="btn-explore-mufon">
-                            {activeSlide.btnText}
-                        </button>
-                    ) : (
-                        <Link to={activeSlide.btnLink} className="btn-explore-mufon">
-                            {activeSlide.btnText}
+                        <Link to="/acceso" className="btn-mufon-red">
+                            {t('heroNavReg')}
                         </Link>
-                    )}
+                        <Link to="/galeria" className="btn-mufon-black">
+                            {t('heroNavMedia')}
+                        </Link>
+                        <Link to="/acceso" className="btn-mufon-outline">
+                            {t('heroNavAccess')}
+                        </Link>
+                    </div>
                 </div>
-            </div>
 
-            {/* FLECHAS DE NAVEGACIÓN MANUAL */}
-            <button className="carousel-arrow left-arrow" onClick={prevSlide}>
-                <ChevronLeft size={36} />
-            </button>
-            <button className="carousel-arrow right-arrow" onClick={nextSlide}>
-                <ChevronRight size={36} />
-            </button>
+                <div className="hero-main-content fade-in-slide" key={currentSlide}>
+                    <div className="mufon-logo-container">
+                        <div className="mufon-glow"></div>
+                        <h2 className="mufon-subtitle">{activeSlide.subtitle}</h2>
+                        <h1 className="mufon-title">{activeSlide.title}</h1>
+                        <h3 className="mufon-tagline">{activeSlide.tagline}</h3>
+                    </div>
 
-            {/* ELEMENTOS DECORATIVOS DE NAVEGACIÓN (PUNTOS) */}
-            <div className="hero-pagination-dots">
-                {slides.map((_, index) => (
-                    <span 
-                        key={index}
-                        className={`dot ${currentSlide === index ? 'active' : ''}`}
-                        onClick={() => setCurrentSlide(index)}
-                    ></span>
-                ))}
-            </div>
+                    <div className="hero-info-box">
+                        <h2 className="info-title">{activeSlide.infoTitle}</h2>
+                        <p className="info-text">
+                            {activeSlide.infoText}<br />
+                            <span className="highlight-mufon">{activeSlide.highlight}</span>
+                        </p>
+                        {activeSlide.onClick ? (
+                            <button onClick={activeSlide.onClick} className="btn-explore-mufon">
+                                {activeSlide.btnText}
+                            </button>
+                        ) : (
+                            <Link to={activeSlide.btnLink} className="btn-explore-mufon">
+                                {activeSlide.btnText}
+                            </Link>
+                        )}
+                    </div>
+                </div>
+
+                {/* FLECHAS DE NAVEGACIÓN MANUAL */}
+                <button className="carousel-arrow left-arrow" onClick={prevSlide}>
+                    <ChevronLeft size={36} />
+                </button>
+                <button className="carousel-arrow right-arrow" onClick={nextSlide}>
+                    <ChevronRight size={36} />
+                </button>
+
+                {/* ELEMENTOS DECORATIVOS DE NAVEGACIÓN (PUNTOS) */}
+                <div className="hero-pagination-dots">
+                    {slides.map((_, index) => (
+                        <span 
+                            key={index}
+                            className={`dot ${currentSlide === index ? 'active' : ''}`}
+                            onClick={() => setCurrentSlide(index)}
+                        ></span>
+                    ))}
+                </div>
+            </section>
 
             {/* BLOQUE SEO - INDEXABLE POR BOTS - BILINGÜE */}
             <div className="seo-bunker-block" aria-label={language === 'en' ? "About Expediente X Granaíno" : "Información sobre Expediente X Granaíno"}>
@@ -356,7 +358,7 @@ const Hero = ({ userAuth }) => {
                     </>
                 )}
             </div>
-        </section>
+        </div>
     );
 };
 
