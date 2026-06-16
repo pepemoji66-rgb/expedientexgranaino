@@ -1428,7 +1428,16 @@ const PanelAdmin = () => {
                                 </div>
                             )}
 
-                            <button type="submit" className="btn-ok" style={{ width: '100%', padding: '15px' }}>GUARDAR CAMBIOS EN EL ARCHIVO</button>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setItemParaEditar(null)}
+                                    style={{ flex: '0 0 auto', padding: '15px 20px', background: 'transparent', color: '#888', border: '1px solid #444', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '1px' }}
+                                >
+                                    ← VOLVER
+                                </button>
+                                <button type="submit" className="btn-ok" style={{ flex: 1, padding: '15px' }}>GUARDAR CAMBIOS EN EL ARCHIVO</button>
+                            </div>
                         </form>
                     </div>
                 </div>
