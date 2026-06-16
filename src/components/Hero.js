@@ -132,13 +132,14 @@ const Hero = ({ userAuth }) => {
                     btnLink: "/noticias"
                 });
             } else if (item.type === 'video') {
-                // El campo capturas puede tener: "archivolocal.png,https://cloudinary.com/..."
-                // Buscamos primero una URL http válida, si no, intentamos construirla
+                // El campo capturas puede mezclar: URL de youtube, archivo local y URL de imagen real
+                // Hay que saltar las URLs de vídeo/youtube y quedarnos con la imagen
                 const capturasList = item.capturas
                     ? item.capturas.split(',').map(c => c.trim()).filter(c => c)
                     : [];
-                const mejorCaptura = capturasList.find(c => c.startsWith('http'))
-                    || capturasList[0]
+                const esUrlImagen = (c) => c.startsWith('http') && !c.includes('youtube.com') && !c.includes('youtu.be') && !c.includes('.mp4') && !c.includes('.webm') && !c.includes('.mov');
+                const mejorCaptura = capturasList.find(esUrlImagen)
+                    || capturasList.find(c => !c.startsWith('http'))  // archivo local como fallback
                     || '';
                 const buildVideoImageUrl = (captura) => {
                     if (!captura) return null;
