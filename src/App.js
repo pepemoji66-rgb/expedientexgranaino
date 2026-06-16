@@ -22,8 +22,6 @@ import PoliticaPrivacidad from './components/PoliticaPrivacidad';
 import PoliticaCookies from './components/PoliticaCookies';
 import AvisoLegal from './components/AvisoLegal';
 import Horoscopo from './components/Horoscopo';
-import CartaAstral from './components/CartaAstral';
-import Tarot from './components/Tarot';
 import { X } from 'lucide-react';
 import TopNavbar from './components/TopNavbar';
 
@@ -209,8 +207,6 @@ function App() {
                 { path: "/especial-atarfe", label: t('sysSidebarDossier') },
                 { path: "/lugares", label: t('navMap') },
                 { path: "/horoscopo", label: t('navHoroscope') },
-                { path: "/tarot", label: t('navTarot') },
-                { path: "/carta-astral", label: t('navAstral') },
                 { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
                 { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
                 { path: "/archipeg", label: "💻 ARCHIPEG V3" }
@@ -303,8 +299,6 @@ function App() {
               <Route path="/lugares" element={<Lugares />} />
               <Route path="/videos" element={<Videos userAuth={userAuth} />} />
               <Route path="/horoscopo" element={<Horoscopo />} />
-              <Route path="/tarot" element={<Tarot />} />
-              <Route path="/carta-astral" element={<CartaAstral />} />
 
               <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
               <Route path="/leer-historia/:id" element={<LecturaHistoria />} />

@@ -56,16 +56,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://expedientexgranaino.com/tarot</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://expedientexgranaino.com/carta-astral</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://expedientexgranaino.com/legal</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

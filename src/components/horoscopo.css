@@ -177,3 +177,74 @@
     }
 }
 
+/* ═══════════════════════════════════════════════
+   BLOQUES DE TEXTO SEO — INTRO Y FOOTER
+═══════════════════════════════════════════════ */
+.horoscopo-seo-intro,
+.horoscopo-seo-footer {
+    max-width: 860px;
+    margin: 0 auto 50px;
+    padding: 30px 35px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(var(--rgb-principal), 0.18);
+    border-left: 3px solid var(--color-principal);
+    border-radius: 6px;
+    font-family: 'Georgia', serif;
+    color: #c8c8c8;
+    line-height: 1.85;
+}
+
+.horoscopo-seo-footer {
+    margin-top: 50px;
+    margin-bottom: 0;
+}
+
+.horoscopo-seo-intro h2,
+.horoscopo-seo-footer h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    color: var(--color-principal);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(var(--rgb-principal), 0.25);
+}
+
+.horoscopo-seo-intro p,
+.horoscopo-seo-footer p {
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    text-align: justify;
+    color: #bbb;
+}
+
+.horoscopo-seo-intro p:last-child,
+.horoscopo-seo-footer p:last-child {
+    margin-bottom: 0;
+}
+
+.horoscopo-seo-intro strong,
+.horoscopo-seo-footer strong {
+    color: #e8e8e8;
+    font-weight: 600;
+}
+
+.horoscopo-seo-intro em,
+.horoscopo-seo-footer em {
+    color: var(--color-principal);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .horoscopo-seo-intro,
+    .horoscopo-seo-footer {
+        padding: 20px;
+        font-size: 0.9rem;
+    }
+
+    .horoscopo-seo-intro h2,
+    .horoscopo-seo-footer h2 {
+        font-size: 0.95rem;
+    }
+}
