@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config';
 
 const ControlMusica = () => {
-  // Ahora arranca en ON por defecto
+  // Arranca en ON por defecto
   const [sonando, setSonando] = useState(true);
   const [audio] = useState(new Audio(`${API_BASE_URL}/audios-ambiente/misterio.mp3`));
+  // Ref para saber si el usuario silenció la música manualmente
+  // Necesario porque stopPropagation en React no detiene listeners nativos del document
+  const usuarioSilencioRef = useRef(false);
 
   useEffect(() => {
     audio.volume = 0.2;
@@ -18,6 +21,9 @@ const ControlMusica = () => {
 
       // Registrar listeners para reproducir con la primera interacción del usuario en la web
       const iniciarEnInteraccion = () => {
+        // Si el usuario lo silenció manualmente, no reactivar
+        if (usuarioSilencioRef.current) return;
+
         audio.play().then(() => {
           // Si se reproduce con éxito, removemos los listeners
           document.removeEventListener('click', iniciarEnInteraccion);
@@ -44,13 +50,14 @@ const ControlMusica = () => {
   }, [sonando, audio]);
 
   const toggleMusica = (e) => {
-    // Evitamos propagación para que el clic del botón no interactúe con el document listener
     e.stopPropagation();
 
     if (sonando) {
+      usuarioSilencioRef.current = true;  // Marcar que el usuario quiere silencio
       audio.pause();
       setSonando(false);
     } else {
+      usuarioSilencioRef.current = false; // El usuario quiere reactivar
       setSonando(true);
       audio.play().catch(e => console.log("Error al activar audio:", e));
     }

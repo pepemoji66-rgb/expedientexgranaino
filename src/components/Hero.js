@@ -133,11 +133,21 @@ const Hero = ({ userAuth }) => {
                 });
             } else if (item.type === 'video') {
                 const primerCaptura = item.capturas && item.capturas.trim() !== '' ? item.capturas.split(',')[0].trim() : '';
+                // Normalizamos la ruta: el servidor guarda 'uploads/imagenes/foto.jpg' y lo sirve en /uploads/imagenes/foto.jpg
+                const buildVideoImageUrl = (captura) => {
+                    if (!captura) return null;
+                    if (captura.startsWith('http')) return captura;
+                    // Si la ruta ya empieza por 'uploads/' la usamos directamente (ej: uploads/imagenes/foto.jpg)
+                    if (captura.startsWith('uploads/') || captura.startsWith('uploads\\')) {
+                        return `${API_BASE_URL}/${captura.replace(/\\/g, '/')}`;
+                    }
+                    // Si es solo un nombre de archivo, lo buscamos en uploads/imagenes
+                    const fileName = captura.split('/').pop().split('\\').pop();
+                    return `${API_BASE_URL}/uploads/imagenes/${fileName}`;
+                };
                 alertasRecientes.push({
                     id: `nuevo-video-${item.id}`,
-                    image: primerCaptura 
-                        ? (primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`) 
-                        : imgEvidencias,
+                    image: buildVideoImageUrl(primerCaptura) || imgEvidencias,
                     subtitle: language === 'en' ? "NEW VIDEO" : "NUEVO VÍDEO",
                     title: (item.titulo || 'EVIDENCIA EN VÍDEO').toUpperCase(),
                     tagline: language === 'en' ? "VISUAL EVIDENCE" : "VISUALIZA LAS PRUEBAS",
