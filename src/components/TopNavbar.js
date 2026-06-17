@@ -14,7 +14,8 @@ import {
     Menu,
     X,
     LogOut,
-    Eye
+    Eye,
+    Monitor
 } from 'lucide-react';
 import ControlMusica from './ControlMusica';
 import logoBunker from '../assets/logo_bunker.jpeg';
@@ -74,6 +75,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     }
     menuItems.push({ path: "/casos-abiertos", label: "💀 TRUE CRIME", icon: <FileText size={16} /> });
     menuItems.push({ path: "/misterios-historicos", label: "👁️ " + t('navMysteries'), icon: <Eye size={16} /> });
+    menuItems.push({ path: "/archipeg", label: language === 'en' ? "💻 My Software" : "💻 Mi Software", icon: <Monitor size={16} /> });
 
     return (
         <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>

@@ -178,7 +178,7 @@ const CasosAbiertos = ({ userAuth }) => {
         const textoTitulo = language === 'en' && caso.titulo_en ? caso.titulo_en : caso.titulo;
         const texto = `💀 UNRESOLVED MYSTERY / CASO ABIERTO: "${textoTitulo?.toUpperCase()}" @PEPE1318057 #TrueCrime #Misterio #ExpedienteXGranaino`;
 
-        if (navigator.share && red !== 'copy') {
+        if (navigator.share) {
             try {
                 await navigator.share({
                     title: 'BÚNKER EXPEDIENTE X - TRUE CRIME',
@@ -192,33 +192,16 @@ const CasosAbiertos = ({ userAuth }) => {
         }
 
         let link = '';
-        if (red === 'twitter') {
-            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
-        } else if (red === 'whatsapp') {
+        if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
+        } else if (red === 'facebook') {
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        } else if (red === 'twitter') {
+            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
         }
 
         if (link) {
             window.open(link, '_blank');
-        } else {
-            try {
-                const texto = `💀 TRUE CRIME: Mira este caso en el Búnker de ExpedienteX: "${(caso.titulo || '').toUpperCase()}"`;
-                const fullText = `${texto} ${url}`;
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(fullText);
-                    alert("📋 ¡Enlace del caso copiado al portapapeles!");
-                } else {
-                    const input = document.createElement('textarea');
-                    input.value = fullText;
-                    document.body.appendChild(input);
-                    input.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(input);
-                    alert("📋 ¡Enlace del caso copiado al portapapeles!");
-                }
-            } catch (err) {
-                alert("❌ No se pudo copiar el enlace.");
-            }
         }
     };
 
@@ -284,9 +267,9 @@ const CasosAbiertos = ({ userAuth }) => {
                                     </button>
 
                                     <div className="caso-acciones">
-                                        <button onClick={() => compartirCaso(caso, 'twitter')} className="btn-mando-pro btn-secondary-pro">𝕏 TWITTER</button>
                                         <button onClick={() => compartirCaso(caso, 'whatsapp')} className="btn-mando-pro btn-secondary-pro">WHATSAPP</button>
-                                        <button onClick={() => compartirCaso(caso, 'copy')} className="btn-mando-pro btn-secondary-pro" style={{ width: '40px' }}>📎</button>
+                                        <button onClick={() => compartirCaso(caso, 'facebook')} className="btn-mando-pro btn-secondary-pro">FACEBOOK</button>
+                                        <button onClick={() => compartirCaso(caso, 'twitter')} className="btn-mando-pro btn-secondary-pro">𝕏 TWITTER</button>
                                     </div>
                                 </div>
                             </div>
@@ -471,6 +454,18 @@ const CasosAbiertos = ({ userAuth }) => {
                             </button>
 
                             <div className="modal-caso-body-html" dangerouslySetInnerHTML={{ __html: language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido }} />
+
+                            {/* SECCIÓN DE COMPARTIR EN MODAL */}
+                            <div style={{ marginTop: '25px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+                                <p style={{ color: 'var(--color-principal)', fontSize: '0.7rem', marginBottom: '10px', fontFamily: 'monospace' }}>
+                                    📡 {language === 'en' ? 'SHARE THIS CASE' : 'COMPARTIR ESTE CASO'}
+                                </p>
+                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                    <button onClick={() => compartirCaso(casoExpandido, 'whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>WHATSAPP</button>
+                                    <button onClick={() => compartirCaso(casoExpandido, 'facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>FACEBOOK</button>
+                                    <button onClick={() => compartirCaso(casoExpandido, 'twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>𝕏 TWITTER</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

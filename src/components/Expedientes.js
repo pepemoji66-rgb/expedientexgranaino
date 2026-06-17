@@ -228,7 +228,7 @@ const Expedientes = () => {
         const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
 
         // Prioridad 1: Web Share API (Móviles)
-        if (navigator.share && red !== 'copy' && red !== 'instagram') {
+        if (navigator.share) {
             try {
                 await navigator.share({
                     title: 'BÚNKER EXPEDIENTE X - INFORME',
@@ -243,34 +243,16 @@ const Expedientes = () => {
 
         // Prioridad 2: Fallback (Desktop / Manual)
         let link = '';
-        if (red === 'twitter') {
-            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
-        } else if (red === 'whatsapp') {
+        if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         } else if (red === 'facebook') {
             link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        } else if (red === 'twitter') {
+            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
         }
 
         if (link) {
             window.open(link, '_blank');
-        } else if (red === 'copy' || red === 'twitter' || red === 'whatsapp') {
-            try {
-                const fullText = `${texto} ${url}`;
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(fullText);
-                    alert(t('expCopySuccess'));
-                } else {
-                    const input = document.createElement('textarea');
-                    input.value = fullText;
-                    document.body.appendChild(input);
-                    input.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(input);
-                    alert(t('expCopySuccess'));
-                }
-            } catch (err) {
-                alert(t('expCopyError'));
-            }
         }
     };
 
@@ -637,10 +619,9 @@ const Expedientes = () => {
                                     {t('expDiffuse')}
                                 </p>
                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                    <button onClick={() => compartirExpediente('twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>𝕏 TWITTER</button>
                                     <button onClick={() => compartirExpediente('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>WHATSAPP</button>
                                     <button onClick={() => compartirExpediente('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>FACEBOOK</button>
-                                    <button onClick={() => compartirExpediente('copy')} className="btn-share-tactico" style={{ background: '#555', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>COPIAR</button>
+                                    <button onClick={() => compartirExpediente('twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>𝕏 TWITTER</button>
                                 </div>
                             </div>
                         </div>

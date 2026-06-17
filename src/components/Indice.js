@@ -421,20 +421,28 @@ const Indice = ({ userAuth, stats, setTema }) => {
             {/* RADAR DE INTELIGENCIA EXTERNA */}
             <NoticiasExternas />
 
-            {/* PROMOCIÓN DE ADQUISICIÓN DE ARCHIPEG V3 */}
-            <div style={{ textAlign: 'center', margin: '30px 0', opacity: 0.9 }}>
-                <Link to="/archipeg" style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '8px',
-                    backgroundColor: 'rgba(99, 91, 255, 0.1)', border: '1px solid rgba(99, 91, 255, 0.3)',
-                    color: '#635bff', padding: '10px 22px', borderRadius: '20px',
-                    textDecoration: 'none', fontSize: '0.9rem', fontWeight: 'bold', transition: 'all 0.3s ease',
-                    fontFamily: 'Outfit, sans-serif'
-                }} 
-                onMouseOver={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.backgroundColor = 'rgba(99, 91, 255, 0.2)'; e.currentTarget.style.boxShadow = '0 0 15px rgba(99, 91, 255, 0.3)'; }}
-                onMouseOut={(e) => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.backgroundColor = 'rgba(99, 91, 255, 0.1)'; e.currentTarget.style.boxShadow = 'none'; }}
-                >
-                    💻 <span>{language === 'en' ? 'Get Archipeg V3 - Sovereign Offline Software' : 'Adquirir Archipeg V3 - Software Offline Soberano'}</span>
-                </Link>
+            {/* BANNER PROMOCIONAL ARCHIPEG PRO */}
+            <div className="archipeg-promo-banner">
+                <div className="archipeg-promo-glow"></div>
+                <div className="archipeg-promo-content">
+                    <div className="archipeg-promo-icon">💻</div>
+                    <div className="archipeg-promo-text">
+                        <h3 className="archipeg-promo-title">ARCHIPEG PRO</h3>
+                        <p className="archipeg-promo-subtitle">
+                            {language === 'en' 
+                                ? 'Your Digital Bunker — Organize your photos & videos from your hard drive. 100% private, no cloud.' 
+                                : 'Tu Búnker Digital — Organiza tus fotos y vídeos desde tu disco duro. 100% privado, sin nube.'}
+                        </p>
+                    </div>
+                    <div className="archipeg-promo-actions">
+                        <Link to="/archipeg" className="archipeg-promo-btn primary">
+                            {language === 'en' ? 'DISCOVER' : 'DESCUBRIR'} ➔
+                        </Link>
+                        <a href="https://buy.stripe.com/5kQ28r4UU9jT9YndSl3Ru00" target="_blank" rel="noopener noreferrer" className="archipeg-promo-btn secondary">
+                            💳 {language === 'en' ? 'GET IT (5€)' : 'ADQUIRIR (5€)'}
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <Comentarios userAuth={userAuth} />

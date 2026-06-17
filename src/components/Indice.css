@@ -777,3 +777,142 @@
     color: #8892b0;
     margin: 0;
 }
+
+/* === BANNER PROMOCIONAL ARCHIPEG PRO === */
+.archipeg-promo-banner {
+    position: relative;
+    margin: 30px 0;
+    padding: 25px 30px;
+    background: linear-gradient(135deg, rgba(99, 91, 255, 0.12) 0%, rgba(0, 212, 255, 0.08) 50%, rgba(99, 91, 255, 0.12) 100%);
+    border: 1px solid rgba(99, 91, 255, 0.35);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.archipeg-promo-banner:hover {
+    border-color: rgba(99, 91, 255, 0.6);
+    box-shadow: 0 0 30px rgba(99, 91, 255, 0.15), inset 0 0 30px rgba(99, 91, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.archipeg-promo-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(99, 91, 255, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    animation: archipeg-glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes archipeg-glow-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.archipeg-promo-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.archipeg-promo-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 91, 255, 0.15);
+    border-radius: 12px;
+    border: 1px solid rgba(99, 91, 255, 0.3);
+}
+
+.archipeg-promo-text {
+    flex: 1;
+}
+
+.archipeg-promo-title {
+    color: #635bff;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 0 0 5px 0;
+    letter-spacing: 2px;
+    font-family: 'Outfit', sans-serif;
+    text-shadow: 0 0 10px rgba(99, 91, 255, 0.3);
+}
+
+.archipeg-promo-subtitle {
+    color: #aaa;
+    font-size: 0.85rem;
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+    line-height: 1.4;
+}
+
+.archipeg-promo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.archipeg-promo-btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.78rem;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 1px;
+    text-align: center;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.archipeg-promo-btn.primary {
+    background: linear-gradient(135deg, #635bff, #7c75ff);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 15px rgba(99, 91, 255, 0.3);
+}
+
+.archipeg-promo-btn.primary:hover {
+    background: linear-gradient(135deg, #7c75ff, #635bff);
+    box-shadow: 0 6px 25px rgba(99, 91, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.archipeg-promo-btn.secondary {
+    background: transparent;
+    color: #635bff;
+    border: 1px solid rgba(99, 91, 255, 0.4);
+}
+
+.archipeg-promo-btn.secondary:hover {
+    background: rgba(99, 91, 255, 0.1);
+    border-color: rgba(99, 91, 255, 0.7);
+}
+
+@media (max-width: 768px) {
+    .archipeg-promo-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .archipeg-promo-actions {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .archipeg-promo-btn {
+        flex: 1;
+        max-width: 180px;
+    }
+}

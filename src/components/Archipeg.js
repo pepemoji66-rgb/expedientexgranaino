@@ -18,6 +18,7 @@ const Archipeg = ({ userAuth }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const audioRef = useRef(null);
     const [audioStarted, setAudioStarted] = useState(false);
+    const [templateCopiado, setTemplateCopiado] = useState(false);
 
     const slides = [
         {
@@ -447,6 +448,42 @@ const Archipeg = ({ userAuth }) => {
                     <p>SYSTEM ENGINEERED BY ARCHIPEG - EXPEDIENTE X GRANAÍNO BASE</p>
                 </div>
             </div>
+
+                {/* PLANTILLA PARA FOROS */}
+                <div className="forum-template-section">
+                    <h3 className="section-heading">{language === 'en' ? 'FORUM TEMPLATE' : 'PLANTILLA PARA FOROS'}</h3>
+                    <p className="forum-template-desc">
+                        {language === 'en' 
+                            ? 'Use this humble text to share Archipeg in forums and communities:' 
+                            : 'Usa este texto humilde para difundir Archipeg en foros y comunidades:'}
+                    </p>
+                    <div className="forum-template-box">
+                        <p className="forum-template-text">
+                            {language === 'en'
+                                ? '"Hello everyone. As an independent developer (and now retired), I created a small program called Archipeg Pro to solve a problem I had myself: the chaos of organizing thousands of photos and videos directly from the hard drive. It\'s a humble project, with no big companies behind it, made to make our lives easier. If you\'d like to try it or leave me your feedback, I\'d be grateful from the bottom of my heart. Best regards."'
+                                : '"Hola compañeros. Como desarrollador independiente (y ya jubilado), he creado un pequeño programa llamado Archipeg Pro para solucionar un problema que yo mismo tenía: el caos de organizar miles de fotos y vídeos directamente desde el disco duro. Es un proyecto humilde, sin grandes empresas detrás, hecho para facilitarnos la vida. Si os apetece probarlo o dejarme vuestra opinión, os lo agradezco de corazón. Un abrazo."'}
+                        </p>
+                    </div>
+                    <button 
+                        className={`btn-copy-template ${templateCopiado ? 'copied' : ''}`}
+                        onClick={async () => {
+                            const textoPlantilla = language === 'en'
+                                ? 'Hello everyone. As an independent developer (and now retired), I created a small program called Archipeg Pro to solve a problem I had myself: the chaos of organizing thousands of photos and videos directly from the hard drive. It\'s a humble project, with no big companies behind it, made to make our lives easier. If you\'d like to try it or leave me your feedback, I\'d be grateful from the bottom of my heart. Best regards. https://expedientexgranaino.com/archipeg'
+                                : 'Hola compañeros. Como desarrollador independiente (y ya jubilado), he creado un pequeño programa llamado Archipeg Pro para solucionar un problema que yo mismo tenía: el caos de organizar miles de fotos y vídeos directamente desde el disco duro. Es un proyecto humilde, sin grandes empresas detrás, hecho para facilitarnos la vida. Si os apetece probarlo o dejarme vuestra opinión, os lo agradezco de corazón. Un abrazo. https://expedientexgranaino.com/archipeg';
+                            try {
+                                await navigator.clipboard.writeText(textoPlantilla);
+                                setTemplateCopiado(true);
+                                setTimeout(() => setTemplateCopiado(false), 3000);
+                            } catch (err) {
+                                alert(language === 'en' ? '❌ Could not copy text' : '❌ No se pudo copiar el texto');
+                            }
+                        }}
+                    >
+                        {templateCopiado 
+                            ? (language === 'en' ? '✅ COPIED!' : '✅ ¡COPIADO!') 
+                            : (language === 'en' ? '📋 COPY TEMPLATE' : '📋 COPIAR PLANTILLA')}
+                    </button>
+                </div>
 
             {/* PRESENTACIÓN INTERACTIVA EN OVERLAY */}
             {showPresentation && (
