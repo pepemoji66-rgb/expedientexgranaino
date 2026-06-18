@@ -33,6 +33,13 @@ const Videos = ({ userAuth }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
+    const getYoutubeId = (url) => {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    };
+
     useEffect(() => {
         cargarVideos();
     }, []);
@@ -141,7 +148,17 @@ const Videos = ({ userAuth }) => {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         } else if (red === 'instagram') {
             try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
+                const fullText = `${texto} ${url}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullText);
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = fullText;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                }
                 alert("📸 TEXTO Y ENLACE COPIADOS. Abre Instagram y pega tu mensaje en una Historia o Post.");
                 link = `https://www.instagram.com/expedientexgranaino/`;
             } catch (err) {
@@ -153,7 +170,17 @@ const Videos = ({ userAuth }) => {
             window.open(link, '_blank');
         } else if (red === 'copy' || red === 'twitter' || red === 'whatsapp' || red === 'instagram') {
             try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
+                const fullText = `${texto} ${url}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullText);
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = fullText;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                }
                 alert("📎 ENLACE COPIADO AL PORTAPAPELES. ¡LISTO PARA DIFUNDIR!");
             } catch (err) {
                 alert("❌ ERROR AL COPIAR: Intenta compartir manualmente.");
@@ -237,16 +264,25 @@ const Videos = ({ userAuth }) => {
                         <div key={vid.id} id={`video-${vid.id}`} className="video-card-dossier original-dossier-card">
                             <div className="badge-prioridad">NIVEL 4</div>
                             <div className="video-frame-wrapper">
-                                <video 
-                                    controls 
-                                    playsInline 
-                                    preload="metadata" 
-                                    crossOrigin="anonymous"
-                                    controlsList={isAdmin ? undefined : "nodownload"}
-                                    onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}
-                                >
-                                    <source src={`${API_BASE_URL}/videos/${vid.url}`} type="video/mp4" />
-                                </video>
+                                {(() => {
+                                    const primerCaptura = vid.capturas && vid.capturas.trim() !== '' ? vid.capturas.split(',')[0].trim() : '';
+                                    const posterUrl = primerCaptura 
+                                        ? (primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`)
+                                        : undefined;
+                                    return (
+                                        <video 
+                                            controls 
+                                            playsInline 
+                                            preload="metadata" 
+                                            crossOrigin="anonymous"
+                                            poster={posterUrl}
+                                            controlsList={isAdmin ? undefined : "nodownload"}
+                                            onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}
+                                        >
+                                            <source src={`${API_BASE_URL}/videos/${vid.url}`} type="video/mp4" />
+                                        </video>
+                                    );
+                                })()}
                             </div>
                             <div className="video-info-pro">
                                 <div className="video-meta-pro">
@@ -286,30 +322,39 @@ const Videos = ({ userAuth }) => {
                             <div className="video-premium-body">
                                 <div className="video-premium-player-col">
                                     <div className="video-frame-wrapper">
-                                        {vid.url && !vid.url.includes('http') ? (
-                                            <video 
-                                                controls 
-                                                playsInline 
-                                                preload="metadata" 
-                                                crossOrigin="anonymous" 
-                                                key={vid.url}
-                                                controlsList={isAdmin ? undefined : "nodownload"}
-                                                onContextMenu={(e) => { if (!isAdmin) e.preventDefault(); }}
-                                            >
-                                                <source src={`${API_BASE_URL}/videos/${vid.url}`} type="video/mp4" />
-                                            </video>
-                                        ) : vid.url && (vid.url.includes('youtube.com') || vid.url.includes('youtu.be')) ? (
-                                            <iframe
-                                                src={vid.url.replace("watch?v=", "embed/").split("&")[0]}
-                                                title={vid.titulo}
-                                                allowFullScreen
-                                            ></iframe>
-                                        ) : (
-                                            (() => {
-                                                const primerCaptura = vid.capturas && vid.capturas.trim() !== '' ? vid.capturas.split(',')[0].trim() : '';
-                                                const bgUrl = primerCaptura 
-                                                    ? (primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`)
-                                                    : `${API_BASE_URL}/imagenes/video_default.png`;
+                                        {(() => {
+                                            const primerCaptura = vid.capturas && vid.capturas.trim() !== '' ? vid.capturas.split(',')[0].trim() : '';
+                                            let bgUrl = '';
+                                            let isYoutube = vid.url && (vid.url.includes('youtube.com') || vid.url.includes('youtu.be'));
+                                            let isLocal = vid.url && !vid.url.includes('http');
+                                            
+                                            if (isYoutube) {
+                                                const ytId = getYoutubeId(vid.url);
+                                                bgUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : `${API_BASE_URL}/imagenes/video_default.png`;
+                                            } else if (primerCaptura) {
+                                                bgUrl = primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`;
+                                            } else {
+                                                bgUrl = `${API_BASE_URL}/imagenes/video_default.png`;
+                                            }
+
+                                            if (isLocal || isYoutube) {
+                                                return (
+                                                    <div 
+                                                        className="video-preview-interactive" 
+                                                        style={{ backgroundImage: `url(${bgUrl})` }}
+                                                        onClick={() => setVideoAbierto(vid)}
+                                                    >
+                                                        <div className="video-preview-overlay">
+                                                            <div className="play-button-tactical">
+                                                                <div className="play-triangle"></div>
+                                                            </div>
+                                                            <span className="video-type-tag">
+                                                                {isLocal ? "📂 ARCHIVO LOCAL" : "📡 CANAL YOUTUBE"}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            } else {
                                                 return (
                                                     <div className="video-placeholder-dossier" style={{ backgroundImage: `url(${bgUrl})` }}>
                                                         <div className="placeholder-overlay">
@@ -318,8 +363,8 @@ const Videos = ({ userAuth }) => {
                                                         </div>
                                                     </div>
                                                 );
-                                            })()
-                                        )}
+                                            }
+                                        })()}
                                     </div>
                                 </div>
                                 
@@ -588,10 +633,11 @@ const Videos = ({ userAuth }) => {
                         }}>✖</button>
                         
                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
-                            {videoAbierto.url && videoAbierto.url.startsWith('http') && (videoAbierto.url.includes('youtube.com') || videoAbierto.url.includes('youtu.be')) ? (
+                            {videoAbierto.url && (videoAbierto.url.includes('youtube.com') || videoAbierto.url.includes('youtu.be')) ? (
                                 <iframe
-                                    src={videoAbierto.url.replace("watch?v=", "embed/").split("&")[0]}
+                                    src={`https://www.youtube.com/embed/${getYoutubeId(videoAbierto.url)}?autoplay=1`}
                                     title={videoAbierto.titulo}
+                                    allow="autoplay; encrypted-media"
                                     allowFullScreen
                                     style={{ width: '100%', height: '80vh', border: 'none' }}
                                 ></iframe>

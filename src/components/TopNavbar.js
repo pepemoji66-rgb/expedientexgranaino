@@ -13,7 +13,9 @@ import {
     Languages,
     Menu,
     X,
-    LogOut
+    LogOut,
+    Eye,
+    Monitor
 } from 'lucide-react';
 import ControlMusica from './ControlMusica';
 import logoBunker from '../assets/logo_bunker.jpeg';
@@ -60,7 +62,6 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
         { path: "/galeria", label: t('navGallery'), icon: <Image size={16} /> },
         { path: "/videos", label: t('navVideos'), icon: <Video size={16} /> },
         { path: "/noticias", label: t('navNews'), icon: <Newspaper size={16} /> },
-        { path: "/audios", label: t('navAudios'), icon: <Mic size={16} /> },
         { path: "/expedientes", label: t('navFiles'), icon: <FileText size={16} /> },
         { path: "/lugares", label: t('navMap'), icon: <Map size={16} /> },
     ];
@@ -73,6 +74,8 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
         );
     }
     menuItems.push({ path: "/casos-abiertos", label: "💀 TRUE CRIME", icon: <FileText size={16} /> });
+    menuItems.push({ path: "/misterios-historicos", label: "👁️ " + t('navMysteries'), icon: <Eye size={16} /> });
+    menuItems.push({ path: "/archipeg", label: language === 'en' ? "💻 My Software" : "💻 Mi Software", icon: <Monitor size={16} /> });
 
     return (
         <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>
@@ -119,6 +122,8 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                                 ENG
                             </button>
                         </div>
+                        {/* Componente del traductor de Google oculto en el DOM para la sincronización de idiomas de la API */}
+                        <GoogleTranslator />
                         <div className="tool-item music-tool">
                             <ControlMusica />
                         </div>

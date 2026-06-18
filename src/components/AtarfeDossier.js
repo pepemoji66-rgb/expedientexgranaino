@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
@@ -6,6 +7,7 @@ import './AtarfeDossier.css';
 
 const AtarfeDossier = () => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
     const [evidencias, setEvidencias] = useState({ videos: [], imagenes: [] });
     const [cargando, setCargando] = useState(true);
     const [expandida, setExpandida] = useState(null);
@@ -83,6 +85,40 @@ const AtarfeDossier = () => {
 
     return (
         <div className="atarfe-dossier-container">
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', flexWrap: 'wrap' }}>
+                <button
+                    onClick={() => navigate('/')}
+                    style={{
+                        background: 'rgba(0, 212, 255, 0.1)',
+                        color: '#00d4ff',
+                        border: '1px solid #00d4ff',
+                        padding: '10px 20px',
+                        cursor: 'pointer',
+                        borderRadius: '4px',
+                        fontWeight: 'bold',
+                        fontFamily: 'monospace',
+                        fontSize: '0.8rem'
+                    }}
+                >
+                    🏠 INICIO
+                </button>
+                <button
+                    onClick={() => navigate(-1)}
+                    style={{
+                        background: '#111',
+                        color: '#ccc',
+                        border: '1px solid #333',
+                        padding: '10px 20px',
+                        cursor: 'pointer',
+                        borderRadius: '4px',
+                        fontWeight: 'bold',
+                        fontFamily: 'monospace',
+                        fontSize: '0.8rem'
+                    }}
+                >
+                    ⬅ VOLVER
+                </button>
+            </div>
             <header className="dossier-header">
                 <div className="stamped-declassified">CONFIDENCIAL / NIVEL 4</div>
                 <h1 className="dossier-title">🛸 Caso OVNI en Granada: El Incidente Atarfe y Albolote</h1>
@@ -300,8 +336,18 @@ const AtarfeDossier = () => {
                         onClick={async () => {
                             const url = `${window.location.origin}/especial-atarfe`;
                             try {
-                                await navigator.clipboard.writeText(url);
-                                alert("📎 ¡ENLACE DEL DOSSIER COPIADO AL PORTAPAPELES! Listo para pegar en tus foros y páginas de misterio.");
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    await navigator.clipboard.writeText(url);
+                                    alert("📎 ¡ENLACE DEL DOSSIER COPIADO AL PORTAPAPELES! Listo para pegar en tus foros y páginas de misterio.");
+                                } else {
+                                    const input = document.createElement('textarea');
+                                    input.value = url;
+                                    document.body.appendChild(input);
+                                    input.select();
+                                    document.execCommand('copy');
+                                    document.body.removeChild(input);
+                                    alert("📎 ¡ENLACE DEL DOSSIER COPIADO AL PORTAPAPELES! Listo para pegar en tus foros y páginas de misterio.");
+                                }
                             } catch (err) {
                                 alert("❌ No se pudo copiar automáticamente. Copia la URL del navegador.");
                             }

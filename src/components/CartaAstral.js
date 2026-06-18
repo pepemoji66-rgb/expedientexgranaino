@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { safeLocalStorage } from '../utils/storage';
 import './cartaAstral.css';
 
 const CartaAstral = () => {
@@ -22,7 +23,7 @@ const CartaAstral = () => {
     const [buscandoCiudad, setBuscandoCiudad] = useState(false);
 
     useEffect(() => {
-        const sesion = localStorage.getItem('agente_sesion');
+        const sesion = safeLocalStorage.getItem('agente_sesion');
         if (sesion) {
             const user = JSON.parse(sesion);
             setUserAuth(user);

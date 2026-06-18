@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { safeLocalStorage } from '../utils/storage';
 
 const LanguageContext = createContext();
 
@@ -52,6 +53,7 @@ const translations = {
         navVideos: "VÍDEOS",
         navNews: "NOTICIAS",
         navAudios: "AUDIOS",
+        navMysteries: "MISTERIOS HISTÓRICOS",
         navFiles: "EXPEDIENTES",
         navMap: "MAPA",
         navHoroscope: "HORÓSCOPO",
@@ -385,7 +387,9 @@ const translations = {
         dossierAtarfeWatermarkTitle: "VIDEO ORIGINAL EXPEDIENTEXGRANAINO",
         dossierAtarfeWatermarkCopyright: "© INVESTIGACIÓN ATARFE - PROPIEDAD DEL BÚNKER",
         dossierAtarfeModalWatermark1: "ARCHIVO ORIGINAL: EXPEDIENTEXGRANAINO.COM",
-        dossierAtarfeModalWatermark2: "INVESTIGACIÓN ATARFE - PROPIEDAD EXCLUSIVA"
+        dossierAtarfeModalWatermark2: "INVESTIGACIÓN ATARFE - PROPIEDAD EXCLUSIVA",
+        casesDisclaimerTitle: "⚠️ DIRECTIVA DE INVESTIGACIÓN DE CAMPO",
+        casesDisclaimerText: "Los expedientes y misterios presentados en este búnker son fichas analíticas preliminares y resúmenes sintetizados (aproximadamente de unas 400 palabras). Dado que sobre muchos de estos sucesos se han escrito libros enteros y realizado décadas de investigación, instamos a todos los agentes y visitantes a utilizar este archivo como un punto de partida operativo. Le recomendamos encarecidamente contrastar datos, investigar a fondo por su cuenta y utilizar la caja de comentarios para aportar cualquier documento, testimonio o corrección que ayude a la comunidad."
     },
     en: {
         // General
@@ -436,6 +440,7 @@ const translations = {
         navVideos: "VIDEOS",
         navNews: "NEWS",
         navAudios: "AUDIOS",
+        navMysteries: "HISTORICAL MYSTERIES",
         navFiles: "DOSSIERS",
         navMap: "MAP",
         navHoroscope: "HOROSCOPE",
@@ -769,15 +774,34 @@ const translations = {
         dossierAtarfeWatermarkTitle: "ORIGINAL VIDEO EXPEDIENTEXGRANAINO",
         dossierAtarfeWatermarkCopyright: "© ATARFE INVESTIGATION - BUNKER PROPERTY",
         dossierAtarfeModalWatermark1: "ORIGINAL FILE: EXPEDIENTEXGRANAINO.COM",
-        dossierAtarfeModalWatermark2: "ATARFE INVESTIGATION - EXCLUSIVE PROPERTY"
+        dossierAtarfeModalWatermark2: "ATARFE INVESTIGATION - EXCLUSIVE PROPERTY",
+        casesDisclaimerTitle: "⚠️ FIELD INVESTIGATION DIRECTIVE",
+        casesDisclaimerText: "The dossiers and mysteries compiled in this bunker are preliminary analytical briefs and synthesized summaries (approximately 400 words). Since many of these events have inspired entire books and decades of research, we urge all agents and visitors to use this archive as an operational starting point. We strongly recommend cross-referencing facts, conducting your own deep research, and using the comment section to contribute any documents, testimonies, or corrections to help the community."
     }
 };
 
 export const LanguageProvider = ({ children }) => {
-    const [language, setLanguage] = useState(localStorage.getItem('bunker_lang') || 'es');
+    const [language, setLanguage] = useState(safeLocalStorage.getItem('bunker_lang') || 'es');
 
     useEffect(() => {
-        localStorage.setItem('bunker_lang', language);
+        safeLocalStorage.setItem('bunker_lang', language);
+        
+        // Sincronización automática continua con el combo de Google Translate
+        const syncGoogleTranslate = () => {
+            try {
+                const googleCombo = document.querySelector('.goog-te-combo');
+                if (googleCombo && googleCombo.value !== language) {
+                    googleCombo.value = language;
+                    googleCombo.dispatchEvent(new Event('change'));
+                }
+            } catch (e) {
+                // Silencioso
+            }
+        };
+
+        syncGoogleTranslate();
+        const interval = setInterval(syncGoogleTranslate, 2000);
+        return () => clearInterval(interval);
     }, [language]);
 
     const t = (key) => {
@@ -787,7 +811,7 @@ export const LanguageProvider = ({ children }) => {
     const toggleLanguage = () => {
         const nextLang = language === 'es' ? 'en' : 'es';
         setLanguage(nextLang);
-        localStorage.setItem('bunker_lang', nextLang);
+        safeLocalStorage.setItem('bunker_lang', nextLang);
 
         // --- SINCRONIZACIÓN TÁCTICA CON GOOGLE TRANSLATE ---
         // Intentamos forzar al widget de Google a traducir si está presente

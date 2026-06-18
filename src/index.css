@@ -30,3 +30,21 @@ iframe, video {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Ocultar el banner superior inyectado por Google Translate y sus tooltips */
+body {
+  top: 0 !important;
+}
+.skiptranslate iframe, 
+.goog-te-banner-frame, 
+.goog-te-banner, 
+#goog-gt-tt, 
+.goog-tooltip, 
+.goog-tooltip:hover {
+  display: none !important;
+}
+.goog-text-highlight {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}

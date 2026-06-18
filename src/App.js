@@ -18,13 +18,10 @@ import Galeria from './components/Galeria';
 import Lugares from './components/Lugares';
 import CasosAbiertos from './components/CasosAbiertos';
 import Noticias from './components/Noticias';
-import Audios from './components/Audios';
 import PoliticaPrivacidad from './components/PoliticaPrivacidad';
 import PoliticaCookies from './components/PoliticaCookies';
 import AvisoLegal from './components/AvisoLegal';
 import Horoscopo from './components/Horoscopo';
-import CartaAstral from './components/CartaAstral';
-import Tarot from './components/Tarot';
 import { X } from 'lucide-react';
 import TopNavbar from './components/TopNavbar';
 
@@ -32,8 +29,9 @@ import CookieBanner from './components/CookieBanner';
 import SobreNosotros from './components/SobreNosotros';
 import AtarfeDossier from './components/AtarfeDossier';
 import Archipeg from './components/Archipeg';
+import MisteriosHistoricos from './components/MisteriosHistoricos';
 import { useLanguage } from './context/LanguageContext';
-
+import { safeLocalStorage } from './utils/storage';
 
 import { API_BASE_URL, ADMIN_EMAIL } from './config';
 
@@ -87,7 +85,6 @@ function App() {
   // EL JEFE DEL BÚNKER (Cargado de config/env)
   const toggleMenu = () => setIsOpen(!isOpen);
   //guardado//
-  // --- CARGA DE DATOS DEL RADAR (CONTADORES) ---
   const cargarContadores = useCallback(async () => {
     try {
       console.log("📡 RADAR: Rastreando actividad en el sector...");
@@ -98,7 +95,6 @@ function App() {
         axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
         axios.get(`${API_BASE_URL}/api/expedientes`),
         axios.get(`${API_BASE_URL}/api/lugares-publicos`),
-        axios.get(`${API_BASE_URL}/api/audios/audios-publicos`),
         axios.get(`${API_BASE_URL}/api/visitas`)
       ]);
 
@@ -111,8 +107,8 @@ function App() {
         noticias: Array.isArray(datos[3]) ? datos[3].length : 0,
         expedientes: Array.isArray(datos[4]) ? datos[4].length : 0,
         lugares: Array.isArray(datos[5]) ? datos[5].length : 0,
-        audios: Array.isArray(datos[6]) ? datos[6].length : 0,
-        visitas_totales: datos[7]?.cuenta || 0
+        audios: 0,
+        visitas_totales: datos[6]?.cuenta || 0
       });
 
     } catch (err) {
@@ -122,14 +118,14 @@ function App() {
 
   useEffect(() => {
     // RECUPERAR SESIÓN: Unificado para evitar el limbo
-    const sesionGuardada = localStorage.getItem('agente_sesion');
+    const sesionGuardada = safeLocalStorage.getItem('agente_sesion');
     if (sesionGuardada) {
       try {
         const datosSesion = JSON.parse(sesionGuardada);
         console.log("🔍 DEPURE: Datos del agente ->", datosSesion);
         setUserAuth(datosSesion);
       } catch (e) {
-        localStorage.removeItem('agente_sesion');
+        safeLocalStorage.removeItem('agente_sesion');
       }
     }
     cargarContadores();
@@ -162,7 +158,7 @@ function App() {
 
   const actualizarAuth = (datos) => {
     if (datos) {
-      localStorage.setItem('agente_sesion', JSON.stringify(datos));
+      safeLocalStorage.setItem('agente_sesion', JSON.stringify(datos));
       setUserAuth(datos);
       cargarContadores();
     }
@@ -170,7 +166,7 @@ function App() {
 
   const cerrarSesion = () => {
     if (window.confirm(t('sysLogoutConfirm'))) {
-      localStorage.removeItem('agente_sesion');
+      safeLocalStorage.removeItem('agente_sesion');
       setUserAuth(null);
       setIsOpen(false);
       window.location.href = '/';
@@ -207,14 +203,12 @@ function App() {
                 { path: "/galeria", label: t('navGallery') },
                 { path: "/videos", label: t('navVideos') },
                 { path: "/noticias", label: t('navNews') },
-                { path: "/audios", label: t('navAudios') },
                 { path: "/expedientes", label: t('navFiles') },
                 { path: "/especial-atarfe", label: t('sysSidebarDossier') },
                 { path: "/lugares", label: t('navMap') },
                 { path: "/horoscopo", label: t('navHoroscope') },
-                { path: "/tarot", label: t('navTarot') },
-                { path: "/carta-astral", label: t('navAstral') },
                 { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
+                { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
                 { path: "/archipeg", label: "💻 ARCHIPEG V3" }
               ].map((route) => (
                 <li key={route.path} style={{ marginBottom: '15px' }}>
@@ -305,14 +299,12 @@ function App() {
               <Route path="/lugares" element={<Lugares />} />
               <Route path="/videos" element={<Videos userAuth={userAuth} />} />
               <Route path="/horoscopo" element={<Horoscopo />} />
-              <Route path="/tarot" element={<Tarot />} />
-              <Route path="/carta-astral" element={<CartaAstral />} />
 
               <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
               <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
               <Route path="/casos-abiertos" element={<CasosAbiertos userAuth={userAuth} />} />
+              <Route path="/misterios-historicos" element={<MisteriosHistoricos />} />
               <Route path="/noticias" element={<Noticias userAuth={userAuth} />} />
-              <Route path="/audios" element={<Audios userAuth={userAuth} />} />
               <Route path="/privacidad" element={<PoliticaPrivacidad />} />
               <Route path="/cookies" element={<PoliticaCookies />} />
                <Route path="/legal" element={<AvisoLegal />} />

@@ -2,15 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './paneladmin.css';
 import { API_BASE_URL, ADMIN_EMAIL } from '../config';
+import { safeLocalStorage } from '../utils/storage';
 
 const PanelAdmin = () => {
-    const [tab, setTab] = useState('usuarios');
+    const [tab, setTab] = useState('inicio');
     const [datos, setDatos] = useState({
         usuarios: [],
         noticias: [],
         imagenes: [],
         videos: [],
-        audios: [],
+        misterios_historicos: [],
         expedientes: [],
         lugares: [],
         casos_abiertos: [],
@@ -51,19 +52,31 @@ const PanelAdmin = () => {
     const [urlExternaAdmin, setUrlExternaAdmin] = useState('');
     const [esAtarfeSubida, setEsAtarfeSubida] = useState(false);
     const [tipoRelatoSubida, setTipoRelatoSubida] = useState('jefe');
+    
+    // ESTADOS PARA PORTADA DE VÍDEO EN CREACIÓN
+    const [archivoCapturaSubida, setArchivoCapturaSubida] = useState(null);
+    const [urlCapturaSubida, setUrlCapturaSubida] = useState('');
+
+    // ESTADOS DE REDES SOCIALES
+    const [modalRedes, setModalRedes] = useState(null); // item a publicar
+    const [redesSeleccionadas, setRedesSeleccionadas] = useState({ twitter: true, facebook: true });
+    const [publicandoRedes, setPublicandoRedes] = useState(false);
+    const [resultadoRedes, setResultadoRedes] = useState(null);
+    const [publicarAlSubir, setPublicarAlSubir] = useState(false);
+    const [estadoRedes, setEstadoRedes] = useState(null);
 
     const cargarDatos = useCallback(async () => {
         setCargando(true);
         try {
-            const [resU, resV, resE, resI, resL, resN, resA, resC, resCOM, resARCH] = await Promise.allSettled([
+            const [resU, resV, resE, resI, resL, resN, resM, resC, resCOM, resARCH] = await Promise.allSettled([
                 axios.get(`${API_BASE_URL}/api/usuarios`),
                 axios.get(`${API_BASE_URL}/api/videos/todos`),
                 axios.get(`${API_BASE_URL}/api/expedientes/todos`),
                 axios.get(`${API_BASE_URL}/api/galeria/admin/todas-las-imagenes`),
                 axios.get(`${API_BASE_URL}/api/lugares`),
                 axios.get(`${API_BASE_URL}/api/galeria/admin/todas-noticias`),
-                axios.get(`${API_BASE_URL}/api/audios`),
-                axios.get(`${API_BASE_URL}/api/casos`),
+                axios.get(`${API_BASE_URL}/api/misterios-historicos/todos`),
+                axios.get(`${API_BASE_URL}/api/casos/todos`),
                 axios.get(`${API_BASE_URL}/api/admin/todos-comentarios`),
                 axios.get(`${API_BASE_URL}/api/archipeg/solicitudes`)
             ]);
@@ -83,7 +96,7 @@ const PanelAdmin = () => {
                 imagenes: parse(resI),
                 lugares: parse(resL),
                 noticias: parse(resN),
-                audios: parse(resA),
+                misterios_historicos: parse(resM),
                 casos_abiertos: parse(resC),
                 comentarios: parse(resCOM),
                 archipeg: parse(resARCH)
@@ -95,9 +108,19 @@ const PanelAdmin = () => {
         }
     }, []);
 
+    // Cargar estado de las plataformas al montar
+    const cargarEstadoRedes = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/social/estado`);
+            setEstadoRedes(res.data);
+        } catch (err) {
+            console.log('📡 Estado de redes no disponible');
+        }
+    }, []);
+
     useEffect(() => {
         // SEGURIDAD NIVEL 5: Verificación interna de sesión
-        const sesion = localStorage.getItem('agente_sesion');
+        const sesion = safeLocalStorage.getItem('agente_sesion');
         if (!sesion) {
             window.location.href = '/';
             return;
@@ -109,8 +132,9 @@ const PanelAdmin = () => {
         }
 
         cargarDatos();
+        cargarEstadoRedes();
         setPaginaActual(1);
-    }, [tab, cargarDatos]);
+    }, [tab, cargarDatos, cargarEstadoRedes]);
 
     const gestionar = async (id, accion, tipo) => {
         if (!window.confirm(`¿Confirmar orden de ${accion.toUpperCase()} para el ID #${id}?`)) return;
@@ -125,7 +149,8 @@ const PanelAdmin = () => {
                 imagenes: { base: '/galeria/borrar-imagen', approve: '/galeria/admin/aprobar-imagen' },
                 noticias: { base: '/galeria/borrar-noticia', approve: '/galeria/admin/aprobar-noticia' },
                 lugares: { base: '/expedientes/borrar-lugar', approve: '/expedientes/aprobar' },
-                audios: { base: '/audios', approve: '/audios/aprobar' }, 
+                casos_abiertos: { base: '/casos', approve: '/casos/aprobar' },
+                misterios_historicos: { base: '/misterios-historicos', approve: '/misterios-historicos/aprobar' },
                 chat: { base: '/borrar-mensaje' },
                 comentarios: { base: '/comentarios' },
                 archipeg: { base: '/archipeg/solicitudes', approve: '/archipeg/solicitudes' }
@@ -205,13 +230,29 @@ const PanelAdmin = () => {
             if (tab === 'imagenes') endpoint = `${API_BASE_URL}/api/galeria/imagenes/${id}`;
             if (tab === 'lugares') endpoint = `${API_BASE_URL}/api/expedientes/lugares/${id}`;
             if (tab === 'casos_abiertos') endpoint = `${API_BASE_URL}/api/casos/${id}`;
-            if (tab === 'audios') endpoint = `${API_BASE_URL}/api/audios/${id}`;
+            if (tab === 'misterios_historicos') endpoint = `${API_BASE_URL}/api/misterios-historicos/${id}`;
             
             let payload;
             let config = {};
 
             // Mapeo dinámico para el backend (lugares/imagenes usan nombre/descripcion, otros titulo/contenido)
             const finalData = { ...editForm };
+
+            // Limpiar rutas locales de capturas y url para vídeos
+            if (tab === 'videos') {
+                if (finalData.capturas) {
+                    finalData.capturas = finalData.capturas
+                        .split(',')
+                        .map(u => u.trim())
+                        .filter(u => u && !(u.includes('\\') || u.startsWith('C:') || u.includes('/Users/')))
+                        .join(',');
+                }
+                if (finalData.url) {
+                    if (finalData.url.includes('\\') || finalData.url.startsWith('C:') || finalData.url.includes('/Users/')) {
+                        finalData.url = '';
+                    }
+                }
+            }
 
             // AUTO-UPLOAD CAPTURAS DE VÍDEOS: si hay capturas seleccionadas pero no cargadas, las subimos automáticamente
             if (tab === 'videos' && archivosCapturas && archivosCapturas.length > 0) {
@@ -297,13 +338,65 @@ const PanelAdmin = () => {
             const id = itemParaEditar.id || itemParaEditar._id;
             const res = await axios.post(`${API_BASE_URL}/api/videos/${id}/capturas`, formData);
             
-            setEditForm(prev => ({ ...prev, capturas: res.data.urls }));
+            const urlsLimpias = res.data.urls
+                ? res.data.urls.split(',').map(u => u.trim()).filter(u => u && !(u.includes('\\') || u.startsWith('C:') || u.includes('/Users/'))).join(',')
+                : '';
+
+            setEditForm(prev => ({ ...prev, capturas: urlsLimpias }));
             setArchivosCapturas([]);
             alert("✅ Evidencias fotográficas añadidas al registro.");
         } catch (err) {
             alert("❌ Fallo al transmitir las capturas.");
         } finally {
             setCargando(false);
+        }
+    };
+
+    // --- FUNCIÓN: PUBLICAR EN REDES SOCIALES ---
+    const publicarEnRedes = async (item) => {
+        const plataformas = [];
+        if (redesSeleccionadas.twitter) plataformas.push('twitter');
+        if (redesSeleccionadas.facebook) plataformas.push('facebook');
+
+        if (plataformas.length === 0) {
+            alert('⚠️ Selecciona al menos una plataforma.');
+            return;
+        }
+
+        setPublicandoRedes(true);
+        setResultadoRedes(null);
+
+        try {
+            // Construir la URL pública del contenido
+            let urlContenido = 'https://expedientexgranaino.com';
+            if (item.id) {
+                const seccion = tab === 'expedientes' || tab === 'misterios_historicos' ? 'leer-historia' : tab === 'noticias' ? 'noticias' : tab === 'imagenes' ? 'galeria' : tab === 'videos' ? 'videos' : tab === 'casos_abiertos' ? 'casos-abiertos' : '';
+                if (seccion === 'leer-historia') {
+                    urlContenido = `https://expedientexgranaino.com/${seccion}/${item.id}${tab === 'misterios_historicos' ? '?src=misterios' : ''}`;
+                } else if (seccion) {
+                    urlContenido = `https://expedientexgranaino.com/${seccion}`;
+                }
+            }
+
+            const res = await axios.post(`${API_BASE_URL}/api/social/publicar`, {
+                titulo: item.titulo || item.nombre || 'Nuevo Expediente',
+                contenido: item.contenido || item.descripcion || item.cuerpo || '',
+                url: urlContenido,
+                imagen_url: item.imagen_url || item.url_imagen || item.imagen || '',
+                plataformas
+            });
+
+            setResultadoRedes(res.data);
+        } catch (err) {
+            console.error('❌ Error publicando en redes:', err);
+            setResultadoRedes({
+                mensaje: '❌ Error de conexión con el servidor.',
+                resultados: [],
+                exitosas: 0,
+                fallidas: 1
+            });
+        } finally {
+            setPublicandoRedes(false);
         }
     };
 
@@ -315,7 +408,7 @@ const PanelAdmin = () => {
             return;
         }
 
-        const esTexto = tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos';
+        const esTexto = tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos';
 
         // PROTOCOLO DE VALIDACIÓN REFORZADO
         if (esTexto) {
@@ -330,20 +423,32 @@ const PanelAdmin = () => {
             }
         }
 
+        if (tipoSubida === 'videos') {
+            const esRutaLocal = (val) => val && (val.includes('\\') || val.startsWith('C:') || val.includes('/Users/'));
+            if (esRutaLocal(urlCapturaSubida)) {
+                setMensajeSubida("❌ ERROR: Has introducido una ruta local en la portada. Sube la portada con el selector de archivos.");
+                return;
+            }
+            if (esRutaLocal(urlExternaAdmin)) {
+                setMensajeSubida("❌ ERROR: Has introducido una ruta local en el enlace del vídeo.");
+                return;
+            }
+        }
+
         const formData = new FormData();
         if (archivoSubida) formData.append('archivo', archivoSubida);
         if (urlExternaAdmin) formData.append('url_externa', urlExternaAdmin);
         formData.append('titulo', tituloSubida);
         formData.append('tipo', tipoSubida);
         if (contenidoSubida) formData.append('contenido', contenidoSubida);
-        if (tipoSubida === 'casos_abiertos') {
+        if (tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') {
             if (tituloEnSubida) formData.append('titulo_en', tituloEnSubida);
             if (contenidoEnSubida) formData.append('contenido_en', contenidoEnSubida);
         }
         if (tipoSubida === 'noticias' && editForm.fuente_url) formData.append('fuente_url', editForm.fuente_url);
         
-        // Coordenadas para Lugares, Relatos, Noticias y Vídeos
-        if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos') {
+        // Coordenadas para Lugares, Relatos, Noticias, Vídeos, Casos y Misterios
+        if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos' || tipoSubida === 'videos') {
             formData.append('latitud', editForm.latitud || 0);
             formData.append('longitud', editForm.longitud || 0);
             formData.append('ubicacion', editForm.ubicacion || '');
@@ -356,23 +461,71 @@ const PanelAdmin = () => {
         if (tipoSubida === 'expedientes') {
             formData.append('tipo_relato', tipoRelatoSubida);
         }
-        
-        if (tipoSubida === 'audios' && editForm.imagen_url) {
-            formData.append('imagen_url', editForm.imagen_url);
+
+        if (tipoSubida === 'videos' && urlCapturaSubida) {
+            formData.append('capturas', urlCapturaSubida);
         }
 
 
         try {
             setCargando(true);
             setMensajeSubida("🛰️ Transmitiendo al búnker...");
-            await axios.post(`${API_BASE_URL}/api/admin/admin/upload`, formData);
+            const resUpload = await axios.post(`${API_BASE_URL}/api/admin/admin/upload`, formData);
+            const urlImagenCargada = resUpload.data?.ruta || '';
+            const newRecordId = resUpload.data?.id;
             setMensajeSubida("✅ REGISTRO CLASIFICADO");
+
+            // Subida consecutiva de la portada del vídeo si se seleccionó archivo
+            if (tipoSubida === 'videos' && newRecordId && archivoCapturaSubida) {
+                setMensajeSubida("🖼️ Subiendo archivo de portada...");
+                const imgFormData = new FormData();
+                imgFormData.append('capturas', archivoCapturaSubida);
+                await axios.post(`${API_BASE_URL}/api/videos/${newRecordId}/capturas`, imgFormData);
+            }
+
+            // --- PUBLICAR EN REDES SOCIALES AUTOMÁTICAMENTE ---
+            if (publicarAlSubir) {
+                setMensajeSubida("✅ REGISTRO CLASIFICADO — 📡 Publicando en redes sociales...");
+                try {
+                    let urlContenido = 'https://expedientexgranaino.com';
+                    const seccionMap = { expedientes: 'expedientes', noticias: 'noticias', imagenes: 'galeria', videos: 'videos', casos_abiertos: 'casos-abiertos' };
+                    if (seccionMap[tipoSubida]) {
+                        urlContenido = `https://expedientexgranaino.com/${seccionMap[tipoSubida]}`;
+                    }
+
+                    const plataformas = [];
+                    if (redesSeleccionadas.twitter) plataformas.push('twitter');
+                    if (redesSeleccionadas.facebook) plataformas.push('facebook');
+
+                    if (plataformas.length > 0) {
+                        const resSocial = await axios.post(`${API_BASE_URL}/api/social/publicar`, {
+                            titulo: tituloSubida,
+                            contenido: contenidoSubida || '',
+                            url: urlContenido,
+                            imagen_url: urlImagenCargada,
+                            plataformas
+                        });
+
+                        if (resSocial.data.exitosas > 0) {
+                            setMensajeSubida(`✅ REGISTRO CLASIFICADO + 📡 Publicado en ${resSocial.data.exitosas} red(es)`);
+                        } else {
+                            setMensajeSubida(`✅ REGISTRO CLASIFICADO — ⚠️ Redes: ${resSocial.data.mensaje}`);
+                        }
+                    }
+                } catch (errSocial) {
+                    console.error('⚠️ Error en publicación social post-subida:', errSocial);
+                    setMensajeSubida("✅ REGISTRO CLASIFICADO — ⚠️ Fallo al publicar en redes (revisa claves .env)");
+                }
+            }
+
             setTituloSubida('');
             setTituloEnSubida('');
             setArchivoSubida(null);
             setContenidoSubida('');
             setContenidoEnSubida('');
             setUrlExternaAdmin('');
+            setArchivoCapturaSubida(null);
+            setUrlCapturaSubida('');
             cargarDatos();
         } catch (err) {
             setMensajeSubida("❌ FALLO EN LA CARGA");
@@ -404,12 +557,16 @@ const PanelAdmin = () => {
             <h2 className="titulo-neon">CONTROL DE MANDO UNIFICADO</h2>
 
             <div className="tabs-admin">
+                <button key="inicio" className={tab === 'inicio' ? 'active' : ''} onClick={() => { setTab('inicio'); setPaginaActual(1); }} style={tab !== 'inicio' ? { borderColor: '#00d4ff', color: '#00d4ff' } : {}}>
+                    🏠 INICIO
+                </button>
                 {Object.keys(datos).map(t => {
                     let label = t.toUpperCase();
                     if (t === 'imagenes') label = 'FOTOS';
                     if (t === 'noticias') label = 'NOTICIAS';
                     if (t === 'expedientes') label = 'RELATOS';
                     if (t === 'casos_abiertos') label = '💀 CASOS ABIERTOS';
+                    if (t === 'misterios_historicos') label = '👁️ MISTERIOS';
                     if (t === 'archipeg') label = '💻 ARCHIPEG';
                     
                     return (
@@ -423,7 +580,78 @@ const PanelAdmin = () => {
                 </button>
             </div>
 
-            {tab !== 'subir' ? (
+            {tab === 'inicio' ? (
+                <div className="inicio-dashboard">
+                    <div className="inicio-bienvenida">
+                        <h3>📡 ESTADO DEL BÚNKER</h3>
+                        <p className="inicio-fecha">{new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
+
+                    <div className="inicio-stats-grid">
+                        {[
+                            { icon: '👥', count: datos.usuarios.length, label: 'Agentes', color: '#00ff41' },
+                            { icon: '📁', count: datos.expedientes.length, label: 'Relatos', color: '#00d4ff' },
+                            { icon: '🎬', count: datos.videos.length, label: 'Vídeos', color: '#ff6b6b' },
+                            { icon: '📷', count: datos.imagenes.length, label: 'Fotos', color: '#ffd93d' },
+                            { icon: '📰', count: datos.noticias.length, label: 'Noticias', color: '#6c5ce7' },
+                            { icon: '👁️', count: datos.misterios_historicos.length, label: 'Misterios', color: '#ff00ff' },
+                            { icon: '🗺️', count: datos.lugares.length, label: 'Lugares', color: '#00b894' },
+                            { icon: '💀', count: datos.casos_abiertos.length, label: 'Casos', color: '#d63031' },
+                            { icon: '💬', count: datos.comentarios.length, label: 'Comentarios', color: '#0984e3' },
+                            { icon: '💻', count: datos.archipeg.length, label: 'ARCHIPEG', color: '#fdcb6e' }
+                        ].map((stat, i) => (
+                            <div key={i} className="inicio-stat-card" style={{ borderColor: stat.color + '30', color: stat.color }}>
+                                <span className="inicio-stat-icon">{stat.icon}</span>
+                                <span className="inicio-stat-number" style={{ color: stat.color }}>{stat.count}</span>
+                                <span className="inicio-stat-label">{stat.label}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="inicio-promo-section">
+                        <div className="inicio-promo-header">
+                            <h3>🎬 GENERADOR DE VÍDEO PROMOCIONAL</h3>
+                            <p>Lanza la presentación cinematográfica y graba tu pantalla para crear vídeos para redes sociales</p>
+                        </div>
+
+                        <div className="inicio-promo-actions">
+                            <button className="inicio-btn-cine" onClick={() => window.open('/promo/cine.html', '_blank')}>
+                                <span className="btn-cine-icon">▶</span>
+                                <div>
+                                    <strong>MODO CINE</strong>
+                                    <small>Presentación automática para grabar</small>
+                                </div>
+                            </button>
+                            <button className="inicio-btn-landing" onClick={() => window.open('/promo/', '_blank')}>
+                                <span className="btn-cine-icon">🌐</span>
+                                <div>
+                                    <strong>LANDING PROMO</strong>
+                                    <small>Página promocional interactiva</small>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div className="inicio-promo-tip">
+                            <span>💡</span>
+                            <div>
+                                <strong>¿CÓMO GRABAR EL VÍDEO?</strong>
+                                <p>1. Pulsa "MODO CINE" para abrir la presentación</p>
+                                <p>2. Pon la ventana en pantalla completa (F11)</p>
+                                <p>3. Activa la grabación de pantalla (Win+G en Windows, o usa OBS)</p>
+                                <p>4. La presentación se reproduce automáticamente con música 🎵</p>
+                                <p>5. Cuando termine, para la grabación y ya tienes tu vídeo 🎉</p>
+                            </div>
+                        </div>
+
+                        <div className="inicio-promo-preview">
+                            <h4>📺 VISTA PREVIA DE LA LANDING</h4>
+                            <div className="inicio-iframe-container">
+                                <iframe src="/promo/" title="Preview promocional" loading="lazy" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : tab !== 'subir' ? (
                 <>
                     <div className="admin-actions-bar">
                         <div className="buscador-admin">
@@ -514,7 +742,7 @@ const PanelAdmin = () => {
                                                         </select>
                                                     </div>
                                                 )}
-                                                {tab === 'expedientes' && (
+                                                {(tab === 'expedientes' || tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                                     <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                                         {item.imagen_url && (
                                                             <img 
@@ -574,29 +802,9 @@ const PanelAdmin = () => {
                                                         <div className="texto-verde" style={{fontSize: '0.75rem', maxWidth: '200px'}}>{item.cuerpo?.substring(0, 80)}...</div>
                                                     )
                                                 )}
-                                                {tab === 'audios' && (item.ruta || item.url_audio) && (
-                                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                        {item.imagen_url && (
-                                                            <img 
-                                                                src={item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`} 
-                                                                className="img-admin-mini-preview" 
-                                                                alt="audio-thumb"
-                                                                onClick={() => setImagenSeleccionada(item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`)}
-                                                            />
-                                                        )}
-                                                        {(item.ruta || item.url_audio).includes('<iframe') ? (
-                                                            <div style={{ width: '150px', overflow: 'hidden' }}>
-                                                                <span style={{fontSize: '0.7rem', color: '#00d4ff'}}>📡 IFRAME AUDIO</span>
-                                                            </div>
-                                                        ) : (item.ruta || item.url_audio).startsWith('http') && !(item.ruta || item.url_audio).toLowerCase().endsWith('.mp3') && !(item.ruta || item.url_audio).toLowerCase().endsWith('.wav') ? (
-                                                            <a href={item.ruta || item.url_audio} target="_blank" rel="noreferrer" style={{color: '#00d4ff', fontSize: '0.7rem', textDecoration: 'none', border: '1px solid #00d4ff', padding: '2px 5px', borderRadius: '3px'}}>🎧 ENLACE</a>
-                                                        ) : (
-                                                            <audio controls crossOrigin="anonymous" style={{ height: '30px', width: '150px' }}>
-                                                                <source src={(item.ruta || item.url_audio).startsWith('http') 
-                                                                    ? (item.ruta || item.url_audio) 
-                                                                    : `${API_BASE_URL}/audios/${item.ruta || item.url_audio}`} type="audio/mpeg" />
-                                                            </audio>
-                                                        )}
+                                                {tab === 'misterios_historicos' && (
+                                                    <div className="texto-verde" style={{fontSize: '0.75rem', maxWidth: '200px'}}>
+                                                        {item.contenido?.substring(0, 80)}...
                                                     </div>
                                                 )}
                                                 {tab === 'chat' && <div className="msg-preview">"{item.mensaje}"</div>}
@@ -627,32 +835,19 @@ const PanelAdmin = () => {
                                                     {!esAprobado && tab !== 'chat' && (
                                                         <button className="btn-ok" onClick={() => gestionar(id, 'aprobar', tab)}>OK</button>
                                                     )}
-                                                    {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares' || tab === 'casos_abiertos' || tab === 'audios') && (
+                                                    {(tab === 'expedientes' || tab === 'videos' || tab === 'noticias' || tab === 'imagenes' || tab === 'lugares' || tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                                         <button className="btn-edit" onClick={() => handleEditar(item)}>EDIT</button>
                                                     )}
-                                                    {esAprobado && (tab === 'expedientes' || tab === 'noticias' || tab === 'imagenes') && (
+                                                    {esAprobado && (tab === 'expedientes' || tab === 'noticias' || tab === 'imagenes' || tab === 'videos' || tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                                         <button 
-                                                            className="btn-social-share" 
+                                                            className="btn-publicar-redes" 
                                                             onClick={() => {
-                                                                const text = `${(item.titulo || item.nombre || "Nuevo Expediente").toUpperCase()}\n\n${(item.contenido || item.descripcion || item.cuerpo || "").substring(0, 200)}...\n\nDescubre más en: https://expedientexgranaino.com\n\n#Granada #Misterio #ExpedienteX`;
-                                                                const imageUrl = item.imagen_url || item.url_imagen || item.imagen;
-                                                                const fullImageUrl = imageUrl?.startsWith('http') ? imageUrl : `${API_BASE_URL}/imagenes/${imageUrl}`;
-                                                                
-                                                                if (navigator.share) {
-                                                                    navigator.share({
-                                                                        title: item.titulo || item.nombre,
-                                                                        text: text,
-                                                                        url: window.location.origin
-                                                                    }).catch(console.error);
-                                                                } else {
-                                                                    alert("📋 CONTENIDO PREPARADO PARA INSTAGRAM:\n\n1. La imagen se ha resaltado.\n2. Copia el texto que aparecerá ahora.\n3. Abre Instagram y pega.");
-                                                                    navigator.clipboard.writeText(text);
-                                                                    alert("✅ Texto copiado al portapapeles. ¡Ya puedes pegarlo en Instagram!");
-                                                                }
+                                                                setModalRedes(item);
+                                                                setResultadoRedes(null);
+                                                                setRedesSeleccionadas({ twitter: true, facebook: true });
                                                             }}
-                                                            style={{ background: '#e1306c', color: 'white', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem' }}
                                                         >
-                                                            📱 REDES
+                                                            📡 REDES
                                                         </button>
                                                     )}
                                                     <button className="btn-del" onClick={() => gestionar(id, 'borrar', tab)}>DEL</button>
@@ -684,7 +879,7 @@ const PanelAdmin = () => {
                                     <option value="imagenes">FOTOS</option>
                                     <option value="noticias">NOTICIAS</option>
                                     <option value="videos">VÍDEOS</option>
-                                    <option value="audios">AUDIOS (PODCAST)</option>
+                                    <option value="misterios_historicos">👁️ MISTERIOS HISTÓRICOS</option>
                                     <option value="lugares">LUGARES (MAPA)</option>
                                     <option value="expedientes">RELATOS</option>
                                     <option value="casos_abiertos">💀 CASOS ABIERTOS</option>
@@ -706,12 +901,7 @@ const PanelAdmin = () => {
                                 <input type="text" value={tituloSubida} onChange={e => setTituloSubida(e.target.value)} placeholder="Título del registro..." />
                             </div>
                             
-                            {tipoSubida === 'casos_abiertos' && (
-                                <div className="form-group-admin">
-                                    <label style={{ color: '#00d4ff' }}>TÍTULO (INGLÉS):</label>
-                                    <input type="text" value={tituloEnSubida} onChange={e => setTituloEnSubida(e.target.value)} placeholder="Title in English..." style={{ background: '#000', color: '#00d4ff', border: '1px solid #333' }} />
-                                </div>
-                            )}
+
                         </div>
                         
                             {tipoSubida === 'noticias' && (
@@ -726,19 +916,7 @@ const PanelAdmin = () => {
                                  </div>
                             )}
 
-                            {tipoSubida === 'audios' && (
-                                <div className="form-group-admin" style={{ marginBottom: '15px' }}>
-                                    <label style={{ color: '#ff00ff' }}>🖼️ URL DE IMAGEN PARA EL AUDIO (OPCIONAL):</label>
-                                    <input 
-                                        type="url" value={editForm.imagen_url} 
-                                        onChange={e => setEditForm({...editForm, imagen_url: e.target.value})} 
-                                        placeholder="https://imagen-del-podcast.jpg..." 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff00ff', border: '1px solid #333' }}
-                                     />
-                                </div>
-                            )}
-
-                        {tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos' ? (
+                        {tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos' || tipoSubida === 'videos' ? (
                             <>
                                 <div className="form-group-admin">
                                     <label>CONTENIDO / DESCRIPCIÓN:</label>
@@ -750,25 +928,74 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px' }}
                                     ></textarea>
                                 </div>
-                                {tipoSubida === 'casos_abiertos' && (
-                                    <div className="form-group-admin" style={{ marginTop: '10px' }}>
-                                        <label style={{ color: '#00d4ff' }}>CONTENIDO (INGLÉS):</label>
-                                        <textarea 
-                                            className="textarea-bunker-admin"
-                                            value={contenidoEnSubida} 
-                                            onChange={e => setContenidoEnSubida(e.target.value)} 
-                                            placeholder="Translate the content to English..."
-                                            style={{ width: '100%', minHeight: '100px', background: '#000', color: '#00d4ff', border: '1px solid #333', padding: '10px' }}
-                                        ></textarea>
-                                    </div>
-                                )}
+
                             </>
                         ) : null}
 
-                        <div className="form-group-admin">
-                            <label>ARCHIVO ADJUNTO {(tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos') ? '(OPCIONAL)' : ''}:</label>
-                            <input type="file" onChange={e => setArchivoSubida(e.target.files[0])} />
-                        </div>
+                        {tipoSubida === 'videos' ? (
+                            <>
+                                <div style={{ background: 'rgba(0, 212, 255, 0.05)', padding: '15px', border: '1px solid rgba(0, 212, 255, 0.2)', marginBottom: '15px', borderRadius: '5px' }}>
+                                    <label style={{ display: 'block', color: '#00d4ff', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '8px' }}>
+                                        📼 ORIGEN DEL VÍDEO (MP4 O YOUTUBE)
+                                    </label>
+                                    
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <label style={{ fontSize: '0.75rem', color: '#ccc', display: 'block', marginBottom: '4px' }}>Opción A: Subir archivo de vídeo (MP4)</label>
+                                        <input type="file" accept="video/mp4,video/*" onChange={e => setArchivoSubida(e.target.files[0])} style={{ fontSize: '0.8rem', color: '#fff' }} />
+                                        {archivoSubida && <small style={{ color: '#00d4ff', display: 'block', marginTop: '4px' }}>✓ Archivo seleccionado: {archivoSubida.name}</small>}
+                                    </div>
+
+                                    <div style={{ borderTop: '1px solid #222', paddingTop: '10px' }}>
+                                        <label style={{ fontSize: '0.75rem', color: '#ccc', display: 'block', marginBottom: '4px' }}>Opción B: Enlace de YouTube o vídeo externo</label>
+                                        <input 
+                                            type="text" 
+                                            value={urlExternaAdmin} 
+                                            onChange={e => setUrlExternaAdmin(e.target.value)} 
+                                            placeholder="Ej: https://www.youtube.com/watch?v=... o nombre de archivo de vídeo"
+                                            style={{ width: '100%', padding: '8px', background: '#000', color: '#fff', border: '1px solid #333' }}
+                                        />
+                                        {urlExternaAdmin && (urlExternaAdmin.includes('\\') || urlExternaAdmin.startsWith('C:') || urlExternaAdmin.includes('/Users/')) && (
+                                            <small style={{ color: '#ff4444', display: 'block', marginTop: '4px', fontWeight: 'bold' }}>
+                                                ⚠️ ALERTA: Has escrito una ruta de archivo local de tu ordenador. Los enlaces deben ser direcciones web.
+                                            </small>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div style={{ background: 'rgba(255, 177, 0, 0.05)', padding: '15px', border: '1px solid rgba(255, 177, 0, 0.2)', marginBottom: '15px', borderRadius: '5px' }}>
+                                    <label style={{ display: 'block', color: '#ffb100', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '8px' }}>
+                                        🖼️ IMAGEN DE PORTADA / MINIATURA DEL VÍDEO (Captura)
+                                    </label>
+                                    
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <label style={{ fontSize: '0.75rem', color: '#ccc', display: 'block', marginBottom: '4px' }}>Opción A: Subir imagen desde tu ordenador</label>
+                                        <input type="file" accept="image/*" onChange={e => setArchivoCapturaSubida(e.target.files[0])} style={{ fontSize: '0.8rem', color: '#fff' }} />
+                                        {archivoCapturaSubida && <small style={{ color: '#ffb100', display: 'block', marginTop: '4px' }}>✓ Portada seleccionada: {archivoCapturaSubida.name}</small>}
+                                    </div>
+
+                                    <div style={{ borderTop: '1px solid #222', paddingTop: '10px' }}>
+                                        <label style={{ fontSize: '0.75rem', color: '#ccc', display: 'block', marginBottom: '4px' }}>Opción B: URL de la imagen de portada</label>
+                                        <input 
+                                            type="text" 
+                                            value={urlCapturaSubida} 
+                                            onChange={e => setUrlCapturaSubida(e.target.value)} 
+                                            placeholder="Ej: https://expedientexgranaino.com/imagenes/mi_captura.png"
+                                            style={{ width: '100%', padding: '8px', background: '#000', color: '#fff', border: '1px solid #333' }}
+                                        />
+                                        {urlCapturaSubida && (urlCapturaSubida.includes('\\') || urlCapturaSubida.startsWith('C:') || urlCapturaSubida.includes('/Users/')) && (
+                                            <small style={{ color: '#ff4444', display: 'block', marginTop: '4px', fontWeight: 'bold' }}>
+                                                ⚠️ ALERTA: Has escrito una ruta de archivo local de tu ordenador. Para usar esa imagen, selecciónala arriba en "Opción A".
+                                            </small>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="form-group-admin">
+                                <label>ARCHIVO ADJUNTO {(tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') ? '(OPCIONAL)' : ''}:</label>
+                                <input type="file" onChange={e => setArchivoSubida(e.target.files[0])} />
+                            </div>
+                        )}
 
                         {tipoSubida === 'imagenes' && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '15px', background: 'rgba(0,255,65,0.05)', border: '1px solid var(--color-principal)', marginTop: '10px', marginBottom: '10px' }}>
@@ -782,18 +1009,20 @@ const PanelAdmin = () => {
                             </div>
                         )}
                         
-                        <div className="form-group-admin" style={{marginTop: '10px'}}>
-                            <label style={{ color: '#00d4ff' }}>🌐 ENLACE EXTERNO O IFRAME (Opcional):</label>
-                            <textarea 
-                                className="input-bunker" 
-                                value={urlExternaAdmin} 
-                                onChange={e => setUrlExternaAdmin(e.target.value)}
-                                placeholder="Pega aquí el enlace de otra página, código de inserción (iframe), YouTube, etc."
-                                style={{ width: '100%', minHeight: '60px', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333' }}
-                            />
-                        </div>
+                        {tipoSubida !== 'videos' && (
+                            <div className="form-group-admin" style={{marginTop: '10px'}}>
+                                <label style={{ color: '#00d4ff' }}>🌐 ENLACE EXTERNO O IFRAME (Opcional):</label>
+                                <textarea 
+                                    className="input-bunker" 
+                                    value={urlExternaAdmin} 
+                                    onChange={e => setUrlExternaAdmin(e.target.value)}
+                                    placeholder="Pega aquí el enlace de otra página, código de inserción (iframe), YouTube, etc."
+                                    style={{ width: '100%', minHeight: '60px', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333' }}
+                                />
+                            </div>
+                        )}
                         
-                        {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'videos') && (
+                        {(tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'imagenes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos' || tipoSubida === 'videos') && (
                             <div style={{ background: 'rgba(177,137,4,0.1)', padding: '15px', marginBottom: '15px', border: '1px solid #b18904' }}>
                                 <label style={{ display: 'block', color: '#b18904', fontSize: '0.8rem', marginBottom: '10px' }}>🛰️ RASTREO GPS:</label>
                                 <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
@@ -818,7 +1047,52 @@ const PanelAdmin = () => {
                             </div>
                         )}
                         
-                        <button type="submit" className="btn-ok-subir" style={{ marginTop: '20px' }}>SUBIR AL BÚNKER</button>
+                        {/* --- CHECKBOX: PUBLICAR EN REDES AL SUBIR --- */}
+                        <div className="redes-al-subir-container">
+                            <div className="redes-al-subir-toggle" onClick={() => setPublicarAlSubir(!publicarAlSubir)}>
+                                <div className={`toggle-switch ${publicarAlSubir ? 'active' : ''}`}>
+                                    <div className="toggle-knob"></div>
+                                </div>
+                                <span className="toggle-label">📡 PUBLICAR EN REDES SOCIALES AL SUBIR</span>
+                            </div>
+                            
+                            {publicarAlSubir && (
+                                <div className="redes-plataformas-subir">
+                                    <label className="plataforma-check">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={redesSeleccionadas.twitter} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, twitter: e.target.checked})}
+                                        />
+                                        <span className="plataforma-icon twitter">𝕏</span> Twitter/X
+                                        {estadoRedes && !estadoRedes.twitter.configurado && !estadoRedes.webhook.configurado && (
+                                            <span className="plataforma-warn">⚠️ Sin claves</span>
+                                        )}
+                                    </label>
+                                    <label className="plataforma-check">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={redesSeleccionadas.facebook} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, facebook: e.target.checked})}
+                                        />
+                                        <span className="plataforma-icon facebook">f</span> Facebook
+                                        {estadoRedes && !estadoRedes.facebook.configurado && !estadoRedes.webhook.configurado && (
+                                            <span className="plataforma-warn">⚠️ Sin claves</span>
+                                        )}
+                                    </label>
+                                    {estadoRedes && estadoRedes.webhook.configurado && (
+                                        <div className="webhook-activo">🔗 Webhook activo (Make/Zapier)</div>
+                                    )}
+                                    {estadoRedes && !estadoRedes.alguno_activo && (
+                                        <div className="redes-aviso-config">⚠️ Configura las claves de las APIs o un webhook en el archivo .env para activar esta función</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <button type="submit" className="btn-ok-subir" style={{ marginTop: '20px' }}>
+                            {publicarAlSubir ? '🚀 SUBIR AL BÚNKER + PUBLICAR EN REDES' : 'SUBIR AL BÚNKER'}
+                        </button>
 
                         {mensajeSubida && <div className="mensaje-status">{mensajeSubida}</div>}
                     </form>
@@ -857,14 +1131,60 @@ const PanelAdmin = () => {
                                 style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
                             />
 
-                            {tab === 'casos_abiertos' && (
+                            {(tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                 <>
-                                    <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>TÍTULO (INGLÉS):</label>
-                                    <input 
-                                        type="text" value={editForm.titulo_en} 
-                                        onChange={e => setEditForm({...editForm, titulo_en: e.target.value})} 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>DESCRIPCIÓN / CASO:</label>
+                                    <textarea 
+                                        value={editForm.contenido} 
+                                        onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
+                                        style={{ width: '100%', minHeight: '150px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
                                     />
+
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAMBIAR IMAGEN DE PORTADA (OPCIONAL):</label>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*"
+                                        onChange={e => setArchivoEdit(e.target.files[0])} 
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+
+                                    {/* GEOLOCALIZACIÓN ESTRATÉGICA */}
+                                    <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
+                                        <label style={{ display: 'block', color: '#b18904', fontSize: '0.8rem', marginBottom: '10px', fontWeight: 'bold' }}>🛰️ GEOLOCALIZACIÓN ESTRATÉGICA</label>
+                                        
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <label style={{ display: 'block', color: '#888', fontSize: '0.7rem', marginBottom: '5px' }}>CIUDAD / ZONA:</label>
+                                            <input 
+                                                type="text" value={editForm.ubicacion || ''} 
+                                                onChange={e => setEditForm({...editForm, ubicacion: e.target.value})} 
+                                                placeholder="Ej: Granada..."
+                                                style={{ width: '100%', padding: '8px', background: '#000', color: '#fff', border: '1px solid #444' }}
+                                            />
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                                            <input 
+                                                type="text" value={busquedaLugar} 
+                                                onChange={e => setBusquedaLugar(e.target.value)} 
+                                                placeholder="Buscar en el radar..."
+                                                style={{ flex: 1, padding: '10px', background: '#000', color: '#fff', border: '1px solid #333' }}
+                                            />
+                                            <button type="button" onClick={buscarCoordenadas} style={{ padding: '10px', background: '#b18904', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+                                                RASTREAR
+                                            </button>
+                                        </div>
+                                        
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                            <div>
+                                                <label style={{ color: 'var(--color-principal)', fontSize: '0.6rem' }}>LATITUD:</label>
+                                                <input type="number" step="any" value={editForm.latitud} onChange={e => setEditForm({...editForm, latitud: e.target.value})} style={{ width: '100%', padding: '8px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', fontSize: '0.75rem' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: 'var(--color-principal)', fontSize: '0.6rem' }}>LONGITUD:</label>
+                                                <input type="number" step="any" value={editForm.longitud} onChange={e => setEditForm({...editForm, longitud: e.target.value})} style={{ width: '100%', padding: '8px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', fontSize: '0.75rem' }} />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </>
                             )}
 
@@ -887,16 +1207,6 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', minHeight: '150px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
                                     />
                                     
-                                    {tab === 'casos_abiertos' && (
-                                        <>
-                                            <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>CONTENIDO (INGLÉS):</label>
-                                            <textarea 
-                                                value={editForm.contenido_en} 
-                                                onChange={e => setEditForm({...editForm, contenido_en: e.target.value})} 
-                                                style={{ width: '100%', minHeight: '150px', background: '#000', color: '#00d4ff', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
-                                            />
-                                        </>
-                                    )}
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>IMAGEN (OPCIONAL):</label>
                                     <input 
                                         type="file" 
@@ -933,50 +1243,80 @@ const PanelAdmin = () => {
 
                             {tab === 'videos' && (
                                 <>
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>URL VÍDEO:</label>
-                                    <input 
-                                        type="text" value={editForm.url} 
-                                        onChange={e => setEditForm({...editForm, url: e.target.value})} 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
-                                    />
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CONTENIDO / DESCRIPCIÓN:</label>
+                                    {/* SECCIÓN 1: VÍDEO */}
+                                    <div style={{ background: 'rgba(0, 212, 255, 0.05)', padding: '15px', border: '1px solid rgba(0, 212, 255, 0.2)', marginBottom: '20px', borderRadius: '5px' }}>
+                                        <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px' }}>
+                                            📼 ORIGEN DEL VÍDEO (ARCHIVO O YOUTUBE):
+                                        </label>
+                                        <input 
+                                            type="text" value={editForm.url} 
+                                            onChange={e => setEditForm({...editForm, url: e.target.value})} 
+                                            placeholder="Enlace de YouTube o nombre de archivo de vídeo (ej: 1.mp4)"
+                                            style={{ width: '100%', padding: '10px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '5px' }}
+                                        />
+                                        <small style={{ display: 'block', color: '#888', fontSize: '0.7rem', marginBottom: '5px' }}>
+                                            Especifica el enlace de YouTube o el nombre del archivo MP4 que se reproducirá en el búnker.
+                                        </small>
+                                        {editForm.url && (editForm.url.includes('\\') || editForm.url.startsWith('C:') || editForm.url.includes('/Users/')) && (
+                                            <div style={{ background: 'rgba(255, 0, 0, 0.15)', border: '1px solid #ff4444', padding: '8px', marginTop: '8px', color: '#ff4444', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                                ⚠️ ERROR: Has escrito una ruta local (`{editForm.url}`). Las rutas locales de tu disco duro no funcionarán. Debes usar enlaces de Internet o nombres de archivos subidos.
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* SECCIÓN 2: DESCRIPCIÓN */}
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px', fontWeight: 'bold' }}>
+                                        📝 CONTENIDO / DESCRIPCIÓN DEL VÍDEO:
+                                    </label>
                                     <textarea 
                                         value={editForm.contenido} 
                                         onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
-                                        style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
+                                        style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '20px' }}
                                     />
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAPTURAS (URLs):</label>
-                                    <textarea 
-                                        value={editForm.capturas} 
-                                        onChange={e => setEditForm({...editForm, capturas: e.target.value})} 
-                                        style={{ width: '100%', minHeight: '60px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '10px' }}
-                                    />
-                                    <div style={{ marginBottom: '15px', padding: '10px', border: '1px dashed #333' }}>
-                                        <label style={{ display: 'block', color: '#b18904', fontSize: '0.7rem', marginBottom: '5px' }}>SUBIR NUEVAS EVIDENCIAS:</label>
-                                        <input type="file" multiple onChange={e => setArchivosCapturas(e.target.files)} style={{ fontSize: '0.7rem', color: '#ccc' }} />
-                                        <button type="button" onClick={subirCapturasAdicionales} style={{ marginTop: '10px', padding: '5px 10px', fontSize: '0.7rem', background: '#333', color: '#fff', border: '1px solid #555' }}>
-                                            CARGAR ARCHIVOS
-                                        </button>
+
+                                    {/* SECCIÓN 3: PORTADA / MINIATURA */}
+                                    <div style={{ background: 'rgba(255, 177, 0, 0.05)', padding: '15px', border: '1px solid rgba(255, 177, 0, 0.2)', marginBottom: '20px', borderRadius: '5px' }}>
+                                        <label style={{ display: 'block', color: '#ffb100', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px' }}>
+                                            🖼️ PORTADA / MINIATURA REPRESENTATIVA (CAPTURA):
+                                        </label>
+                                        
+                                        <textarea 
+                                            value={editForm.capturas} 
+                                            onChange={e => setEditForm({...editForm, capturas: e.target.value})} 
+                                            placeholder="Enlace o dirección web de la imagen de portada..."
+                                            style={{ width: '100%', minHeight: '60px', background: '#000', color: '#fff', border: '1px solid #333', padding: '10px', marginBottom: '10px' }}
+                                        />
+                                        
+                                        {editForm.capturas && (editForm.capturas.includes('\\') || editForm.capturas.startsWith('C:') || editForm.capturas.includes('/Users/')) && (
+                                            <div style={{ background: 'rgba(255, 0, 0, 0.2)', border: '1px solid #ff4444', padding: '10px', marginBottom: '15px', color: '#ff4444', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                                ⚠️ ATENCIÓN: Has escrito una ruta local de tu ordenador (`{editForm.capturas}`). 
+                                                Las rutas locales NO se cargan en internet. Para colocar esta imagen, usa el botón de abajo "SUBIR Y APLICAR PORTADA" para subir el archivo.
+                                            </div>
+                                        )}
+
+                                        <div style={{ padding: '12px', background: 'rgba(0,0,0,0.5)', border: '1px dashed #555', borderRadius: '4px' }}>
+                                            <label style={{ display: 'block', color: '#ffb100', fontSize: '0.75rem', marginBottom: '8px', fontWeight: 'bold' }}>
+                                                ⚙️ SUBIR PORTADA DESDE EL ORDENADOR:
+                                            </label>
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                onChange={e => setArchivosCapturas(e.target.files)} 
+                                                style={{ fontSize: '0.75rem', color: '#ccc', marginBottom: '10px', display: 'block' }} 
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={subirCapturasAdicionales} 
+                                                style={{ padding: '8px 15px', fontSize: '0.75rem', background: '#ffb100', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold', borderRadius: '3px' }}
+                                            >
+                                                SUBIR Y APLICAR PORTADA
+                                            </button>
+                                        </div>
                                     </div>
                                 </>
                             )}
 
-                            {tab === 'audios' && (
-                                <>
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>RUTA O ENLACE (AUDIO):</label>
-                                    <input 
-                                        type="text" value={editForm.ruta} 
-                                        onChange={e => setEditForm({...editForm, ruta: e.target.value})} 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', marginBottom: '15px' }}
-                                    />
-                                    <label style={{ display: 'block', color: '#ff00ff', fontSize: '0.8rem', marginBottom: '5px' }}>IMAGEN (URL) PARA PODCAST:</label>
-                                    <input 
-                                        type="text" value={editForm.imagen_url} 
-                                        onChange={e => setEditForm({...editForm, imagen_url: e.target.value})} 
-                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff00ff', border: '1px solid #333', marginBottom: '15px' }}
-                                    />
-                                </>
-                            )}
+
 
                             {tab === 'noticias' && (
                                 <>
@@ -1088,7 +1428,16 @@ const PanelAdmin = () => {
                                 </div>
                             )}
 
-                            <button type="submit" className="btn-ok" style={{ width: '100%', padding: '15px' }}>GUARDAR CAMBIOS EN EL ARCHIVO</button>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setItemParaEditar(null)}
+                                    style={{ flex: '0 0 auto', padding: '15px 20px', background: 'transparent', color: '#888', border: '1px solid #444', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '1px' }}
+                                >
+                                    ← VOLVER
+                                </button>
+                                <button type="submit" className="btn-ok" style={{ flex: 1, padding: '15px' }}>GUARDAR CAMBIOS EN EL ARCHIVO</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -1099,6 +1448,114 @@ const PanelAdmin = () => {
                     <div className="modal-zoom-content fade-in" onClick={e => e.stopPropagation()}>
                         <button className="btn-cerrar-zoom" onClick={() => setImagenSeleccionada(null)}>✖</button>
                         <img src={imagenSeleccionada} alt="Zoom evidencia" className="img-zoom-full" />
+                    </div>
+                </div>
+            )}
+
+            {/* ========== MODAL DE PUBLICACIÓN EN REDES SOCIALES ========== */}
+            {modalRedes && (
+                <div className="modal-admin-overlay" onClick={() => { if (!publicandoRedes) { setModalRedes(null); setResultadoRedes(null); } }}>
+                    <div className="modal-redes-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-redes-header">
+                            <h3>📡 PUBLICAR EN REDES SOCIALES</h3>
+                            {!publicandoRedes && (
+                                <button className="btn-cerrar-modal" onClick={() => { setModalRedes(null); setResultadoRedes(null); }}>X</button>
+                            )}
+                        </div>
+
+                        <div className="modal-redes-body">
+                            {/* PREVISUALIZACIÓN DEL CONTENIDO */}
+                            <div className="redes-preview">
+                                <div className="redes-preview-titulo">
+                                    🛸 {(modalRedes.titulo || modalRedes.nombre || 'Sin título').toUpperCase()}
+                                </div>
+                                <div className="redes-preview-contenido">
+                                    {(modalRedes.contenido || modalRedes.descripcion || modalRedes.cuerpo || '').substring(0, 150)}
+                                    {(modalRedes.contenido || modalRedes.descripcion || modalRedes.cuerpo || '').length > 150 ? '...' : ''}
+                                </div>
+                                <div className="redes-preview-hashtags">
+                                    #Granada #Misterio #ExpedienteX #OVNI #Paranormal
+                                </div>
+                            </div>
+
+                            {/* SELECCIÓN DE PLATAFORMAS */}
+                            {!resultadoRedes && (
+                                <div className="redes-seleccion">
+                                    <p className="redes-seleccion-titulo">Selecciona las plataformas:</p>
+                                    <label className="plataforma-check-modal">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={redesSeleccionadas.twitter} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, twitter: e.target.checked})}
+                                            disabled={publicandoRedes}
+                                        />
+                                        <span className="plataforma-icon-lg twitter">𝕏</span>
+                                        <div>
+                                            <strong>Twitter / X</strong>
+                                            {estadoRedes && (
+                                                <small className={estadoRedes.twitter.configurado || estadoRedes.webhook.configurado ? 'cfg-ok' : 'cfg-warn'}>
+                                                    {estadoRedes.twitter.configurado ? '✅ API Directa' : estadoRedes.webhook.configurado ? '🔗 Vía Webhook' : '⚠️ Sin configurar'}
+                                                </small>
+                                            )}
+                                        </div>
+                                    </label>
+                                    <label className="plataforma-check-modal">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={redesSeleccionadas.facebook} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, facebook: e.target.checked})}
+                                            disabled={publicandoRedes}
+                                        />
+                                        <span className="plataforma-icon-lg facebook">f</span>
+                                        <div>
+                                            <strong>Facebook</strong>
+                                            {estadoRedes && (
+                                                <small className={estadoRedes.facebook.configurado || estadoRedes.webhook.configurado ? 'cfg-ok' : 'cfg-warn'}>
+                                                    {estadoRedes.facebook.configurado ? '✅ API Directa' : estadoRedes.webhook.configurado ? '🔗 Vía Webhook' : '⚠️ Sin configurar'}
+                                                </small>
+                                            )}
+                                        </div>
+                                    </label>
+                                </div>
+                            )}
+
+                            {/* BOTÓN DE PUBLICAR */}
+                            {!resultadoRedes && (
+                                <button 
+                                    className="btn-lanzar-redes" 
+                                    onClick={() => publicarEnRedes(modalRedes)}
+                                    disabled={publicandoRedes || (!redesSeleccionadas.twitter && !redesSeleccionadas.facebook)}
+                                >
+                                    {publicandoRedes ? (
+                                        <><span className="spinner-redes"></span> TRANSMITIENDO...</>
+                                    ) : (
+                                        '🚀 LANZAR PUBLICACIÓN'
+                                    )}
+                                </button>
+                            )}
+
+                            {/* RESULTADOS */}
+                            {resultadoRedes && (
+                                <div className="redes-resultados">
+                                    <div className={`redes-resultado-header ${resultadoRedes.exitosas > 0 ? 'exito' : 'fallo'}`}>
+                                        {resultadoRedes.exitosas > 0 ? '✅' : '⚠️'} {resultadoRedes.mensaje}
+                                    </div>
+                                    {resultadoRedes.resultados && resultadoRedes.resultados.map((r, i) => (
+                                        <div key={i} className={`redes-resultado-item ${r.exito ? 'ok' : 'fail'}`}>
+                                            <span className="resultado-plataforma">
+                                                {r.plataforma === 'twitter' ? '𝕏' : r.plataforma === 'facebook' ? 'f' : '🔗'}
+                                            </span>
+                                            <span className="resultado-texto">
+                                                {r.exito ? r.mensaje : r.error}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    <button className="btn-cerrar-resultados" onClick={() => { setModalRedes(null); setResultadoRedes(null); }}>
+                                        CERRAR
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

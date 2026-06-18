@@ -541,6 +541,7 @@ input, textarea, select {
 }
 
 /* Variante para la sección Hero (sobre fondo de imagen) */
+.hero-global-mufon-wrapper .seo-bunker-block,
 .hero-global-mufon .seo-bunker-block {
     position: relative;
     z-index: 5;
@@ -574,6 +575,7 @@ input, textarea, select {
         font-size: 0.75rem;
         margin: 20px auto;
     }
+    .hero-global-mufon-wrapper .seo-bunker-block,
     .hero-global-mufon .seo-bunker-block {
         padding: 20px 5%;
     }

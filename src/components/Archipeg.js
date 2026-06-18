@@ -18,6 +18,7 @@ const Archipeg = ({ userAuth }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const audioRef = useRef(null);
     const [audioStarted, setAudioStarted] = useState(false);
+    const [templateCopiado, setTemplateCopiado] = useState(false);
 
     const slides = [
         {
@@ -259,12 +260,30 @@ const Archipeg = ({ userAuth }) => {
                 {!userAuth ? (
                     <div className="archipeg-bunker-lock">
                         <Lock size={48} className="lock-icon" />
-                        <h3>{language === 'en' ? "ACCESS RESTRICTED: AGENT AUTHENTICATION REQUIRED" : "ACCESO RESTRINGIDO: SE REQUIERE AUTENTICACIÓN DE AGENTE"}</h3>
-                        <p>
-                            {language === 'en'
-                                ? "To request, purchase, or download Archipeg software versions, you must be a registered and approved agent of the Expediente X Granaíno Bunker."
-                                : "Para solicitar, adquirir o descargar las versiones de Archipeg, debes formar parte del búnker de agentes autorizados de Expediente X Granaíno."}
-                        </p>
+                        <h3>{language === 'en' ? "IDENTIFICATION REQUIRED TO ACQUIRE ARCHIPEG" : "IDENTIFICACIÓN REQUERIDA PARA ADQUIRIR ARCHIPEG"}</h3>
+                        
+                        <div style={{ background: 'rgba(255, 68, 68, 0.1)', border: '1px solid #ff4444', padding: '15px', borderRadius: '8px', marginBottom: '20px', textAlign: 'left', fontSize: '0.85rem' }}>
+                            <p style={{ margin: '0 0 10px 0', color: '#ff8888', fontWeight: 'bold' }}>
+                                ⚠️ {language === 'en' ? "OBLIGATORY FOR YOUR LICENSE DELIVERY:" : "OBLIGATORIO PARA EL ENVÍO DE TU LICENCIA:"}
+                            </p>
+                            <p style={{ margin: 0, color: '#ddd', fontFamily: 'Outfit, sans-serif', lineHeight: '1.5' }}>
+                                {language === 'en'
+                                    ? "To buy Archipeg, it is essential to have an active session in the Bunker. This ensures the system can correctly link the purchase and automatically send the download link (.EXE) to your registered email address (make sure it is a valid, active email)."
+                                    : "Para comprar el programa es imprescindible iniciar sesión en el Búnker. Así, el sistema podrá vincular correctamente la compra y enviarte automáticamente la licencia y el instalador (.EXE) a tu dirección de correo de registro (asegúrate de registrar un correo válido y activo)."}
+                            </p>
+                        </div>
+
+                        <div style={{ background: 'rgba(255, 177, 0, 0.1)', border: '1px solid #ffb100', padding: '15px', borderRadius: '8px', marginBottom: '25px', textAlign: 'left', fontSize: '0.85rem' }}>
+                            <p style={{ margin: '0 0 10px 0', color: '#ffb100', fontWeight: 'bold' }}>
+                                🍏 {language === 'en' ? "APPLE / MOBILE COMPATIBILITY NOTICE:" : "AVISO DE COMPATIBILIDAD (APPLE / MÓVIL):"}
+                            </p>
+                            <p style={{ margin: 0, color: '#ddd', fontFamily: 'Outfit, sans-serif', lineHeight: '1.5' }}>
+                                {language === 'en'
+                                    ? "Archipeg is a native desktop application for Windows PCs (.EXE). It is NOT compatible with Apple computers (macOS), mobile phones (iPhone, Android) or iPads. Please register and purchase only if you will run it on a Windows computer."
+                                    : "Archipeg es un programa nativo para ordenadores Windows (.EXE). NO es compatible con ordenadores Apple (macOS), teléfonos móviles (iPhone, Android) ni iPads. Por favor, regístrate y adquiere el programa únicamente si lo vas a usar en un ordenador Windows."}
+                            </p>
+                        </div>
+
                         <div className="bunker-lock-buttons">
                             <Link to="/acceso" className="btn-bunker-login">{language === 'en' ? "LOGIN TO BUNKER" : "ENTRAR AL BÚNKER"}</Link>
                             <Link to="/acceso" className="btn-bunker-register">{language === 'en' ? "REGISTER NEW AGENT" : "REGISTRARSE EN EL BÚNKER"}</Link>
@@ -327,6 +346,17 @@ const Archipeg = ({ userAuth }) => {
                                     ? "Unlock the absolute control of your digital life forever. Single payment, no subscriptions." 
                                     : "Desbloquea el control absoluto de tu vida digital para siempre. Pago único, sin suscripciones mensuales."}
                             </p>
+
+                            <div style={{ background: 'rgba(255, 177, 0, 0.1)', border: '1px solid #ffb100', padding: '12px 15px', borderRadius: '6px', marginBottom: '20px', fontSize: '0.8rem', textAlign: 'left', lineHeight: '1.4', fontFamily: 'Outfit, sans-serif' }}>
+                                <p style={{ margin: '0 0 5px 0', color: '#ffb100', fontWeight: 'bold' }}>
+                                    ⚠️ {language === 'en' ? "WINDOWS EXCLUSIVE (.EXE)" : "EXCLUSIVO PARA ORDENADORES WINDOWS (.EXE)"}
+                                </p>
+                                <p style={{ margin: 0, color: '#ccc' }}>
+                                    {language === 'en'
+                                        ? "This software is NOT compatible with Mac/macOS, iPhone, Android, or iPad. If purchasing from an Apple or mobile device, the license will be emailed to you to be downloaded and installed on your Windows PC."
+                                        : "Este programa NO es compatible con ordenadores Mac/macOS, iPhone, Android ni iPad. Si compras desde un dispositivo Apple o móvil, la licencia se enviará a tu correo de registro para que la descargues e instales en tu ordenador Windows."}
+                                </p>
+                            </div>
                             
                             <div className="status-container">
                                 {!solicitudPro ? (
@@ -388,6 +418,11 @@ const Archipeg = ({ userAuth }) => {
                                                     💳 Adquirir con Stripe
                                                 </a>
                                             </div>
+                                            <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#ffb100', textAlign: 'center', fontFamily: 'Outfit, sans-serif' }}>
+                                                ℹ️ {language === 'en' 
+                                                    ? "If you pay via Apple Pay / Safari on iOS, please check your mailbox afterwards on your Windows PC to download the program." 
+                                                    : "Si pagas mediante Apple Pay / Safari en tu iPhone o iPad, recuerda revisar tu bandeja de correo después en tu ordenador Windows para descargar el instalador."}
+                                            </div>
                                         </div>
                                     </li>
                                     <li className="step-item">
@@ -413,6 +448,42 @@ const Archipeg = ({ userAuth }) => {
                     <p>SYSTEM ENGINEERED BY ARCHIPEG - EXPEDIENTE X GRANAÍNO BASE</p>
                 </div>
             </div>
+
+                {/* PLANTILLA PARA FOROS */}
+                <div className="forum-template-section">
+                    <h3 className="section-heading">{language === 'en' ? 'FORUM TEMPLATE' : 'PLANTILLA PARA FOROS'}</h3>
+                    <p className="forum-template-desc">
+                        {language === 'en' 
+                            ? 'Use this humble text to share Archipeg in forums and communities:' 
+                            : 'Usa este texto humilde para difundir Archipeg en foros y comunidades:'}
+                    </p>
+                    <div className="forum-template-box">
+                        <p className="forum-template-text">
+                            {language === 'en'
+                                ? '"Hello everyone. As an independent developer (and now retired), I created a small program called Archipeg Pro to solve a problem I had myself: the chaos of organizing thousands of photos and videos directly from the hard drive. It\'s a humble project, with no big companies behind it, made to make our lives easier. If you\'d like to try it or leave me your feedback, I\'d be grateful from the bottom of my heart. Best regards."'
+                                : '"Hola compañeros. Como desarrollador independiente (y ya jubilado), he creado un pequeño programa llamado Archipeg Pro para solucionar un problema que yo mismo tenía: el caos de organizar miles de fotos y vídeos directamente desde el disco duro. Es un proyecto humilde, sin grandes empresas detrás, hecho para facilitarnos la vida. Si os apetece probarlo o dejarme vuestra opinión, os lo agradezco de corazón. Un abrazo."'}
+                        </p>
+                    </div>
+                    <button 
+                        className={`btn-copy-template ${templateCopiado ? 'copied' : ''}`}
+                        onClick={async () => {
+                            const textoPlantilla = language === 'en'
+                                ? 'Hello everyone. As an independent developer (and now retired), I created a small program called Archipeg Pro to solve a problem I had myself: the chaos of organizing thousands of photos and videos directly from the hard drive. It\'s a humble project, with no big companies behind it, made to make our lives easier. If you\'d like to try it or leave me your feedback, I\'d be grateful from the bottom of my heart. Best regards. https://expedientexgranaino.com/archipeg'
+                                : 'Hola compañeros. Como desarrollador independiente (y ya jubilado), he creado un pequeño programa llamado Archipeg Pro para solucionar un problema que yo mismo tenía: el caos de organizar miles de fotos y vídeos directamente desde el disco duro. Es un proyecto humilde, sin grandes empresas detrás, hecho para facilitarnos la vida. Si os apetece probarlo o dejarme vuestra opinión, os lo agradezco de corazón. Un abrazo. https://expedientexgranaino.com/archipeg';
+                            try {
+                                await navigator.clipboard.writeText(textoPlantilla);
+                                setTemplateCopiado(true);
+                                setTimeout(() => setTemplateCopiado(false), 3000);
+                            } catch (err) {
+                                alert(language === 'en' ? '❌ Could not copy text' : '❌ No se pudo copiar el texto');
+                            }
+                        }}
+                    >
+                        {templateCopiado 
+                            ? (language === 'en' ? '✅ COPIED!' : '✅ ¡COPIADO!') 
+                            : (language === 'en' ? '📋 COPY TEMPLATE' : '📋 COPIAR PLANTILLA')}
+                    </button>
+                </div>
 
             {/* PRESENTACIÓN INTERACTIVA EN OVERLAY */}
             {showPresentation && (

@@ -254,6 +254,80 @@ module.exports = async (db) => {
             aprobado INT DEFAULT 1
         )`);
 
+        await db.execute(`CREATE TABLE IF NOT EXISTS misterios_historicos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            titulo VARCHAR(255),
+            titulo_en VARCHAR(255),
+            contenido TEXT,
+            contenido_en TEXT,
+            imagen_url VARCHAR(255),
+            latitud DOUBLE DEFAULT 0,
+            longitud DOUBLE DEFAULT 0,
+            estado VARCHAR(50) DEFAULT 'aprobado',
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        const rowsMisterios = await db.query("SELECT COUNT(*) as total FROM misterios_historicos");
+        if (rowsMisterios[0].total === 0) {
+            console.log("🌱 Sembrando misterios históricos por defecto...");
+            const misteriosIniciales = [
+                {
+                    titulo: "El Incidente OVNI de Roswell",
+                    titulo_en: "The Roswell UFO Incident",
+                    contenido: "En julio de 1947, un objeto volador no identificado se estrelló en un rancho cerca de Roswell, Nuevo México. Aunque el ejército inicialmente reportó la recuperación de un 'disco volador', rápidamente cambiaron la versión afirmando que se trataba de un globo meteorológico convencional. Décadas de testigos, conspiraciones y documentos desclasificados sugieren la recuperación de tecnología extraterrestre y cuerpos no humanos en el desierto, convirtiendo a Roswell en el epicentro de la ufología mundial.",
+                    contenido_en: "In July 1947, an unidentified flying object crashed at a ranch near Roswell, New Mexico. Although the military initially reported recovering a 'flying disc', they quickly changed their story, claiming it was a conventional weather balloon. Decades of witnesses, conspiracies, and declassified documents suggest the recovery of extraterrestrial technology and non-human bodies in the desert, turning Roswell into the epicenter of global ufology.",
+                    imagen_url: "roswell.jpg",
+                    latitud: 33.3943,
+                    longitud: -104.5230
+                },
+                {
+                    titulo: "El Misterio del Triángulo de las Bermudas",
+                    titulo_en: "The Mystery of the Bermuda Triangle",
+                    contenido: "Una vasta región del Océano Atlántico occidental conocida por la desaparición inexplicable de decenas de barcos y aviones, incluyendo el famoso Vuelo 19 en 1945. Las brújulas fallan, las transmisiones se cortan y las naves desaparecen sin dejar rastro de combustible ni restos. Las hipótesis van desde anomalías magnéticas y liberaciones de gas metano hasta portales dimensionales y actividad extraterrestre.",
+                    contenido_en: "A vast region of the western Atlantic Ocean known for the unexplained disappearance of dozens of ships and aircraft, including the famous Flight 19 in 1945. Compasses fail, transmissions cut off, and vessels vanish without leaving oil slicks or debris. Hypotheses range from magnetic anomalies and methane gas releases to dimensional portals and extraterrestrial activity.",
+                    imagen_url: "bermuda.jpg",
+                    latitud: 25.0000,
+                    longitud: -71.0000
+                },
+                {
+                    titulo: "El Manuscrito Voynich: El Libro Indescifrable",
+                    titulo_en: "The Voynich Manuscript: The Undecipherable Book",
+                    contenido: "Un documento ilustrado del siglo XV escrito en un sistema de escritura y lenguaje completamente desconocidos. A pesar de los esfuerzos de los criptógrafos militares más brillantes del mundo y de las inteligencias artificiales modernas, su contenido sigue siendo un misterio absoluto. Sus páginas contienen extrañas ilustraciones de plantas inexistentes, diagramas cosmológicos y figuras femeninas en baños alquímicos.",
+                    contenido_en: "An illustrated codex from the 15th century written in an entirely unknown writing system and language. Despite the efforts of the world's most brilliant military cryptographers and modern artificial intelligences, its content remains an absolute mystery. Its pages contain strange drawings of non-existent plants, cosmological diagrams, and female figures in alchemical baths.",
+                    imagen_url: "voynich.jpg",
+                    latitud: 41.9028,
+                    longitud: 12.4964
+                },
+                {
+                    titulo: "La Colonia Perdida de Roanoke",
+                    titulo_en: "The Lost Colony of Roanoke",
+                    contenido: "En 1587, más de un centenar de colonos ingleses se establecieron en la isla de Roanoke. Tres años después, cuando llegó una expedición de reabastecimiento, la colonia entera había desaparecido sin rastro de lucha o violencia. La única pista era la palabra 'CROATOAN' tallada en un poste de madera. El destino de los colonos sigue siendo uno de los mayores enigmas de la historia de América del Norte.",
+                    contenido_en: "In 1587, more than a hundred English settlers established themselves on Roanoke Island. Three years later, when a resupply expedition arrived, the entire colony had vanished without any sign of struggle or violence. The only clue was the word 'CROATOAN' carved into a wooden post. The fate of the settlers remains one of North America's greatest historical enigmas.",
+                    imagen_url: "roanoke.jpg",
+                    latitud: 35.9396,
+                    longitud: -75.7201
+                },
+                {
+                    titulo: "El Asesino del Zodiaco",
+                    titulo_en: "The Zodiac Killer",
+                    contenido: "Un asesino en serie que aterrorizó el norte de California a finales de los años 60 y principios de los 70. Se autodenominó 'Zodiaco' en cartas enviadas a la prensa local, las cuales contenían criptogramas y amenazas complejas. Aunque se le atribuyen oficialmente cinco víctimas mortales, el asesino afirmaba haber matado a 37 personas. Su identidad real sigue siendo un misterio sin resolver y sus cifrados continúan desafiando a los investigadores.",
+                    contenido_en: "A serial killer who terrorized Northern California in the late 1960s and early 1970s. He dubbed himself 'Zodiac' in letters sent to the local press, which contained complex cryptograms and threats. Although officially linked to five murders, the killer claimed to have killed 37 people. His true identity remains an unsolved mystery, and his ciphers continue to challenge investigators.",
+                    imagen_url: "zodiac.jpg",
+                    latitud: 37.7749,
+                    longitud: -122.4194
+                }
+            ];
+
+            for (const m of misteriosIniciales) {
+                await db.execute(
+                    "INSERT INTO misterios_historicos (titulo, titulo_en, contenido, contenido_en, imagen_url, latitud, longitud, estado) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado')",
+                    [m.titulo, m.titulo_en, m.contenido, m.contenido_en, m.imagen_url, m.latitud, m.longitud]
+                );
+            }
+            console.log("🌱 Siembra de misterios históricos completada con éxito.");
+        }
+
+
         await db.execute(`CREATE TABLE IF NOT EXISTS archipeg_solicitudes (
             id INT AUTO_INCREMENT PRIMARY KEY,
             usuario_id INT,

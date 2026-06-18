@@ -1,55 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Forms from './Forms';
 import API_BASE_URL from '../config';
+import { safeLocalStorage } from '../utils/storage';
 import { useLanguage } from '../context/LanguageContext';
+import './seccion-acceso.css';
 
 const Seccionusuarios = ({ setAuth }) => {
-    const { t, language } = useLanguage();
+    const { language } = useLanguage();
     const [esLogin, setEsLogin] = useState(true);
-    const [datos, setDatos] = useState({
-        nombre: '',
-        email: '',
-        password: '',
-        ciudad: '',
-        edad: ''
-    });
+    const [datos, setDatos] = useState({ nombre: '', email: '', password: '', ciudad: '' });
     const [cargando, setCargando] = useState(false);
+    const [mensajeOk, setMensajeOk] = useState('');
+    const [mensajeError, setMensajeError] = useState('');
+    const [mostrarPassword, setMostrarPassword] = useState(false);
+    const [erroresCampo, setErroresCampo] = useState({});
     const navigate = useNavigate();
+    const primerInputRef = useRef(null);
+
+    // Auto-focus al primer campo al cambiar de modo
+    useEffect(() => {
+        if (primerInputRef.current) primerInputRef.current.focus();
+    }, [esLogin]);
+
+    const validarCampo = (name, value) => {
+        if (name === 'nombre' && !esLogin && value.trim().length < 2) {
+            return language === 'en' ? 'Alias must have at least 2 characters' : 'El alias debe tener al menos 2 caracteres';
+        }
+        if (name === 'email' && esLogin && !value.trim()) {
+            return language === 'en' ? 'Required' : 'Obligatorio';
+        }
+        if (name === 'password' && value.length > 0 && value.length < 6) {
+            return language === 'en' ? 'Minimum 6 characters' : 'Mínimo 6 caracteres';
+        }
+        return '';
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setDatos(prev => ({ ...prev, [name]: value }));
+        // Limpiar error del campo cuando el usuario empieza a escribir
+        if (erroresCampo[name]) {
+            setErroresCampo(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+        const error = validarCampo(name, value);
+        if (error) setErroresCampo(prev => ({ ...prev, [name]: error }));
+    };
 
     const handleSubmit = async (e) => {
-        if (e) e.preventDefault();
+        e.preventDefault();
+        setMensajeOk('');
+        setMensajeError('');
         setCargando(true);
 
-        // AJUSTE TÁCTICO: Sincronizamos con las rutas modulares del backend (/api/auth)
-        const url = esLogin 
-            ? `${API_BASE_URL}/api/auth/login-agente` 
+        const url = esLogin
+            ? `${API_BASE_URL}/api/auth/login-agente`
             : `${API_BASE_URL}/api/auth/registro`;
 
         try {
             const res = await axios.post(url, datos);
 
             if (esLogin) {
-                alert(t('successAuth') + ": " + (res.data.usuario?.nombre || "Agente Operativo"));
-
+                const agente = res.data.usuario;
+                setMensajeOk(`✅ ${language === 'en' ? 'WELCOME, AGENT' : 'BIENVENIDO, AGENTE'} ${agente?.nombre?.toUpperCase() || 'OPERATIVO'}`);
                 if (setAuth) {
-                    setAuth(res.data.usuario);
-                    localStorage.setItem('agente_sesion', JSON.stringify(res.data.usuario));
+                    setAuth(agente);
+                    safeLocalStorage.setItem('agente_sesion', JSON.stringify(agente));
                 }
-                navigate('/');
+                setTimeout(() => navigate('/'), 1500);
             } else {
-                alert(t('successReg'));
-                setEsLogin(true);
+                setMensajeOk(language === 'en'
+                    ? '✅ REGISTERED! Switching to login...'
+                    : '✅ ¡REGISTRADO! Cambiando a acceso...');
+                setDatos({ nombre: '', email: '', password: '', ciudad: '' });
+                setTimeout(() => { setEsLogin(true); setMensajeOk(''); }, 2200);
             }
-
-            // Limpieza de datos
-            setDatos({ nombre: '', email: '', password: '', ciudad: '', edad: '' });
-
         } catch (err) {
             console.error("Error en la conexión:", err);
-            const msgError = err.response?.data?.mensaje || err.response?.data?.error || t('errorFallen');
-            alert(`❌ ERROR: ${msgError}`);
+            const msgError = err.response?.data?.mensaje || err.response?.data?.error ||
+                (language === 'en' ? 'Connection error. Try again.' : 'Error de conexión. Inténtalo de nuevo.');
+            setMensajeError(`❌ ${msgError}`);
         } finally {
             setCargando(false);
         }
@@ -57,109 +91,218 @@ const Seccionusuarios = ({ setAuth }) => {
 
     const toggleModo = () => {
         setEsLogin(!esLogin);
-        setDatos({ nombre: '', email: '', password: '', ciudad: '', edad: '' });
+        setDatos({ nombre: '', email: '', password: '', ciudad: '' });
+        setMensajeOk('');
+        setMensajeError('');
+        setErroresCampo({});
     };
 
+    const beneficios = language === 'en'
+        ? ['🛸 Post UFO sightings', '📁 Access classified dossiers', '🎖️ Earn agent ranks', '💬 Comment & vote evidence', '🔔 Get real-time alerts']
+        : ['🛸 Publicar avistamientos OVNI', '📁 Acceder a dossiers clasificados', '🎖️ Ganar rangos de agente', '💬 Comentar y votar evidencias', '🔔 Recibir alertas en tiempo real'];
+
     return (
-        <div className="seccion-usuarios fade-in">
-            <Forms
-                title={esLogin ? t('loginTitle') : t('registerTitle')}
-                subtitle={esLogin ? t('loginSubtitle') : t('registerSubtitle')}
-                onSubmit={handleSubmit}
-                onClear={() => setDatos({ nombre: '', email: '', password: '', ciudad: '', edad: '' })}
-                btnText={cargando ? t('loading') : (esLogin ? t('loginTitle') : t('registerTitle'))}
-            >
-                <div style={{ background: 'rgba(255,177,0,0.1)', border: '1px solid #ffb100', padding: '15px', marginBottom: '20px', borderRadius: '5px', textAlign: 'center' }}>
-                    <p style={{ color: '#ffb100', fontSize: '0.8rem', fontFamily: 'monospace', margin: 0 }}>
-                        {language === 'en' 
-                            ? "⚠️ ATTENTION: Content reading is public. To contribute material, you must register. This helps us filter spam and maintain the rigor of the topics. You can use an alias and a fake email if you want anonymity, but you must be of legal age. City is optional. All contributions will be reviewed by the Administrator."
-                            : "⚠️ ATENCIÓN: La lectura de contenido es pública. Para aportar material, debes registrarte. Esto nos permite filtrar spam y mantener el rigor de los temas. Puedes usar un alias y un correo inventado si quieres anonimato, pero es obligatorio ser mayor de edad. La ciudad es opcional. Todas las aportaciones serán revisadas por el Administrador."}
-                    </p>
+        <div className="acceso-page fade-in">
+
+            {/* PANEL IZQUIERDO: Beneficios */}
+            <div className="acceso-beneficios">
+                <div className="acceso-logo-bunker">
+                    <div className="acceso-radar-ring"></div>
+                    <div className="acceso-radar-ring delay1"></div>
+                    <div className="acceso-radar-dot"></div>
                 </div>
-
-                {!esLogin && (
-                    <div className="form-group">
-                        <label htmlFor="nombre">{t('namePlaceholder')}</label>
-                        <input
-                            id="nombre"
-                            type="text"
-                            placeholder={t('namePlaceholder')}
-                            value={datos.nombre}
-                            onChange={(e) => setDatos({ ...datos, nombre: e.target.value })}
-                            required
-                        />
-                    </div>
-                )}
-
-                {!esLogin && (
-                    <div className="form-group">
-                        <label htmlFor="ciudad">{t('cityPlaceholder')}</label>
-                        <input
-                            id="ciudad"
-                            type="text"
-                            placeholder={t('cityPlaceholder')}
-                            value={datos.ciudad}
-                            onChange={(e) => setDatos({ ...datos, ciudad: e.target.value })}
-                        />
-                    </div>
-                )}
-
-                {!esLogin && (
-                    <div className="form-group">
-                        <label htmlFor="edad">Edad (Debes ser mayor de 18)</label>
-                        <input
-                            id="edad"
-                            type="number"
-                            min="18"
-                            max="120"
-                            placeholder="Tu edad (Mín. 18)"
-                            value={datos.edad}
-                            onChange={(e) => setDatos({ ...datos, edad: e.target.value })}
-                            required
-                        />
-                    </div>
-                )}
-
-                <div className="form-group">
-                    <label htmlFor="email">{t('emailPlaceholder')}</label>
-                    <input
-                        id="email"
-                        type="email"
-                        placeholder={t('emailPlaceholder')}
-                        value={datos.email}
-                        onChange={(e) => setDatos({ ...datos, email: e.target.value })}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="password">{t('passwordPlaceholder')}</label>
-                    <input
-                        id="password"
-                        type="password"
-                        placeholder={t('passwordPlaceholder')}
-                        value={datos.password}
-                        onChange={(e) => setDatos({ ...datos, password: e.target.value })}
-                        required
-                    />
-                </div>
-
-                <p style={{ textAlign: 'center', color: '#fff', fontSize: '0.85rem', marginTop: '15px' }}>
-                    {esLogin ? t('noAccount') : t('hasAccount')}
-                    <span
-                        onClick={toggleModo}
-                        role="button"
-                        style={{
-                            color: 'var(--color-principal)',
-                            cursor: 'pointer',
-                            textDecoration: 'underline',
-                            fontWeight: 'bold'
-                        }}
-                    >
-                        {esLogin ? t('registerLink') : t('loginLink')}
-                    </span>
+                <h2 className="acceso-beneficios-titulo">
+                    {language === 'en' ? 'JOIN THE NETWORK' : 'ÚNETE A LA RED'}
+                </h2>
+                <p className="acceso-beneficios-sub">
+                    {language === 'en'
+                        ? 'Classified access for field agents'
+                        : 'Acceso clasificado para agentes de campo'}
                 </p>
-            </Forms>
+                <ul className="acceso-beneficios-lista">
+                    {beneficios.map((b, i) => (
+                        <li key={i} className="acceso-beneficio-item" style={{ animationDelay: `${i * 0.1}s` }}>
+                            {b}
+                        </li>
+                    ))}
+                </ul>
+                <div className="acceso-anonimo-badge">
+                    🔒 {language === 'en' ? '100% Anonymous · No real data needed' : '100% Anónimo · Sin datos reales'}
+                </div>
+            </div>
+
+            {/* PANEL DERECHO: Formulario */}
+            <div className="acceso-form-panel">
+                {/* TABS */}
+                <div className="acceso-tabs" role="tablist">
+                    <button
+                        role="tab"
+                        aria-selected={esLogin}
+                        className={`acceso-tab ${esLogin ? 'active' : ''}`}
+                        onClick={() => !esLogin && toggleModo()}
+                    >
+                        {language === 'en' ? '🔑 ACCESS' : '🔑 ACCEDER'}
+                    </button>
+                    <button
+                        role="tab"
+                        aria-selected={!esLogin}
+                        className={`acceso-tab ${!esLogin ? 'active' : ''}`}
+                        onClick={() => esLogin && toggleModo()}
+                    >
+                        {language === 'en' ? '📋 REGISTER' : '📋 REGISTRARSE'}
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="acceso-form" noValidate>
+
+                    {/* MENSAJES DE ESTADO */}
+                    {mensajeOk && (
+                        <div className="acceso-msg acceso-msg-ok" role="alert">
+                            {mensajeOk}
+                        </div>
+                    )}
+                    {mensajeError && (
+                        <div className="acceso-msg acceso-msg-error" role="alert">
+                            {mensajeError}
+                        </div>
+                    )}
+
+                    {/* ALIAS (solo en registro) */}
+                    {!esLogin && (
+                        <div className={`acceso-field ${erroresCampo.nombre ? 'field-error' : ''}`}>
+                            <label htmlFor="acc-nombre">
+                                {language === 'en' ? 'ALIAS / CODENAME' : 'ALIAS / NOMBRE CLAVE'}
+                            </label>
+                            <input
+                                id="acc-nombre"
+                                name="nombre"
+                                type="text"
+                                value={datos.nombre}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                placeholder={language === 'en' ? 'Agent X, Investigator72...' : 'Agente X, Investigador72...'}
+                                required
+                                ref={!esLogin ? primerInputRef : null}
+                                autoComplete="username"
+                            />
+                            {erroresCampo.nombre && <span className="field-error-msg">{erroresCampo.nombre}</span>}
+                        </div>
+                    )}
+
+                    {/* ALIAS O EMAIL (login) / EMAIL OPCIONAL (registro) */}
+                    <div className={`acceso-field ${erroresCampo.email ? 'field-error' : ''}`}>
+                        <label htmlFor="acc-email">
+                            {esLogin
+                                ? (language === 'en' ? 'ALIAS OR EMAIL' : 'ALIAS O EMAIL')
+                                : (language === 'en' ? 'EMAIL (OPTIONAL — for password recovery)' : 'EMAIL (OPCIONAL — para recuperar contraseña)')}
+                        </label>
+                        <input
+                            id="acc-email"
+                            name="email"
+                            type="text"
+                            value={datos.email}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            placeholder={esLogin
+                                ? (language === 'en' ? 'Your alias or email...' : 'Tu alias o correo...')
+                                : (language === 'en' ? 'optional@secreto.com' : 'opcional@secreto.com')}
+                            required={esLogin}
+                            ref={esLogin ? primerInputRef : null}
+                            autoComplete={esLogin ? 'username' : 'email'}
+                        />
+                        {erroresCampo.email && <span className="field-error-msg">{erroresCampo.email}</span>}
+                    </div>
+
+                    {/* CONTRASEÑA con toggle */}
+                    <div className={`acceso-field ${erroresCampo.password ? 'field-error' : ''}`}>
+                        <label htmlFor="acc-password">
+                            {language === 'en' ? 'ENCRYPTION CODE (PASSWORD)' : 'CÓDIGO DE ENCRIPTACIÓN (CONTRASEÑA)'}
+                        </label>
+                        <div className="acceso-password-wrapper">
+                            <input
+                                id="acc-password"
+                                name="password"
+                                type={mostrarPassword ? 'text' : 'password'}
+                                value={datos.password}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                placeholder="••••••••"
+                                required
+                                autoComplete={esLogin ? 'current-password' : 'new-password'}
+                                minLength={6}
+                            />
+                            <button
+                                type="button"
+                                className="acceso-toggle-pass"
+                                onClick={() => setMostrarPassword(v => !v)}
+                                aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                            >
+                                {mostrarPassword ? '🙈' : '👁️'}
+                            </button>
+                        </div>
+                        {erroresCampo.password && <span className="field-error-msg">{erroresCampo.password}</span>}
+                        {/* Indicador de fuerza solo en registro */}
+                        {!esLogin && datos.password.length > 0 && (
+                            <div className="acceso-pass-strength">
+                                <div
+                                    className={`acceso-pass-bar ${datos.password.length < 6 ? 'weak' : datos.password.length < 10 ? 'medium' : 'strong'}`}
+                                    style={{ width: `${Math.min(100, (datos.password.length / 12) * 100)}%` }}
+                                ></div>
+                                <span className="acceso-pass-label">
+                                    {datos.password.length < 6
+                                        ? (language === 'en' ? 'Weak' : 'Débil')
+                                        : datos.password.length < 10
+                                            ? (language === 'en' ? 'Medium' : 'Media')
+                                            : (language === 'en' ? 'Strong' : 'Fuerte')}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* CIUDAD (solo en registro, completamente opcional) */}
+                    {!esLogin && (
+                        <div className="acceso-field">
+                            <label htmlFor="acc-ciudad">
+                                {language === 'en' ? 'SECTOR / CITY (OPTIONAL)' : 'SECTOR / CIUDAD (OPCIONAL)'}
+                            </label>
+                            <input
+                                id="acc-ciudad"
+                                name="ciudad"
+                                type="text"
+                                value={datos.ciudad}
+                                onChange={handleChange}
+                                placeholder={language === 'en' ? 'Granada, Sevilla...' : 'Granada, Sevilla...'}
+                                autoComplete="address-level2"
+                            />
+                        </div>
+                    )}
+
+                    {/* BOTÓN PRINCIPAL */}
+                    <button
+                        type="submit"
+                        className={`acceso-btn-submit ${cargando ? 'loading' : ''}`}
+                        disabled={cargando}
+                    >
+                        {cargando
+                            ? (language === 'en' ? '⏳ VALIDATING...' : '⏳ VALIDANDO...')
+                            : esLogin
+                                ? (language === 'en' ? '🔑 ESTABLISH CONNECTION' : '🔑 ESTABLECER CONEXIÓN')
+                                : (language === 'en' ? '🛸 JOIN THE BUNKER' : '🛸 UNIRSE AL BÚNKER')}
+                    </button>
+
+                    {/* SWITCH LOGIN/REGISTRO */}
+                    <p className="acceso-switch-modo">
+                        {esLogin
+                            ? (language === 'en' ? "No account yet? " : "¿Sin credenciales aún? ")
+                            : (language === 'en' ? "Already an agent? " : "¿Ya eres agente? ")}
+                        <button type="button" className="acceso-switch-btn" onClick={toggleModo}>
+                            {esLogin
+                                ? (language === 'en' ? 'REGISTER FREE' : 'REGISTRO GRATUITO')
+                                : (language === 'en' ? 'LOG IN' : 'IDENTIFICARSE')}
+                        </button>
+                    </p>
+                </form>
+            </div>
         </div>
     );
 };

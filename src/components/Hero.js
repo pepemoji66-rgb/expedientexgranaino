@@ -9,6 +9,7 @@ import './Hero.css';
 import imgEspacio from '../assets/espacio_ufo.png';
 import imgEvidencias from '../assets/galeria_evidencias.png';
 import imgRelatos from '../assets/misterio_relatos.png';
+import imgAtarfeReal from '../assets/atarfe_captura_real_horizontal.png';
 
 const Hero = ({ userAuth }) => {
     const { t, toggleLanguage, language } = useLanguage();
@@ -34,30 +35,30 @@ const Hero = ({ userAuth }) => {
                     todasNovedades = todasNovedades.concat(dataNot.map(x => ({ ...x, type: 'noticia', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // 3. Audios
-                const resAudios = await fetch(`${API_BASE_URL}/api/audios/audios-publicos`);
-                const dataAudios = await resAudios.json();
-                if (Array.isArray(dataAudios)) {
-                    todasNovedades = todasNovedades.concat(dataAudios.map(x => ({ ...x, type: 'audio', timestamp: new Date(x.fecha_subida).getTime() })));
-                }
-
-                // 4. Videos
+                // 3. Videos
                 const resVideos = await fetch(`${API_BASE_URL}/api/videos/publicos`);
                 const dataVideos = await resVideos.json();
                 if (Array.isArray(dataVideos)) {
                     todasNovedades = todasNovedades.concat(dataVideos.map(x => ({ ...x, type: 'video', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // 5. Casos Abiertos (True Crime)
+                // 4. Casos Abiertos (True Crime)
                 const resCasos = await fetch(`${API_BASE_URL}/api/casos`);
                 const dataCasos = await resCasos.json();
                 if (Array.isArray(dataCasos)) {
                     todasNovedades = todasNovedades.concat(dataCasos.map(x => ({ ...x, type: 'caso', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // Ordenar por fecha y coger los 2 más recientes
+                // 5. Misterios Históricos (Casos Históricos)
+                const resMist = await fetch(`${API_BASE_URL}/api/misterios-historicos`);
+                const dataMist = await resMist.json();
+                if (Array.isArray(dataMist)) {
+                    todasNovedades = todasNovedades.concat(dataMist.map(x => ({ ...x, type: 'misterio', timestamp: new Date(x.fecha).getTime() })));
+                }
+
+                // Ordenar por fecha y coger los 4 más recientes
                 todasNovedades.sort((a, b) => b.timestamp - a.timestamp);
-                setNovedadesGlobales(todasNovedades.slice(0, 2));
+                setNovedadesGlobales(todasNovedades.slice(0, 4));
 
             } catch (err) {
                 console.error("Error al captar últimas actualizaciones para Hero:", err);
@@ -66,26 +67,12 @@ const Hero = ({ userAuth }) => {
         fetchUltimos();
     }, []);
 
-
-
-    const getSlides = () => {
+    const getSlides = () => {
         return [
             {
-                id: 'bilingual',
-                image: imgEspacio,
-                subtitle: t('slideBilingualSubtitle'),
-                title: t('slideBilingualTitle'),
-                tagline: t('slideBilingualTagline'),
-                infoTitle: t('slideBilingualInfoTitle'),
-                infoText: t('slideBilingualInfoText'),
-                highlight: t('slideBilingualHighlight'),
-                btnText: t('slideBilingualBtn'),
-                btnLink: "#",
-                onClick: (e) => { e.preventDefault(); toggleLanguage(); }
-            },
-            {
                 id: 'especial-atarfe',
-                image: imgEvidencias,
+                image: imgAtarfeReal,
+                backgroundPosition: 'right center',
                 subtitle: language === 'en' ? "DECLASSIFIED DOSSIER" : "DOSSIER DESCLASIFICADO",
                 title: "CASO OVNI ATARFE",
                 tagline: language === 'en' ? "THE ATARFE INCIDENT" : "EL INCIDENTE ATARFE Y ALBOLOTE",
@@ -108,78 +95,6 @@ const Hero = ({ userAuth }) => {
                 highlight: language === 'en' ? "100% PRIVATE • SECURE • NO CLOUD" : "100% PRIVADO • SEGURO • SIN NUBE",
                 btnText: language === 'en' ? "GET ARCHIPEG" : "ADQUIRIR ARCHIPEG",
                 btnLink: "/archipeg"
-            },
-            {
-                id: 'casos-abiertos',
-                image: imgRelatos,
-                subtitle: language === 'en' ? "UNSOLVED CASES" : "CASOS ABIERTOS",
-                title: "TRUE CRIME",
-                tagline: language === 'en' ? "CRIMES & MYSTERIES" : "CRÍMENES & MISTERIOS",
-                infoTitle: language === 'en' ? "UNRESOLVED MYSTERIES" : "MISTERIOS SIN RESOLVER",
-                infoText: language === 'en' ? "Delve into the unsolved cases. Real crimes, unexplained disappearances, and mysteries that defy logic." : "Adéntrate en los casos abiertos. Crímenes reales, desapariciones inexplicables y misterios que desafían la lógica.",
-                highlight: language === 'en' ? "CLASSIFIED FILES" : "ARCHIVOS CLASIFICADOS",
-                btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
-                btnLink: "/casos-abiertos"
-            },
-            {
-                id: 0,
-                image: imgEspacio,
-                subtitle: "GLOBAL",
-                title: "EXPEDIENTEXGRANAINO",
-                tagline: t('heroObserverNetwork'),
-                infoTitle: t('heroObserverTitle'),
-                infoText: t('heroObserverText'),
-                highlight: t('heroObserverHighlight'),
-                btnText: t('heroReport'),
-                btnLink: "/expedientes"
-            },
-            {
-                id: 1,
-                image: imgEvidencias,
-                subtitle: "DIVISIÓN",
-                title: t('heroGalleryTitle'),
-                tagline: "ARCHIVO CLASIFICADO",
-                infoTitle: t('heroGalleryTitle'),
-                infoText: t('heroGalleryDesc'),
-                highlight: "ACCESO TOTAL A ARCHIVOS DESCLASIFICADOS",
-                btnText: t('heroGalleryBtn'),
-                btnLink: "/galeria"
-            },
-            {
-                id: 2,
-                image: imgRelatos,
-                subtitle: "INTELIGENCIA",
-                title: t('heroStoriesTitle'),
-                tagline: "HISTORIA OCULTA",
-                infoTitle: t('heroStoriesTitle'),
-                infoText: t('heroStoriesDesc'),
-                highlight: "COMPARTE TU EXPERIENCIA CON NOSOTROS",
-                btnText: t('heroStoriesBtn'),
-                btnLink: "/noticias"
-            },
-            {
-                id: 3,
-                image: imgEspacio,
-                subtitle: "ASCENSO TÁCTICO",
-                title: t('heroRankTitle'),
-                tagline: "EVOLUCIÓN EN LA RED",
-                infoTitle: t('heroRankTitle'),
-                infoText: t('heroRankDesc'),
-                highlight: "MÁS VISITAS = MAYOR RANGO TÁCTICO",
-                btnText: t('heroRankBtn'),
-                btnLink: "/acceso"
-            },
-            {
-                id: 4,
-                image: imgEspacio,
-                subtitle: "RECLUTAMIENTO",
-                title: t('heroRegisterTitle'),
-                tagline: "PROTEGEMOS TU IDENTIDAD",
-                infoTitle: t('heroRegisterTitle'),
-                infoText: t('heroRegisterDesc'),
-                highlight: "TU PRIVACIDAD ES NUESTRA PRIORIDAD MÁXIMA",
-                btnText: t('heroRegisterBtn'),
-                btnLink: "/acceso"
             }
         ];
     };
@@ -216,26 +131,28 @@ const Hero = ({ userAuth }) => {
                     btnText: "LEER NOTICIA",
                     btnLink: "/noticias"
                 });
-            } else if (item.type === 'audio') {
-                alertasRecientes.push({
-                    id: `nuevo-audio-${item.id}`,
-                    image: item.imagen_url ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`) : imgRelatos,
-                    subtitle: language === 'en' ? "NEW AUDIO DOSSIER" : "NUEVO AUDIO / PODCAST",
-                    title: (item.titulo || 'AUDIO DOSSIER').toUpperCase(),
-                    tagline: language === 'en' ? "LISTEN TO THE EVIDENCE" : "ESCUCHA LA EVIDENCIA",
-                    infoTitle: language === 'en' ? "NEW AUDIO ADDED" : "REGISTRO SONORO AÑADIDO",
-                    infoText: language === 'en' ? "A new audio with testimonies and evidence has been uploaded." : "Se ha subido un nuevo audio con testimonios y pruebas sonoras al archivo central.",
-                    highlight: language === 'en' ? "AVAILABLE IN THE AUDIO SECTION" : "DISPONIBLES EN LA SECCIÓN DE AUDIOS",
-                    btnText: language === 'en' ? "LISTEN NOW" : "ESCUCHAR AHORA",
-                    btnLink: "/audios"
-                });
             } else if (item.type === 'video') {
-                const primerCaptura = item.capturas && item.capturas.trim() !== '' ? item.capturas.split(',')[0].trim() : '';
+                // El campo capturas puede mezclar: URL de youtube, archivo local y URL de imagen real
+                // Hay que saltar las URLs de vídeo/youtube y quedarnos con la imagen
+                const capturasList = item.capturas
+                    ? item.capturas.split(',').map(c => c.trim()).filter(c => c)
+                    : [];
+                const esUrlImagen = (c) => c.startsWith('http') && !c.includes('youtube.com') && !c.includes('youtu.be') && !c.includes('.mp4') && !c.includes('.webm') && !c.includes('.mov');
+                const mejorCaptura = capturasList.find(esUrlImagen)
+                    || capturasList.find(c => !c.startsWith('http'))  // archivo local como fallback
+                    || '';
+                const buildVideoImageUrl = (captura) => {
+                    if (!captura) return null;
+                    if (captura.startsWith('http')) return captura;
+                    if (captura.startsWith('uploads/') || captura.startsWith('uploads\\')) {
+                        return `${API_BASE_URL}/${captura.replace(/\\/g, '/')}`;
+                    }
+                    const fileName = captura.split('/').pop().split('\\').pop();
+                    return `${API_BASE_URL}/uploads/imagenes/${fileName}`;
+                };
                 alertasRecientes.push({
                     id: `nuevo-video-${item.id}`,
-                    image: primerCaptura 
-                        ? (primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`) 
-                        : imgEvidencias,
+                    image: buildVideoImageUrl(mejorCaptura) || imgEvidencias,
                     subtitle: language === 'en' ? "NEW VIDEO" : "NUEVO VÍDEO",
                     title: (item.titulo || 'EVIDENCIA EN VÍDEO').toUpperCase(),
                     tagline: language === 'en' ? "VISUAL EVIDENCE" : "VISUALIZA LAS PRUEBAS",
@@ -257,6 +174,19 @@ const Hero = ({ userAuth }) => {
                     highlight: language === 'en' ? "CLASSIFIED FILE" : "ARCHIVO CLASIFICADO",
                     btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
                     btnLink: "/casos-abiertos"
+                });
+            } else if (item.type === 'misterio') {
+                alertasRecientes.push({
+                    id: `nuevo-misterio-${item.id}`,
+                    image: item.imagen_url ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`) : imgRelatos,
+                    subtitle: language === 'en' ? "HISTORICAL MYSTERY" : "MISTERIO HISTÓRICO",
+                    title: (item.titulo || 'MISTERIO DESCLASIFICADO').toUpperCase(),
+                    tagline: language === 'en' ? "UNRESOLVED ENIGMAS" : "ENIGMAS DE LA HISTORIA",
+                    infoTitle: language === 'en' ? "CLASSIFIED HISTORY" : "HISTORIA CLASIFICADA",
+                    infoText: item.contenido ? item.contenido.replace(/<[^>]+>/g, '').substring(0, 100) + '...' : (language === 'en' ? "New historical enigma cataloged." : "Nuevo enigma histórico catalogado."),
+                    highlight: language === 'en' ? "ANCIENT SECRETS" : "SECRETOS DEL PASADO",
+                    btnText: language === 'en' ? "EXPLORE ENIGMAS" : "EXPLORAR ENIGMAS",
+                    btnLink: "/misterios-historicos"
                 });
             }
         });
@@ -280,103 +210,114 @@ const Hero = ({ userAuth }) => {
     const activeSlide = slides[currentSlide];
 
     return (
-        <section 
-            className="hero-global-mufon" 
-            style={{ backgroundImage: `url(${activeSlide.image})` }}
-        >
-            <div className="hero-overlay-dark"></div>
-            
-            {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
-            <div className="hero-top-actions">
-                <div className="action-buttons-group">
-                    {novedadesGlobales.length > 0 && (
-                        <Link 
-                            to={novedadesGlobales[0].type === 'noticia' ? "/noticias" : novedadesGlobales[0].type === 'audio' ? "/audios" : novedadesGlobales[0].type === 'video' ? "/galeria" : novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : "/expedientes"} 
-                            className="btn-nuevo-archivo-blink"
-                        >
-                            <span className="blink-dot"></span> {t('heroNewFile')}
+        <div className="hero-global-mufon-wrapper">
+            <section 
+                className={`hero-global-mufon hero-slide-${activeSlide?.id}`}
+                style={{ 
+                    backgroundImage: `url(${activeSlide?.image})`,
+                    backgroundPosition: activeSlide?.backgroundPosition || 'center'
+                }}
+            >
+                <div className="hero-overlay-dark"></div>
+                
+                {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
+                <div className="hero-top-actions">
+                    <div className="action-buttons-group">
+                        {novedadesGlobales.length > 0 && (
+                            <Link 
+                                to={
+                                    novedadesGlobales[0].type === 'noticia' ? "/noticias" : 
+                                    novedadesGlobales[0].type === 'video' ? "/galeria" : 
+                                    novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : 
+                                    novedadesGlobales[0].type === 'misterio' ? "/misterios-historicos" : 
+                                    "/expedientes"
+                                } 
+                                className="btn-nuevo-archivo-blink"
+                            >
+                                <span className="blink-dot"></span> {t('heroNewFile')}
+                            </Link>
+                        )}
+                        
+                        {/* PLACA DE AGENTE INTEGRADA EN PANEL DE MANDOS */}
+                        {userAuth && (
+                            <div className="hero-agent-badge">
+                                <span className="agent-status-led"></span>
+                                <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
+                                {userAuth.rango && (
+                                    <span className="agent-rango-tag">
+                                        {userAuth.rango === 'Agente en Prácticas' ? '🔰 ' :
+                                         userAuth.rango === 'Cabo' ? '🎖️ ' :
+                                         userAuth.rango === 'Cabo 1º' ? '🎖️🎖️ ' :
+                                         userAuth.rango === 'Sargento' ? '⭐ ' :
+                                         userAuth.rango === 'Teniente' ? '⭐⭐ ' :
+                                         userAuth.rango === 'Capitán' ? '⭐⭐⭐ ' :
+                                         userAuth.rango === 'Comandante' ? '🦅 ' : '🛡️ '}
+                                        {userAuth.rango.toUpperCase()}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
+                        <Link to="/expedientes" className="btn-mufon-red">
+                            {t('heroNavReport')}
                         </Link>
-                    )}
-                    
-                    {/* PLACA DE AGENTE INTEGRADA EN PANEL DE MANDOS */}
-                    {userAuth && (
-                        <div className="hero-agent-badge">
-                            <span className="agent-status-led"></span>
-                            <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
-                            {userAuth.rango && (
-                                <span className="agent-rango-tag">
-                                    {userAuth.rango === 'Agente en Prácticas' ? '🔰 ' :
-                                     userAuth.rango === 'Cabo' ? '🎖️ ' :
-                                     userAuth.rango === 'Cabo 1º' ? '🎖️🎖️ ' :
-                                     userAuth.rango === 'Sargento' ? '⭐ ' :
-                                     userAuth.rango === 'Teniente' ? '⭐⭐ ' :
-                                     userAuth.rango === 'Capitán' ? '⭐⭐⭐ ' :
-                                     userAuth.rango === 'Comandante' ? '🦅 ' : '🛡️ '}
-                                    {userAuth.rango.toUpperCase()}
-                                </span>
-                            )}
-                        </div>
-                    )}
-
-                    <Link to="/expedientes" className="btn-mufon-red">
-                        {t('heroNavReport')}
-                    </Link>
-                    <Link to="/acceso" className="btn-mufon-red">
-                        {t('heroNavReg')}
-                    </Link>
-                    <Link to="/galeria" className="btn-mufon-black">
-                        {t('heroNavMedia')}
-                    </Link>
-                    <Link to="/acceso" className="btn-mufon-outline">
-                        {t('heroNavAccess')}
-                    </Link>
-                </div>
-            </div>
-
-            <div className="hero-main-content fade-in-slide" key={currentSlide}>
-                <div className="mufon-logo-container">
-                    <div className="mufon-glow"></div>
-                    <h2 className="mufon-subtitle">{activeSlide.subtitle}</h2>
-                    <h1 className="mufon-title">{activeSlide.title}</h1>
-                    <h3 className="mufon-tagline">{activeSlide.tagline}</h3>
-                </div>
-
-                <div className="hero-info-box">
-                    <h2 className="info-title">{activeSlide.infoTitle}</h2>
-                    <p className="info-text">
-                        {activeSlide.infoText}<br />
-                        <span className="highlight-mufon">{activeSlide.highlight}</span>
-                    </p>
-                    {activeSlide.onClick ? (
-                        <button onClick={activeSlide.onClick} className="btn-explore-mufon">
-                            {activeSlide.btnText}
-                        </button>
-                    ) : (
-                        <Link to={activeSlide.btnLink} className="btn-explore-mufon">
-                            {activeSlide.btnText}
+                        <Link to="/acceso" className="btn-mufon-red">
+                            {t('heroNavReg')}
                         </Link>
-                    )}
+                        <Link to="/galeria" className="btn-mufon-black">
+                            {t('heroNavMedia')}
+                        </Link>
+                        <Link to="/acceso" className="btn-mufon-outline">
+                            {t('heroNavAccess')}
+                        </Link>
+                    </div>
                 </div>
-            </div>
 
-            {/* FLECHAS DE NAVEGACIÓN MANUAL */}
-            <button className="carousel-arrow left-arrow" onClick={prevSlide}>
-                <ChevronLeft size={36} />
-            </button>
-            <button className="carousel-arrow right-arrow" onClick={nextSlide}>
-                <ChevronRight size={36} />
-            </button>
+                <div className="hero-main-content fade-in-slide" key={currentSlide}>
+                    <div className="mufon-logo-container">
+                        <div className="mufon-glow"></div>
+                        <h2 className="mufon-subtitle">{activeSlide.subtitle}</h2>
+                        <h1 className="mufon-title">{activeSlide.title}</h1>
+                        <h3 className="mufon-tagline">{activeSlide.tagline}</h3>
+                    </div>
 
-            {/* ELEMENTOS DECORATIVOS DE NAVEGACIÓN (PUNTOS) */}
-            <div className="hero-pagination-dots">
-                {slides.map((_, index) => (
-                    <span 
-                        key={index}
-                        className={`dot ${currentSlide === index ? 'active' : ''}`}
-                        onClick={() => setCurrentSlide(index)}
-                    ></span>
-                ))}
-            </div>
+                    <div className="hero-info-box">
+                        <h2 className="info-title">{activeSlide.infoTitle}</h2>
+                        <p className="info-text">
+                            {activeSlide.infoText}<br />
+                            <span className="highlight-mufon">{activeSlide.highlight}</span>
+                        </p>
+                        {activeSlide.onClick ? (
+                            <button onClick={activeSlide.onClick} className="btn-explore-mufon">
+                                {activeSlide.btnText}
+                            </button>
+                        ) : (
+                            <Link to={activeSlide.btnLink} className="btn-explore-mufon">
+                                {activeSlide.btnText}
+                            </Link>
+                        )}
+                    </div>
+                </div>
+
+                {/* FLECHAS DE NAVEGACIÓN MANUAL */}
+                <button className="carousel-arrow left-arrow" onClick={prevSlide}>
+                    <ChevronLeft size={36} />
+                </button>
+                <button className="carousel-arrow right-arrow" onClick={nextSlide}>
+                    <ChevronRight size={36} />
+                </button>
+
+                {/* ELEMENTOS DECORATIVOS DE NAVEGACIÓN (PUNTOS) */}
+                <div className="hero-pagination-dots">
+                    {slides.map((_, index) => (
+                        <span 
+                            key={index}
+                            className={`dot ${currentSlide === index ? 'active' : ''}`}
+                            onClick={() => setCurrentSlide(index)}
+                        ></span>
+                    ))}
+                </div>
+            </section>
 
             {/* BLOQUE SEO - INDEXABLE POR BOTS - BILINGÜE */}
             <div className="seo-bunker-block" aria-label={language === 'en' ? "About Expediente X Granaíno" : "Información sobre Expediente X Granaíno"}>
@@ -432,7 +373,7 @@ const Hero = ({ userAuth }) => {
                     </>
                 )}
             </div>
-        </section>
+        </div>
     );
 };
 

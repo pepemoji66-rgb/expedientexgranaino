@@ -52,7 +52,7 @@ module.exports = (db) => {
   }, async (req, res) => {
     const { tipo, titulo, contenido, url_externa, latitud, longitud } = req.body;
     
-    if (!req.file && tipo !== 'expedientes' && tipo !== 'casos_abiertos' && !url_externa) {
+    if (!req.file && tipo !== 'expedientes' && tipo !== 'casos_abiertos' && tipo !== 'misterios_historicos' && !url_externa) {
       return res.status(400).send({ message: '⚠️ No se ha recibido ningún archivo ni URL.' });
     }
 
@@ -73,9 +73,9 @@ module.exports = (db) => {
     let params = [];
 
     if (tipo === 'videos') {
-      const { contenido, latitud, longitud } = req.body;
-      sql = "INSERT INTO videos (titulo, url, estado, latitud, longitud, descripcion, fecha) VALUES (?, ?, 'aprobado', ?, ?, ?, NOW())";
-      params = [titulo, nombreArchivo, latitud || 0, longitud || 0, contenido || ''];
+      const { contenido, latitud, longitud, capturas } = req.body;
+      sql = "INSERT INTO videos (titulo, url, estado, latitud, longitud, descripcion, capturas, fecha) VALUES (?, ?, 'aprobado', ?, ?, ?, ?, NOW())";
+      params = [titulo, nombreArchivo, latitud || 0, longitud || 0, contenido || '', capturas || ''];
     } else if (tipo === 'audios') {
       const { imagen_url } = req.body;
       sql = "INSERT INTO audios (titulo, ruta, aprobado, fecha_subida, imagen_url) VALUES (?, ?, 1, NOW(), ?)";
@@ -103,6 +103,11 @@ module.exports = (db) => {
       const fuente_url = req.body.url_externa || null;
       sql = "INSERT INTO casos_abiertos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha, fuente_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW(), ?)";
       params = [titulo, contenido || '', titulo_en, contenido_en, req.file ? nombreArchivo : null, latitud || 0, longitud || 0, fuente_url];
+    } else if (tipo === 'misterios_historicos') {
+      const titulo_en = req.body.titulo_en || null;
+      const contenido_en = req.body.contenido_en || null;
+      sql = "INSERT INTO misterios_historicos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW())";
+      params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0];
     }
 
     if (!sql) {
@@ -110,10 +115,11 @@ module.exports = (db) => {
     }
 
     try {
-      await db.execute(sql, params);
+      const [result] = await db.execute(sql, params);
       res.send({
         message: '¡Archivo clasificado y guardado!',
-        ruta: nombreArchivo
+        ruta: nombreArchivo,
+        id: result ? result.insertId : null
       });
     } catch (err) {
       console.error("❌ Error en DB al subir:", err);

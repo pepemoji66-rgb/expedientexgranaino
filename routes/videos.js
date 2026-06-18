@@ -69,10 +69,17 @@ module.exports = (db, upload) => {
     // --- 4.5 ACTUALIZAR VÍDEO (PUT) ---
     router.put('/:id', async (req, res) => {
         const { titulo, url, latitud, longitud, estado, capturas, descripcion } = req.body;
+        
+        // Limpiamos capturas y url de cualquier ruta local del ordenador
+        const cleanCapturas = capturas 
+            ? capturas.split(',').map(u => u.trim()).filter(u => u && !(u.includes('\\') || u.startsWith('C:') || u.includes('/Users/'))).join(',') 
+            : '';
+        const cleanUrl = url && !(url.includes('\\') || url.startsWith('C:') || url.includes('/Users/')) ? url : '';
+
         try {
             await db.execute(
                 "UPDATE videos SET titulo = ?, url = ?, latitud = ?, longitud = ?, estado = ?, capturas = ?, descripcion = ? WHERE id = ?",
-                [titulo, url, latitud, longitud, estado, capturas, descripcion || '', req.params.id]
+                [titulo, cleanUrl, latitud, longitud, estado, cleanCapturas, descripcion || '', req.params.id]
             );
             res.json({ mensaje: "Vídeo actualizado en el búnker." });
         } catch (err) {
@@ -88,7 +95,15 @@ module.exports = (db, upload) => {
             // Obtenemos las capturas actuales para no borrarlas
             const current = await db.query("SELECT capturas FROM videos WHERE id = ?", [req.params.id]);
             const prevCapturas = current[0]?.capturas || '';
-            const newCapturas = prevCapturas ? `${prevCapturas},${urls}` : urls;
+            
+            // Limpiamos de rutas locales la lista anterior
+            const cleanPrev = prevCapturas
+                .split(',')
+                .map(u => u.trim())
+                .filter(u => u && !(u.includes('\\') || u.startsWith('C:') || u.includes('/Users/')))
+                .join(',');
+
+            const newCapturas = cleanPrev ? `${cleanPrev},${urls}` : urls;
 
             await db.execute("UPDATE videos SET capturas = ? WHERE id = ?", [newCapturas, req.params.id]);
             res.json({ mensaje: "Capturas añadidas al expediente del vídeo.", urls: newCapturas });

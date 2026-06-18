@@ -34,7 +34,7 @@ const AdSlot = ({ id, type = 'horizontal' }) => {
             <ins className="adsbygoogle"
                  style={{ display: 'block' }}
                  data-ad-client="ca-pub-2318415961583536"
-                 data-ad-slot={id === 'footer-top' ? '8888888888' : '1234567890'} // Estos IDs se pueden afinar más tarde
+                 data-ad-slot="8608960205"
                  data-ad-format="auto"
                  data-full-width-responsive="true"></ins>
         </div>

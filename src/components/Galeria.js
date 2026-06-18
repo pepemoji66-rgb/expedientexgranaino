@@ -119,7 +119,17 @@ const Galeria = ({ userAuth }) => {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         } else if (red === 'instagram') {
             try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
+                const fullText = `${texto} ${url}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullText);
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = fullText;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                }
                 alert(t('galleryCopyAlert'));
                 link = `https://www.instagram.com/expedientexgranaino/`;
             } catch (err) {}
@@ -129,7 +139,17 @@ const Galeria = ({ userAuth }) => {
             window.open(link, '_blank');
         } else {
             try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
+                const fullText = `${texto} ${url}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullText);
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = fullText;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                }
                 alert(t('galleryCopyAlert'));
             } catch (err) {}
         }

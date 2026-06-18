@@ -5,6 +5,7 @@ import { renderizarTextoConMedios } from '../utils/renderMedios';
 import API_BASE_URL from '../config';
 import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
+import { safeLocalStorage } from '../utils/storage';
 import './expedientes.css';
 
 const Expedientes = () => {
@@ -36,7 +37,7 @@ const Expedientes = () => {
     }, []);
 
     useEffect(() => {
-        const sesion = localStorage.getItem('agente_sesion');
+        const sesion = safeLocalStorage.getItem('agente_sesion');
         if (sesion) setUserAuth(JSON.parse(sesion));
     }, []);
 
@@ -85,10 +86,55 @@ const Expedientes = () => {
 
     // Detener Robocop al cerrar el modal
     useEffect(() => {
-        if (!relatoAbierto) {
+        if (!relatoAbierto && window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
     }, [relatoAbierto]);
+
+    // Traducción automática al vuelo en inglés / restauración en español para relatoAbierto
+    useEffect(() => {
+        if (relatoAbierto) {
+            if (language === 'en') {
+                const alreadyTranslated = relatoAbierto.titulo_en || relatoAbierto.contenido_en || (relatoAbierto._translatedLanguage === 'en');
+                if (!alreadyTranslated) {
+                    (async () => {
+                        try {
+                            const texto = relatoAbierto.contenido || "";
+                            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
+                            const data = await res.json();
+                            const traducido = data[0].map(x => x[0]).join("");
+                            
+                            let tituloTraducido = relatoAbierto.titulo;
+                            if (relatoAbierto.titulo) {
+                                const resTitulo = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(relatoAbierto.titulo)}`);
+                                const dataTitulo = await resTitulo.json();
+                                tituloTraducido = dataTitulo[0].map(x => x[0]).join("");
+                            }
+
+                            setRelatoAbierto(prev => {
+                                if (prev && prev.id === relatoAbierto.id) {
+                                    return { 
+                                        ...prev, 
+                                        contenido: traducido, 
+                                        titulo: tituloTraducido,
+                                        _translatedLanguage: 'en'
+                                    };
+                                }
+                                return prev;
+                            });
+                        } catch (err) {
+                            console.error("Auto translation error for relato:", err);
+                        }
+                    })();
+                }
+            } else if (language === 'es') {
+                const relatoOriginal = datos.find(d => d.id === relatoAbierto.id);
+                if (relatoOriginal) {
+                    setRelatoAbierto(relatoOriginal);
+                }
+            }
+        }
+    }, [relatoAbierto?.id, language, datos]);
 
     const obtenerUbicacion = () => {
         if (!navigator.geolocation) return alert("GPS NO DISPONIBLE.");
@@ -182,7 +228,7 @@ const Expedientes = () => {
         const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
 
         // Prioridad 1: Web Share API (Móviles)
-        if (navigator.share && red !== 'copy' && red !== 'instagram') {
+        if (navigator.share) {
             try {
                 await navigator.share({
                     title: 'BÚNKER EXPEDIENTE X - INFORME',
@@ -197,23 +243,16 @@ const Expedientes = () => {
 
         // Prioridad 2: Fallback (Desktop / Manual)
         let link = '';
-        if (red === 'twitter') {
-            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
-        } else if (red === 'whatsapp') {
+        if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         } else if (red === 'facebook') {
             link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        } else if (red === 'twitter') {
+            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
         }
 
         if (link) {
             window.open(link, '_blank');
-        } else if (red === 'copy' || red === 'twitter' || red === 'whatsapp') {
-            try {
-                await navigator.clipboard.writeText(`${texto} ${url}`);
-                alert(t('expCopySuccess'));
-            } catch (err) {
-                alert(t('expCopyError'));
-            }
         }
     };
 
@@ -470,7 +509,7 @@ const Expedientes = () => {
                             <div className="img-relato-full" style={{ position: 'relative' }}>
                                 {relatoAbierto.latitud && relatoAbierto.longitud && parseFloat(relatoAbierto.latitud) !== 0 && (
                                     <button
-                                        onClick={() => navigate('/lugares', { state: { lat: relatoAbierto.latitud, lng: relatoAbierto.longitud, noticiaId: relatoAbierto.id } })}
+                                        onClick={() => navigate('/lugares', { state: { lat: relatoAbierto.latitud, lng: relatoAbierto.longitud, noticiaId: `exp-${relatoAbierto.id}` } })}
                                         style={{
                                             position: 'absolute',
                                             top: '15px',
@@ -503,51 +542,14 @@ const Expedientes = () => {
                             <span>COORD: {relatoAbierto.latitud || '0'}, {relatoAbierto.longitud || '0'}</span>
                         </div>
 
-                        {language === 'en' && (
-                            <div style={{ marginTop: '15px', textAlign: 'center' }}>
-                                <button
-                                    onClick={async () => {
-                                        const btn = document.getElementById('btn-trans-tactico');
-                                        if (btn) btn.innerText = "📡 " + t('readTranslateWait').toUpperCase();
-
-                                        try {
-                                            const texto = relatoAbierto.contenido || "";
-                                            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(texto)}`);
-                                            const data = await res.json();
-                                            const traducido = data[0].map(x => x[0]).join("");
-
-                                            setRelatoAbierto({ ...relatoAbierto, contenido: traducido });
-                                            if (btn) btn.style.display = 'none'; // Ya está traducido
-                                        } catch (e) {
-                                            const urlTranslate = `https://translate.google.com/?sl=es&tl=en&text=${encodeURIComponent(relatoAbierto.contenido)}&op=translate`;
-                                            window.open(urlTranslate, '_blank');
-                                        }
-                                    }}
-                                    id="btn-trans-tactico"
-                                    style={{
-                                        background: 'var(--color-principal)',
-                                        color: '#000',
-                                        border: 'none',
-                                        padding: '10px 20px',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                        fontFamily: 'monospace',
-                                        fontSize: '0.8rem',
-                                        boxShadow: '0 0 15px rgba(0,255,65,0.5)',
-                                        width: '100%',
-                                        borderRadius: '2px',
-                                        marginBottom: '10px'
-                                    }}
-                                >
-                                    📡 {t('readTranslateStory')}
-                                </button>
-                            </div>
-                        )}
-
                         {/* BOTÓN ROBOCOP (TTS) */}
                         <div style={{ marginTop: language === 'en' ? '0' : '15px', textAlign: 'center' }}>
                             <button
                                 onClick={() => {
+                                    if (!window.speechSynthesis) {
+                                        alert("🔊 El sistema de síntesis de voz no está disponible en este navegador o dispositivo.");
+                                        return;
+                                    }
                                     if (window.speechSynthesis.speaking) {
                                         window.speechSynthesis.cancel();
                                     } else {
@@ -617,10 +619,9 @@ const Expedientes = () => {
                                     {t('expDiffuse')}
                                 </p>
                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                    <button onClick={() => compartirExpediente('twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>𝕏 TWITTER</button>
                                     <button onClick={() => compartirExpediente('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>WHATSAPP</button>
                                     <button onClick={() => compartirExpediente('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>FACEBOOK</button>
-                                    <button onClick={() => compartirExpediente('copy')} className="btn-share-tactico" style={{ background: '#555', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>COPIAR</button>
+                                    <button onClick={() => compartirExpediente('twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}>𝕏 TWITTER</button>
                                 </div>
                             </div>
                         </div>
