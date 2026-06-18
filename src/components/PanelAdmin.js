@@ -1140,6 +1140,13 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', minHeight: '150px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
                                     />
 
+                                    <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>🔗 URL FUENTE ORIGINAL (OPCIONAL):</label>
+                                    <input 
+                                        type="url" value={editForm.fuente_url} 
+                                        onChange={e => setEditForm({...editForm, fuente_url: e.target.value})} 
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAMBIAR IMAGEN DE PORTADA (OPCIONAL):</label>
                                     <input 
                                         type="file" 
@@ -1207,6 +1214,13 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', minHeight: '150px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px', marginBottom: '15px' }}
                                     />
                                     
+                                    <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.8rem', marginBottom: '5px' }}>🔗 URL FUENTE ORIGINAL (OPCIONAL):</label>
+                                    <input 
+                                        type="url" value={editForm.fuente_url} 
+                                        onChange={e => setEditForm({...editForm, fuente_url: e.target.value})} 
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>IMAGEN (OPCIONAL):</label>
                                     <input 
                                         type="file" 
