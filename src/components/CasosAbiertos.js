@@ -455,6 +455,14 @@ const CasosAbiertos = ({ userAuth }) => {
 
                             <div className="modal-caso-body-html" dangerouslySetInnerHTML={{ __html: language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido }} />
 
+                            {casoExpandido.fuente_url && (
+                                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                                    <a href={casoExpandido.fuente_url} target="_blank" rel="noopener noreferrer" className="btn-access-tactical" style={{ display: 'inline-block', padding: '10px 20px', background: 'var(--color-principal)', color: '#000', textDecoration: 'none', fontWeight: 'bold' }}>
+                                        🔗 {language === 'en' ? 'VIEW ORIGINAL SOURCE' : 'VER FUENTE ORIGINAL'}
+                                    </a>
+                                </div>
+                            )}
+
                             {/* SECCIÓN DE COMPARTIR EN MODAL */}
                             <div style={{ marginTop: '25px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
                                 <p style={{ color: 'var(--color-principal)', fontSize: '0.7rem', marginBottom: '10px', fontFamily: 'monospace' }}>

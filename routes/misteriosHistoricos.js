@@ -68,12 +68,12 @@ module.exports = (upload) => {
     // --- EDITAR UN MISTERIO ---
     router.put('/:id', upload ? upload.single('imagen') : (req, res, next) => next(), async (req, res) => {
         const { id } = req.params;
-        const { titulo, contenido, titulo_en, contenido_en, latitud, longitud } = req.body;
-        const nombreArchivo = req.file ? (req.file.path || req.file.filename) : (req.body.url_externa || null);
+        const { titulo, contenido, titulo_en, contenido_en, latitud, longitud, fuente_url, url_externa } = req.body;
+        const nombreArchivo = req.file ? (req.file.path || req.file.filename) : null;
         
         try {
-            let query = "UPDATE misterios_historicos SET titulo = ?, contenido = ?, titulo_en = ?, contenido_en = ?, latitud = ?, longitud = ?";
-            let valores = [titulo, contenido, titulo_en || null, contenido_en || null, latitud || 0, longitud || 0];
+            let query = "UPDATE misterios_historicos SET titulo = ?, contenido = ?, titulo_en = ?, contenido_en = ?, latitud = ?, longitud = ?, fuente_url = ?";
+            let valores = [titulo, contenido, titulo_en || null, contenido_en || null, latitud || 0, longitud || 0, fuente_url || url_externa || null];
 
             if (nombreArchivo) {
                 query += ", imagen_url = ?";

@@ -604,6 +604,14 @@ const Expedientes = () => {
                         <div className="texto-relato-modal">
                             {renderizarTextoConMedios(relatoAbierto.contenido)}
                         </div>
+                        
+                        {relatoAbierto.fuente_url && (
+                            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                                <a href={relatoAbierto.fuente_url} target="_blank" rel="noopener noreferrer" className="btn-access-tactical" style={{ display: 'inline-block', padding: '10px 20px', background: 'var(--color-principal)', color: '#000', textDecoration: 'none', fontWeight: 'bold' }}>
+                                    🔗 VER FUENTE ORIGINAL
+                                </a>
+                            </div>
+                        )}
 
                         <div className="modal-footer-pro">
                             <div className="modal-actions-top">

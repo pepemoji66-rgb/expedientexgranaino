@@ -106,8 +106,9 @@ module.exports = (db) => {
     } else if (tipo === 'misterios_historicos') {
       const titulo_en = req.body.titulo_en || null;
       const contenido_en = req.body.contenido_en || null;
-      sql = "INSERT INTO misterios_historicos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW())";
-      params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0];
+      const fuente_url = req.body.fuente_url || req.body.url_externa || null;
+      sql = "INSERT INTO misterios_historicos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha, fuente_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW(), ?)";
+      params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0, fuente_url];
     }
 
     if (!sql) {
