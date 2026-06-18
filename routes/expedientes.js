@@ -173,18 +173,19 @@ module.exports = (db, upload) => {
     });
 
     router.put('/:id', upload.single('imagen'), async (req, res) => {
-        const { titulo, contenido, latitud, longitud, estado, tipo } = req.body;
+        const { titulo, contenido, latitud, longitud, estado, tipo, fuente_url, url_externa } = req.body;
+        const url_final = fuente_url || url_externa || null;
         const imagen_url = req.file ? (req.file.path || req.file.filename) : null;
         try {
             if (imagen_url) {
                 await db.execute(
-                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, imagen_url = ? WHERE id = ?",
-                    [titulo, contenido, latitud, longitud, estado, tipo, imagen_url, req.params.id]
+                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, imagen_url = ?, fuente_url = ? WHERE id = ?",
+                    [titulo, contenido, latitud, longitud, estado, tipo, imagen_url, url_final, req.params.id]
                 );
             } else {
                 await db.execute(
-                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ? WHERE id = ?",
-                    [titulo, contenido, latitud, longitud, estado, tipo, req.params.id]
+                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, fuente_url = ? WHERE id = ?",
+                    [titulo, contenido, latitud, longitud, estado, tipo, url_final, req.params.id]
                 );
             }
             res.json({ mensaje: "Expediente actualizado con éxito." });

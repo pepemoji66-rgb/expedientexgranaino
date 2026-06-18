@@ -42,14 +42,14 @@ module.exports = (upload) => {
     // --- EDITAR UN CASO ABIERTO ---
     router.put('/:id', upload ? upload.single('imagen') : (req, res, next) => next(), async (req, res) => {
         const { id } = req.params;
-    const { titulo, contenido, titulo_en, contenido_en, latitud, longitud, ubicacion } = req.body;
+    const { titulo, contenido, titulo_en, contenido_en, latitud, longitud, ubicacion, url_externa, fuente_url } = req.body;
     
     // Check if there is an image uploaded
-    const nombreArchivo = req.file ? (req.file.path || req.file.filename) : (req.body.url_externa || null);
+    const nombreArchivo = req.file ? (req.file.path || req.file.filename) : null;
     
     try {
-        let query = "UPDATE casos_abiertos SET titulo = ?, contenido = ?, titulo_en = ?, contenido_en = ?, latitud = ?, longitud = ?";
-        let valores = [titulo, contenido, titulo_en || null, contenido_en || null, latitud || 0, longitud || 0];
+        let query = "UPDATE casos_abiertos SET titulo = ?, contenido = ?, titulo_en = ?, contenido_en = ?, latitud = ?, longitud = ?, fuente_url = ?";
+        let valores = [titulo, contenido, titulo_en || null, contenido_en || null, latitud || 0, longitud || 0, fuente_url || url_externa || null];
 
         if (nombreArchivo) {
             query += ", imagen_url = ?";

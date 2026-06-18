@@ -4,13 +4,12 @@ import { API_BASE_URL } from '../config';
 const ControlMusica = () => {
   // ARRANCA EN OFF — el usuario decide cuándo activar la música
   const [sonando, setSonando] = useState(false);
-  const [audio] = useState(new Audio(`${API_BASE_URL}/audios-ambiente/misterio.mp3`));
+  const [audio] = useState(() => new Audio(`${API_BASE_URL}/audios-ambiente/misterio.mp3`));
 
   useEffect(() => {
     audio.volume = 0.2;
     audio.loop = true;
 
-    // NO hacemos autoplay — respetamos la experiencia del usuario
     return () => { 
       audio.pause(); 
     };

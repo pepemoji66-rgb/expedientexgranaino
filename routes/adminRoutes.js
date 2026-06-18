@@ -81,7 +81,8 @@ module.exports = (db) => {
       sql = "INSERT INTO audios (titulo, ruta, aprobado, fecha_subida, imagen_url) VALUES (?, ?, 1, NOW(), ?)";
       params = [titulo, nombreArchivo, imagen_url || null];
     } else if (tipo === 'noticias') {
-      const { fuente_url, contenido, latitud, longitud, ubicacion, nivel_alerta } = req.body;
+      const { contenido, latitud, longitud, ubicacion, nivel_alerta } = req.body;
+      const fuente_url = req.body.fuente_url || req.body.url_externa || null;
       sql = "INSERT INTO noticias (titulo, cuerpo, imagen_url, estado, fecha, fuente_url, latitud, longitud, ubicacion, nivel_alerta) VALUES (?, ?, ?, 'aprobado', NOW(), ?, ?, ?, ?, ?)";
       params = [titulo, contenido || '', nombreArchivo, fuente_url || '', latitud || 0, longitud || 0, ubicacion || '', nivel_alerta || 'Bajo'];
     } else if (tipo === 'imagenes') {
@@ -93,13 +94,15 @@ module.exports = (db) => {
       params = [titulo, 'Registro desde Panel de Mando', nombreArchivo, latitud || 0, longitud || 0];
     } else if (tipo === 'expedientes') {
       const tipo_relato = req.body.tipo_relato || 'jefe';
-      sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, estado, tipo, imagen_url, latitud, longitud, fecha) VALUES (?, ?, ?, 'aprobado', ?, ?, ?, ?, NOW())";
-      params = [titulo, contenido, (tipo_relato === 'jefe' ? 'ADMINISTRADOR' : 'AGENTE'), tipo_relato, nombreArchivo, latitud || 0, longitud || 0];
+      const fuente_url = req.body.url_externa || null;
+      sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, estado, tipo, imagen_url, latitud, longitud, fecha, fuente_url) VALUES (?, ?, ?, 'aprobado', ?, ?, ?, ?, NOW(), ?)";
+      params = [titulo, contenido, (tipo_relato === 'jefe' ? 'ADMINISTRADOR' : 'AGENTE'), tipo_relato, req.file ? nombreArchivo : null, latitud || 0, longitud || 0, fuente_url];
     } else if (tipo === 'casos_abiertos') {
       const titulo_en = req.body.titulo_en || null;
       const contenido_en = req.body.contenido_en || null;
-      sql = "INSERT INTO casos_abiertos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW())";
-      params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0];
+      const fuente_url = req.body.url_externa || null;
+      sql = "INSERT INTO casos_abiertos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha, fuente_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW(), ?)";
+      params = [titulo, contenido || '', titulo_en, contenido_en, req.file ? nombreArchivo : null, latitud || 0, longitud || 0, fuente_url];
     }
 
     if (!sql) {
