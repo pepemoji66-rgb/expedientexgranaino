@@ -5,6 +5,7 @@ import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './lecturahistoria.css';
 import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
+import { amazonData } from '../amazonData';
 
 // ==========================================
 // COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
@@ -62,27 +63,10 @@ const LecturaHistoria = () => {
     const [esMisterio, setEsMisterio] = useState(false);
     const [cargando, setCargando] = useState(true);
 
-    // DATOS MOCK PARA DEMO DE AFILIADOS AMAZON
-    const mockBanner = {
-        titulo: "Lectura Recomendada: Göbekli Tepe",
-        descripcion: "Profundiza en el origen de los dioses en el templo más antiguo de la humanidad.",
-        link: "https://www.amazon.es/"
-    };
-
-    const mockBibliografia = [
-        {
-            titulo: "El Misterio de Göbekli Tepe",
-            autor: "Andrew Collins",
-            imagen_url: "https://m.media-amazon.com/images/I/71R2o5-jAUL._AC_UF894,1000_QL80_.jpg",
-            link: "https://www.amazon.es/"
-        },
-        {
-            titulo: "Magos de los Dioses",
-            autor: "Graham Hancock",
-            imagen_url: "https://m.media-amazon.com/images/I/81h2N31Kk6L._AC_UF894,1000_QL80_.jpg",
-            link: "https://www.amazon.es/"
-        }
-    ];
+    // DATOS DINÁMICOS DE AMAZON
+    const itemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
+    const bannerData = amazonData[itemKey]?.banner;
+    const biblioData = amazonData[itemKey]?.bibliografia;
 
     const obtenerHistoria = async () => {
         try {
@@ -419,8 +403,8 @@ const LecturaHistoria = () => {
                         </button>
                     </div>
 
-                    {/* BANNER AMAZON (DEMO) */}
-                    <AmazonBanner {...mockBanner} />
+                    {/* BANNER AMAZON DINÁMICO */}
+                    {bannerData && <AmazonBanner {...bannerData} />}
 
                     {renderizarTextoConMedios(historia.contenido || historia.cuerpo || t('readNoContent'))}
                     
@@ -451,8 +435,8 @@ const LecturaHistoria = () => {
                     </div>
                 </div>
                 
-                {/* BIBLIOGRAFÍA AMAZON (DEMO) */}
-                <AmazonBibliography libros={mockBibliografia} />
+                {/* BIBLIOGRAFÍA AMAZON DINÁMICA */}
+                {biblioData && <AmazonBibliography libros={biblioData} />}
 
             </div>
         </div>
