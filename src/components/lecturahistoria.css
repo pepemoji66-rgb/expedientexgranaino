@@ -131,3 +131,207 @@
     }
 }
 
+/* =========================================
+   SISTEMA DE AFILIADOS AMAZON
+========================================= */
+
+/* 1. Enlace inline integrado en el texto */
+.amazon-link-inline {
+    color: #00d4ff; /* Mismo azul cyber de la web */
+    text-decoration: none;
+    font-weight: bold;
+    border-bottom: 1px dashed rgba(0, 212, 255, 0.5);
+    transition: all 0.3s ease;
+    padding: 0 2px;
+}
+
+.amazon-link-inline:hover {
+    color: #00ff41; /* Verde hacker al pasar el ratón */
+    border-bottom: 1px solid #00ff41;
+    background: rgba(0, 255, 65, 0.1);
+    border-radius: 2px;
+}
+
+/* 2. Banner de Texto Destacado */
+.amazon-banner {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 212, 255, 0.05);
+    border-left: 4px solid #00d4ff;
+    padding: 20px;
+    margin: 30px 0;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.amazon-banner:hover {
+    transform: translateX(5px);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.15);
+    background: rgba(0, 212, 255, 0.08);
+}
+
+.amazon-banner-icon {
+    font-size: 2rem;
+    margin-right: 20px;
+    color: #00d4ff;
+}
+
+.amazon-banner-content {
+    flex: 1;
+}
+
+.amazon-banner-title {
+    font-size: 1.1rem;
+    color: #fff;
+    font-weight: bold;
+    margin: 0 0 5px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.amazon-banner-desc {
+    font-size: 0.95rem;
+    color: #aaa;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.amazon-banner-btn {
+    background: transparent;
+    color: #00d4ff;
+    border: 1px solid #00d4ff;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    font-family: monospace;
+    white-space: nowrap;
+    margin-left: 20px;
+    transition: all 0.3s ease;
+}
+
+.amazon-banner:hover .amazon-banner-btn {
+    background: #00d4ff;
+    color: #000;
+}
+
+/* 3. Sección Bibliografía */
+.amazon-bibliography-section {
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.amazon-bibliography-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-principal);
+    font-size: 1.2rem;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+}
+
+.amazon-bibliography-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.amazon-book-card {
+    display: flex;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.amazon-book-card:hover {
+    border-color: rgba(0, 212, 255, 0.3);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    transform: translateY(-3px);
+}
+
+.amazon-book-cover-container {
+    width: 100px;
+    flex-shrink: 0;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.amazon-book-cover {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 2px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+}
+
+.amazon-book-card:hover .amazon-book-cover {
+    transform: scale(1.05);
+}
+
+.amazon-book-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.amazon-book-title {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+.amazon-book-author {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0 0 12px 0;
+    font-family: monospace;
+}
+
+.amazon-book-btn {
+    align-self: flex-start;
+    font-size: 0.75rem;
+    color: #00d4ff;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.amazon-book-card:hover .amazon-book-btn {
+    color: #00ff41;
+}
+
+@media (max-width: 600px) {
+    .amazon-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+    .amazon-banner-icon {
+        margin: 0 0 10px 0;
+    }
+    .amazon-banner-btn {
+        margin: 15px 0 0 0;
+        width: 100%;
+    }
+}
+

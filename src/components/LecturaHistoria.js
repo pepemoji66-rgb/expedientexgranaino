@@ -6,6 +6,48 @@ import './lecturahistoria.css';
 import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
 
+// ==========================================
+// COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
+// ==========================================
+
+const AmazonBanner = ({ titulo, descripcion, link }) => (
+    <a href={link} target="_blank" rel="noopener noreferrer" className="amazon-banner">
+        <div className="amazon-banner-icon">📖</div>
+        <div className="amazon-banner-content">
+            <h4 className="amazon-banner-title">{titulo}</h4>
+            <p className="amazon-banner-desc">{descripcion}</p>
+        </div>
+        <div className="amazon-banner-btn">VER EN AMAZON</div>
+    </a>
+);
+
+const AmazonBibliography = ({ libros, tituloSeccion }) => {
+    if (!libros || libros.length === 0) return null;
+    return (
+        <div className="amazon-bibliography-section fade-in">
+            <div className="amazon-bibliography-header">
+                📚 <span>{tituloSeccion || "PARA SABER MÁS (BIBLIOGRAFÍA)"}</span>
+            </div>
+            <div className="amazon-bibliography-grid">
+                {libros.map((libro, index) => (
+                    <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer" className="amazon-book-card">
+                        <div className="amazon-book-cover-container">
+                            <img src={libro.imagen_url} alt={libro.titulo} className="amazon-book-cover" />
+                        </div>
+                        <div className="amazon-book-info">
+                            <div>
+                                <h5 className="amazon-book-title">{libro.titulo}</h5>
+                                <p className="amazon-book-author">{libro.autor}</p>
+                            </div>
+                            <div className="amazon-book-btn">🛒 COMPRAR EN AMAZON</div>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const LecturaHistoria = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
     const { id } = useParams();
@@ -19,6 +61,28 @@ const LecturaHistoria = () => {
     const [esNoticia, setEsNoticia] = useState(false);
     const [esMisterio, setEsMisterio] = useState(false);
     const [cargando, setCargando] = useState(true);
+
+    // DATOS MOCK PARA DEMO DE AFILIADOS AMAZON
+    const mockBanner = {
+        titulo: "Lectura Recomendada: Göbekli Tepe",
+        descripcion: "Profundiza en el origen de los dioses en el templo más antiguo de la humanidad.",
+        link: "https://www.amazon.es/"
+    };
+
+    const mockBibliografia = [
+        {
+            titulo: "El Misterio de Göbekli Tepe",
+            autor: "Andrew Collins",
+            imagen_url: "https://m.media-amazon.com/images/I/71R2o5-jAUL._AC_UF894,1000_QL80_.jpg",
+            link: "https://www.amazon.es/"
+        },
+        {
+            titulo: "Magos de los Dioses",
+            autor: "Graham Hancock",
+            imagen_url: "https://m.media-amazon.com/images/I/81h2N31Kk6L._AC_UF894,1000_QL80_.jpg",
+            link: "https://www.amazon.es/"
+        }
+    ];
 
     const obtenerHistoria = async () => {
         try {
@@ -355,6 +419,9 @@ const LecturaHistoria = () => {
                         </button>
                     </div>
 
+                    {/* BANNER AMAZON (DEMO) */}
+                    <AmazonBanner {...mockBanner} />
+
                     {renderizarTextoConMedios(historia.contenido || historia.cuerpo || t('readNoContent'))}
                     
                     {historia.fuente_url && (
@@ -383,6 +450,10 @@ const LecturaHistoria = () => {
                         </div>
                     </div>
                 </div>
+                
+                {/* BIBLIOGRAFÍA AMAZON (DEMO) */}
+                <AmazonBibliography libros={mockBibliografia} />
+
             </div>
         </div>
     );
