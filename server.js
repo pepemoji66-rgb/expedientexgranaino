@@ -1309,6 +1309,39 @@ app.get('/leer-historia/:id', async (req, res) => {
     });
 });
 
+// --- ENDPOINTS PARA AFILIADOS DE AMAZON (NINJA) ---
+app.get('/api/amazon/:itemKey', async (req, res) => {
+    try {
+        const itemKey = req.params.itemKey;
+        const rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [itemKey]);
+        if (rows && rows.length > 0) {
+            res.json(JSON.parse(rows[0].datos_json));
+        } else {
+            res.json(null);
+        }
+    } catch (err) {
+        console.error("Error al obtener datos de amazon:", err);
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
+app.post('/api/amazon/:itemKey', async (req, res) => {
+    try {
+        const itemKey = req.params.itemKey;
+        const datos_json = JSON.stringify(req.body);
+        
+        // Usamos INSERT ... ON DUPLICATE KEY UPDATE para MySQL
+        await db.execute(
+            "INSERT INTO amazon_afiliados (item_key, datos_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE datos_json = ?", 
+            [itemKey, datos_json, datos_json]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Error al guardar datos de amazon:", err);
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
 // Ruta de captura general: el resto de páginas del SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));

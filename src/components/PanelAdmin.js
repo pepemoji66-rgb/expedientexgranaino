@@ -65,6 +65,30 @@ const PanelAdmin = () => {
     const [publicarAlSubir, setPublicarAlSubir] = useState(false);
     const [estadoRedes, setEstadoRedes] = useState(null);
 
+    // ESTADO PARA AMAZON AFILIADOS (NINJA)
+    const [amazonJson, setAmazonJson] = useState('');
+
+    useEffect(() => {
+        if (itemParaEditar) {
+            const id = itemParaEditar.id || itemParaEditar._id;
+            let tipo = 'exp';
+            if (tab === 'misterios_historicos') tipo = 'misterio';
+            if (tab === 'noticias') tipo = 'noticia';
+            const itemKey = `${tipo}-${id}`;
+            
+            axios.get(`${API_BASE_URL}/api/amazon/${itemKey}`).then(res => {
+                if (res.data) {
+                    setAmazonJson(JSON.stringify(res.data, null, 4));
+                } else {
+                    setAmazonJson('');
+                }
+            }).catch(err => {
+                console.error("Error al cargar amazon:", err);
+                setAmazonJson('');
+            });
+        }
+    }, [itemParaEditar, tab]);
+
     const cargarDatos = useCallback(async () => {
         setCargando(true);
         try {
@@ -290,9 +314,27 @@ const PanelAdmin = () => {
             }
 
             await axios.put(endpoint, payload, config);
+
+            // --- GUARDAR AFILIADOS AMAZON (NINJA) ---
+            if (amazonJson.trim() !== '') {
+                let tipo = 'exp';
+                if (tab === 'misterios_historicos') tipo = 'misterio';
+                if (tab === 'noticias') tipo = 'noticia';
+                const itemKey = `${tipo}-${id}`;
+                try {
+                    const parsedJson = JSON.parse(amazonJson);
+                    await axios.post(`${API_BASE_URL}/api/amazon/${itemKey}`, parsedJson);
+                } catch(e) {
+                    alert("❌ CUIDADO: El código de Amazon no es un JSON válido y no se ha guardado. Corrige los corchetes o comillas.");
+                }
+            } else if (itemParaEditar && itemParaEditar.id) {
+                // Si lo vacían, en el futuro se podría borrar de la bd, pero por ahora lo dejamos así.
+            }
+
             alert("✅ REGISTRO ACTUALIZADO CORRECTAMENTE");
             setItemParaEditar(null);
             setArchivoEdit(null);
+            setAmazonJson('');
             cargarDatos();
         } catch (err) {
             console.error("Error al guardar:", err);
@@ -1439,6 +1481,19 @@ const PanelAdmin = () => {
                                             <input type="number" step="any" value={editForm.longitud} onChange={e => setEditForm({...editForm, longitud: e.target.value})} style={{ width: '100%', padding: '8px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', fontSize: '0.75rem' }} />
                                         </div>
                                     </div>
+                                </div>
+                            )}
+
+                            {(tab === 'expedientes' || tab === 'noticias' || tab === 'misterios_historicos' || tab === 'casos_abiertos') && (
+                                <div style={{ background: 'rgba(255,153,0,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #ff9900' }}>
+                                    <label style={{ display: 'block', color: '#ff9900', fontSize: '0.8rem', marginBottom: '5px', fontWeight: 'bold' }}>🛒 CÓDIGO MÁGICO DE AMAZON (JSON)</label>
+                                    <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '10px' }}>Pega aquí el bloque de código que te paso por el chat para recomendar libros.</p>
+                                    <textarea 
+                                        value={amazonJson} 
+                                        onChange={e => setAmazonJson(e.target.value)} 
+                                        placeholder='{\n  "banner": { ... },\n  "bibliografia": [ ... ]\n}'
+                                        style={{ width: '100%', minHeight: '150px', background: '#050505', color: '#ff9900', border: '1px solid #333', padding: '10px', fontFamily: 'monospace', fontSize: '0.8rem' }}
+                                    />
                                 </div>
                             )}
 

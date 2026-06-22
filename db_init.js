@@ -355,6 +355,13 @@ module.exports = async (db) => {
             console.log("🔢 Contador de visitas ya activo. Protocolo de preservación activado.");
         }
 
+        // --- SISTEMA DE AFILIADOS AMAZON (NINJA) ---
+        await db.execute(`CREATE TABLE IF NOT EXISTS amazon_afiliados (
+            item_key VARCHAR(100) PRIMARY KEY,
+            datos_json TEXT
+        )`);
+        console.log("🩹 TABLA: amazon_afiliados inicializada en MySQL.");
+
         console.log("✅ Tablas MySQL verificadas.");
 
     } catch (err) {

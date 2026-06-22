@@ -5,7 +5,6 @@ import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './lecturahistoria.css';
 import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
-import { amazonData } from '../amazonData';
 
 // ==========================================
 // COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
@@ -62,11 +61,20 @@ const LecturaHistoria = () => {
     const [esNoticia, setEsNoticia] = useState(false);
     const [esMisterio, setEsMisterio] = useState(false);
     const [cargando, setCargando] = useState(true);
+    const [amazonConfig, setAmazonConfig] = useState(null);
 
-    // DATOS DINÁMICOS DE AMAZON
-    const itemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
-    const bannerData = amazonData[itemKey]?.banner;
-    const biblioData = amazonData[itemKey]?.bibliografia;
+    // DATOS DINÁMICOS DE AMAZON DESDE API
+    useEffect(() => {
+        if (historia) {
+            const currentItemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
+            axios.get(`${API_BASE_URL}/api/amazon/${currentItemKey}`).then(res => {
+                if (res.data) setAmazonConfig(res.data);
+            }).catch(e => console.error("Error amazon config:", e));
+        }
+    }, [historia, id, esMisterio, esNoticia]);
+
+    const bannerData = amazonConfig?.banner;
+    const biblioData = amazonConfig?.bibliografia;
 
     const obtenerHistoria = async () => {
         try {
