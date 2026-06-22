@@ -7,6 +7,49 @@ import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
 import { safeLocalStorage } from '../utils/storage';
 import './expedientes.css';
+import './lecturahistoria.css';
+
+// ==========================================
+// COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
+// ==========================================
+
+const AmazonBanner = ({ titulo, descripcion, link }) => (
+    <a href={link} target="_blank" rel="noopener noreferrer" className="amazon-banner" style={{marginBottom: '20px'}}>
+        <div className="amazon-banner-icon">📖</div>
+        <div className="amazon-banner-content">
+            <h4 className="amazon-banner-title">{titulo}</h4>
+            <p className="amazon-banner-desc">{descripcion}</p>
+        </div>
+        <div className="amazon-banner-btn">VER EN AMAZON</div>
+    </a>
+);
+
+const AmazonBibliography = ({ libros, tituloSeccion }) => {
+    if (!libros || libros.length === 0) return null;
+    return (
+        <div className="amazon-bibliography-section fade-in" style={{marginTop: '30px'}}>
+            <div className="amazon-bibliography-header">
+                📚 <span>{tituloSeccion || "PARA SABER MÁS (BIBLIOGRAFÍA)"}</span>
+            </div>
+            <div className="amazon-bibliography-grid">
+                {libros.map((libro, index) => (
+                    <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer" className="amazon-book-card">
+                        <div className="amazon-book-cover-container">
+                            <img src={libro.imagen_url} alt={libro.titulo} className="amazon-book-cover" />
+                        </div>
+                        <div className="amazon-book-info">
+                            <div>
+                                <h5 className="amazon-book-title">{libro.titulo}</h5>
+                                <p className="amazon-book-author">{libro.autor}</p>
+                            </div>
+                            <div className="amazon-book-btn">🛒 COMPRAR EN AMAZON</div>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 const Expedientes = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
@@ -25,6 +68,7 @@ const Expedientes = () => {
     const [busquedaLugar, setBusquedaLugar] = useState('');
     const [cargando, setCargando] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [amazonConfig, setAmazonConfig] = useState(null);
 
     const [userAuth, setUserAuth] = useState(null);
 
@@ -84,10 +128,19 @@ const Expedientes = () => {
         cargarDatos();
     }, [cargarDatos]);
 
-    // Detener Robocop al cerrar el modal
+    // Detener Robocop al cerrar el modal y limpiar amazonConfig
     useEffect(() => {
-        if (!relatoAbierto && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
+        if (!relatoAbierto) {
+            setAmazonConfig(null);
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        } else {
+            // Fetch Amazon config
+            const itemKey = `exp-${relatoAbierto.id}`;
+            axios.get(`${API_BASE_URL}/api/amazon/${itemKey}`).then(res => {
+                if (res.data) setAmazonConfig(res.data);
+            }).catch(e => console.error("Error amazon config:", e));
         }
     }, [relatoAbierto]);
 
@@ -601,6 +654,9 @@ const Expedientes = () => {
 
                         <hr style={{ borderColor: '#333', margin: '15px 0' }} />
 
+                        {/* BANNER AMAZON DINÁMICO */}
+                        {amazonConfig?.banner && <AmazonBanner {...amazonConfig.banner} />}
+
                         <div className="texto-relato-modal">
                             {renderizarTextoConMedios(relatoAbierto.contenido)}
                         </div>
@@ -633,6 +689,9 @@ const Expedientes = () => {
                                 </div>
                             </div>
                         </div>
+                        
+                        {/* BIBLIOGRAFÍA AMAZON DINÁMICA */}
+                        {amazonConfig?.bibliografia && <AmazonBibliography libros={amazonConfig.bibliografia} />}
                     </div>
                 </div>
             )}
