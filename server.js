@@ -1356,6 +1356,34 @@ app.post('/api/amazon/:itemKey', async (req, res) => {
     }
 });
 
+// Página de Biblioteca (/biblioteca) - SEO enriquecido
+app.get('/biblioteca', (req, res) => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) return res.sendFile(indexPath);
+
+        const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #ffb100">
+    <h1 style="color:#ffb100;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">BIBLIOTECA DEL BÚNKER - Expediente X Granaíno</h1>
+    <p>Nuestra selección de obras imprescindibles para investigar fenómenos anómalos, misterios históricos y crónicas ufológicas. 
+    Desde relatos de abducciones hasta investigaciones de campo sobre entidades desconocidas.</p>
+</article>`;
+
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/imagenes/biblioteca_banner.png`;
+
+        const pagina = inyectarContenidoSEO(
+            html,
+            'Biblioteca del Búnker | Libros recomendados de Misterio y Ufología',
+            'Selección de obras imprescindibles sobre OVNIs, fenómenos paranormales y misterios históricos recomendadas por el Búnker de Expediente X Granaíno.',
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
+        );
+        res.send(pagina);
+    });
+});
+
 // Ruta de captura general: el resto de páginas del SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
