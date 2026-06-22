@@ -10,6 +10,7 @@ import imgEspacio from '../assets/espacio_ufo.png';
 import imgEvidencias from '../assets/galeria_evidencias.png';
 import imgRelatos from '../assets/misterio_relatos.png';
 import imgAtarfeReal from '../assets/atarfe_captura_real_horizontal.png';
+import imgBiblioteca from '../assets/biblioteca_banner.png';
 
 const Hero = ({ userAuth }) => {
     const { t, toggleLanguage, language } = useLanguage();
@@ -56,9 +57,9 @@ const Hero = ({ userAuth }) => {
                     todasNovedades = todasNovedades.concat(dataMist.map(x => ({ ...x, type: 'misterio', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // Ordenar por fecha y coger los 4 más recientes
+                // Ordenar por fecha y coger los 3 más recientes
                 todasNovedades.sort((a, b) => b.timestamp - a.timestamp);
-                setNovedadesGlobales(todasNovedades.slice(0, 4));
+                setNovedadesGlobales(todasNovedades.slice(0, 3));
 
             } catch (err) {
                 console.error("Error al captar últimas actualizaciones para Hero:", err);
@@ -70,7 +71,19 @@ const Hero = ({ userAuth }) => {
     const getSlides = () => {
         return [
             {
-                id: 'especial-atarfe',
+                id: 'biblioteca-bunker',
+                image: imgBiblioteca,
+                subtitle: language === 'en' ? "RECOMMENDED READING" : "LECTURAS RECOMENDADAS",
+                title: "BIBLIOTECA DEL BÚNKER",
+                tagline: language === 'en' ? "EXPAND YOUR KNOWLEDGE" : "AMPLÍA TUS CONOCIMIENTOS",
+                infoTitle: language === 'en' ? "ESOTERIC ARCHIVE" : "ARCHIVO ESOTÉRICO Y UFOLÓGICO",
+                infoText: language === 'en' ? "Discover our curated collection of books about UFOs, paranormal phenomena, and historical mysteries." : "Descubre nuestra colección de libros imprescindibles sobre OVNIs, fenómenos paranormales y misterios históricos.",
+                highlight: language === 'en' ? "SUPPORT THE PROJECT" : "APOYA AL PROYECTO",
+                btnText: language === 'en' ? "ENTER LIBRARY" : "ENTRAR A LA BIBLIOTECA",
+                btnLink: "/biblioteca"
+            },
+            {
+                id: 'archipeg-promo',
                 image: imgAtarfeReal,
                 backgroundPosition: 'right center',
                 subtitle: language === 'en' ? "DECLASSIFIED DOSSIER" : "DOSSIER DESCLASIFICADO",
@@ -95,6 +108,21 @@ const Hero = ({ userAuth }) => {
                 highlight: language === 'en' ? "100% PRIVATE • SECURE • NO CLOUD" : "100% PRIVADO • SEGURO • SIN NUBE",
                 btnText: language === 'en' ? "GET ARCHIPEG" : "ADQUIRIR ARCHIPEG",
                 btnLink: "/archipeg"
+            },
+            {
+                id: 'especial-atarfe',
+                image: imgAtarfeReal,
+                backgroundPosition: 'right center',
+                subtitle: language === 'en' ? "DECLASSIFIED DOSSIER" : "DOSSIER DESCLASIFICADO",
+                title: "CASO OVNI ATARFE",
+                tagline: language === 'en' ? "THE ATARFE INCIDENT" : "EL INCIDENTE ATARFE Y ALBOLOTE",
+                infoTitle: language === 'en' ? "CONFIDENTIAL ARCHIVE" : "ARCHIVO CONFIDENCIAL / NIVEL 4",
+                infoText: language === 'en' 
+                    ? "Full technical report on the UFO sightings in Granada. Unedited original evidence and direct testimonies."
+                    : "Informe técnico completo sobre los avistamientos OVNI en Granada. Evidencias originales sin editar y testimonios directos.",
+                highlight: language === 'en' ? "ORIGINAL EVIDENCE" : "EVIDENCIAS ORIGINALES Y TESTIMONIOS",
+                btnText: language === 'en' ? "ACCESS DOSSIER" : "ACCEDER AL DOSSIER",
+                btnLink: "/especial-atarfe"
             }
         ];
     };
