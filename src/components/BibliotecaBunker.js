@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Facebook, Twitter, Link as LinkIcon, MessageCircle } from 'lucide-react';
 import API_BASE_URL from '../config';
 import './biblioteca.css';
 
@@ -80,6 +81,26 @@ const BibliotecaBunker = () => {
                     )}
                 </div>
             )}
+            
+            {/* SECCIÓN DE COMPARTIR */}
+            <div className="biblioteca-share-section" style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255, 177, 0, 0.2)', textAlign: 'center' }}>
+                <h3 style={{ color: '#ffb100', marginBottom: '20px', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>DIFUNDE EL CONOCIMIENTO</h3>
+                <p style={{ color: '#888', marginBottom: '20px', fontSize: '0.9rem' }}>Comparte esta biblioteca en tus redes y ayúdanos a desclasificar la verdad.</p>
+                <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: '#1877F2', color: 'white', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>
+                        <Facebook size={20} /> Facebook
+                    </a>
+                    <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent("Echa un vistazo a la Biblioteca del Búnker de Expediente X Granaíno 📚🛸")}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: '#000000', color: 'white', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold', border: '1px solid #333' }}>
+                        <Twitter size={20} /> X (Twitter)
+                    </a>
+                    <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Descubre la Biblioteca del Búnker de Expediente X Granaíno 📚🛸: " + window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: '#25D366', color: 'white', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>
+                        <MessageCircle size={20} /> WhatsApp
+                    </a>
+                    <button onClick={() => { navigator.clipboard.writeText(window.location.href); alert("¡Enlace copiado al portapapeles! Listo para pegarlo en Instagram u otras redes."); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: 'transparent', color: '#ffb100', border: '1px solid #ffb100', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
+                        <LinkIcon size={20} /> Copiar Enlace
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
