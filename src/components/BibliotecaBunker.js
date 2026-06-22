@@ -43,7 +43,12 @@ const BibliotecaBunker = () => {
         <div className="biblioteca-bunker-container fade-in">
             <div className="biblioteca-header">
                 <h1>📚 BIBLIOTECA DEL BÚNKER</h1>
-                <p>Nuestra selección de obras imprescindibles para investigar fenómenos anómalos, misterios históricos y crónicas ufológicas. Adquiriendo estos libros a través de nuestros enlaces ayudas a mantener activo el Búnker.</p>
+                <div className="biblioteca-intro-text">
+                    <p>Bienvenido al archivo de lectura clasificada de Expediente X Granaíno. Aquí encontrarás nuestra selección de obras imprescindibles para investigar fenómenos anómalos, misterios históricos y crónicas ufológicas. Desde relatos de abducciones hasta investigaciones de campo sobre entidades desconocidas.</p>
+                    <p className="amazon-disclaimer-text" style={{ fontSize: '0.85rem', color: '#888', marginTop: '15px', borderLeft: '2px solid var(--color-principal)', paddingLeft: '15px', textAlign: 'left' }}>
+                        <strong>Aviso de transparencia:</strong> Los libros mostrados en esta sección son recomendaciones genuinas del Búnker. En calidad de Afiliados de Amazon, obtenemos ingresos por las compras adscritas que cumplen los requisitos aplicables. Esto <strong>NO supone ningún sobrecoste para ti</strong>. Al hacer clic en "Comprar en Amazon", serás redirigido a la plataforma oficial de Amazon de forma 100% segura. Gracias a tu apoyo mediante estas compras, podemos mantener los servidores operativos y seguir desclasificando expedientes.
+                    </p>
+                </div>
             </div>
 
             {cargando ? (
