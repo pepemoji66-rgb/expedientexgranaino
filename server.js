@@ -1310,6 +1310,20 @@ app.get('/leer-historia/:id', async (req, res) => {
 });
 
 // --- ENDPOINTS PARA AFILIADOS DE AMAZON (NINJA) ---
+app.get('/api/amazon/todos', async (req, res) => {
+    try {
+        const rows = await db.query("SELECT datos_json FROM amazon_afiliados");
+        if (rows && rows.length > 0) {
+            const todosLosLibros = rows.map(row => JSON.parse(row.datos_json));
+            res.json(todosLosLibros);
+        } else {
+            res.json([]);
+        }
+    } catch (err) {
+        console.error("Error al obtener todos los datos de amazon:", err);
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
 app.get('/api/amazon/:itemKey', async (req, res) => {
     try {
         const itemKey = req.params.itemKey;

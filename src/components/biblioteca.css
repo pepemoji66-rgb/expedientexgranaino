@@ -1,0 +1,103 @@
+.biblioteca-bunker-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 20px 60px 20px; /* Padding top para compensar el navbar */
+    min-height: 100vh;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+}
+
+.biblioteca-header {
+    text-align: center;
+    margin-bottom: 50px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 30px;
+}
+
+.biblioteca-header h1 {
+    color: var(--color-principal);
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.biblioteca-header p {
+    font-size: 1.1rem;
+    color: #aaa;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.biblioteca-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.biblioteca-card {
+    display: flex;
+    flex-direction: row;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+}
+
+.biblioteca-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 212, 255, 0.1);
+    border-color: var(--color-principal);
+}
+
+.biblioteca-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 0;
+}
+
+.biblioteca-loading p {
+    margin-top: 20px;
+    color: var(--color-principal);
+    font-family: monospace;
+}
+
+.spinner-bunker {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 212, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--color-principal);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.biblioteca-vacia {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px;
+    background: #111;
+    border: 1px dashed #333;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .biblioteca-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .biblioteca-grid {
+        grid-template-columns: 1fr;
+    }
+}

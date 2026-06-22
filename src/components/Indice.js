@@ -107,6 +107,15 @@ const Indice = ({ userAuth, stats, setTema }) => {
                         <span className="gate-action-btn">{language === 'en' ? 'OPEN DOSSIERS ➔' : 'ABRIR EXPEDIENTES ➔'}</span>
                     </div>
                 </Link>
+                <Link to="/biblioteca" className="gate-card" style={{borderColor: '#ffb100'}}>
+                    <div className="gate-glow" style={{background: 'radial-gradient(circle at 50% 50%, rgba(255, 177, 0, 0.15) 0%, transparent 60%)'}}></div>
+                    <div className="gate-icon" style={{color: '#ffb100'}}>📚</div>
+                    <div className="gate-content">
+                        <h3 style={{color: '#ffb100'}}>{language === 'en' ? 'RECOMMENDED BIBLIOGRAPHY' : 'BIBLIOTECA DEL BÚNKER'}</h3>
+                        <p>{language === 'en' ? 'Discover our selection of essential books to investigate anomalous phenomena and historical mysteries.' : 'Descubre nuestra selección de libros imprescindibles para investigar fenómenos anómalos y misterios históricos.'}</p>
+                        <span className="gate-action-btn" style={{color: '#ffb100', borderTopColor: 'rgba(255, 177, 0, 0.2)'}}>{language === 'en' ? 'ENTER LIBRARY ➔' : 'ENTRAR A LA BIBLIOTECA ➔'}</span>
+                    </div>
+                </Link>
             </div>
 
             {/* --- SECCIÓN REUBICADA: PROTOCOLOS Y SOBRE MÍ --- */}
