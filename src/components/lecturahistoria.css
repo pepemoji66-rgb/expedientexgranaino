@@ -307,7 +307,7 @@
 .amazon-book-btn {
     align-self: flex-start;
     font-size: 0.75rem;
-    color: #00d4ff;
+    color: #ff9900;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -317,7 +317,7 @@
 }
 
 .amazon-book-card:hover .amazon-book-btn {
-    color: #00ff41;
+    color: #ffb100;
 }
 
 @media (max-width: 600px) {
