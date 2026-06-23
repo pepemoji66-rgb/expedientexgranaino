@@ -38,10 +38,11 @@ const PoliticaCookies = () => {
                 <h2 style={{ color: 'var(--color-principal)', fontSize: '1.2rem' }}>4. CÓMO DESACTIVAR LAS COOKIES</h2>
                 <p>Usted puede permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones del navegador instalado en su ordenador:</p>
                 <ul>
-                    <li>Chrome</li>
-                    <li>Explorer / Edge</li>
-                    <li>Firefox</li>
-                    <li>Safari</li>
+                    <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>Google Chrome</a></li>
+                    <li><a href="https://support.microsoft.com/es-es/windows/eliminar-y-administrar-cookies-168dab11-0753-043d-7c16-ede5947fc64d" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>Microsoft Edge / Explorer</a></li>
+                    <li><a href="https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>Mozilla Firefox</a></li>
+                    <li><a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>Safari</a></li>
+                    <li><a href="https://help.opera.com/en/latest/web-preferences/#cookies" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>Opera</a></li>
                 </ul>
                 <p>Si decide bloquear las cookies, es posible que algunas funciones del búnker no estén disponibles o no funcionen correctamente.</p>
             </section>
