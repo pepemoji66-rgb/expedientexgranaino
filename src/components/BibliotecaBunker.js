@@ -7,6 +7,8 @@ import './biblioteca.css';
 const BibliotecaBunker = () => {
     const [libros, setLibros] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const [paginaActual, setPaginaActual] = useState(1);
+    const librosPorPagina = 10;
 
     useEffect(() => {
         const fetchLibros = async () => {
@@ -40,6 +42,12 @@ const BibliotecaBunker = () => {
         fetchLibros();
     }, []);
 
+    // Lógica de Paginación
+    const indiceUltimoLibro = paginaActual * librosPorPagina;
+    const indicePrimerLibro = indiceUltimoLibro - librosPorPagina;
+    const librosPaginados = libros.slice(indicePrimerLibro, indiceUltimoLibro);
+    const totalPaginas = Math.ceil(libros.length / librosPorPagina);
+
     return (
         <div className="biblioteca-bunker-container fade-in">
             <div className="biblioteca-header">
@@ -58,28 +66,58 @@ const BibliotecaBunker = () => {
                     <p>Accediendo a los archivos de la biblioteca...</p>
                 </div>
             ) : (
-                <div className="biblioteca-grid">
-                    {libros.length > 0 ? (
-                        libros.map((libro, index) => (
-                            <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer" className="amazon-book-card biblioteca-card">
-                                <div className="amazon-book-cover-container">
-                                    <img src={libro.imagen_url} alt={libro.titulo} className="amazon-book-cover" />
-                                </div>
-                                <div className="amazon-book-info">
-                                    <div>
-                                        <h5 className="amazon-book-title">{libro.titulo}</h5>
-                                        <p className="amazon-book-author">{libro.autor}</p>
+                <>
+                    <div className="biblioteca-grid">
+                        {librosPaginados.length > 0 ? (
+                            librosPaginados.map((libro, index) => (
+                                <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer" className="amazon-book-card biblioteca-card">
+                                    <div className="amazon-book-cover-container">
+                                        <img src={libro.imagen_url} alt={libro.titulo} className="amazon-book-cover" />
                                     </div>
-                                    <div className="amazon-book-btn">🛒 COMPRAR EN AMAZON</div>
-                                </div>
-                            </a>
-                        ))
-                    ) : (
-                        <div className="biblioteca-vacia">
-                            <p>Aún no hay libros clasificados en la biblioteca.</p>
+                                    <div className="amazon-book-info">
+                                        <div>
+                                            <h5 className="amazon-book-title">{libro.titulo}</h5>
+                                            <p className="amazon-book-author">{libro.autor}</p>
+                                        </div>
+                                        <div className="amazon-book-btn">🛒 COMPRAR EN AMAZON</div>
+                                    </div>
+                                </a>
+                            ))
+                        ) : (
+                            <div className="biblioteca-vacia">
+                                <p>Aún no hay libros clasificados en la biblioteca.</p>
+                            </div>
+                        )}
+                    </div>
+                    
+                    {totalPaginas > 1 && (
+                        <div className="biblioteca-paginacion" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '40px' }}>
+                            <button 
+                                onClick={() => {
+                                    setPaginaActual(prev => Math.max(prev - 1, 1));
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                disabled={paginaActual === 1}
+                                style={{ padding: '8px 16px', background: paginaActual === 1 ? '#333' : '#ffb100', color: paginaActual === 1 ? '#888' : '#000', border: 'none', borderRadius: '4px', cursor: paginaActual === 1 ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+                            >
+                                ANTERIOR
+                            </button>
+                            <span style={{ color: '#ffb100', display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
+                                Pág. {paginaActual} / {totalPaginas}
+                            </span>
+                            <button 
+                                onClick={() => {
+                                    setPaginaActual(prev => Math.min(prev + 1, totalPaginas));
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                disabled={paginaActual === totalPaginas}
+                                style={{ padding: '8px 16px', background: paginaActual === totalPaginas ? '#333' : '#ffb100', color: paginaActual === totalPaginas ? '#888' : '#000', border: 'none', borderRadius: '4px', cursor: paginaActual === totalPaginas ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+                            >
+                                SIGUIENTE
+                            </button>
                         </div>
                     )}
-                </div>
+                </>
             )}
             
             {/* SECCIÓN DE COMPARTIR */}

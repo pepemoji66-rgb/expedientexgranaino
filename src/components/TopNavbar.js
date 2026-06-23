@@ -75,6 +75,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     }
     menuItems.push({ path: "/casos-abiertos", label: "💀 TRUE CRIME", icon: <FileText size={16} /> });
     menuItems.push({ path: "/misterios-historicos", label: "👁️ " + t('navMysteries'), icon: <Eye size={16} /> });
+    menuItems.push({ path: "/biblioteca", label: "📚 BIBLIOTECA", icon: <FileText size={16} /> });
     menuItems.push({ path: "/archipeg", label: language === 'en' ? "💻 My Software" : "💻 Mi Software", icon: <Monitor size={16} /> });
 
     return (
