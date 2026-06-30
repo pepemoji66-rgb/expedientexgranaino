@@ -22,10 +22,10 @@ const AmazonBanner = ({ titulo, descripcion, link }) => (
     </a>
 );
 
-const AmazonBibliography = ({ libros, tituloSeccion }) => {
+const AmazonBibliography = ({ libros, tituloSeccion, customStyle }) => {
     if (!libros || libros.length === 0) return null;
     return (
-        <div className="amazon-bibliography-section fade-in">
+        <div className="amazon-bibliography-section fade-in" style={customStyle}>
             <div className="amazon-bibliography-header">
                 📚 <span>{tituloSeccion || "PARA SABER MÁS (BIBLIOGRAFÍA)"}</span>
             </div>
@@ -257,6 +257,71 @@ const LecturaHistoria = () => {
             setEnviando(false);
         }
     };
+
+    const renderComentariosBox = (isSideBySide = false) => (
+        <div className="comentarios-container" style={isSideBySide ? {
+            flex: '1.5 1 400px',
+            minWidth: '300px',
+            margin: 0,
+            maxWidth: 'none',
+            width: '100%',
+            boxSizing: 'border-box'
+        } : {
+            marginTop: '50px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+            paddingTop: '40px'
+        }}>
+            <h3 className="titulo-seccion-bunker">📡 {language === 'en' ? 'AGENT COMMUNICATIONS' : 'COMUNICACIONES DE AGENTES'}</h3>
+            
+            <p style={{ color: 'var(--color-principal)', fontSize: '0.8rem', opacity: 0.8, marginBottom: '15px', fontFamily: 'monospace', textAlign: 'left' }}>
+                💬 {language === 'en' 
+                    ? 'Contribute your data, theories, or comments on this file. Free access (no registration required).' 
+                    : 'Aporta tus datos, teorías o comentarios sobre este expediente. Libre acceso (no requiere registro).'}
+            </p>
+
+            <form onSubmit={enviarComentario} className="form-comentario">
+                <input
+                    type="text"
+                    value={nick}
+                    onChange={(e) => setNick(e.target.value)}
+                    placeholder={language === 'en' ? "Your Nick / Agent Name..." : "Tu Nick / Nombre de Agente..."}
+                    className="input-bunker-nick"
+                    required
+                    style={{ marginBottom: '10px' }}
+                />
+                <textarea
+                    value={nuevoComentario}
+                    onChange={(e) => setNuevoComentario(e.target.value)}
+                    placeholder={language === 'en' ? "Write your comment or report here..." : "Escribe tu informe o comentario aquí..."}
+                    className="input-bunker-comentario"
+                    required
+                ></textarea>
+                <button type="submit" disabled={enviando} className="btn-enviar-comentario">
+                    {enviando ? (language === 'en' ? 'TRANSMITTING...' : 'TRANSMITIENDO...') : (language === 'en' ? 'SEND TO FILE' : 'ENVIAR AL ARCHIVO')}
+                </button>
+            </form>
+
+            <div className="lista-comentarios">
+                {comentarios.length > 0 ? (
+                    comentarios.map((c) => (
+                        <div key={c.id} className="comentario-card fade-in">
+                            <div className="comentario-header">
+                                <span className="comentario-agente">👤 AGENTE: {c.agente?.toUpperCase()}</span>
+                                <span className="comentario-fecha">{new Date(c.fecha).toLocaleString()}</span>
+                           </div>
+                            <p className="comentario-mensaje">{c.mensaje}</p>
+                        </div>
+                    ))
+                ) : (
+                    <p className="no-comentarios">
+                        {language === 'en' 
+                            ? 'FREQUENCY CLEAR. BE THE FIRST TO REPORT ON THIS FILE...' 
+                            : 'FRECUENCIA LIMPIA. SÉ EL PRIMERO EN APORTAR INFORMACIÓN SOBRE ESTE EXPEDIENTE...'}
+                    </p>
+                )}
+            </div>
+        </div>
+    );
 
     const compartirHistoria = async (red) => {
         if (!historia) return;
@@ -497,55 +562,26 @@ const LecturaHistoria = () => {
                     </div>
                 </div>
                 
-                {/* BIBLIOGRAFÍA AMAZON DINÁMICA */}
-                {biblioData && <AmazonBibliography libros={biblioData} />}
-
-                {/* CAJA DE COMENTARIOS TÁCTICOS POR EXPEDIENTE */}
-                <div className="comentarios-container" style={{ marginTop: '50px', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '40px' }}>
-                    <h3 className="titulo-seccion-bunker">📡 {language === 'en' ? 'AGENT COMMUNICATIONS' : 'COMUNICACIONES DE AGENTES'}</h3>
-                    
-                    <form onSubmit={enviarComentario} className="form-comentario">
-                        <input
-                            type="text"
-                            value={nick}
-                            onChange={(e) => setNick(e.target.value)}
-                            placeholder={language === 'en' ? "Your Nick / Agent Name..." : "Tu Nick / Nombre de Agente..."}
-                            className="input-bunker-nick"
-                            required
-                            style={{ marginBottom: '10px' }}
-                        />
-                        <textarea
-                            value={nuevoComentario}
-                            onChange={(e) => setNuevoComentario(e.target.value)}
-                            placeholder={language === 'en' ? "Write your comment or report here..." : "Escribe tu informe o comentario aquí..."}
-                            className="input-bunker-comentario"
-                            required
-                        ></textarea>
-                        <button type="submit" disabled={enviando} className="btn-enviar-comentario">
-                            {enviando ? (language === 'en' ? 'TRANSMITTING...' : 'TRANSMITIENDO...') : (language === 'en' ? 'SEND TO FILE' : 'ENVIAR AL ARCHIVO')}
-                        </button>
-                    </form>
-
-                    <div className="lista-comentarios">
-                        {comentarios.length > 0 ? (
-                            comentarios.map((c) => (
-                                <div key={c.id} className="comentario-card fade-in">
-                                    <div className="comentario-header">
-                                        <span className="comentario-agente">👤 AGENTE: {c.agente?.toUpperCase()}</span>
-                                        <span className="comentario-fecha">{new Date(c.fecha).toLocaleString()}</span>
-                                    </div>
-                                    <p className="comentario-mensaje">{c.mensaje}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="no-comentarios">
-                                {language === 'en' 
-                                    ? 'FREQUENCY CLEAR. BE THE FIRST TO REPORT ON THIS FILE...' 
-                                    : 'FRECUENCIA LIMPIA. SÉ EL PRIMERO EN APORTAR INFORMACIÓN SOBRE ESTE EXPEDIENTE...'}
-                            </p>
-                        )}
+                {/* LAYOUT DE PIE DE EXPEDIENTE: LIBROS + COMENTARIOS AL LADO */}
+                {biblioData ? (
+                    <div className="lectura-historia-footer-layout" style={{
+                        display: 'flex',
+                        gap: '40px',
+                        marginTop: '50px',
+                        alignItems: 'flex-start',
+                        width: '100%',
+                        flexWrap: 'wrap',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                        paddingTop: '30px'
+                    }}>
+                        <div style={{ flex: '1 1 300px', minWidth: '280px' }}>
+                            <AmazonBibliography libros={biblioData} customStyle={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }} />
+                        </div>
+                        {renderComentariosBox(true)}
                     </div>
-                </div>
+                ) : (
+                    renderComentariosBox(false)
+                )}
 
             </div>
         </div>
