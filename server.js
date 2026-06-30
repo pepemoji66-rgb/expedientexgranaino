@@ -296,10 +296,21 @@ app.get('/api/admin/todos-comentarios', async (req, res) => {
 
 app.get('/api/comentarios', async (req, res) => {
     try {
-        // En la home mostramos solo los aprobados o los últimos 50
-        const results = await db.query("SELECT * FROM comentarios ORDER BY id DESC LIMIT 50");
+        // En la home mostramos solo los aprobados o los últimos 50 (donde item_key es null)
+        const results = await db.query("SELECT * FROM comentarios WHERE item_key IS NULL ORDER BY id DESC LIMIT 50");
         res.json(results);
     } catch (err) { res.status(200).json([]); }
+});
+
+app.get('/api/comentarios/:itemKey', async (req, res) => {
+    const { itemKey } = req.params;
+    try {
+        const results = await db.query("SELECT * FROM comentarios WHERE item_key = ? ORDER BY id ASC", [itemKey]);
+        res.json(results);
+    } catch (err) {
+        console.error("Error al obtener comentarios de item:", err);
+        res.status(200).json([]);
+    }
 });
 
 app.post('/api/comentarios', async (req, res) => {
@@ -315,6 +326,23 @@ app.post('/api/comentarios', async (req, res) => {
         res.json({ mensaje: "Comunicación enviada al archivo." });
     } catch (err) {
         console.error("Error al guardar comentario:", err);
+        res.status(500).json({ error: "Error al guardar comentario." });
+    }
+});
+
+app.post('/api/comentarios/:itemKey', async (req, res) => {
+    const { itemKey } = req.params;
+    const { agente, mensaje } = req.body;
+    if (!agente || !mensaje) return res.status(400).json({ error: "Faltan datos." });
+    try {
+        await db.execute("INSERT INTO comentarios (agente, mensaje, item_key, fecha, aprobado) VALUES (?, ?, ?, NOW(), 1)", [agente, mensaje, itemKey]);
+
+        // ALERTA TELEGRAM: Nuevo comentario en expediente
+        enviarAlertaTelegram(`💬 NUEVO COMENTARIO en expediente [${itemKey}] de ${agente}: "${mensaje.substring(0, 50)}${mensaje.length > 50 ? '...' : ''}"`);
+
+        res.json({ mensaje: "Comunicación enviada al archivo." });
+    } catch (err) {
+        console.error("Error al guardar comentario en expediente:", err);
         res.status(500).json({ error: "Error al guardar comentario." });
     }
 });

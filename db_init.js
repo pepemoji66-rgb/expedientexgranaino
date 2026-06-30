@@ -251,7 +251,8 @@ module.exports = async (db) => {
             agente VARCHAR(255), 
             mensaje TEXT, 
             fecha DATETIME DEFAULT CURRENT_TIMESTAMP, 
-            aprobado INT DEFAULT 1
+            aprobado INT DEFAULT 1,
+            item_key VARCHAR(255) DEFAULT NULL
         )`);
 
         await db.execute(`CREATE TABLE IF NOT EXISTS misterios_historicos (

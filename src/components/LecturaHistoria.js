@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './lecturahistoria.css';
+import './Comentarios.css';
 import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -63,15 +64,48 @@ const LecturaHistoria = () => {
     const [cargando, setCargando] = useState(true);
     const [amazonConfig, setAmazonConfig] = useState(null);
 
+    // ESTADO DE COMENTARIOS
+    const [comentarios, setComentarios] = useState([]);
+    const [nick, setNick] = useState('');
+    const [nuevoComentario, setNuevoComentario] = useState('');
+    const [enviando, setEnviando] = useState(false);
+
+    const currentItemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
+
+    // Cargar Nick guardado
+    useEffect(() => {
+        const savedNick = localStorage.getItem('agente_nick');
+        if (savedNick) {
+            setNick(savedNick);
+        }
+    }, []);
+
+    // Cargar Comentarios del expediente
+    const cargarComentarios = async () => {
+        if (!id) return;
+        try {
+            const key = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
+            const res = await axios.get(`${API_BASE_URL}/api/comentarios/${key}`);
+            setComentarios(res.data);
+        } catch (err) {
+            console.error("Error al cargar comentarios del expediente:", err);
+        }
+    };
+
+    useEffect(() => {
+        if (historia) {
+            cargarComentarios();
+        }
+    }, [historia, id, esMisterio, esNoticia]);
+
     // DATOS DINÁMICOS DE AMAZON DESDE API
     useEffect(() => {
         if (historia) {
-            const currentItemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
             axios.get(`${API_BASE_URL}/api/amazon/${currentItemKey}`).then(res => {
                 if (res.data) setAmazonConfig(res.data);
             }).catch(e => console.error("Error amazon config:", e));
         }
-    }, [historia, id, esMisterio, esNoticia]);
+    }, [historia, id, esMisterio, esNoticia, currentItemKey]);
 
     const bannerData = amazonConfig?.banner;
     const biblioData = amazonConfig?.bibliografia;
@@ -203,6 +237,26 @@ const LecturaHistoria = () => {
             }
         };
     }, [id, language]);
+
+    const enviarComentario = async (e) => {
+        e.preventDefault();
+        if (!nick.trim() || !nuevoComentario.trim()) return;
+
+        setEnviando(true);
+        try {
+            await axios.post(`${API_BASE_URL}/api/comentarios/${currentItemKey}`, {
+                agente: nick,
+                mensaje: nuevoComentario
+            });
+            setNuevoComentario('');
+            localStorage.setItem('agente_nick', nick);
+            cargarComentarios();
+        } catch (err) {
+            alert("Error al enviar la transmisión.");
+        } finally {
+            setEnviando(false);
+        }
+    };
 
     const compartirHistoria = async (red) => {
         if (!historia) return;
@@ -445,6 +499,53 @@ const LecturaHistoria = () => {
                 
                 {/* BIBLIOGRAFÍA AMAZON DINÁMICA */}
                 {biblioData && <AmazonBibliography libros={biblioData} />}
+
+                {/* CAJA DE COMENTARIOS TÁCTICOS POR EXPEDIENTE */}
+                <div className="comentarios-container" style={{ marginTop: '50px', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '40px' }}>
+                    <h3 className="titulo-seccion-bunker">📡 {language === 'en' ? 'AGENT COMMUNICATIONS' : 'COMUNICACIONES DE AGENTES'}</h3>
+                    
+                    <form onSubmit={enviarComentario} className="form-comentario">
+                        <input
+                            type="text"
+                            value={nick}
+                            onChange={(e) => setNick(e.target.value)}
+                            placeholder={language === 'en' ? "Your Nick / Agent Name..." : "Tu Nick / Nombre de Agente..."}
+                            className="input-bunker-nick"
+                            required
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <textarea
+                            value={nuevoComentario}
+                            onChange={(e) => setNuevoComentario(e.target.value)}
+                            placeholder={language === 'en' ? "Write your comment or report here..." : "Escribe tu informe o comentario aquí..."}
+                            className="input-bunker-comentario"
+                            required
+                        ></textarea>
+                        <button type="submit" disabled={enviando} className="btn-enviar-comentario">
+                            {enviando ? (language === 'en' ? 'TRANSMITTING...' : 'TRANSMITIENDO...') : (language === 'en' ? 'SEND TO FILE' : 'ENVIAR AL ARCHIVO')}
+                        </button>
+                    </form>
+
+                    <div className="lista-comentarios">
+                        {comentarios.length > 0 ? (
+                            comentarios.map((c) => (
+                                <div key={c.id} className="comentario-card fade-in">
+                                    <div className="comentario-header">
+                                        <span className="comentario-agente">👤 AGENTE: {c.agente?.toUpperCase()}</span>
+                                        <span className="comentario-fecha">{new Date(c.fecha).toLocaleString()}</span>
+                                    </div>
+                                    <p className="comentario-mensaje">{c.mensaje}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="no-comentarios">
+                                {language === 'en' 
+                                    ? 'FREQUENCY CLEAR. BE THE FIRST TO REPORT ON THIS FILE...' 
+                                    : 'FRECUENCIA LIMPIA. SÉ EL PRIMERO EN APORTAR INFORMACIÓN SOBRE ESTE EXPEDIENTE...'}
+                            </p>
+                        )}
+                    </div>
+                </div>
 
             </div>
         </div>

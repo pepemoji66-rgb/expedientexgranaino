@@ -43,6 +43,22 @@
     border-color: #444;
 }
 
+.input-bunker-nick {
+    background: #050505;
+    border: 1px solid #222;
+    color: #fff;
+    padding: 12px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+.input-bunker-nick:focus {
+    border-color: #444;
+}
+
 .btn-enviar-comentario {
     background: #fff;
     color: #000;

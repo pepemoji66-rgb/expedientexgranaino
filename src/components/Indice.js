@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Comentarios from './Comentarios';
 import NoticiasExternas from './NoticiasExternas';
 import { useLanguage } from '../context/LanguageContext';
 import { API_BASE_URL } from '../config';
@@ -453,8 +452,6 @@ const Indice = ({ userAuth, stats, setTema }) => {
                     </div>
                 </div>
             </div>
-
-            <Comentarios userAuth={userAuth} />
         </div>
     );
 };
