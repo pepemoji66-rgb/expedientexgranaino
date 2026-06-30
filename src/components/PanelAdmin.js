@@ -74,6 +74,7 @@ const PanelAdmin = () => {
             let tipo = 'exp';
             if (tab === 'misterios_historicos') tipo = 'misterio';
             if (tab === 'noticias') tipo = 'noticia';
+            if (tab === 'casos_abiertos') tipo = 'caso';
             const itemKey = `${tipo}-${id}`;
             
             axios.get(`${API_BASE_URL}/api/amazon/${itemKey}`).then(res => {
@@ -320,6 +321,7 @@ const PanelAdmin = () => {
                 let tipo = 'exp';
                 if (tab === 'misterios_historicos') tipo = 'misterio';
                 if (tab === 'noticias') tipo = 'noticia';
+                if (tab === 'casos_abiertos') tipo = 'caso';
                 const itemKey = `${tipo}-${id}`;
                 try {
                     const parsedJson = JSON.parse(amazonJson);

@@ -1368,25 +1368,38 @@ app.get('/api/amazon/todos', async (req, res) => {
         res.status(500).json({ error: "Error en el servidor" });
     }
 });
+
+// Devuelve todas las item_keys que tienen configuración Amazon (para badge en galería)
+app.get('/api/amazon-keys', async (req, res) => {
+    try {
+        const rows = await db.query("SELECT item_key FROM amazon_afiliados");
+        res.json(rows.map(r => r.item_key));
+    } catch (err) {
+        console.error("Error al obtener claves amazon:", err);
+        res.status(500).json([]);
+    }
+});
 app.get('/api/amazon/:itemKey', async (req, res) => {
     try {
         const itemKey = req.params.itemKey;
         let rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [itemKey]);
         
-        // FALLBACK: compatibilidad con claves del panel de administración
-        // El panel guarda con formato "casos_abiertos-XX" y "misterios_historicos-XX"
-        // pero el lector busca con "caso-XX" y "misterio-XX"
+        // FALLBACK: compatibilidad con datos existentes guardados con claves antiguas
+        // El panel guardaba casos como "exp-XX" (era el tipo por defecto), ahora usa "caso-XX"
         if (!rows || rows.length === 0) {
-            let fallbackKey = null;
+            const fallbackKeys = [];
             if (itemKey.startsWith('caso-')) {
                 const id = itemKey.replace('caso-', '');
-                fallbackKey = 'casos_abiertos-' + id;
+                // Buscar también con el formato antiguo (exp-) que era el default del panel
+                fallbackKeys.push('exp-' + id);
+                fallbackKeys.push('casos_abiertos-' + id);
             } else if (itemKey.startsWith('misterio-')) {
                 const id = itemKey.replace('misterio-', '');
-                fallbackKey = 'misterios_historicos-' + id;
+                fallbackKeys.push('misterios_historicos-' + id);
             }
-            if (fallbackKey) {
-                rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [fallbackKey]);
+            for (const fk of fallbackKeys) {
+                const fr = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [fk]);
+                if (fr && fr.length > 0) { rows = fr; break; }
             }
         }
         

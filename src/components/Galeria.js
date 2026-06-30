@@ -19,6 +19,7 @@ const Galeria = ({ userAuth }) => {
     const [paginaActual, setPaginaActual] = useState(1);
     const [fotoExpandida, setFotoExpandida] = useState(null);
     const [cargando, setCargando] = useState(true);
+    const [amazonKeys, setAmazonKeys] = useState(new Set()); // IDs con libro Amazon
 
     // --- ESTADOS DE ZOOM Y PAN ---
     const [zoom, setZoom] = useState(1);
@@ -134,6 +135,34 @@ const Galeria = ({ userAuth }) => {
     useEffect(() => {
         cargarImagenes();
     }, [cargarImagenes]);
+
+    // Cargar todas las claves de Amazon para mostrar el badge
+    useEffect(() => {
+        axios.get(`${API_BASE_URL}/api/amazon/todos`).then(res => {
+            // Normalizar claves: caso-XX, exp-XX, misterio-XX, noticia-XX
+            // El servidor guarda con exp- para casos por defecto (legacy)
+            const keysRaw = Array.isArray(res.data) ? res.data : [];
+            // Extraer item_key de cada objeto si los tiene, o intentar parsear
+            // En realidad /api/amazon/todos devuelve los datos_json parseados, sin el item_key
+            // Así que usamos el endpoint que devuelve claves
+            setAmazonKeys(new Set(keysRaw.map(k => typeof k === 'string' ? k : JSON.stringify(k))));
+        }).catch(() => {});
+
+        // Pedir las claves reales desde un endpoint dedicado
+        axios.get(`${API_BASE_URL}/api/amazon-keys`).then(res => {
+            if (Array.isArray(res.data)) {
+                const keys = new Set();
+                res.data.forEach(k => {
+                    keys.add(k);
+                    // Añadir variantes: exp-XX también cuenta como caso-XX
+                    if (k.startsWith('exp-')) keys.add('caso-' + k.replace('exp-', ''));
+                    if (k.startsWith('casos_abiertos-')) keys.add('caso-' + k.replace('casos_abiertos-', ''));
+                    if (k.startsWith('misterios_historicos-')) keys.add('misterio-' + k.replace('misterios_historicos-', ''));
+                });
+                setAmazonKeys(keys);
+            }
+        }).catch(() => {});
+    }, []);
 
     const verEnMapa = (img) => {
         if (!img.latitud || !img.longitud || parseFloat(img.latitud) === 0) {
@@ -295,6 +324,28 @@ const Galeria = ({ userAuth }) => {
                                                 {getBadgeInfo(img).text}
                                             </span>
                                         </div>
+                                        {/* BADGE AMAZON: esquina superior izquierda */}
+                                        {amazonKeys.has(img.id) && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: '8px',
+                                                left: '8px',
+                                                background: 'linear-gradient(135deg,#ff9900,#e47911)',
+                                                color: '#111',
+                                                fontWeight: '900',
+                                                fontSize: '0.6rem',
+                                                fontFamily: 'monospace',
+                                                letterSpacing: '0.5px',
+                                                padding: '4px 7px',
+                                                borderRadius: '3px',
+                                                boxShadow: '0 0 8px rgba(255,153,0,0.7)',
+                                                pointerEvents: 'none',
+                                                zIndex: 10,
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                📚 AMAZON
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="info-img-footer">
                                         <h4 className="titulo-popup-neon">{img.nombre || img.titulo || 'SIN TÍTULO'}</h4>
