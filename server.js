@@ -1371,7 +1371,16 @@ app.get('/api/amazon/todos', async (req, res) => {
 app.get('/api/amazon/:itemKey', async (req, res) => {
     try {
         const itemKey = req.params.itemKey;
-        const rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [itemKey]);
+        let rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [itemKey]);
+        
+        // FALLBACK: Si es un caso (caso-XX) y no tiene datos, buscar también como exp-XX
+        // (compatibilidad con libros configurados antes del cambio de clave)
+        if ((!rows || rows.length === 0) && itemKey.startsWith('caso-')) {
+            const idNumerico = itemKey.replace('caso-', '');
+            const fallbackKey = 'exp-' + idNumerico;
+            rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [fallbackKey]);
+        }
+        
         if (rows && rows.length > 0) {
             res.json(JSON.parse(rows[0].datos_json));
         } else {
