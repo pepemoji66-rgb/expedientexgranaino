@@ -175,7 +175,7 @@ const Noticias = ({ userAuth }) => {
             <div className="noticias-grid">
                 {Array.isArray(noticiasPaginadas) && noticiasPaginadas.length > 0 ? (
                     noticiasPaginadas.map((item) => (
-                        <div key={item.id} className="card-noticia fade-in" onClick={() => navigate(`/leer-historia/${item.id}`)}>
+                        <div key={item.id} className="card-noticia fade-in" onClick={() => navigate(`/leer-historia/${item.id}?src=noticias`)}>
                             <div className="noticia-img-container" style={{ position: 'relative' }}>
                                 <img
                                     src={getUrlImagen(item.imagen_url)}

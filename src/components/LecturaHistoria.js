@@ -195,6 +195,59 @@ const LecturaHistoria = ({ userAuth }) => {
                 }
             }
 
+            // Si viene especificado que es una noticia, la buscamos con prioridad
+            if (src === 'noticias') {
+                try {
+                    const resNoticias = await axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`);
+                    const encontradaNoticia = resNoticias.data.find(h => h.id == id);
+                    if (encontradaNoticia) {
+                        const hist = await traducirAlVuelo(encontradaNoticia, 'cuerpo');
+                        setHistoria(hist);
+                        setEsRelatoAdmin(false);
+                        setEsNoticia(true);
+                        setEsMisterio(false);
+                        setEsCaso(false);
+                        setCargando(false);
+                        return;
+                    }
+                } catch (errN) {
+                    console.error("Error al buscar en noticias:", errN);
+                }
+            }
+
+            // Si viene especificado que es un expediente (admin o público), lo buscamos con prioridad
+            if (src === 'expedientes') {
+                try {
+                    const resAdmin = await axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`);
+                    const encontradaAdmin = resAdmin.data.find(h => h.id == id);
+                    if (encontradaAdmin) {
+                        const hist = await traducirAlVuelo(encontradaAdmin);
+                        setHistoria(hist);
+                        setEsRelatoAdmin(true);
+                        setEsNoticia(false);
+                        setEsMisterio(false);
+                        setEsCaso(false);
+                        setCargando(false);
+                        return;
+                    }
+
+                    const resPublicos = await axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`);
+                    const encontradaPublica = resPublicos.data.find(h => h.id == id);
+                    if (encontradaPublica) {
+                        const hist = await traducirAlVuelo(encontradaPublica);
+                        setHistoria(hist);
+                        setEsRelatoAdmin(false);
+                        setEsNoticia(false);
+                        setEsMisterio(false);
+                        setEsCaso(false);
+                        setCargando(false);
+                        return;
+                    }
+                } catch (errE) {
+                    console.error("Error al buscar en expedientes:", errE);
+                }
+            }
+
             // 1. Intentamos buscar primero en los Relatos del Administrador
             const resAdmin = await axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`);
             const encontradaAdmin = resAdmin.data.find(h => h.id == id);
@@ -401,7 +454,13 @@ const LecturaHistoria = ({ userAuth }) => {
 
     const compartirHistoria = async (red) => {
         if (!historia) return;
-        const url = window.location.origin + `/leer-historia/${historia.id}`;
+        
+        let url = window.location.origin + `/leer-historia/${historia.id}`;
+        if (esCaso) url += '?src=casos';
+        else if (esMisterio) url += '?src=misterios';
+        else if (esNoticia) url += '?src=noticias';
+        else url += '?src=expedientes';
+
         const textoCompartir = `🛸 ¡AVISTAMIENTO DETECTADO! Mira esto en el Búnker de ExpedienteX: "${(historia.titulo || '').toUpperCase()}" #UFO #Granada #ExpedienteXGranaino`;
         
         // Prioridad 1: Web Share API (Móviles)
