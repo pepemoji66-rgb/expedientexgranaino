@@ -39,6 +39,13 @@ module.exports = (db) => {
     limits: { fileSize: 100 * 1024 * 1024 }
   });
 
+  const cleanFloat = (val) => {
+    if (val === undefined || val === null || val === '') return 0;
+    const cleanStr = String(val).replace(',', '.');
+    const parsed = parseFloat(cleanStr);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
   // --- RUTA DE CARGA PARA EL ADMIN ---
   router.post('/admin/upload', (req, res, next) => {
     upload.single('archivo')(req, res, function (err) {
@@ -50,7 +57,9 @@ module.exports = (db) => {
       next();
     });
   }, async (req, res) => {
-    const { tipo, titulo, contenido, url_externa, latitud, longitud } = req.body;
+    const { tipo, titulo, contenido, url_externa } = req.body;
+    const latitud = cleanFloat(req.body.latitud);
+    const longitud = cleanFloat(req.body.longitud);
     
     if (!req.file && tipo !== 'expedientes' && tipo !== 'casos_abiertos' && tipo !== 'misterios_historicos' && !url_externa) {
       return res.status(400).send({ message: '⚠️ No se ha recibido ningún archivo ni URL.' });
@@ -73,7 +82,7 @@ module.exports = (db) => {
     let params = [];
 
     if (tipo === 'videos') {
-      const { contenido, latitud, longitud, capturas } = req.body;
+      const { contenido, capturas } = req.body;
       sql = "INSERT INTO videos (titulo, url, estado, latitud, longitud, descripcion, capturas, fecha) VALUES (?, ?, 'aprobado', ?, ?, ?, ?, NOW())";
       params = [titulo, nombreArchivo, latitud || 0, longitud || 0, contenido || '', capturas || ''];
     } else if (tipo === 'audios') {
@@ -81,7 +90,7 @@ module.exports = (db) => {
       sql = "INSERT INTO audios (titulo, ruta, aprobado, fecha_subida, imagen_url) VALUES (?, ?, 1, NOW(), ?)";
       params = [titulo, nombreArchivo, imagen_url || null];
     } else if (tipo === 'noticias') {
-      const { contenido, latitud, longitud, ubicacion, nivel_alerta } = req.body;
+      const { contenido, ubicacion, nivel_alerta } = req.body;
       const fuente_url = req.body.fuente_url || req.body.url_externa || null;
       sql = "INSERT INTO noticias (titulo, cuerpo, imagen_url, estado, fecha, fuente_url, latitud, longitud, ubicacion, nivel_alerta) VALUES (?, ?, ?, 'aprobado', NOW(), ?, ?, ?, ?, ?)";
       params = [titulo, contenido || '', nombreArchivo, fuente_url || '', latitud || 0, longitud || 0, ubicacion || '', nivel_alerta || 'Bajo'];

@@ -126,8 +126,14 @@ module.exports = async (db) => {
             estado VARCHAR(50) DEFAULT 'pendiente',
             fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
             titulo_en VARCHAR(255),
-            contenido_en TEXT
+            contenido_en TEXT,
+            fuente_url TEXT
         )`);
+
+        try {
+            await db.execute("ALTER TABLE casos_abiertos ADD COLUMN fuente_url TEXT");
+            console.log("🩹 PARCHE APLICADO: Columna 'fuente_url' añadida a casos_abiertos.");
+        } catch (e) {}
 
         await db.execute(`CREATE TABLE IF NOT EXISTS noticias (
             id INT AUTO_INCREMENT PRIMARY KEY, 
@@ -265,8 +271,14 @@ module.exports = async (db) => {
             latitud DOUBLE DEFAULT 0,
             longitud DOUBLE DEFAULT 0,
             estado VARCHAR(50) DEFAULT 'aprobado',
-            fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+            fuente_url TEXT
         )`);
+
+        try {
+            await db.execute("ALTER TABLE misterios_historicos ADD COLUMN fuente_url TEXT");
+            console.log("🩹 PARCHE APLICADO: Columna 'fuente_url' añadida a misterios_historicos.");
+        } catch (e) {}
 
         const rowsMisterios = await db.query("SELECT COUNT(*) as total FROM misterios_historicos");
         if (rowsMisterios[0].total === 0) {
