@@ -10,7 +10,8 @@ const Galeria = ({ userAuth }) => {
     // --- ESTADOS BLINDADOS ---
     const [registros, setRegistros] = useState({
         'noticias': [],
-        'relatos': []
+        'relatos': [],
+        'misterios': []
     });
 
     const [pestanaActiva, setPestanaActiva] = useState('noticias');
@@ -37,16 +38,22 @@ const Galeria = ({ userAuth }) => {
             urlBase: `${API_BASE_URL}/imagenes/`,
             columna: 'imagen_url',
             etiqueta: t('galleryTabStories')
+        },
+        'misterios': {
+            urlBase: `${API_BASE_URL}/imagenes/`,
+            columna: 'imagen_url',
+            etiqueta: t('galleryTabMisterios') || 'MISTERIOS'
         }
     };
 
     const cargarImagenes = useCallback(async () => {
         try {
             setCargando(true);
-            const [resN, resE1, resE2] = await Promise.all([
+            const [resN, resE1, resE2, resM] = await Promise.all([
                 axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
                 axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`),
-                axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`)
+                axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`),
+                axios.get(`${API_BASE_URL}/api/misterios-historicos`)
             ]);
 
             // Noticias con imagen
@@ -68,17 +75,26 @@ const Galeria = ({ userAuth }) => {
                 esRelato: true
             }));
 
+            // Misterios con imagen
+            const misteriosData = Array.isArray(resM.data) ? resM.data : [];
+            const misteriosConImagen = misteriosData.filter(m => m.imagen_url).map(m => ({
+                ...m,
+                id: `misterio-${m.id}`,
+                tipo: 'misterio'
+            }));
+
             setRegistros({
                 'noticias': noticiasConImagen,
-                'relatos': relatosConImagen
+                'relatos': relatosConImagen,
+                'misterios': misteriosConImagen
             });
         } catch (err) {
             console.error("❌ ERROR AL CARGAR GALERÍA:", err);
-            setRegistros({ 'noticias': [], 'relatos': [] });
+            setRegistros({ 'noticias': [], 'relatos': [], 'misterios': [] });
         } finally {
             setCargando(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         cargarImagenes();
@@ -216,6 +232,11 @@ const Galeria = ({ userAuth }) => {
                         <span className="text-folder">{t('galleryTabStories')}</span>
                         <div className="indicator-neon"></div>
                     </button>
+                    <button className={`btn-pestana-moderno ${pestanaActiva === 'misterios' ? 'active' : ''}`} onClick={() => { setPestanaActiva('misterios'); setPaginaActual(1); }}>
+                        <span className="icon-folder">👽</span>
+                        <span className="text-folder">{t('galleryTabMisterios') || 'MISTERIOS'}</span>
+                        <div className="indicator-neon"></div>
+                    </button>
                 </div>
             </nav>
 
@@ -248,14 +269,80 @@ const Galeria = ({ userAuth }) => {
             </main>
 
             {totalPaginas > 1 && (
-                <footer className="galeria-pagination">
+                <footer className="galeria-pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                     <button disabled={paginaActual === 1} onClick={() => setPaginaActual(p => p - 1)} className="btn-pag-nav"> ◄ </button>
+                    
                     <div className="pag-numbers">
-                        {[...Array(totalPaginas)].map((_, i) => (
-                            <button key={i} onClick={() => setPaginaActual(i + 1)} className={`btn-pag-num ${paginaActual === i + 1 ? 'active' : ''}`}>{i + 1}</button>
-                        ))}
+                        {/* Primera página */}
+                        {paginaActual > 3 && (
+                            <>
+                                <button onClick={() => setPaginaActual(1)} className="btn-pag-num">1</button>
+                                <span className="pag-dots" style={{ color: '#444', margin: '0 5px', fontFamily: 'monospace' }}>...</span>
+                            </>
+                        )}
+
+                        {/* Páginas intermedias alrededor de la actual */}
+                        {[...Array(totalPaginas)].map((_, i) => {
+                            const page = i + 1;
+                            if (page === paginaActual || (page >= paginaActual - 2 && page <= paginaActual + 2)) {
+                                return (
+                                    <button 
+                                        key={i} 
+                                        onClick={() => setPaginaActual(page)} 
+                                        className={`btn-pag-num ${paginaActual === page ? 'active' : ''}`}
+                                    >
+                                        {page}
+                                    </button>
+                                );
+                            }
+                            return null;
+                        })}
+
+                        {/* Última página */}
+                        {paginaActual < totalPaginas - 2 && (
+                            <>
+                                <span className="pag-dots" style={{ color: '#444', margin: '0 5px', fontFamily: 'monospace' }}>...</span>
+                                <button onClick={() => setPaginaActual(totalPaginas)} className="btn-pag-num">{totalPaginas}</button>
+                            </>
+                        )}
                     </div>
+
                     <button disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(p => p + 1)} className="btn-pag-nav"> ► </button>
+
+                    {/* Saltador de página rápido */}
+                    <div className="pag-jumper" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '10px' }}>
+                        <span style={{ color: '#666', fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '1px' }}>
+                            {language === 'en' ? 'JUMP TO:' : 'SALTAR A:'}
+                        </span>
+                        <input
+                            type="number"
+                            min="1"
+                            max={totalPaginas}
+                            value={paginaActual}
+                            onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                if (val >= 1 && val <= totalPaginas) {
+                                    setPaginaActual(val);
+                                }
+                            }}
+                            style={{
+                                width: '50px',
+                                padding: '6px 8px',
+                                fontSize: '0.8rem',
+                                textAlign: 'center',
+                                background: '#050505',
+                                border: '1px solid #222',
+                                color: 'var(--color-principal)',
+                                outline: 'none',
+                                transition: '0.3s',
+                                borderRadius: '2px',
+                                fontFamily: 'monospace'
+                            }}
+                        />
+                        <span style={{ color: '#666', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                            / {totalPaginas}
+                        </span>
+                    </div>
                 </footer>
             )}
 
@@ -302,10 +389,13 @@ const Galeria = ({ userAuth }) => {
                                     <h2 className="neon-text-blue">{(fotoExpandida.titulo || fotoExpandida.nombre)?.toUpperCase()}</h2>
                                     <div className="contenedor-acciones-rapidas" style={{ margin: '20px 0', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                         {fotoExpandida.tipo === 'expediente' && (
-                                            <button className="btn-action-map-v2" onClick={() => navigate('/expedientes')}>{t('galleryViewFullStory')}</button>
+                                            <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('exp-', '')}`)}>{t('galleryViewFullStory')}</button>
                                         )}
                                         {fotoExpandida.tipo === 'noticia' && (
-                                            <button className="btn-action-map-v2" onClick={() => navigate('/noticias')}>{t('galleryViewFullNews')}</button>
+                                            <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('noticia-', '')}`)}>{t('galleryViewFullNews')}</button>
+                                        )}
+                                        {fotoExpandida.tipo === 'misterio' && (
+                                            <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('misterio-', '')}?src=misterios`)}>{t('galleryViewFullMisterio')}</button>
                                         )}
                                         {(fotoExpandida.latitud && parseFloat(fotoExpandida.latitud) !== 0) && (
                                             <button className="btn-action-map-v2" style={{ background: 'var(--color-principal)', color: '#000' }} onClick={() => verEnMapa(fotoExpandida)}>{t('galleryRadarLocalize')}</button>
