@@ -285,7 +285,7 @@ const Expedientes = () => {
 
     const compartirExpediente = async (red) => {
         if (!relatoAbierto) return;
-        const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}`;
+        const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}?src=expedientes`;
         const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
 
         // Prioridad 1: Web Share API (Móviles)
