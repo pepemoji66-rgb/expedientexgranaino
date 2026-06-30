@@ -1264,6 +1264,7 @@ app.get('/galeria', async (req, res) => {
 // Ruta para leer un expediente/noticia/misterio individual con SEO dinámico
 app.get('/leer-historia/:id', async (req, res) => {
     const id = req.params.id;
+    const src = req.query.src; // Leer ?src= del query string
     const indexPath = path.join(__dirname, 'build', 'index.html');
     
     fs.readFile(indexPath, 'utf8', async (err, html) => {
@@ -1273,42 +1274,94 @@ app.get('/leer-historia/:id', async (req, res) => {
         let esRelatoAdmin = false;
         let esNoticia = false;
         let esMisterio = false;
+        let esCaso = false;
 
         try {
-            // 1. Buscar en relatos del admin / jefe
-            const relatosAdmin = await db.query(
-                "SELECT * FROM expedientes WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND tipo = 'jefe'",
-                [id]
-            );
-            if (relatosAdmin && relatosAdmin.length > 0) {
-                historia = relatosAdmin[0];
-                esRelatoAdmin = true;
-            } else {
-                // 2. Buscar en expedientes de agentes
-                const expedientesPublicos = await db.query(
-                    "SELECT * FROM expedientes WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND (tipo = 'agente' OR tipo IS NULL)",
+            // Intentar primero búsqueda dirigida según 'src'
+            if (src === 'casos') {
+                const casos = await db.query("SELECT * FROM casos_abiertos WHERE id = ?", [id]);
+                if (casos && casos.length > 0) {
+                    historia = casos[0];
+                    esCaso = true;
+                }
+            } else if (src === 'misterios') {
+                const misterios = await db.query("SELECT * FROM misterios_historicos WHERE id = ?", [id]);
+                if (misterios && misterios.length > 0) {
+                    historia = misterios[0];
+                    esMisterio = true;
+                }
+            } else if (src === 'noticias') {
+                const noticias = await db.query("SELECT * FROM noticias WHERE id = ?", [id]);
+                if (noticias && noticias.length > 0) {
+                    historia = noticias[0];
+                    esNoticia = true;
+                }
+            } else if (src === 'expedientes') {
+                const relatosAdmin = await db.query(
+                    "SELECT * FROM expedientes WHERE id = ? AND tipo = 'jefe'",
                     [id]
                 );
-                if (expedientesPublicos && expedientesPublicos.length > 0) {
-                    historia = expedientesPublicos[0];
+                if (relatosAdmin && relatosAdmin.length > 0) {
+                    historia = relatosAdmin[0];
+                    esRelatoAdmin = true;
                 } else {
-                    // 3. Buscar en noticias
-                    const noticias = await db.query(
-                        "SELECT * FROM noticias WHERE id = ? AND (estado = 'aprobado' OR estado IS NULL)",
+                    const expedientesPublicos = await db.query(
+                        "SELECT * FROM expedientes WHERE id = ? AND (tipo = 'agente' OR tipo IS NULL)",
                         [id]
                     );
-                    if (noticias && noticias.length > 0) {
-                        historia = noticias[0];
-                        esNoticia = true;
+                    if (expedientesPublicos && expedientesPublicos.length > 0) {
+                        historia = expedientesPublicos[0];
+                    }
+                }
+            }
+
+            // Fallback: Si no se encontró nada con la búsqueda dirigida, buscar secuencialmente
+            if (!historia) {
+                // 1. Buscar en relatos del admin / jefe
+                const relatosAdmin = await db.query(
+                    "SELECT * FROM expedientes WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND tipo = 'jefe'",
+                    [id]
+                );
+                if (relatosAdmin && relatosAdmin.length > 0) {
+                    historia = relatosAdmin[0];
+                    esRelatoAdmin = true;
+                } else {
+                    // 2. Buscar en expedientes de agentes
+                    const expedientesPublicos = await db.query(
+                        "SELECT * FROM expedientes WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND (tipo = 'agente' OR tipo IS NULL)",
+                        [id]
+                    );
+                    if (expedientesPublicos && expedientesPublicos.length > 0) {
+                        historia = expedientesPublicos[0];
                     } else {
-                        // 4. Buscar en misterios históricos
-                        const misterios = await db.query(
-                            "SELECT * FROM misterios_historicos WHERE id = ?",
+                        // 3. Buscar en noticias
+                        const noticias = await db.query(
+                            "SELECT * FROM noticias WHERE id = ? AND (estado = 'aprobado' OR estado IS NULL)",
                             [id]
                         );
-                        if (misterios && misterios.length > 0) {
-                            historia = misterios[0];
-                            esMisterio = true;
+                        if (noticias && noticias.length > 0) {
+                            historia = noticias[0];
+                            esNoticia = true;
+                        } else {
+                            // 4. Buscar en misterios históricos
+                            const misterios = await db.query(
+                                "SELECT * FROM misterios_historicos WHERE id = ?",
+                                [id]
+                            );
+                            if (misterios && misterios.length > 0) {
+                                historia = misterios[0];
+                                esMisterio = true;
+                            } else {
+                                // 5. Buscar en casos abiertos / True Crime
+                                const casos = await db.query(
+                                    "SELECT * FROM casos_abiertos WHERE id = ?",
+                                    [id]
+                                );
+                                if (casos && casos.length > 0) {
+                                    historia = casos[0];
+                                    esCaso = true;
+                                }
+                            }
                         }
                     }
                 }
@@ -1333,7 +1386,7 @@ app.get('/leer-historia/:id', async (req, res) => {
             const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">${historia.titulo ? historia.titulo.toUpperCase() : 'SIN TÍTULO'}</h1>
-    <p><strong>Clasificación:</strong> ${esRelatoAdmin ? 'Relato del Administrador' : esNoticia ? 'Noticia de Alerta' : esMisterio ? 'Misterio Histórico' : 'Expediente de Agente'}</p>
+    <p><strong>Clasificación:</strong> ${esRelatoAdmin ? 'Relato del Administrador' : esNoticia ? 'Noticia de Alerta' : esMisterio ? 'Misterio Histórico' : esCaso ? 'Caso Abierto / True Crime' : 'Expediente de Agente'}</p>
     <p><strong>Autor:</strong> ${historia.usuario_nombre || historia.agente || 'Administrador'}</p>
     <div style="white-space:pre-line;">${cuerpoTexto}</div>
 </article>`;
