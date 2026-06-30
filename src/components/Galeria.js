@@ -11,7 +11,8 @@ const Galeria = ({ userAuth }) => {
     const [registros, setRegistros] = useState({
         'noticias': [],
         'relatos': [],
-        'misterios': []
+        'misterios': [],
+        'truecrime': []
     });
 
     const [pestanaActiva, setPestanaActiva] = useState('noticias');
@@ -43,12 +44,18 @@ const Galeria = ({ userAuth }) => {
             urlBase: `${API_BASE_URL}/imagenes/`,
             columna: 'imagen_url',
             etiqueta: t('galleryTabMisterios') || 'MISTERIOS'
+        },
+        'truecrime': {
+            urlBase: `${API_BASE_URL}/imagenes/`,
+            columna: 'imagen_url',
+            etiqueta: t('galleryTabTrueCrime') || 'TRUE CRIME'
         }
     };
 
     const getBadgeInfo = (img) => {
         if (img.tipo === 'noticia') return { text: t('badgeNews') || '📰 NOTICIA', color: '#00d4ff' };
         if (img.tipo === 'misterio') return { text: t('badgeMystery') || '👽 MISTERIO HISTÓRICO', color: '#ffb100' };
+        if (img.tipo === 'caso') return { text: t('badgeTrueCrime') || '🛡️ CASO REAL / TRUE CRIME', color: '#ff4757' };
         if (img.subtipo === 'jefe' || img.tipo === 'jefe') return { text: t('badgeTrueCrime') || '🛡️ CASO REAL / TRUE CRIME', color: '#ff4757' };
         return { text: t('badgeAgentExp') || '👤 EXPEDIENTE AGENTE', color: '#2ed573' };
     };
@@ -56,11 +63,12 @@ const Galeria = ({ userAuth }) => {
     const cargarImagenes = useCallback(async () => {
         try {
             setCargando(true);
-            const [resN, resE1, resE2, resM] = await Promise.all([
+            const [resN, resE1, resE2, resM, resC] = await Promise.all([
                 axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
                 axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`),
                 axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`),
-                axios.get(`${API_BASE_URL}/api/misterios-historicos`)
+                axios.get(`${API_BASE_URL}/api/misterios-historicos`),
+                axios.get(`${API_BASE_URL}/api/casos`)
             ]);
 
             // Noticias con imagen
@@ -101,14 +109,23 @@ const Galeria = ({ userAuth }) => {
                 tipo: 'misterio'
             }));
 
+            // Casos (True Crime) con imagen
+            const casosData = Array.isArray(resC.data) ? resC.data : [];
+            const casosConImagen = casosData.filter(c => c.imagen_url).map(c => ({
+                ...c,
+                id: `caso-${c.id}`,
+                tipo: 'caso'
+            }));
+
             setRegistros({
                 'noticias': noticiasConImagen,
                 'relatos': relatosConImagen,
-                'misterios': misteriosConImagen
+                'misterios': misteriosConImagen,
+                'truecrime': casosConImagen
             });
         } catch (err) {
             console.error("❌ ERROR AL CARGAR GALERÍA:", err);
-            setRegistros({ 'noticias': [], 'relatos': [], 'misterios': [] });
+            setRegistros({ 'noticias': [], 'relatos': [], 'misterios': [], 'truecrime': [] });
         } finally {
             setCargando(false);
         }
@@ -253,6 +270,11 @@ const Galeria = ({ userAuth }) => {
                     <button className={`btn-pestana-moderno ${pestanaActiva === 'misterios' ? 'active' : ''}`} onClick={() => { setPestanaActiva('misterios'); setPaginaActual(1); }}>
                         <span className="icon-folder">👽</span>
                         <span className="text-folder">{t('galleryTabMisterios') || 'MISTERIOS'}</span>
+                        <div className="indicator-neon"></div>
+                    </button>
+                    <button className={`btn-pestana-moderno ${pestanaActiva === 'truecrime' ? 'active' : ''}`} onClick={() => { setPestanaActiva('truecrime'); setPaginaActual(1); }}>
+                        <span className="icon-folder">💀</span>
+                        <span className="text-folder">{t('galleryTabTrueCrime') || 'TRUE CRIME'}</span>
                         <div className="indicator-neon"></div>
                     </button>
                 </div>
@@ -420,6 +442,9 @@ const Galeria = ({ userAuth }) => {
                                         )}
                                         {fotoExpandida.tipo === 'misterio' && (
                                             <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('misterio-', '')}?src=misterios`)}>{t('galleryViewFullMisterio')}</button>
+                                        )}
+                                        {fotoExpandida.tipo === 'caso' && (
+                                            <button className="btn-action-map-v2" onClick={() => navigate(`/casos-abiertos?id=${fotoExpandida.id.replace('caso-', '')}`)}>{t('galleryViewFullCaso')}</button>
                                         )}
                                         {(fotoExpandida.latitud && parseFloat(fotoExpandida.latitud) !== 0) && (
                                             <button className="btn-action-map-v2" style={{ background: 'var(--color-principal)', color: '#000' }} onClick={() => verEnMapa(fotoExpandida)}>{t('galleryRadarLocalize')}</button>
