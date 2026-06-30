@@ -68,9 +68,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
 
     if (userAuth) {
         menuItems.push(
-            { path: "/horoscopo", label: t('navHoroscope'), icon: <Sparkles size={16} /> },
-            { path: "/tarot", label: t('navTarot'), icon: <Sparkles size={16} /> },
-            { path: "/carta-astral", label: t('navAstral'), icon: <Sparkles size={16} /> }
+            { path: "/horoscopo", label: t('navHoroscope'), icon: <Sparkles size={16} /> }
         );
     }
     menuItems.push({ path: "/casos-abiertos", label: "💀 TRUE CRIME", icon: <FileText size={16} /> });

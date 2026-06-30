@@ -6,7 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { API_BASE_URL } from '../config';
 
 const Galeria = ({ userAuth }) => {
-    const { t } = useLanguage();
+    const { language, t } = useLanguage();
     // --- ESTADOS BLINDADOS ---
     const [registros, setRegistros] = useState({
         'noticias': [],
