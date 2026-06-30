@@ -1373,12 +1373,21 @@ app.get('/api/amazon/:itemKey', async (req, res) => {
         const itemKey = req.params.itemKey;
         let rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [itemKey]);
         
-        // FALLBACK: Si es un caso (caso-XX) y no tiene datos, buscar también como exp-XX
-        // (compatibilidad con libros configurados antes del cambio de clave)
-        if ((!rows || rows.length === 0) && itemKey.startsWith('caso-')) {
-            const idNumerico = itemKey.replace('caso-', '');
-            const fallbackKey = 'exp-' + idNumerico;
-            rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [fallbackKey]);
+        // FALLBACK: compatibilidad con claves del panel de administración
+        // El panel guarda con formato "casos_abiertos-XX" y "misterios_historicos-XX"
+        // pero el lector busca con "caso-XX" y "misterio-XX"
+        if (!rows || rows.length === 0) {
+            let fallbackKey = null;
+            if (itemKey.startsWith('caso-')) {
+                const id = itemKey.replace('caso-', '');
+                fallbackKey = 'casos_abiertos-' + id;
+            } else if (itemKey.startsWith('misterio-')) {
+                const id = itemKey.replace('misterio-', '');
+                fallbackKey = 'misterios_historicos-' + id;
+            }
+            if (fallbackKey) {
+                rows = await db.query("SELECT datos_json FROM amazon_afiliados WHERE item_key = ?", [fallbackKey]);
+            }
         }
         
         if (rows && rows.length > 0) {
