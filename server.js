@@ -263,26 +263,41 @@ app.get('/api/lugares-publicos', async (req, res) => {
     } catch (err) { res.status(200).json([]); }
 });
 
-// --- PROTOCOLO DE LIMPIEZA C-100 ---
-async function podarRegistros(tabla, limite = 100) {
+// --- PROTOCOLO DE LIMPIEZA DE COMENTARIOS ---
+async function podarComentarios(itemKey = null, limite = 100) {
     try {
-        // Obtenemos el total para informar
-        const countRes = await db.query(`SELECT COUNT(*) as total FROM ${tabla}`);
-        const total = countRes[0]?.total || 0;
+        let total = 0;
+        let rows = [];
 
-        if (total > limite) {
-            console.log(`🧹 LIMPIEZA: El sector ${tabla} excede el límite (${total}/${limite}). Ejecutando poda...`);
-            // Obtenemos el ID del registro en la posición 'limite' (el último que queremos conservar)
-            // Usamos query en vez de execute para dar soporte a LIMIT/OFFSET en mysql2
-            const rows = await db.query(`SELECT id FROM ${tabla} ORDER BY id DESC LIMIT 1 OFFSET ?`, [limite - 1]);
-            if (rows.length > 0) {
-                const limiteId = rows[0].id;
-                await db.execute(`DELETE FROM ${tabla} WHERE id < ?`, [limiteId]);
-                console.log(`🧹 LIMPIEZA: Eliminados registros antiguos con ID menor a ${limiteId} en la tabla ${tabla}`);
+        if (itemKey === null) {
+            // Podar comentarios de la Home (donde item_key es NULL)
+            const countRes = await db.query("SELECT COUNT(*) as total FROM comentarios WHERE item_key IS NULL");
+            total = countRes[0]?.total || 0;
+            if (total > limite) {
+                console.log(`🧹 LIMPIEZA HOME: Hay ${total}/${limite} comentarios. Podando...`);
+                rows = await db.query("SELECT id FROM comentarios WHERE item_key IS NULL ORDER BY id DESC LIMIT 1 OFFSET ?", [limite - 1]);
+                if (rows.length > 0) {
+                    const limiteId = rows[0].id;
+                    await db.execute("DELETE FROM comentarios WHERE item_key IS NULL AND id < ?", [limiteId]);
+                    console.log(`🧹 LIMPIEZA HOME: Eliminados comentarios de home antiguos con ID menor a ${limiteId}`);
+                }
+            }
+        } else {
+            // Podar comentarios de un expediente específico
+            const countRes = await db.query("SELECT COUNT(*) as total FROM comentarios WHERE item_key = ?", [itemKey]);
+            total = countRes[0]?.total || 0;
+            if (total > limite) {
+                console.log(`🧹 LIMPIEZA EXPEDIENTE [${itemKey}]: Hay ${total}/${limite} comentarios. Podando...`);
+                rows = await db.query("SELECT id FROM comentarios WHERE item_key = ? ORDER BY id DESC LIMIT 1 OFFSET ?", [itemKey, limite - 1]);
+                if (rows.length > 0) {
+                    const limiteId = rows[0].id;
+                    await db.execute("DELETE FROM comentarios WHERE item_key = ? AND id < ?", [itemKey, limiteId]);
+                    console.log(`🧹 LIMPIEZA EXPEDIENTE [${itemKey}]: Eliminados comentarios antiguos con ID menor a ${limiteId}`);
+                }
             }
         }
     } catch (err) {
-        console.error(`❌ Error en protocolo C-100 para ${tabla}:`, err.message);
+        console.error(`❌ Error en protocolo de poda de comentarios:`, err.message);
     }
 }
 
@@ -318,7 +333,7 @@ app.post('/api/comentarios', async (req, res) => {
     if (!agente || !mensaje) return res.status(400).json({ error: "Faltan datos." });
     try {
         await db.execute("INSERT INTO comentarios (agente, mensaje, fecha, aprobado) VALUES (?, ?, NOW(), 1)", [agente, mensaje]);
-        await podarRegistros('comentarios', 100); // Auto-limpieza
+        await podarComentarios(null, 100); // Auto-limpieza de la Home
 
         // ALERTA TELEGRAM: Nuevo comentario
         enviarAlertaTelegram(`💬 NUEVO COMENTARIO en la Home de ${agente}: "${mensaje.substring(0, 50)}${mensaje.length > 50 ? '...' : ''}"`);
@@ -336,6 +351,7 @@ app.post('/api/comentarios/:itemKey', async (req, res) => {
     if (!agente || !mensaje) return res.status(400).json({ error: "Faltan datos." });
     try {
         await db.execute("INSERT INTO comentarios (agente, mensaje, item_key, fecha, aprobado) VALUES (?, ?, ?, NOW(), 1)", [agente, mensaje, itemKey]);
+        await podarComentarios(itemKey, 50); // Auto-limpieza por expediente (Máximo 50 comentarios)
 
         // ALERTA TELEGRAM: Nuevo comentario en expediente
         enviarAlertaTelegram(`💬 NUEVO COMENTARIO en expediente [${itemKey}] de ${agente}: "${mensaje.substring(0, 50)}${mensaje.length > 50 ? '...' : ''}"`);
