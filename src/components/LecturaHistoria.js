@@ -49,7 +49,7 @@ const AmazonBibliography = ({ libros, tituloSeccion, customStyle }) => {
     );
 };
 
-const LecturaHistoria = () => {
+const LecturaHistoria = ({ userAuth }) => {
     const { language, t, forceTranslationUpdate } = useLanguage();
     const { id } = useParams();
     const navigate = useNavigate();
@@ -70,15 +70,20 @@ const LecturaHistoria = () => {
     const [nuevoComentario, setNuevoComentario] = useState('');
     const [enviando, setEnviando] = useState(false);
 
+    const isAdmin = userAuth && (userAuth.email === 'archipegv2@gmail.com' || userAuth.rol === 'admin');
     const currentItemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
 
-    // Cargar Nick guardado
+    // Cargar Nick guardado o pre-llenar con el nombre del usuario
     useEffect(() => {
-        const savedNick = localStorage.getItem('agente_nick');
-        if (savedNick) {
-            setNick(savedNick);
+        if (userAuth && userAuth.nombre) {
+            setNick(userAuth.nombre);
+        } else {
+            const savedNick = localStorage.getItem('agente_nick');
+            if (savedNick) {
+                setNick(savedNick);
+            }
         }
-    }, []);
+    }, [userAuth]);
 
     // Cargar Comentarios del expediente
     const cargarComentarios = async () => {
@@ -258,6 +263,16 @@ const LecturaHistoria = () => {
         }
     };
 
+    const borrarComentario = async (id) => {
+        if (!window.confirm("¿ELIMINAR ESTA COMUNICACIÓN DEL ARCHIVO?")) return;
+        try {
+            await axios.delete(`${API_BASE_URL}/api/comentarios/${id}`);
+            cargarComentarios();
+        } catch (err) {
+            alert("Error al borrar.");
+        }
+    };
+
     const renderComentariosBox = (isSideBySide = false) => (
         <div className="comentarios-container" style={isSideBySide ? {
             flex: '1.5 1 400px',
@@ -307,7 +322,14 @@ const LecturaHistoria = () => {
                         <div key={c.id} className="comentario-card fade-in">
                             <div className="comentario-header">
                                 <span className="comentario-agente">👤 AGENTE: {c.agente?.toUpperCase()}</span>
-                                <span className="comentario-fecha">{new Date(c.fecha).toLocaleString()}</span>
+                                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                    <span className="comentario-fecha">{new Date(c.fecha).toLocaleString()}</span>
+                                    {isAdmin && (
+                                        <button onClick={() => borrarComentario(c.id)} className="btn-borrar-comentario">
+                                            🗑️
+                                        </button>
+                                    )}
+                                </div>
                            </div>
                             <p className="comentario-mensaje">{c.mensaje}</p>
                         </div>

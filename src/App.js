@@ -303,7 +303,7 @@ function App() {
               <Route path="/horoscopo" element={<Horoscopo />} />
 
               <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
-              <Route path="/leer-historia/:id" element={<LecturaHistoria />} />
+              <Route path="/leer-historia/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/casos-abiertos" element={<CasosAbiertos userAuth={userAuth} />} />
               <Route path="/misterios-historicos" element={<MisteriosHistoricos />} />
               <Route path="/noticias" element={<Noticias userAuth={userAuth} />} />

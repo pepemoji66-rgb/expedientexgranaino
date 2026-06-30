@@ -130,6 +130,13 @@
     padding: 40px 0;
 }
 
+.lista-comentarios {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-top: 20px;
+}
+
 /* Scrollbar técnica */
 .lista-comentarios::-webkit-scrollbar {
     width: 3px;
