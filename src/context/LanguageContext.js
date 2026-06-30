@@ -169,6 +169,10 @@ const translations = {
         galleryRadarLocalize: "📍 LOCALIZAR EN EL RADAR",
         galleryLinkedFile: "🔒 ARCHIVO VINCULADO: Esta evidencia gráfica forma parte de una crónica detallada en el archivo central. Pulsa el botón superior para desclasificar el relato completo.",
         galleryNoNotes: "Sin notas adicionales en el informe.",
+        badgeNews: "📰 NOTICIA",
+        badgeMystery: "👽 MISTERIO HISTÓRICO",
+        badgeTrueCrime: "🛡️ CASO REAL / TRUE CRIME",
+        badgeAgentExp: "👤 EXPEDIENTE AGENTE",
         // Chat
         chatFrequency: "FRECUENCIA:",
         chatOnline: "(EN LÍNEA)",
@@ -558,6 +562,10 @@ const translations = {
         galleryRadarLocalize: "📍 LOCATE ON RADAR",
         galleryLinkedFile: "🔒 LINKED FILE: This graphic evidence is part of a detailed chronicle in the central archive. Press the button above to declassify the full story.",
         galleryNoNotes: "No additional notes in the report.",
+        badgeNews: "📰 NEWS",
+        badgeMystery: "👽 HISTORICAL MYSTERY",
+        badgeTrueCrime: "🛡️ TRUE CRIME / CASE",
+        badgeAgentExp: "👤 AGENT FILE",
         // Chat
         chatFrequency: "FREQUENCY:",
         chatOnline: "(ONLINE)",

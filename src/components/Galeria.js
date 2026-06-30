@@ -46,6 +46,13 @@ const Galeria = ({ userAuth }) => {
         }
     };
 
+    const getBadgeInfo = (img) => {
+        if (img.tipo === 'noticia') return { text: t('badgeNews') || '📰 NOTICIA', color: '#00d4ff' };
+        if (img.tipo === 'misterio') return { text: t('badgeMystery') || '👽 MISTERIO HISTÓRICO', color: '#ffb100' };
+        if (img.subtipo === 'jefe' || img.tipo === 'jefe') return { text: t('badgeTrueCrime') || '🛡️ CASO REAL / TRUE CRIME', color: '#ff4757' };
+        return { text: t('badgeAgentExp') || '👤 EXPEDIENTE AGENTE', color: '#2ed573' };
+    };
+
     const cargarImagenes = useCallback(async () => {
         try {
             setCargando(true);
@@ -64,16 +71,27 @@ const Galeria = ({ userAuth }) => {
                 tipo: 'noticia'
             }));
 
-            // Relatos con imagen
+            // Relatos con imagen (separando Agentes y Jefe)
             const resE1Data = Array.isArray(resE1.data) ? resE1.data : [];
             const resE2Data = Array.isArray(resE2.data) ? resE2.data : [];
-            const todosExp = [...resE1Data, ...resE2Data];
-            const relatosConImagen = todosExp.filter(e => e.imagen_url).map(e => ({
+            
+            const relatosAgente = resE1Data.filter(e => e.imagen_url).map(e => ({
                 ...e,
                 id: `exp-${e.id}`,
                 tipo: 'expediente',
+                subtipo: 'agente',
                 esRelato: true
             }));
+
+            const relatosJefe = resE2Data.filter(e => e.imagen_url).map(e => ({
+                ...e,
+                id: `exp-${e.id}`,
+                tipo: 'expediente',
+                subtipo: 'jefe',
+                esRelato: true
+            }));
+
+            const relatosConImagen = [...relatosAgente, ...relatosJefe];
 
             // Misterios con imagen
             const misteriosData = Array.isArray(resM.data) ? resM.data : [];
@@ -250,7 +268,11 @@ const Galeria = ({ userAuth }) => {
                                 <article key={img.id} className="card-imagen-completa" onClick={() => { resetZoom(); setFotoExpandida({ ...img, rutaCompleta: rutaImg }); }}>
                                     <div className="contenedor-img-wrapper">
                                         <img src={rutaImg} alt={img.titulo || img.nombre} onError={handleImgError} />
-                                        <div className="overlay-card"><span className="badge-sector-mini">{confActual.etiqueta}</span></div>
+                                        <div className="overlay-card">
+                                            <span className="badge-sector-mini" style={{ background: getBadgeInfo(img).color, color: '#000', fontWeight: 'bold' }}>
+                                                {getBadgeInfo(img).text}
+                                            </span>
+                                        </div>
                                     </div>
                                     <div className="info-img-footer">
                                         <h4 className="titulo-popup-neon">{img.nombre || img.titulo || 'SIN TÍTULO'}</h4>
@@ -378,7 +400,9 @@ const Galeria = ({ userAuth }) => {
                             <div className="modal-text-content">
                                 <header>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                        <span className="tag-alerta">{confActual.etiqueta}</span>
+                                        <span className="tag-alerta" style={{ background: getBadgeInfo(fotoExpandida).color, color: '#000', fontWeight: 'bold' }}>
+                                            {getBadgeInfo(fotoExpandida).text}
+                                        </span>
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             <button onClick={() => compartirEvidencia(fotoExpandida, 'twitter')} className="btn-social-mini" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.65rem' }}>𝕏</button>
                                             <button onClick={() => compartirEvidencia(fotoExpandida, 'instagram')} className="btn-social-mini" style={{ background: '#E1306C', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.65rem' }}>IG</button>
