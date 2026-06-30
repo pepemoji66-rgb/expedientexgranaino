@@ -243,7 +243,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
                             const tituloMostrar = language === 'en' && caso.titulo_en ? caso.titulo_en : caso.titulo;
                             const contenidoMostrar = language === 'en' && caso.contenido_en ? caso.contenido_en : caso.contenido;
                             return (
-                                <div key={caso.id} className="home-card caso-card-home" onClick={() => navigate(`/casos-abiertos?id=${caso.id}`)}>
+                                <div key={caso.id} className="home-card caso-card-home" onClick={() => navigate(`/leer-historia/${caso.id}?src=casos`)}>
                                     <div className="card-image-wrap">
                                         {caso.imagen_url ? (
                                             <img src={caso.imagen_url.startsWith('http') ? caso.imagen_url : `${API_BASE_URL}/imagenes/${caso.imagen_url}`} alt={tituloMostrar} />

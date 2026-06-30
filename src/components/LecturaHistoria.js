@@ -348,7 +348,7 @@ const LecturaHistoria = ({ userAuth }) => {
                 window.speechSynthesis.cancel();
             }
         };
-    }, [id, language]);
+    }, [id, language, src]);
 
     const enviarComentario = async (e) => {
         e.preventDefault();
