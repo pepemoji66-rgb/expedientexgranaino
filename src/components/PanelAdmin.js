@@ -572,7 +572,8 @@ const PanelAdmin = () => {
             setUrlCapturaSubida('');
             cargarDatos();
         } catch (err) {
-            setMensajeSubida("❌ FALLO EN LA CARGA");
+            const errorMsg = err.response?.data?.message || "❌ FALLO EN LA CARGA";
+            setMensajeSubida(errorMsg);
         } finally {
             setCargando(false);
         }
