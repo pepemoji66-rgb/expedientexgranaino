@@ -61,6 +61,7 @@ const LecturaHistoria = ({ userAuth }) => {
     const [esRelatoAdmin, setEsRelatoAdmin] = useState(false);
     const [esNoticia, setEsNoticia] = useState(false);
     const [esMisterio, setEsMisterio] = useState(false);
+    const [esCaso, setEsCaso] = useState(false);
     const [cargando, setCargando] = useState(true);
     const [amazonConfig, setAmazonConfig] = useState(null);
 
@@ -71,7 +72,7 @@ const LecturaHistoria = ({ userAuth }) => {
     const [enviando, setEnviando] = useState(false);
 
     const isAdmin = userAuth && (userAuth.email === 'archipegv2@gmail.com' || userAuth.rol === 'admin');
-    const currentItemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
+    const currentItemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : esCaso ? 'caso-' : 'exp-') + id;
 
     // Cargar Nick guardado o pre-llenar con el nombre del usuario
     useEffect(() => {
@@ -89,7 +90,7 @@ const LecturaHistoria = ({ userAuth }) => {
     const cargarComentarios = async () => {
         if (!id) return;
         try {
-            const key = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + id;
+            const key = currentItemKey;
             const res = await axios.get(`${API_BASE_URL}/api/comentarios/${key}`);
             setComentarios(res.data);
         } catch (err) {
@@ -101,7 +102,7 @@ const LecturaHistoria = ({ userAuth }) => {
         if (historia) {
             cargarComentarios();
         }
-    }, [historia, id, esMisterio, esNoticia]);
+    }, [historia, id, esMisterio, esNoticia, esCaso]);
 
     // DATOS DINÁMICOS DE AMAZON DESDE API
     useEffect(() => {
@@ -110,7 +111,7 @@ const LecturaHistoria = ({ userAuth }) => {
                 if (res.data) setAmazonConfig(res.data);
             }).catch(e => console.error("Error amazon config:", e));
         }
-    }, [historia, id, esMisterio, esNoticia, currentItemKey]);
+    }, [historia, id, esMisterio, esNoticia, esCaso, currentItemKey]);
 
     const bannerData = amazonConfig?.banner;
     const biblioData = amazonConfig?.bibliografia;
@@ -154,6 +155,26 @@ const LecturaHistoria = ({ userAuth }) => {
                 };
             };
 
+            // Si viene especificado que es un caso abierto (True Crime), lo buscamos con prioridad
+            if (src === 'casos') {
+                try {
+                    const resCasos = await axios.get(`${API_BASE_URL}/api/casos`);
+                    const encontradaCaso = resCasos.data.find(h => h.id == id);
+                    if (encontradaCaso) {
+                        const hist = await traducirAlVuelo(encontradaCaso);
+                        setHistoria(hist);
+                        setEsRelatoAdmin(false);
+                        setEsNoticia(false);
+                        setEsMisterio(false);
+                        setEsCaso(true);
+                        setCargando(false);
+                        return;
+                    }
+                } catch (errC) {
+                    console.error("Error al buscar en casos:", errC);
+                }
+            }
+
             // Si viene especificado que es un misterio histórico, lo buscamos con máxima prioridad
             if (src === 'misterios') {
                 try {
@@ -165,6 +186,7 @@ const LecturaHistoria = ({ userAuth }) => {
                         setEsRelatoAdmin(false);
                         setEsNoticia(false);
                         setEsMisterio(true);
+                        setEsCaso(false);
                         setCargando(false);
                         return;
                     }
@@ -183,6 +205,7 @@ const LecturaHistoria = ({ userAuth }) => {
                 setEsRelatoAdmin(true);
                 setEsNoticia(false);
                 setEsMisterio(false);
+                setEsCaso(false);
             } else {
                 // 2. Si no es de admin, buscamos en los expedientes públicos de usuarios
                 const resPublicos = await axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`);
@@ -194,6 +217,7 @@ const LecturaHistoria = ({ userAuth }) => {
                     setEsRelatoAdmin(false);
                     setEsNoticia(false);
                     setEsMisterio(false);
+                    setEsCaso(false);
                 } else {
                     // 3. ¡EL PARCHE! Si no es expediente, buscamos en las NOTICIAS
                     const resNoticias = await axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`);
@@ -205,6 +229,7 @@ const LecturaHistoria = ({ userAuth }) => {
                         setEsRelatoAdmin(false); // Tratamos noticia como registro estándar
                         setEsNoticia(true);
                         setEsMisterio(false);
+                        setEsCaso(false);
                     } else {
                         // 4. Si no es noticia, buscamos en los MISTERIOS HISTÓRICOS
                         try {
@@ -216,11 +241,40 @@ const LecturaHistoria = ({ userAuth }) => {
                                 setEsRelatoAdmin(false);
                                 setEsNoticia(false);
                                 setEsMisterio(true);
+                                setEsCaso(false);
                             } else {
-                                setHistoria(null);
+                                // 5. Si no es misterio, buscamos en los casos (True Crime)
+                                const resCasos = await axios.get(`${API_BASE_URL}/api/casos`);
+                                const encontradaCaso = resCasos.data.find(h => h.id == id);
+                                if (encontradaCaso) {
+                                    const hist = await traducirAlVuelo(encontradaCaso);
+                                    setHistoria(hist);
+                                    setEsRelatoAdmin(false);
+                                    setEsNoticia(false);
+                                    setEsMisterio(false);
+                                    setEsCaso(true);
+                                } else {
+                                    setHistoria(null);
+                                }
                             }
                         } catch (errM) {
-                            setHistoria(null);
+                            // Intentar casos en catch de misterios
+                            try {
+                                const resCasos = await axios.get(`${API_BASE_URL}/api/casos`);
+                                const encontradaCaso = resCasos.data.find(h => h.id == id);
+                                if (encontradaCaso) {
+                                    const hist = await traducirAlVuelo(encontradaCaso);
+                                    setHistoria(hist);
+                                    setEsRelatoAdmin(false);
+                                    setEsNoticia(false);
+                                    setEsMisterio(false);
+                                    setEsCaso(true);
+                                } else {
+                                    setHistoria(null);
+                                }
+                            } catch (e) {
+                                setHistoria(null);
+                            }
                         }
                     }
                 }

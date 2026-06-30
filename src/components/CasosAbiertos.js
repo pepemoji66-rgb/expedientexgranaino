@@ -261,7 +261,7 @@ const CasosAbiertos = ({ userAuth }) => {
 
                                     <button
                                         className="btn-leer-mas"
-                                        onClick={() => setCasoExpandido(caso)}
+                                        onClick={() => navigate(`/leer-historia/${caso.id}?src=casos`)}
                                     >
                                         {language === 'en' ? 'READ FULL DOSSIER' : 'LEER DOSSIER COMPLETO'}
                                     </button>
