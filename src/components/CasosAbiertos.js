@@ -12,6 +12,7 @@ const CasosAbiertos = ({ userAuth }) => {
     const [casos, setCasos] = useState([]);
     const [casoExpandido, setCasoExpandido] = useState(null);
     const [paginaActual, setPaginaActual] = useState(1);
+    const [amazonKeys, setAmazonKeys] = useState(new Set());
     const casosPorPagina = 9;
 
     // Formulario states
@@ -24,6 +25,13 @@ const CasosAbiertos = ({ userAuth }) => {
 
     useEffect(() => {
         cargarCasos();
+        
+        // Cargar claves de Amazon
+        axios.get(`${API_BASE_URL}/api/amazon-keys`).then(res => {
+            if (Array.isArray(res.data)) {
+                setAmazonKeys(new Set(res.data));
+            }
+        }).catch(() => {});
     }, []);
 
     // Detener Robocop al cerrar el modal
@@ -229,7 +237,7 @@ const CasosAbiertos = ({ userAuth }) => {
 
                         return (
                             <div key={caso.id} id={`caso-${caso.id}`} className="caso-card">
-                                <div className="caso-imagen-wrapper">
+                                <div className="caso-imagen-wrapper" style={{ position: 'relative' }}>
                                     {caso.imagen_url ? (
                                         <img
                                             src={caso.imagen_url.startsWith('http') ? caso.imagen_url : `${API_BASE_URL}/imagenes/${caso.imagen_url}`}
@@ -242,6 +250,29 @@ const CasosAbiertos = ({ userAuth }) => {
                                         </div>
                                     )}
                                     <div className="caso-badge">CLASSIFIED</div>
+                                    
+                                    {/* BADGE AMAZON */}
+                                    {(amazonKeys.has(`caso-${caso.id}`) || amazonKeys.has(`casos_abiertos-${caso.id}`) || amazonKeys.has(`exp-${caso.id}`)) && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            left: '10px',
+                                            background: 'linear-gradient(135deg,#ff9900,#e47911)',
+                                            color: '#111',
+                                            fontWeight: '900',
+                                            fontSize: '0.65rem',
+                                            fontFamily: 'monospace',
+                                            letterSpacing: '0.5px',
+                                            padding: '4px 8px',
+                                            borderRadius: '3px',
+                                            boxShadow: '0 0 10px rgba(255,153,0,0.8)',
+                                            pointerEvents: 'none',
+                                            zIndex: 10,
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            📚 {language === 'en' ? 'AMAZON BOOK' : 'LIBRO RECOMENDADO'}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="caso-info">

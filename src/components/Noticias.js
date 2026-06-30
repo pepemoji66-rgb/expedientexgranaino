@@ -15,6 +15,7 @@ const Noticias = ({ userAuth }) => {
     const [noticias, setNoticias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
+    const [amazonKeys, setAmazonKeys] = useState(new Set());
     const navigate = useNavigate();
 
     // --- LÓGICA DE PAGINACIÓN ---
@@ -79,6 +80,13 @@ const Noticias = ({ userAuth }) => {
 
     useEffect(() => {
         obtenerNoticias();
+
+        // Cargar claves de Amazon
+        axios.get(`${API_BASE_URL}/api/amazon-keys`).then(res => {
+            if (Array.isArray(res.data)) {
+                setAmazonKeys(new Set(res.data));
+            }
+        }).catch(() => {});
     }, [obtenerNoticias]);
 
     // --- LÓGICA DE BÚSQUEDA DE SATÉLITE (GEOLOCALIZACIÓN) ---
@@ -168,13 +176,36 @@ const Noticias = ({ userAuth }) => {
                 {Array.isArray(noticiasPaginadas) && noticiasPaginadas.length > 0 ? (
                     noticiasPaginadas.map((item) => (
                         <div key={item.id} className="card-noticia fade-in" onClick={() => navigate(`/leer-historia/${item.id}`)}>
-                            <div className="noticia-img-container">
+                            <div className="noticia-img-container" style={{ position: 'relative' }}>
                                 <img
                                     src={getUrlImagen(item.imagen_url)}
                                     alt={item.titulo}
                                     className="noticia-miniatura"
                                     onError={(e) => { e.target.src = `https://placehold.co/400x250/000/00ff41?text=${t('newsNoImage')}`; }}
                                 />
+                                
+                                {/* BADGE AMAZON */}
+                                {(amazonKeys.has(`noticia-${item.id}`) || amazonKeys.has(`noticias-${item.id}`)) && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '10px',
+                                        left: '10px',
+                                        background: 'linear-gradient(135deg,#ff9900,#e47911)',
+                                        color: '#111',
+                                        fontWeight: '900',
+                                        fontSize: '0.65rem',
+                                        fontFamily: 'monospace',
+                                        letterSpacing: '0.5px',
+                                        padding: '4px 8px',
+                                        borderRadius: '3px',
+                                        boxShadow: '0 0 10px rgba(255,153,0,0.8)',
+                                        pointerEvents: 'none',
+                                        zIndex: 10,
+                                        textTransform: 'uppercase'
+                                    }}>
+                                        📚 RECOMENDADO
+                                    </div>
+                                )}
                             </div>
                             <div className="noticia-contenido">
                                 <div className="noticia-meta">

@@ -11,10 +11,18 @@ const MisteriosHistoricos = () => {
     const navigate = useNavigate();
     const [misterios, setMisterios] = useState([]);
     const [paginaActual, setPaginaActual] = useState(1);
+    const [amazonKeys, setAmazonKeys] = useState(new Set());
     const misteriosPorPagina = 9;
 
     useEffect(() => {
         cargarMisterios();
+
+        // Cargar claves de Amazon
+        axios.get(`${API_BASE_URL}/api/amazon-keys`).then(res => {
+            if (Array.isArray(res.data)) {
+                setAmazonKeys(new Set(res.data));
+            }
+        }).catch(() => {});
     }, []);
 
     const cargarMisterios = async () => {
@@ -80,7 +88,7 @@ const MisteriosHistoricos = () => {
                                 className="misterio-card glass-card"
                                 onClick={() => navigate(`/leer-historia/${m.id}?src=misterios`)}
                             >
-                                <div className="card-media-wrap">
+                                <div className="card-media-wrap" style={{ position: 'relative' }}>
                                     {m.imagen_url ? (
                                         <img 
                                             src={m.imagen_url.startsWith('http') ? m.imagen_url : `${API_BASE_URL}/imagenes/${m.imagen_url}`} 
@@ -94,6 +102,29 @@ const MisteriosHistoricos = () => {
                                         </div>
                                     )}
                                     <div className="misterio-badge-tag">ENIGMA</div>
+                                    
+                                    {/* BADGE AMAZON */}
+                                    {(amazonKeys.has(`misterio-${m.id}`) || amazonKeys.has(`misterios_historicos-${m.id}`)) && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            left: '10px',
+                                            background: 'linear-gradient(135deg,#ff9900,#e47911)',
+                                            color: '#111',
+                                            fontWeight: '900',
+                                            fontSize: '0.65rem',
+                                            fontFamily: 'monospace',
+                                            letterSpacing: '0.5px',
+                                            padding: '4px 8px',
+                                            borderRadius: '3px',
+                                            boxShadow: '0 0 10px rgba(255,153,0,0.8)',
+                                            pointerEvents: 'none',
+                                            zIndex: 10,
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            📚 {language === 'en' ? 'AMAZON BOOK' : 'LIBRO RECOMENDADO'}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="card-body-wrap">
                                     <h3>{titulo?.toUpperCase()}</h3>

@@ -69,6 +69,7 @@ const Expedientes = () => {
     const [cargando, setCargando] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [amazonConfig, setAmazonConfig] = useState(null);
+    const [amazonKeys, setAmazonKeys] = useState(new Set());
 
     const [userAuth, setUserAuth] = useState(null);
 
@@ -83,6 +84,13 @@ const Expedientes = () => {
     useEffect(() => {
         const sesion = safeLocalStorage.getItem('agente_sesion');
         if (sesion) setUserAuth(JSON.parse(sesion));
+
+        // Cargar claves de Amazon
+        axios.get(`${API_BASE_URL}/api/amazon-keys`).then(res => {
+            if (Array.isArray(res.data)) {
+                setAmazonKeys(new Set(res.data));
+            }
+        }).catch(() => {});
     }, []);
 
     useEffect(() => {
@@ -400,11 +408,34 @@ const Expedientes = () => {
                                 expedientesActuales.map(item => (
                                     <div key={item.id} className="card-expediente-mobile" onClick={() => navigate(`/leer-historia/${item.id}`)}>
                                         {item.imagen_url && (
-                                            <div className="card-img-container">
+                                            <div className="card-img-container" style={{ position: 'relative' }}>
                                                 <img
                                                     src={item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`}
                                                     alt="evidencia"
                                                 />
+                                                
+                                                {/* BADGE AMAZON */}
+                                                {(amazonKeys.has(`exp-${item.id}`) || amazonKeys.has(`expedientes-${item.id}`)) && (
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        top: '10px',
+                                                        left: '10px',
+                                                        background: 'linear-gradient(135deg,#ff9900,#e47911)',
+                                                        color: '#111',
+                                                        fontWeight: '900',
+                                                        fontSize: '0.65rem',
+                                                        fontFamily: 'monospace',
+                                                        letterSpacing: '0.5px',
+                                                        padding: '4px 8px',
+                                                        borderRadius: '3px',
+                                                        boxShadow: '0 0 10px rgba(255,153,0,0.8)',
+                                                        pointerEvents: 'none',
+                                                        zIndex: 10,
+                                                        textTransform: 'uppercase'
+                                                    }}>
+                                                        📚 {language === 'en' ? 'AMAZON BOOK' : 'LIBRO RECOMENDADO'}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                         <div className="card-body-mobile">
