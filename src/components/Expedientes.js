@@ -398,7 +398,7 @@ const Expedientes = () => {
                         <div className="grid-expedientes">
                             {expedientesActuales.length > 0 ? (
                                 expedientesActuales.map(item => (
-                                    <div key={item.id} className="card-expediente-mobile" onClick={() => setRelatoAbierto(item)}>
+                                    <div key={item.id} className="card-expediente-mobile" onClick={() => navigate(`/leer-historia/${item.id}`)}>
                                         {item.imagen_url && (
                                             <div className="card-img-container">
                                                 <img
