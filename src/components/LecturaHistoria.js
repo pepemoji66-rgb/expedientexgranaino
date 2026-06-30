@@ -500,8 +500,8 @@ const LecturaHistoria = ({ userAuth }) => {
 
                 <div className="meta-lectura" style={{ color: '#aaa', fontFamily: 'Courier New', marginBottom: '25px', fontSize: '0.9rem' }}>
                     <p>ID_SERIAL: <span style={{ color: 'var(--color-principal)' }}>#{historia.id}</span></p>
-                    <p>CLASIFICACIÓN: <span style={{ color: esRelatoAdmin ? 'var(--color-principal)' : '#ff9900' }}>
-                        {esRelatoAdmin ? t('readAdminStory') : t('readAgentRegistry')}
+                    <p>CLASIFICACIÓN: <span style={{ color: esRelatoAdmin ? 'var(--color-principal)' : esCaso ? '#ff3333' : esMisterio ? '#a855f7' : esNoticia ? '#f59e0b' : '#ff9900' }}>
+                        {esRelatoAdmin ? t('readAdminStory') : esCaso ? '🔴 CASO REAL / TRUE CRIME' : esMisterio ? '👽 MISTERIO HISTÓRICO' : esNoticia ? '📰 NOTICIA' : t('readAgentRegistry')}
                     </span></p>
                     <p>ORIGEN: <span style={{ color: '#fff' }}>
                         {(historia.usuario_nombre || historia.agente || t('readSystemCentral')).toUpperCase()}
@@ -514,7 +514,7 @@ const LecturaHistoria = ({ userAuth }) => {
                         {/* BOTÓN FLOTANTE SOBRE IMAGEN */}
                         {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
                             <button
-                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : 'exp-') + historia.id } })}
+                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : esCaso ? 'caso-' : 'exp-') + historia.id } })}
                                 className="btn-localizar-portada"
                             >
                                 {t('readLocateRadar')}
@@ -536,6 +536,80 @@ const LecturaHistoria = ({ userAuth }) => {
                                 e.target.style.display = 'none'; 
                             }}
                         />
+                    </div>
+                )}
+
+                {/* BOTÓN AMAZON DESTACADO BAJO LA IMAGEN — SIEMPRE VISIBLE SI HAY LIBRO */}
+                {(biblioData && biblioData.length > 0) && (
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        margin: '18px 0 10px 0'
+                    }}>
+                        <a
+                            href={biblioData[0].link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            id="amazon-cta-portada"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                background: 'linear-gradient(135deg, #ff9900, #e47911)',
+                                color: '#111',
+                                fontWeight: '900',
+                                fontFamily: 'Courier New, monospace',
+                                fontSize: '0.95rem',
+                                letterSpacing: '1px',
+                                padding: '14px 30px',
+                                borderRadius: '4px',
+                                textDecoration: 'none',
+                                boxShadow: '0 0 20px rgba(255,153,0,0.5)',
+                                border: '2px solid #ff9900',
+                                transition: 'all 0.2s ease',
+                                textTransform: 'uppercase'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.boxShadow='0 0 35px rgba(255,153,0,0.85)'; e.currentTarget.style.transform='scale(1.04)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.boxShadow='0 0 20px rgba(255,153,0,0.5)'; e.currentTarget.style.transform='scale(1)'; }}
+                        >
+                            🛒 <span>📚 {language === 'en' ? 'RECOMMENDED BOOK — BUY ON AMAZON' : 'LIBRO RECOMENDADO — COMPRAR EN AMAZON'}</span>
+                        </a>
+                    </div>
+                )}
+                {(!biblioData || biblioData.length === 0) && bannerData && (
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        margin: '18px 0 10px 0'
+                    }}>
+                        <a
+                            href={bannerData.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            id="amazon-banner-cta-portada"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                background: 'linear-gradient(135deg, #ff9900, #e47911)',
+                                color: '#111',
+                                fontWeight: '900',
+                                fontFamily: 'Courier New, monospace',
+                                fontSize: '0.95rem',
+                                letterSpacing: '1px',
+                                padding: '14px 30px',
+                                borderRadius: '4px',
+                                textDecoration: 'none',
+                                boxShadow: '0 0 20px rgba(255,153,0,0.5)',
+                                border: '2px solid #ff9900',
+                                transition: 'all 0.2s ease',
+                                textTransform: 'uppercase'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.boxShadow='0 0 35px rgba(255,153,0,0.85)'; e.currentTarget.style.transform='scale(1.04)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.boxShadow='0 0 20px rgba(255,153,0,0.5)'; e.currentTarget.style.transform='scale(1)'; }}
+                        >
+                            🛒 <span>📚 {language === 'en' ? 'RECOMMENDED BOOK — BUY ON AMAZON' : 'LIBRO RECOMENDADO — COMPRAR EN AMAZON'}</span>
+                        </a>
                     </div>
                 )}
 
