@@ -86,6 +86,30 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 </div>
             </div>
 
+            {/* AVISO DE AFILIADOS DE AMAZON */}
+            <div className="cases-disclaimer-box amazon-disclosure-box" style={{ 
+                marginTop: '15px', 
+                border: '1px solid #ff9900', 
+                background: 'rgba(255, 153, 0, 0.03)',
+                boxShadow: '0 0 10px rgba(255, 153, 0, 0.1)'
+            }}>
+                <div className="disclaimer-header" style={{ color: '#ff9900', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>⚠️ {language === 'en' ? 'IMPORTANT NOTICE (AFFILIATES)' : 'AVISO IMPORTANTE (DIVULGACIÓN DE AFILIADOS)'}</span>
+                </div>
+                <div className="disclaimer-body" style={{ color: '#ccc', fontSize: '0.8rem', lineHeight: '1.4' }}>
+                    <p style={{ marginBottom: '8px' }}>
+                        {language === 'en' 
+                            ? 'The books, movies and products recommended in the Bunker are suggestions from the author to deepen your knowledge of mysteries and files. You are under no obligation to buy them when clicking, nor will you pay a single cent more (the price is exactly the same).'
+                            : 'Los libros, películas y productos recomendados en el Búnker son sugerencias del autor para profundizar en los misterios y expedientes. No tienes ninguna obligación de comprarlos al hacer clic, ni pagarás un céntimo de más por hacerlo (el precio es exactamente el mismo).'}
+                    </p>
+                    <p>
+                        {language === 'en'
+                            ? 'In fact, once you enter Amazon through any of our links, any normal purchase you decide to make on the platform (even if it is something completely different from the recommended book) also helps us. Amazon provides the Bunker chief with a small commission percentage that goes entirely to cover page maintenance expenses (server, domain, and development). Your collaboration is of great help to keep the archive open and we will be infinitely grateful!'
+                            : 'De hecho, una vez que entras a Amazon a través de cualquiera de nuestros enlaces, cualquier compra habitual que decidas hacer en la plataforma (aunque sea algo totalmente diferente al libro recomendado) también nos ayuda. Amazon aporta al jefe del Búnker un pequeño porcentaje que se destina íntegramente a cubrir los gastos de mantenimiento de la página (servidor, dominio y desarrollo tecnológico). ¡Tu colaboración es de gran ayuda para mantener el archivo abierto y te estaremos infinitamente agradecidos!'} 🛸🛰️
+                    </p>
+                </div>
+            </div>
+
             {/* SECCIÓN DE ACCESO INMEDIATO (UX PRIORITARIA) */}
             <div className="quick-access-gates">
                 <Link to="/lugares" className="gate-card map-gate">
