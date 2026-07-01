@@ -21,6 +21,13 @@ const BibliotecaBunker = () => {
                     response.data.forEach(item => {
                         if (item.bibliografia && Array.isArray(item.bibliografia)) {
                             todosLosLibros = [...todosLosLibros, ...item.bibliografia];
+                        } else if (item.enlace_amazon) {
+                            todosLosLibros.push({
+                                titulo: item.titulo,
+                                autor: item.autor || "Redacción Búnker",
+                                link: item.enlace_amazon,
+                                imagen_url: item.imagen_url
+                            });
                         }
                     });
                 }

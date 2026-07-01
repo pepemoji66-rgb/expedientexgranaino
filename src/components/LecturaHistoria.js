@@ -114,7 +114,15 @@ const LecturaHistoria = ({ userAuth }) => {
     }, [historia, id, esMisterio, esNoticia, esCaso, currentItemKey]);
 
     const bannerData = amazonConfig?.banner;
-    const biblioData = amazonConfig?.bibliografia;
+    let biblioData = amazonConfig?.bibliografia;
+    if (!biblioData && amazonConfig?.enlace_amazon) {
+        biblioData = [{
+            titulo: amazonConfig.titulo,
+            autor: amazonConfig.autor || "Redacción Búnker",
+            imagen_url: amazonConfig.imagen_url,
+            link: amazonConfig.enlace_amazon
+        }];
+    }
 
     const obtenerHistoria = async () => {
         try {

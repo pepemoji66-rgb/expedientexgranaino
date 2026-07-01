@@ -1409,9 +1409,15 @@ app.get('/leer-historia/:id', async (req, res) => {
 // --- ENDPOINTS PARA AFILIADOS DE AMAZON (NINJA) ---
 app.get('/api/amazon/todos', async (req, res) => {
     try {
-        const rows = await db.query("SELECT datos_json FROM amazon_afiliados");
+        const rows = await db.query("SELECT item_key, datos_json FROM amazon_afiliados");
         if (rows && rows.length > 0) {
-            const todosLosLibros = rows.map(row => JSON.parse(row.datos_json));
+            const todosLosLibros = rows.map(row => {
+                const parsed = JSON.parse(row.datos_json);
+                return {
+                    item_key: row.item_key,
+                    ...parsed
+                };
+            });
             res.json(todosLosLibros);
         } else {
             res.json([]);

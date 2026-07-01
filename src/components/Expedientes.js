@@ -51,6 +51,49 @@ const AmazonBibliography = ({ libros, tituloSeccion }) => {
     );
 };
 
+const buildAmazonMaps = (todos) => {
+    const keys = new Set();
+    const links = new Map();
+    
+    if (Array.isArray(todos)) {
+        todos.forEach(item => {
+            const k = item.item_key;
+            if (!k) return;
+            
+            const link = item.enlace_amazon || item.banner?.link || item.bibliografia?.[0]?.link;
+            if (!link) return;
+            
+            keys.add(k);
+            links.set(k, link);
+            
+            const id = k.split('-')[1];
+            if (id) {
+                if (k.startsWith('misterio') || k.startsWith('misterios_historicos')) {
+                    keys.add(`misterio-${id}`);
+                    keys.add(`misterios_historicos-${id}`);
+                    links.set(`misterio-${id}`, link);
+                    links.set(`misterios_historicos-${id}`, link);
+                } else if (k.startsWith('caso') || k.startsWith('casos_abiertos') || k.startsWith('exp')) {
+                    keys.add(`caso-${id}`);
+                    keys.add(`casos_abiertos-${id}`);
+                    keys.add(`exp-${id}`);
+                    keys.add(`expedientes-${id}`);
+                    links.set(`caso-${id}`, link);
+                    links.set(`casos_abiertos-${id}`, link);
+                    links.set(`exp-${id}`, link);
+                    links.set(`expedientes-${id}`, link);
+                } else if (k.startsWith('noticia') || k.startsWith('noticias')) {
+                    keys.add(`noticia-${id}`);
+                    keys.add(`noticias-${id}`);
+                    links.set(`noticia-${id}`, link);
+                    links.set(`noticias-${id}`, link);
+                }
+            }
+        });
+    }
+    return { keys, links };
+};
+
 const Expedientes = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
     const [busqueda, setBusqueda] = useState('');
@@ -70,6 +113,18 @@ const Expedientes = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [amazonConfig, setAmazonConfig] = useState(null);
     const [amazonKeys, setAmazonKeys] = useState(new Set());
+    const [amazonLinks, setAmazonLinks] = useState(new Map());
+
+    const bannerData = amazonConfig?.banner;
+    let biblioData = amazonConfig?.bibliografia;
+    if (!biblioData && amazonConfig?.enlace_amazon) {
+        biblioData = [{
+            titulo: amazonConfig.titulo,
+            autor: amazonConfig.autor || "Redacción Búnker",
+            imagen_url: amazonConfig.imagen_url,
+            link: amazonConfig.enlace_amazon
+        }];
+    }
 
     const [userAuth, setUserAuth] = useState(null);
 
@@ -85,11 +140,11 @@ const Expedientes = () => {
         const sesion = safeLocalStorage.getItem('agente_sesion');
         if (sesion) setUserAuth(JSON.parse(sesion));
 
-        // Cargar claves de Amazon
-        axios.get(`${API_BASE_URL}/api/amazon-keys`).then(res => {
-            if (Array.isArray(res.data)) {
-                setAmazonKeys(new Set(res.data));
-            }
+        // Cargar claves y enlaces de Amazon
+        axios.get(`${API_BASE_URL}/api/amazon/todos`).then(res => {
+            const { keys, links } = buildAmazonMaps(res.data);
+            setAmazonKeys(keys);
+            setAmazonLinks(links);
         }).catch(() => {});
     }, []);
 
@@ -416,25 +471,33 @@ const Expedientes = () => {
                                                 
                                                 {/* BADGE AMAZON */}
                                                 {(amazonKeys.has(`exp-${item.id}`) || amazonKeys.has(`expedientes-${item.id}`)) && (
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        top: '10px',
-                                                        left: '10px',
-                                                        background: 'linear-gradient(135deg,#ff9900,#e47911)',
-                                                        color: '#111',
-                                                        fontWeight: '900',
-                                                        fontSize: '0.65rem',
-                                                        fontFamily: 'monospace',
-                                                        letterSpacing: '0.5px',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '3px',
-                                                        boxShadow: '0 0 10px rgba(255,153,0,0.8)',
-                                                        pointerEvents: 'none',
-                                                        zIndex: 10,
-                                                        textTransform: 'uppercase'
-                                                    }}>
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const link = amazonLinks.get(`exp-${item.id}`) || amazonLinks.get(`expedientes-${item.id}`);
+                                                            if (link) window.open(link, '_blank');
+                                                        }}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '10px',
+                                                            left: '10px',
+                                                            background: 'linear-gradient(135deg,#ff9900,#e47911)',
+                                                            color: '#111',
+                                                            fontWeight: '900',
+                                                            fontSize: '0.65rem',
+                                                            fontFamily: 'monospace',
+                                                            letterSpacing: '0.5px',
+                                                            padding: '4px 8px',
+                                                            borderRadius: '3px',
+                                                            boxShadow: '0 0 10px rgba(255,153,0,0.8)',
+                                                            zIndex: 10,
+                                                            textTransform: 'uppercase',
+                                                            border: 'none',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
                                                         📚 {language === 'en' ? 'AMAZON BOOK' : 'LIBRO RECOMENDADO'}
-                                                    </div>
+                                                    </button>
                                                 )}
                                             </div>
                                         )}
@@ -686,7 +749,7 @@ const Expedientes = () => {
                         <hr style={{ borderColor: '#333', margin: '15px 0' }} />
 
                         {/* BANNER AMAZON DINÁMICO */}
-                        {amazonConfig?.banner && <AmazonBanner {...amazonConfig.banner} />}
+                        {bannerData && <AmazonBanner {...bannerData} />}
 
                         <div className="texto-relato-modal">
                             {renderizarTextoConMedios(relatoAbierto.contenido)}
@@ -722,7 +785,7 @@ const Expedientes = () => {
                         </div>
                         
                         {/* BIBLIOGRAFÍA AMAZON DINÁMICA */}
-                        {amazonConfig?.bibliografia && <AmazonBibliography libros={amazonConfig.bibliografia} />}
+                        {biblioData && <AmazonBibliography libros={biblioData} />}
                     </div>
                 </div>
             )}

@@ -8,14 +8,58 @@ import './noticias.css';
 import API_BASE_URL from '../config';
 import NoticiasExternas from './NoticiasExternas';
 
+const buildAmazonMaps = (todos) => {
+    const keys = new Set();
+    const links = new Map();
+    
+    if (Array.isArray(todos)) {
+        todos.forEach(item => {
+            const k = item.item_key;
+            if (!k) return;
+            
+            const link = item.enlace_amazon || item.banner?.link || item.bibliografia?.[0]?.link;
+            if (!link) return;
+            
+            keys.add(k);
+            links.set(k, link);
+            
+            const id = k.split('-')[1];
+            if (id) {
+                if (k.startsWith('misterio') || k.startsWith('misterios_historicos')) {
+                    keys.add(`misterio-${id}`);
+                    keys.add(`misterios_historicos-${id}`);
+                    links.set(`misterio-${id}`, link);
+                    links.set(`misterios_historicos-${id}`, link);
+                } else if (k.startsWith('caso') || k.startsWith('casos_abiertos') || k.startsWith('exp')) {
+                    keys.add(`caso-${id}`);
+                    keys.add(`casos_abiertos-${id}`);
+                    keys.add(`exp-${id}`);
+                    keys.add(`expedientes-${id}`);
+                    links.set(`caso-${id}`, link);
+                    links.set(`casos_abiertos-${id}`, link);
+                    links.set(`exp-${id}`, link);
+                    links.set(`expedientes-${id}`, link);
+                } else if (k.startsWith('noticia') || k.startsWith('noticias')) {
+                    keys.add(`noticia-${id}`);
+                    keys.add(`noticias-${id}`);
+                    links.set(`noticia-${id}`, link);
+                    links.set(`noticias-${id}`, link);
+                }
+            }
+        });
+    }
+    return { keys, links };
+};
+
 const Noticias = ({ userAuth }) => {
-    const { t, forceTranslationUpdate } = useLanguage();
+    const { t, forceTranslationUpdate, language } = useLanguage();
     // --- CONFIGURACIÓN DE SEÑAL MAESTRA ---
 
     const [noticias, setNoticias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
     const [amazonKeys, setAmazonKeys] = useState(new Set());
+    const [amazonLinks, setAmazonLinks] = useState(new Map());
     const navigate = useNavigate();
 
     // --- LÓGICA DE PAGINACIÓN ---
@@ -44,34 +88,25 @@ const Noticias = ({ userAuth }) => {
             color: "#00ff41"
         },
         {
-            titulo: "IKER JIMÉNEZ (OFICIAL)",
-            url: "https://www.ikerjimenez.com/",
-            desc: "El portal de referencia del misterio en España y Cuarto Milenio.",
+            titulo: "MUFON",
+            url: "https://mufon.com/",
+            desc: "Mutual UFO Network, la organización civil más antigua dedicada al reporte científico de OVNIs.",
             color: "#00d4ff"
         },
         {
-            titulo: "ESPACIO EN BLANCO (RTVE)",
-            url: "https://www.rtve.es/play/audios/espacio-en-blanco/",
-            desc: "Mítico programa de radio sobre enigmas y otras realidades.",
-            color: "#ffb100"
-        },
-        {
-            titulo: "EL COLEGIO INVISIBLE",
-            url: "https://www.ondacero.es/programas/colegio-invisible/",
-            desc: "Investigaciones periodísticas sobre lo inexplicable.",
-            color: "#ff4444"
+            titulo: "GEIPAN (FRANCIA)",
+            url: "http://www.geipan.fr/",
+            desc: "Grupo de la Agencia Espacial Francesa (CNES) encargado del estudio de fenómenos aeroespaciales no identificados.",
+            color: "#ff9900"
         }
     ];
 
     const obtenerNoticias = useCallback(async () => {
         try {
-            setCargando(true);
-            // Sintonizamos la frecuencia de noticias públicas aprobadas
             const res = await axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`);
-            setNoticias(Array.isArray(res.data) ? res.data : []);
+            if (res.data) setNoticias(res.data);
         } catch (err) {
-            console.error("❌ ERROR AL CARGAR TELETIPO:", err);
-            setNoticias([]);
+            console.error("Error al obtener noticias:", err);
         } finally {
             setCargando(false);
             if (forceTranslationUpdate) forceTranslationUpdate();
@@ -81,11 +116,11 @@ const Noticias = ({ userAuth }) => {
     useEffect(() => {
         obtenerNoticias();
 
-        // Cargar claves de Amazon
-        axios.get(`${API_BASE_URL}/api/amazon-keys`).then(res => {
-            if (Array.isArray(res.data)) {
-                setAmazonKeys(new Set(res.data));
-            }
+        // Cargar claves y enlaces de Amazon
+        axios.get(`${API_BASE_URL}/api/amazon/todos`).then(res => {
+            const { keys, links } = buildAmazonMaps(res.data);
+            setAmazonKeys(keys);
+            setAmazonLinks(links);
         }).catch(() => {});
     }, [obtenerNoticias]);
 
@@ -186,25 +221,33 @@ const Noticias = ({ userAuth }) => {
                                 
                                 {/* BADGE AMAZON */}
                                 {(amazonKeys.has(`noticia-${item.id}`) || amazonKeys.has(`noticias-${item.id}`)) && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '10px',
-                                        left: '10px',
-                                        background: 'linear-gradient(135deg,#ff9900,#e47911)',
-                                        color: '#111',
-                                        fontWeight: '900',
-                                        fontSize: '0.65rem',
-                                        fontFamily: 'monospace',
-                                        letterSpacing: '0.5px',
-                                        padding: '4px 8px',
-                                        borderRadius: '3px',
-                                        boxShadow: '0 0 10px rgba(255,153,0,0.8)',
-                                        pointerEvents: 'none',
-                                        zIndex: 10,
-                                        textTransform: 'uppercase'
-                                    }}>
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const link = amazonLinks.get(`noticia-${item.id}`) || amazonLinks.get(`noticias-${item.id}`);
+                                            if (link) window.open(link, '_blank');
+                                        }}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            left: '10px',
+                                            background: 'linear-gradient(135deg,#ff9900,#e47911)',
+                                            color: '#111',
+                                            fontWeight: '900',
+                                            fontSize: '0.65rem',
+                                            fontFamily: 'monospace',
+                                            letterSpacing: '0.5px',
+                                            padding: '4px 8px',
+                                            borderRadius: '3px',
+                                            boxShadow: '0 0 10px rgba(255,153,0,0.8)',
+                                            zIndex: 10,
+                                            textTransform: 'uppercase',
+                                            border: 'none',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
                                         📚 RECOMENDADO
-                                    </div>
+                                    </button>
                                 )}
                             </div>
                             <div className="noticia-contenido">
