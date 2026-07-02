@@ -219,72 +219,7 @@
     100% { opacity: 0.7; }
 }
 
-/* ============================================
-   GOOGLE TRANSLATE - OVERRIDE NUCLEAR
-   Google inyecta estilos inline, necesitamos
-   selectores de máxima especificidad
-   ============================================ */
-#google_translate_element {
-    position: absolute;
-    width: 0;
-    height: 0;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-/* Override raíz: TODOS los hijos del contenedor */
-#google_translate_element *,
-#google_translate_element span,
-#google_translate_element a,
-#google_translate_element .goog-te-gadget,
-#google_translate_element .goog-te-gadget span,
-#google_translate_element .goog-te-gadget a {
-    color: #ffffff !important;
-    font-family: 'Inter', sans-serif !important;
-}
-
-.goog-te-gadget,
-.goog-te-gadget-simple {
-    background-color: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    font-size: 0.65rem !important;
-    font-family: 'Inter', sans-serif !important;
-    color: #ffffff !important;
-}
-
-.goog-te-gadget-simple img {
-    display: inline-block !important;
-    margin-right: 4px !important;
-}
-
-.goog-te-menu-value {
-    color: #ffffff !important;
-    margin: 0 !important;
-}
-
-.goog-te-menu-value *,
-.goog-te-menu-value span,
-.goog-te-menu-value a {
-    border-left: none !important;
-    color: #ffffff !important;
-    text-transform: uppercase;
-    font-weight: 800;
-}
-
-.goog-te-menu-value:hover span {
-    color: #fff !important;
-}
-
-/* Clases internas de Google Translate (pueden variar) */
-.VIpgJd-ZVi9od-l4eHX-hSRGPd,
-.VIpgJd-ZVi9od-l4eHX-hSRGPd span,
-.VIpgJd-ZVi9od-l4eHX-hSRGPd a,
-[class*="VIpgJd"] span,
-[class*="VIpgJd"] a {
-    color: #ffffff !important;
-}
+/* Sistema bilingüe ES/EN propio — sin dependencia de Google Translate */
 
 /* USER AREA */
 .user-area {
@@ -451,10 +386,6 @@
         border-right: none;
         padding-right: 0;
     }
-
-    #google_translate_element {
-        width: 120px;
-    }
 }
 
 @media (max-width: 480px) {
@@ -475,9 +406,7 @@
         gap: 8px;
     }
 
-    #google_translate_element {
-        width: 100px;
-    }
+
 }
 
 
