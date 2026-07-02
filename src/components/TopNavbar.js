@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
     Home,
@@ -23,35 +23,6 @@ import { ADMIN_EMAIL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
 import './TopNavbar.css';
 
-// Componente blindado para el traductor para evitar re-renders innecesarios
-const GoogleTranslator = memo(() => {
-    React.useEffect(() => {
-        const loadTranslate = () => {
-            if (window.google && window.google.translate && window.google.translate.TranslateElement) {
-                const element = document.getElementById('google_translate_element');
-                if (element && element.innerHTML === "") {
-                    new window.google.translate.TranslateElement({
-                        pageLanguage: 'es',
-                        includedLanguages: 'en,es,fr,de,it,pt',
-                        autoDisplay: false,
-                        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
-                    }, 'google_translate_element');
-                }
-            }
-        };
-
-        // Vigilar y reponer si desaparece
-        const interval = setInterval(loadTranslate, 2000);
-        const timeout = setTimeout(loadTranslate, 1000);
-
-        return () => {
-            clearInterval(interval);
-            clearTimeout(timeout);
-        };
-    }, []);
-
-    return <div id="google_translate_element"></div>;
-});
 
 const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     const location = useLocation();
@@ -121,8 +92,6 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                                 ENG
                             </button>
                         </div>
-                        {/* Componente del traductor de Google oculto en el DOM para la sincronización de idiomas de la API */}
-                        <GoogleTranslator />
                         <div className="tool-item music-tool">
                             <ControlMusica />
                         </div>
