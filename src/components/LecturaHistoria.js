@@ -469,7 +469,7 @@ const LecturaHistoria = ({ userAuth }) => {
         else if (esNoticia) url += '?src=noticias';
         else url += '?src=expedientes';
 
-        const textoCompartir = `🛸 ¡AVISTAMIENTO DETECTADO! Mira esto en el Búnker de ExpedienteX: "${(historia.titulo || '').toUpperCase()}" #UFO #Granada #ExpedienteXGranaino`;
+        const textoCompartir = `🛸 ¡EXPEDIENTE DESCLASIFICADO! "${(historia.titulo || '').toUpperCase()}" — Investígalo en el Búnker Granaíno 👁️ #UFO #MisterioGranadino #ExpedienteXGranaino #TrueCrime`;
         
         // Prioridad 1: Web Share API (Móviles)
         if (navigator.share) {
@@ -492,7 +492,7 @@ const LecturaHistoria = ({ userAuth }) => {
         } else if (red === 'facebook') {
             link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         } else if (red === 'twitter') {
-            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
+            link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
         }
 
         if (link) {
@@ -772,9 +772,9 @@ const LecturaHistoria = ({ userAuth }) => {
                             📡 {language === 'en' ? 'SHARE / COMPARTIR EN REDES' : 'DIFUNDIR EVIDENCIA / COMPARTIR EN REDES'}
                         </p>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>WHATSAPP</button>
-                            <button onClick={() => compartirHistoria('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>FACEBOOK</button>
-                            <button onClick={() => compartirHistoria('twitter')} className="btn-share-tactico" style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>𝕏 TWITTER</button>
+                            <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>💬 WHATSAPP</button>
+                            <button onClick={() => compartirHistoria('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📘 FACEBOOK</button>
+                            <button onClick={() => compartirHistoria('twitter')} className="btn-share-tactico" style={{ background: '#000', color: '#fff', border: '1px solid #555', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>𝕏 PUBLICAR EN X</button>
                         </div>
                     </div>
                 </div>
