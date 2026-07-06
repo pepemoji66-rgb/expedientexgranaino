@@ -43,6 +43,25 @@ module.exports = (upload) => {
         const valores = [titulo, contenido, titulo_en || null, contenido_en || null, latitud || 0, longitud || 0, imagen_url || null];
         
         await db.execute(query, valores);
+
+        // 📸 AUTO-GALERÍA: Si hay imagen, la insertamos en la galería
+        if (imagen_url) {
+            try {
+                const sqlGaleria = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, 'publica', NOW())";
+                await db.execute(sqlGaleria, [
+                    titulo || 'Evidencia de Caso Abierto',
+                    imagen_url,
+                    'Sistema',
+                    `Imagen del caso abierto: ${titulo || ''}`,
+                    latitud || 0,
+                    longitud || 0
+                ]);
+                console.log('📸 Imagen de caso abierto añadida automáticamente a la galería.');
+            } catch (galErr) {
+                console.warn('⚠️ No se pudo auto-insertar en galería (caso abierto):', galErr.message);
+            }
+        }
+
         res.status(201).json({ mensaje: "Caso Abierto registrado con éxito." });
     } catch (err) {
         console.error("❌ Error al registrar Caso Abierto:", err);
@@ -71,6 +90,24 @@ module.exports = (upload) => {
         valores.push(id);
 
         await db.execute(query, valores);
+
+        // 📸 AUTO-GALERÍA: Si hay nueva imagen al editar
+        if (nombreArchivo) {
+            try {
+                const sqlGaleria = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, 'publica', NOW())";
+                await db.execute(sqlGaleria, [
+                    titulo || 'Evidencia de Caso Abierto',
+                    nombreArchivo,
+                    'Sistema',
+                    `Imagen actualizada del caso: ${titulo || ''}`,
+                    latitud || 0,
+                    longitud || 0
+                ]);
+            } catch (galErr) {
+                console.warn('⚠️ No se pudo auto-insertar en galería (edición caso):', galErr.message);
+            }
+        }
+
         res.json({ mensaje: "Caso actualizado con éxito." });
     } catch (err) {
         console.error("❌ Error al actualizar Caso Abierto:", err);

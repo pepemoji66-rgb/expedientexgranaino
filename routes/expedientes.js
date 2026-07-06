@@ -91,7 +91,25 @@ module.exports = (db, upload) => {
 
             const sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, latitud, longitud, estado, tipo, imagen_url, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             const [result] = await db.execute(sql, [titulo, contenido, usuario_nombre, latitud || 0, longitud || 0, estado, finalTipo, imagen_url]);
-            
+
+            // 📸 AUTO-GALERÍA: Si hay imagen, la insertamos automáticamente en la galería
+            if (imagen_url) {
+                try {
+                    const sqlGaleria = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, 'publica', NOW())";
+                    await db.execute(sqlGaleria, [
+                        titulo || 'Evidencia de Expediente',
+                        imagen_url,
+                        usuario_nombre || 'Sistema',
+                        `Imagen del expediente: ${titulo || ''}`,
+                        latitud || 0,
+                        longitud || 0
+                    ]);
+                    console.log('📸 Imagen de expediente añadida automáticamente a la galería.');
+                } catch (galErr) {
+                    console.warn('⚠️ No se pudo auto-insertar en galería (expediente):', galErr.message);
+                }
+            }
+
             res.json({ mensaje: "✅ Expediente registrado y archivado.", id: result.insertId });
         } catch (err) {
             console.error("❌ ERROR POST EXPEDIENTE:", err);
@@ -182,6 +200,20 @@ module.exports = (db, upload) => {
                     "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, imagen_url = ?, fuente_url = ? WHERE id = ?",
                     [titulo, contenido, latitud, longitud, estado, tipo, imagen_url, url_final, req.params.id]
                 );
+                // 📸 AUTO-GALERÍA: nueva imagen al editar expediente
+                try {
+                    const sqlGaleria = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, 'publica', NOW())";
+                    await db.execute(sqlGaleria, [
+                        titulo || 'Evidencia de Expediente',
+                        imagen_url,
+                        'Sistema',
+                        `Imagen actualizada del expediente: ${titulo || ''}`,
+                        latitud || 0,
+                        longitud || 0
+                    ]);
+                } catch (galErr) {
+                    console.warn('⚠️ No se pudo auto-insertar en galería (edición expediente):', galErr.message);
+                }
             } else {
                 await db.execute(
                     "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, fuente_url = ? WHERE id = ?",

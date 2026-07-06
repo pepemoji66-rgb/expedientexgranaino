@@ -165,6 +165,24 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
             const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, imagen_url, estado, fecha, aprobado, agente, fuente_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente', NOW(), 0, ?, ?)";
             const [result] = await db.execute(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null, nombreImagen, agente || 'Agente Anónimo', fuente_url || '']);
             
+            // 📸 AUTO-GALERÍA: Si hay imagen, la insertamos en la galería
+            if (nombreImagen) {
+                try {
+                    const sqlGaleria = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, 'publica', NOW())";
+                    await db.execute(sqlGaleria, [
+                        titulo || 'Evidencia de Noticia',
+                        nombreImagen,
+                        agente || 'Sistema',
+                        `Imagen de la noticia: ${titulo || ''}`,
+                        latitud || 0,
+                        longitud || 0
+                    ]);
+                    console.log('📸 Imagen de noticia añadida automáticamente a la galería.');
+                } catch (galErr) {
+                    console.warn('⚠️ No se pudo auto-insertar en galería (noticia):', galErr.message);
+                }
+            }
+
             // ALERTA TELEGRAM
             enviarAlertaTelegram(`📰 NUEVA NOTICIA PROPUESTA: "${titulo}"\n🚨 Nivel: ${nivel_alerta}\n👤 Agente: ${agente}`);
             
@@ -186,6 +204,20 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
                     "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ?, imagen_url = ? WHERE id = ?",
                     [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, imagen_url, req.params.id]
                 );
+                // 📸 AUTO-GALERÍA: nueva imagen al editar noticia
+                try {
+                    const sqlGaleria = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, 'publica', NOW())";
+                    await db.execute(sqlGaleria, [
+                        titulo || 'Evidencia de Noticia',
+                        imagen_url,
+                        'Sistema',
+                        `Imagen actualizada de la noticia: ${titulo || ''}`,
+                        latitud || 0,
+                        longitud || 0
+                    ]);
+                } catch (galErr) {
+                    console.warn('⚠️ No se pudo auto-insertar en galería (edición noticia):', galErr.message);
+                }
             } else {
                 await db.execute(
                     "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ? WHERE id = ?",
