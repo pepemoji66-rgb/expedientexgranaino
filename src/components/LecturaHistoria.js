@@ -476,7 +476,7 @@ const LecturaHistoria = ({ userAuth }) => {
         if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + ' ' + url)}`;
         } else if (red === 'facebook') {
-            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(textoCompartir)}`;
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         } else if (red === 'twitter') {
             link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
         }
