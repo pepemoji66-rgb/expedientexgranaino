@@ -460,7 +460,7 @@ const LecturaHistoria = ({ userAuth }) => {
         </div>
     );
 
-    const compartirHistoria = async (red) => {
+    const compartirHistoria = (red) => {
         if (!historia) return;
         
         let url = window.location.origin + `/leer-historia/${historia.id}`;
@@ -469,34 +469,20 @@ const LecturaHistoria = ({ userAuth }) => {
         else if (esNoticia) url += '?src=noticias';
         else url += '?src=expedientes';
 
-        const textoCompartir = `🛸 ¡EXPEDIENTE DESCLASIFICADO! "${(historia.titulo || '').toUpperCase()}" — Investígalo en el Búnker Granaíno 👁️ #UFO #MisterioGranadino #ExpedienteXGranaino #TrueCrime`;
-        
-        // Prioridad 1: Web Share API (Móviles)
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'BÚNKER EXPEDIENTE X',
-                    text: textoCompartir,
-                    url: url,
-                });
-                return;
-            } catch (err) {
-                console.log("Compartir cancelado o no soportado");
-            }
-        }
+        const textoCompartir = `🛸 ¡EXPEDIENTE DESCLASIFICADO! "${(historia.titulo || '').toUpperCase()}" — Investígalo en el Búnker Granaíno 👁️ #MisterioGranadino #ExpedienteXGranaino #TrueCrime`;
 
-        // Prioridad 2: Fallback (Escritorio)
+        // Siempre abrimos la URL directa de cada red — evita el bug del navigator.share en PC
         let link = '';
         if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + ' ' + url)}`;
         } else if (red === 'facebook') {
-            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(textoCompartir)}`;
         } else if (red === 'twitter') {
             link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
         }
 
         if (link) {
-            window.open(link, '_blank');
+            window.open(link, '_blank', 'noopener,noreferrer,width=600,height=500');
         }
     };
 

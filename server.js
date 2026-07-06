@@ -317,6 +317,14 @@ app.get('/api/comentarios', async (req, res) => {
     } catch (err) { res.status(200).json([]); }
 });
 
+// --- ENDPOINT: Último comentario global (para sistema de notificaciones) ---
+app.get('/api/comentarios/ultimo', async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM comentarios ORDER BY id DESC LIMIT 1");
+        res.json(result[0] || null);
+    } catch (err) { res.status(200).json(null); }
+});
+
 app.get('/api/comentarios/:itemKey', async (req, res) => {
     const { itemKey } = req.params;
     try {

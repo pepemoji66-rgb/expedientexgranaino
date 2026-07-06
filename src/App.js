@@ -71,6 +71,10 @@ function App() {
   const [userAuth, setUserAuth] = useState(null);
   const [tema, setTema] = useState('#ffffff');
   const [visitasTotales, setVisitasTotales] = useState(0);
+  const [comentariosNuevos, setComentariosNuevos] = useState(0);
+  const [ultimoComentario, setUltimoComentario] = useState(null);
+  const [mostrarToastComentario, setMostrarToastComentario] = useState(false);
+  const ultimoIdComentarioVisto = React.useRef(null);
 
   const [stats, setStats] = useState({
     usuarios: 0,
@@ -141,6 +145,33 @@ function App() {
         console.log("Radar de visitas desactivado", err);
         cargarContadores();
       });
+
+    // 💬 RADAR DE COMENTARIOS NUEVOS — Polling cada 60 segundos
+    const comprobarComentariosNuevos = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/comentarios/ultimo`);
+        const ultimo = res.data;
+        if (!ultimo) return;
+        // Primera carga: guardamos el ID sin notificar
+        if (ultimoIdComentarioVisto.current === null) {
+          ultimoIdComentarioVisto.current = ultimo.id;
+          return;
+        }
+        // Si hay un comentario más nuevo, notificamos
+        if (ultimo.id > ultimoIdComentarioVisto.current) {
+          const cantidad = ultimo.id - ultimoIdComentarioVisto.current;
+          setComentariosNuevos(cantidad);
+          setUltimoComentario(ultimo);
+          setMostrarToastComentario(true);
+          // El toast se auto-cierra a los 8 segundos
+          setTimeout(() => setMostrarToastComentario(false), 8000);
+        }
+      } catch (e) {}
+    };
+
+    const intervaloComentarios = setInterval(comprobarComentariosNuevos, 60000);
+    comprobarComentariosNuevos(); // Primera comprobación inmediata
+    return () => clearInterval(intervaloComentarios);
   }, [cargarContadores]);
 
   // Función para convertir Hex a RGB para las variables CSS
@@ -322,6 +353,55 @@ function App() {
       </div>
     </div>
     <CookieBanner />
+
+      {/* 💬 TOAST DE NUEVO COMENTARIO */}
+      {mostrarToastComentario && ultimoComentario && (
+        <div
+          onClick={() => {
+            // Navegar al expediente del comentario
+            const key = ultimoComentario.item_key || '';
+            let ruta = '/expedientes';
+            let id = null;
+            if (key.startsWith('misterio-')) { ruta = '/leer-historia'; id = key.replace('misterio-', ''); ruta += `/${id}?src=misterios`; }
+            else if (key.startsWith('caso-')) { ruta = '/leer-historia'; id = key.replace('caso-', ''); ruta += `/${id}?src=casos`; }
+            else if (key.startsWith('noticia-')) { ruta = '/leer-historia'; id = key.replace('noticia-', ''); ruta += `/${id}?src=noticias`; }
+            else if (key.startsWith('exp-')) { ruta = '/leer-historia'; id = key.replace('exp-', ''); ruta += `/${id}?src=expedientes`; }
+            setComentariosNuevos(0);
+            setMostrarToastComentario(false);
+            ultimoIdComentarioVisto.current = ultimoComentario.id;
+            window.location.href = id ? ruta : '/expedientes';
+          }}
+          style={{
+            position: 'fixed', bottom: '25px', right: '25px', zIndex: 99999,
+            background: 'linear-gradient(135deg, #0a0a0a, #111)',
+            border: '1px solid var(--color-principal)',
+            boxShadow: '0 0 30px rgba(0,255,65,0.3), 0 4px 20px rgba(0,0,0,0.8)',
+            borderRadius: '6px', padding: '15px 20px', maxWidth: '320px',
+            cursor: 'pointer', animation: 'slideInRight 0.4s ease-out',
+            fontFamily: 'Courier New, monospace'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '1.2rem' }}>💬</span>
+            <span style={{ color: 'var(--color-principal)', fontWeight: '900', fontSize: '0.75rem', letterSpacing: '1px' }}>
+              NUEVO COMENTARIO DE AGENTE
+            </span>
+            <button
+              onClick={(e) => { e.stopPropagation(); setMostrarToastComentario(false); }}
+              style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '1rem' }}
+            >✕</button>
+          </div>
+          <p style={{ color: '#fff', fontSize: '0.8rem', margin: '0 0 6px 0', fontWeight: 'bold' }}>
+            👤 {(ultimoComentario.agente || 'Agente Anónimo').toUpperCase()}
+          </p>
+          <p style={{ color: '#aaa', fontSize: '0.75rem', margin: '0 0 10px 0', lineHeight: '1.4' }}>
+            "{(ultimoComentario.mensaje || '').substring(0, 80)}{ultimoComentario.mensaje?.length > 80 ? '...' : ''}"
+          </p>
+          <div style={{ color: 'var(--color-principal)', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '1px' }}>
+            👁️ VER COMENTARIO →
+          </div>
+        </div>
+      )}
   </Router>
 );
 
