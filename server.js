@@ -555,7 +555,8 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     // Inyectamos meta description, OG, Twitter Cards, canonical y JSON-LD
     html = html.replace(
         '</head>',
-        `<meta name="description" content="${desc}" />
+        `<meta name="google-site-verification" content="wu1T4bL_7euJUjS-742pfAGN6xKEynd3X9P9BDUr0Dc" />
+<meta name="description" content="${desc}" />
 <meta name="keywords" content="OVNI Granada, fenómenos paranormales, ufología Andalucía, avistamientos UFO, psicofonías, misterio, investigación paranormal, Expediente X" />
 <link rel="canonical" href="${url}" />
 <meta property="og:type" content="website" />
