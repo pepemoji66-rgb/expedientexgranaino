@@ -97,6 +97,30 @@ app.use((req, res, next) => {
     next();
 });
 
+// --- 🛡️ MIDDLEWARE ANTI-BOTS Y TRÁFICO FANTASMA DE CENTROS DE DATOS ---
+app.use((req, res, next) => {
+    const userAgent = req.headers['user-agent'] || '';
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+    
+    // Lista blanca: Buscadores legítimos indispensables para SEO y Compartir en Redes
+    const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot/i.test(userAgent);
+
+    if (isLegitBot) {
+        return next(); // Permitimos pasar a los bots de Google y redes sociales sin trabas
+    }
+
+    // Lista negra: Firmas de bots de scraping, headless browsers y herramientas de test automatizados
+    const isMaliciousBot = /headless|selenium|puppeteer|webdriver|scrapy|crawl|spider|axios|python|wget|curl|golang|java|libwww|perl|php|ruby|insomnia|postman|apachebench|cyberfodder|mj12bot|semrushbot|ahrefsbot|dotbot|rogerbot|exabot|semrush|sogou|megaindex|semalt|uipresence/i.test(userAgent);
+
+    // Bloqueo inmediato con código 403 Forbidden a los bots en lista negra
+    if (isMaliciousBot) {
+        console.warn(`🛡️  BÚNKER ANTI-BOTS: Acceso Bloqueado (User-Agent Sospechoso) -> UA: "${userAgent}" | IP: ${ip}`);
+        return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
+    }
+
+    next();
+});
+
 // --- 5. CONFIGURACIÓN DE CARPETAS Y STORAGE ---
 const storageLocal = (folder) => multer.diskStorage({
     destination: (req, file, cb) => cb(null, folder),
@@ -1524,6 +1548,79 @@ app.get('/biblioteca', (req, res) => {
         );
         res.send(pagina);
     });
+});
+
+// --- 🗺️ GENERACIÓN DINÁMICA DE SITEMAP.XML PARA GOOGLE Y MOTORES DE BÚSQUEDA ---
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const domain = 'https://expedientexgranaino.com';
+        const today = new Date().toISOString().split('T')[0];
+
+        // 1. URLs estáticas básicas
+        const estaticas = [
+            { path: '/', priority: '1.0', changefreq: 'daily' },
+            { path: '/noticias', priority: '0.9', changefreq: 'daily' },
+            { path: '/expedientes', priority: '0.9', changefreq: 'daily' },
+            { path: '/casos-abiertos', priority: '0.9', changefreq: 'weekly' },
+            { path: '/misterios-historicos', priority: '0.9', changefreq: 'weekly' },
+            { path: '/especial-atarfe', priority: '0.9', changefreq: 'monthly' },
+            { path: '/videos', priority: '0.8', changefreq: 'weekly' },
+            { path: '/galeria', priority: '0.8', changefreq: 'weekly' },
+            { path: '/lugares', priority: '0.8', changefreq: 'weekly' },
+            { path: '/biblioteca', priority: '0.8', changefreq: 'weekly' },
+            { path: '/sobre-nosotros', priority: '0.8', changefreq: 'monthly' },
+            { path: '/privacidad', priority: '0.3', changefreq: 'yearly' },
+            { path: '/cookies', priority: '0.3', changefreq: 'yearly' },
+            { path: '/legal', priority: '0.3', changefreq: 'yearly' }
+        ];
+
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+        // Añadir estáticas
+        estaticas.forEach(url => {
+            xml += `  <url>\n    <loc>${domain}${url.path}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${url.changefreq}</changefreq>\n    <priority>${url.priority}</priority>\n  </url>\n`;
+        });
+
+        // 2. Obtener expedientes
+        try {
+            const exps = await db.query("SELECT id FROM expedientes WHERE estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'");
+            exps.forEach(e => {
+                xml += `  <url>\n    <loc>${domain}/leer-historia/${e.id}?src=expedientes</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+            });
+        } catch (e) { console.error("Error sitemap exps:", e.message); }
+
+        // 3. Obtener casos abiertos (True Crime)
+        try {
+            const casos = await db.query("SELECT id FROM casos_abiertos WHERE estado = 'aprobado'");
+            casos.forEach(c => {
+                xml += `  <url>\n    <loc>${domain}/leer-historia/${c.id}?src=casos</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+            });
+        } catch (e) { console.error("Error sitemap casos:", e.message); }
+
+        // 4. Obtener misterios históricos
+        try {
+            const misterios = await db.query("SELECT id FROM misterios_historicos WHERE estado = 'aprobado'");
+            misterios.forEach(m => {
+                xml += `  <url>\n    <loc>${domain}/leer-historia/${m.id}?src=misterios</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+            });
+        } catch (e) { console.error("Error sitemap misterios:", e.message); }
+
+        // 5. Obtener noticias
+        try {
+            const noticias = await db.query("SELECT id FROM noticias WHERE estado = 'aprobado'");
+            noticias.forEach(n => {
+                xml += `  <url>\n    <loc>${domain}/leer-historia/${n.id}?src=noticias</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+            });
+        } catch (e) { console.error("Error sitemap noticias:", e.message); }
+
+        xml += `</urlset>`;
+
+        res.header('Content-Type', 'application/xml');
+        res.send(xml);
+    } catch (err) {
+        console.error("Fallo general en generación de sitemap.xml:", err);
+        res.status(500).send("Error generating sitemap");
+    }
 });
 
 // Ruta de captura general: el resto de páginas del SPA
