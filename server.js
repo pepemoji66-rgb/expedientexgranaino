@@ -1413,7 +1413,11 @@ app.get('/leer-historia/:id', async (req, res) => {
             // Formar URL de la imagen
             const rawImg = historia.imagen_url || historia.url_imagen;
             const imagenUrl = resolverImagenUrl(req, rawImg) || resolverImagenUrl(req, 'social-preview.png');
-            const { paginaUrl } = obtenerUrlsRequest(req);
+            
+            // Forzar URL canónica limpia sin parámetros ?src=...
+            const protocol = req.protocol === 'http' || req.protocol === 'https' ? req.protocol : 'https';
+            const host = req.get('host');
+            const paginaUrl = `${protocol}://${host}/leer-historia/${historia.id}`;
 
             const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
@@ -1585,7 +1589,7 @@ app.get('/sitemap.xml', async (req, res) => {
         try {
             const exps = await db.query("SELECT id FROM expedientes WHERE estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'");
             exps.forEach(e => {
-                xml += `  <url>\n    <loc>${domain}/leer-historia/${e.id}?src=expedientes</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+                xml += `  <url>\n    <loc>${domain}/leer-historia/${e.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
             });
         } catch (e) { console.error("Error sitemap exps:", e.message); }
 
@@ -1593,7 +1597,7 @@ app.get('/sitemap.xml', async (req, res) => {
         try {
             const casos = await db.query("SELECT id FROM casos_abiertos WHERE estado = 'aprobado'");
             casos.forEach(c => {
-                xml += `  <url>\n    <loc>${domain}/leer-historia/${c.id}?src=casos</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+                xml += `  <url>\n    <loc>${domain}/leer-historia/${c.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
             });
         } catch (e) { console.error("Error sitemap casos:", e.message); }
 
@@ -1601,7 +1605,7 @@ app.get('/sitemap.xml', async (req, res) => {
         try {
             const misterios = await db.query("SELECT id FROM misterios_historicos WHERE estado = 'aprobado'");
             misterios.forEach(m => {
-                xml += `  <url>\n    <loc>${domain}/leer-historia/${m.id}?src=misterios</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+                xml += `  <url>\n    <loc>${domain}/leer-historia/${m.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
             });
         } catch (e) { console.error("Error sitemap misterios:", e.message); }
 
@@ -1609,7 +1613,7 @@ app.get('/sitemap.xml', async (req, res) => {
         try {
             const noticias = await db.query("SELECT id FROM noticias WHERE estado = 'aprobado'");
             noticias.forEach(n => {
-                xml += `  <url>\n    <loc>${domain}/leer-historia/${n.id}?src=noticias</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+                xml += `  <url>\n    <loc>${domain}/leer-historia/${n.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
             });
         } catch (e) { console.error("Error sitemap noticias:", e.message); }
 
