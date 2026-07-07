@@ -1560,62 +1560,74 @@ app.get('/sitemap.xml', async (req, res) => {
         const domain = 'https://expedientexgranaino.com';
         const today = new Date().toISOString().split('T')[0];
 
-        // 1. URLs estáticas básicas
+        // Usamos un Set de JavaScript para almacenar URLs y garantizar que sean 100% ÚNICAS
+        const urlsUnicas = new Set();
+
+        // 1. URLs estáticas básicas (Añadimos al Set)
         const estaticas = [
-            { path: '/', priority: '1.0', changefreq: 'daily' },
-            { path: '/noticias', priority: '0.9', changefreq: 'daily' },
-            { path: '/expedientes', priority: '0.9', changefreq: 'daily' },
-            { path: '/casos-abiertos', priority: '0.9', changefreq: 'weekly' },
-            { path: '/misterios-historicos', priority: '0.9', changefreq: 'weekly' },
-            { path: '/especial-atarfe', priority: '0.9', changefreq: 'monthly' },
-            { path: '/videos', priority: '0.8', changefreq: 'weekly' },
-            { path: '/galeria', priority: '0.8', changefreq: 'weekly' },
-            { path: '/lugares', priority: '0.8', changefreq: 'weekly' },
-            { path: '/biblioteca', priority: '0.8', changefreq: 'weekly' },
-            { path: '/sobre-nosotros', priority: '0.8', changefreq: 'monthly' },
-            { path: '/privacidad', priority: '0.3', changefreq: 'yearly' },
-            { path: '/cookies', priority: '0.3', changefreq: 'yearly' },
-            { path: '/legal', priority: '0.3', changefreq: 'yearly' }
+            '/',
+            '/noticias',
+            '/expedientes',
+            '/casos-abiertos',
+            '/misterios-historicos',
+            '/especial-atarfe',
+            '/videos',
+            '/galeria',
+            '/lugares',
+            '/biblioteca',
+            '/sobre-nosotros',
+            '/privacidad',
+            '/cookies',
+            '/legal'
         ];
-
-        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-
-        // Añadir estáticas
-        estaticas.forEach(url => {
-            xml += `  <url>\n    <loc>${domain}${url.path}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${url.changefreq}</changefreq>\n    <priority>${url.priority}</priority>\n  </url>\n`;
-        });
+        
+        estaticas.forEach(p => urlsUnicas.add(`${domain}${p}`));
 
         // 2. Obtener expedientes
         try {
             const exps = await db.query("SELECT id FROM expedientes WHERE estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'");
-            exps.forEach(e => {
-                xml += `  <url>\n    <loc>${domain}/leer-historia/${e.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-            });
+            exps.forEach(e => urlsUnicas.add(`${domain}/leer-historia/${e.id}`));
         } catch (e) { console.error("Error sitemap exps:", e.message); }
 
         // 3. Obtener casos abiertos (True Crime)
         try {
             const casos = await db.query("SELECT id FROM casos_abiertos WHERE estado = 'aprobado'");
-            casos.forEach(c => {
-                xml += `  <url>\n    <loc>${domain}/leer-historia/${c.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-            });
+            casos.forEach(c => urlsUnicas.add(`${domain}/leer-historia/${c.id}`));
         } catch (e) { console.error("Error sitemap casos:", e.message); }
 
         // 4. Obtener misterios históricos
         try {
             const misterios = await db.query("SELECT id FROM misterios_historicos WHERE estado = 'aprobado'");
-            misterios.forEach(m => {
-                xml += `  <url>\n    <loc>${domain}/leer-historia/${m.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-            });
+            misterios.forEach(m => urlsUnicas.add(`${domain}/leer-historia/${m.id}`));
         } catch (e) { console.error("Error sitemap misterios:", e.message); }
 
         // 5. Obtener noticias
         try {
             const noticias = await db.query("SELECT id FROM noticias WHERE estado = 'aprobado'");
-            noticias.forEach(n => {
-                xml += `  <url>\n    <loc>${domain}/leer-historia/${n.id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-            });
+            noticias.forEach(n => urlsUnicas.add(`${domain}/leer-historia/${n.id}`));
         } catch (e) { console.error("Error sitemap noticias:", e.message); }
+
+        // Construir el XML final con los datos del Set
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+        urlsUnicas.forEach(url => {
+            // Asignar prioridades según la sección
+            let priority = '0.7';
+            let changefreq = 'weekly';
+
+            if (url === `${domain}/` || url === `${domain}`) {
+                priority = '1.0';
+                changefreq = 'daily';
+            } else if (url.includes('/noticias') || url.includes('/expedientes') || url.includes('/casos-abiertos') || url.includes('/misterios-historicos')) {
+                priority = '0.9';
+                changefreq = 'daily';
+            } else if (url.includes('/privacidad') || url.includes('/cookies') || url.includes('/legal')) {
+                priority = '0.3';
+                changefreq = 'yearly';
+            }
+
+            xml += `  <url>\n    <loc>${url}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>\n`;
+        });
 
         xml += `</urlset>`;
 
