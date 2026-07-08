@@ -486,10 +486,10 @@ const Galeria = ({ userAuth }) => {
                                     <h2 className="neon-text-blue">{(fotoExpandida.titulo || fotoExpandida.nombre)?.toUpperCase()}</h2>
                                     <div className="contenedor-acciones-rapidas" style={{ margin: '20px 0', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                         {fotoExpandida.tipo === 'expediente' && (
-                                            <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('exp-', '')}`)}>{t('galleryViewFullStory')}</button>
+                                            <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('exp-', '')}?src=expedientes`)}>{t('galleryViewFullStory')}</button>
                                         )}
                                         {fotoExpandida.tipo === 'noticia' && (
-                                            <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('noticia-', '')}`)}>{t('galleryViewFullNews')}</button>
+                                            <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('noticia-', '')}?src=noticias`)}>{t('galleryViewFullNews')}</button>
                                         )}
                                         {fotoExpandida.tipo === 'misterio' && (
                                             <button className="btn-action-map-v2" onClick={() => navigate(`/leer-historia/${fotoExpandida.id.replace('misterio-', '')}?src=misterios`)}>{t('galleryViewFullMisterio')}</button>

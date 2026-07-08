@@ -192,7 +192,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 <div className="home-grid-cards">
                     {recentExpedientes.length > 0 ? (
                         recentExpedientes.map((exp) => (
-                            <div key={exp.id} className="home-card expediente-card-home" onClick={() => navigate(`/leer-historia/${exp.id}`)}>
+                            <div key={exp.id} className="home-card expediente-card-home" onClick={() => navigate(`/leer-historia/${exp.id}?src=expedientes`)}>
                                 {exp.imagen_url ? (
                                     <div className="card-image-wrap">
                                         <img src={exp.imagen_url.startsWith('http') ? exp.imagen_url : `${API_BASE_URL}/imagenes/${exp.imagen_url}`} alt={exp.titulo} />
@@ -228,7 +228,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 <div className="home-grid-cards">
                     {recentNoticias.length > 0 ? (
                         recentNoticias.map((news) => (
-                            <div key={news.id} className="home-card news-card-home" onClick={() => navigate(`/leer-historia/${news.id}`)}>
+                            <div key={news.id} className="home-card news-card-home" onClick={() => navigate(`/leer-historia/${news.id}?src=noticias`)}>
                                 <div className="card-image-wrap">
                                     <img 
                                         src={news.imagen_url ? (news.imagen_url.startsWith('http') ? news.imagen_url : `${API_BASE_URL}/imagenes/${news.imagen_url.split('/').pop()}`) : "/img-default.jpg"} 

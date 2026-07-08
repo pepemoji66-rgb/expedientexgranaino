@@ -416,7 +416,8 @@ const PanelAdmin = () => {
             if (item.id) {
                 const seccion = tab === 'expedientes' || tab === 'misterios_historicos' ? 'leer-historia' : tab === 'noticias' ? 'noticias' : tab === 'imagenes' ? 'galeria' : tab === 'videos' ? 'videos' : tab === 'casos_abiertos' ? 'casos-abiertos' : '';
                 if (seccion === 'leer-historia') {
-                    urlContenido = `https://expedientexgranaino.com/${seccion}/${item.id}${tab === 'misterios_historicos' ? '?src=misterios' : ''}`;
+                    const params = tab === 'misterios_historicos' ? '?src=misterios' : tab === 'expedientes' ? '?src=expedientes' : '';
+                    urlContenido = `https://expedientexgranaino.com/${seccion}/${item.id}${params}`;
                 } else if (seccion) {
                     urlContenido = `https://expedientexgranaino.com/${seccion}`;
                 }
