@@ -473,7 +473,21 @@ const LecturaHistoria = ({ userAuth }) => {
 
         const textoCompartir = `🛸 ¡EXPEDIENTE DESCLASIFICADO! "${(historia.titulo || '').toUpperCase()}" — Investígalo en el Búnker Granaíno 👁️ #MisterioGranadino #ExpedienteXGranaino #TrueCrime`;
 
-        // Siempre abrimos la URL directa de cada red — evita el bug del navigator.share en PC
+        // Solo usar navigator.share en móviles para evitar el bug de PC
+        if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            try {
+                navigator.share({
+                    title: historia.titulo || 'Expediente X Granaíno',
+                    text: textoCompartir,
+                    url: url
+                });
+                return;
+            } catch (err) {
+                console.log("Fallo al usar navigator.share nativo", err);
+            }
+        }
+
+        // Fallback para PC: Siempre abrimos la URL directa de cada red
         let link = '';
         if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + ' ' + url)}`;

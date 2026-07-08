@@ -344,6 +344,19 @@ const Expedientes = () => {
         const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}?src=expedientes`;
         const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
 
+        if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            try {
+                navigator.share({
+                    title: relatoAbierto.titulo || 'Expediente X Granaíno',
+                    text: texto,
+                    url: url
+                });
+                return;
+            } catch (err) {
+                console.log("Fallo al usar navigator.share nativo", err);
+            }
+        }
+
         // Directo a la red seleccionada — sin navigator.share que intercepta en PC
         let link = '';
         if (red === 'whatsapp') {

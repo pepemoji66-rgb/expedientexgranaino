@@ -231,6 +231,19 @@ const CasosAbiertos = ({ userAuth }) => {
         const textoTitulo = language === 'en' && caso.titulo_en ? caso.titulo_en : caso.titulo;
         const texto = `💀 UNRESOLVED MYSTERY / CASO ABIERTO: "${textoTitulo?.toUpperCase()}" @PEPE1318057 #TrueCrime #Misterio #ExpedienteXGranaino`;
 
+        if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            try {
+                navigator.share({
+                    title: caso.titulo || 'Expediente X Granaíno',
+                    text: texto,
+                    url: url
+                });
+                return;
+            } catch (err) {
+                console.log("Fallo al usar navigator.share nativo", err);
+            }
+        }
+
         // Directo a la red seleccionada — sin navigator.share que intercepta en PC
         let link = '';
         if (red === 'whatsapp') {
