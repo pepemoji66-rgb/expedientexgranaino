@@ -255,7 +255,7 @@ const CasosAbiertos = ({ userAuth }) => {
         }
 
         if (link) {
-            window.open(link, '_blank', 'noopener,noreferrer,width=600,height=500');
+            window.open(link, '_blank', 'noopener,noreferrer');
         }
     };
 
