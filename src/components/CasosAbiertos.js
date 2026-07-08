@@ -236,7 +236,7 @@ const CasosAbiertos = ({ userAuth }) => {
         if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         } else if (red === 'facebook') {
-            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&display=popup`;
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         } else if (red === 'twitter') {
             link = `https://x.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
         }
