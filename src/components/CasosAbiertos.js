@@ -225,35 +225,24 @@ const CasosAbiertos = ({ userAuth }) => {
         }
     };
 
-    const compartirCaso = async (caso, red) => {
-        const url = `${window.location.origin}/leer-historia/${caso.id}?src=casos`;
+    const compartirCaso = (caso, red) => {
+        // URL limpia para compartir — SIN ?src= para evitar previews incorrectas en Facebook
+        const url = `${window.location.origin}/leer-historia/${caso.id}`;
         const textoTitulo = language === 'en' && caso.titulo_en ? caso.titulo_en : caso.titulo;
         const texto = `💀 UNRESOLVED MYSTERY / CASO ABIERTO: "${textoTitulo?.toUpperCase()}" @PEPE1318057 #TrueCrime #Misterio #ExpedienteXGranaino`;
 
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'BÚNKER EXPEDIENTE X - TRUE CRIME',
-                    text: texto,
-                    url: url,
-                });
-                return;
-            } catch (err) {
-                console.log("Compartir cancelado o no soportado");
-            }
-        }
-
+        // Directo a la red seleccionada — sin navigator.share que intercepta en PC
         let link = '';
         if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         } else if (red === 'facebook') {
-            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&display=popup`;
         } else if (red === 'twitter') {
-            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
+            link = `https://x.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
         }
 
         if (link) {
-            window.open(link, '_blank');
+            window.open(link, '_blank', 'noopener,noreferrer,width=600,height=500');
         }
     };
 

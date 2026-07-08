@@ -463,11 +463,9 @@ const LecturaHistoria = ({ userAuth }) => {
     const compartirHistoria = (red) => {
         if (!historia) return;
         
-        let url = window.location.origin + `/leer-historia/${historia.id}`;
-        if (esCaso) url += '?src=casos';
-        else if (esMisterio) url += '?src=misterios';
-        else if (esNoticia) url += '?src=noticias';
-        else url += '?src=expedientes';
+        // URL limpia para compartir — SIN ?src= para que Facebook/X/WhatsApp
+        // siempre usen la URL canónica y no mezclen previews de distintas variaciones
+        const url = `${window.location.origin}/leer-historia/${historia.id}`;
 
         const textoCompartir = `🛸 ¡EXPEDIENTE DESCLASIFICADO! "${(historia.titulo || '').toUpperCase()}" — Investígalo en el Búnker Granaíno 👁️ #MisterioGranadino #ExpedienteXGranaino #TrueCrime`;
 
@@ -476,7 +474,7 @@ const LecturaHistoria = ({ userAuth }) => {
         if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + ' ' + url)}`;
         } else if (red === 'facebook') {
-            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&display=popup`;
         } else if (red === 'twitter') {
             link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
         }

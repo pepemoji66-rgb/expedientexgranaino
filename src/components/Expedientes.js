@@ -338,37 +338,24 @@ const Expedientes = () => {
         }
     };
 
-    const compartirExpediente = async (red) => {
+    const compartirExpediente = (red) => {
         if (!relatoAbierto) return;
-        const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}?src=expedientes`;
+        // URL limpia para compartir — SIN ?src= para evitar previews incorrectas en Facebook
+        const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}`;
         const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
 
-        // Prioridad 1: Web Share API (Móviles)
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'BÚNKER EXPEDIENTE X - INFORME',
-                    text: texto,
-                    url: url,
-                });
-                return;
-            } catch (err) {
-                console.log("Compartir cancelado");
-            }
-        }
-
-        // Prioridad 2: Fallback (Desktop / Manual)
+        // Directo a la red seleccionada — sin navigator.share que intercepta en PC
         let link = '';
         if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
         } else if (red === 'facebook') {
-            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&display=popup`;
         } else if (red === 'twitter') {
-            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
+            link = `https://x.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
         }
 
         if (link) {
-            window.open(link, '_blank');
+            window.open(link, '_blank', 'noopener,noreferrer,width=600,height=500');
         }
     };
 
