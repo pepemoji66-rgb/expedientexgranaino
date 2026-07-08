@@ -462,10 +462,14 @@ const LecturaHistoria = ({ userAuth }) => {
 
     const compartirHistoria = (red) => {
         if (!historia) return;
-        
-        // URL limpia para compartir — SIN ?src= para que Facebook/X/WhatsApp
-        // siempre usen la URL canónica y no mezclen previews de distintas variaciones
-        const url = `${window.location.origin}/leer-historia/${historia.id}`;
+
+        // El ?src= es IMPRESCINDIBLE — el servidor lo usa para saber en qué tabla
+        // de la BD buscar el artículo (casos_abiertos, expedientes, noticias, misterios)
+        let url = `${window.location.origin}/leer-historia/${historia.id}`;
+        if (esCaso) url += '?src=casos';
+        else if (esMisterio) url += '?src=misterios';
+        else if (esNoticia) url += '?src=noticias';
+        else url += '?src=expedientes';
 
         const textoCompartir = `🛸 ¡EXPEDIENTE DESCLASIFICADO! "${(historia.titulo || '').toUpperCase()}" — Investígalo en el Búnker Granaíno 👁️ #MisterioGranadino #ExpedienteXGranaino #TrueCrime`;
 

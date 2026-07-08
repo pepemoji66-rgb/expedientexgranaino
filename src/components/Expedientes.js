@@ -340,8 +340,8 @@ const Expedientes = () => {
 
     const compartirExpediente = (red) => {
         if (!relatoAbierto) return;
-        // URL limpia para compartir — SIN ?src= para evitar previews incorrectas en Facebook
-        const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}`;
+        // El ?src= es IMPRESCINDIBLE — el servidor lo usa para saber en qué tabla buscar
+        const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}?src=expedientes`;
         const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
 
         // Directo a la red seleccionada — sin navigator.share que intercepta en PC

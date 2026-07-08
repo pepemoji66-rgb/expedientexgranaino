@@ -226,8 +226,8 @@ const CasosAbiertos = ({ userAuth }) => {
     };
 
     const compartirCaso = (caso, red) => {
-        // URL limpia para compartir — SIN ?src= para evitar previews incorrectas en Facebook
-        const url = `${window.location.origin}/leer-historia/${caso.id}`;
+        // El ?src= es IMPRESCINDIBLE — el servidor busca en casos_abiertos gracias a él
+        const url = `${window.location.origin}/leer-historia/${caso.id}?src=casos`;
         const textoTitulo = language === 'en' && caso.titulo_en ? caso.titulo_en : caso.titulo;
         const texto = `💀 UNRESOLVED MYSTERY / CASO ABIERTO: "${textoTitulo?.toUpperCase()}" @PEPE1318057 #TrueCrime #Misterio #ExpedienteXGranaino`;
 
