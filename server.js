@@ -106,41 +106,43 @@ app.use((req, res, next) => {
     const esRecursoEstatico = /\.(js|css|png|jpg|jpeg|gif|webp|ico|svg|woff|woff2|ttf|map|json)(\?.*)?$/.test(req.path);
     if (esRecursoEstatico) return next();
 
-    // Lista blanca: Buscadores legítimos indispensables para SEO y Compartir en Redes
-    const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot/i.test(userAgent);
+    // Lista blanca: Buscadores, redes sociales Y Amazon (afiliados, verificación de enlaces)
+    const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot|amazonbot|amazon|ia_archiver|slurp/i.test(userAgent);
     if (isLegitBot) return next();
 
-    // Lista negra por User-Agent: Firmas de bots conocidos
-    const isMaliciousUA = /headless|selenium|puppeteer|webdriver|scrapy|crawl|spider|libwww|perl|python-urllib|python-requests|wget|curl\/|go-http|java\/|apachebench|mj12bot|semrushbot|ahrefsbot|dotbot|rogerbot|exabot|semrush|sogou|megaindex|semalt|uipresence|zgrab|masscan|nmap|sqlmap/i.test(userAgent);
+    // Lista negra por User-Agent: Firmas de bots claramente maliciosos
+    const isMaliciousUA = /headless|selenium|puppeteer|webdriver|scrapy|libwww|perl|python-urllib|python-requests|wget|curl\/|go-http|java\/|apachebench|mj12bot|semrushbot|ahrefsbot|dotbot|rogerbot|exabot|semrush|sogou|megaindex|semalt|uipresence|zgrab|masscan|nmap|sqlmap/i.test(userAgent);
     if (isMaliciousUA) {
         console.warn(`🛡️ ANTI-BOTS [UA]: Bloqueado -> UA: "${userAgent.substring(0, 80)}" | IP: ${ip}`);
         return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
     }
 
-    // Lista negra por IP: Rangos de centros de datos conocidos en EE. UU. (AWS Oregon, Azure, GCloud, DO)
-    // Estos rangos son los que generan tráfico fantasma en Boardman y Prineville (Oregón)
-    const ipPartes = ip.split('.').map(Number);
-    const primerOcteto = ipPartes[0];
-    const segundoOcteto = ipPartes[1];
+    // Bloqueo por IP de datacenter SOLO si además el User-Agent está vacío o es muy genérico
+    // Así protegemos los bots legítimos de Amazon Afiliados que vienen de IPs de AWS
+    const sinUserAgent = !userAgent || userAgent.trim() === '';
+    const uaGenerico = /^mozilla\/5\.0\s*$/i.test(userAgent.trim());
 
-    const esDatacenter = (
-        // AWS us-east / us-west (Boardman, Prineville - Oregón)
-        (primerOcteto === 3 && segundoOcteto >= 80 && segundoOcteto <= 130) ||
-        (primerOcteto === 52 && [32, 33, 34, 35, 36, 37, 38, 39, 88, 89].includes(segundoOcteto)) ||
-        (primerOcteto === 54 && [148, 149, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255].includes(segundoOcteto)) ||
-        // DigitalOcean
-        (primerOcteto === 104 && segundoOcteto >= 16 && segundoOcteto <= 31) ||
-        // Sin User-Agent: petición automatizada que no se identifica
-        (!userAgent || userAgent.trim() === '')
-    );
+    if (sinUserAgent || uaGenerico) {
+        const ipPartes = ip.split('.').map(Number);
+        const primerOcteto = ipPartes[0];
+        const segundoOcteto = ipPartes[1];
 
-    if (esDatacenter) {
-        console.warn(`🛡️ ANTI-BOTS [IP]: Bloqueado -> IP: ${ip} | UA: "${userAgent.substring(0, 60)}"`);
-        return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
+        const esDatacenter = (
+            (primerOcteto === 3 && segundoOcteto >= 80 && segundoOcteto <= 130) ||
+            (primerOcteto === 52 && [32, 33, 34, 35, 36, 37, 38, 39, 88, 89].includes(segundoOcteto)) ||
+            (primerOcteto === 54 && segundoOcteto >= 148) ||
+            (primerOcteto === 104 && segundoOcteto >= 16 && segundoOcteto <= 31)
+        );
+
+        if (esDatacenter) {
+            console.warn(`🛡️ ANTI-BOTS [IP+UA vacío]: Bloqueado -> IP: ${ip} | UA: "${userAgent.substring(0, 60)}"`);
+            return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
+        }
     }
 
     next();
 });
+
 
 // --- 5. CONFIGURACIÓN DE CARPETAS Y STORAGE ---
 const storageLocal = (folder) => multer.diskStorage({
