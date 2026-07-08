@@ -8,6 +8,7 @@ const BibliotecaBunker = () => {
     const [libros, setLibros] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [paginaActual, setPaginaActual] = useState(1);
+    const [busqueda, setBusqueda] = useState('');
     const librosPorPagina = 10;
 
     useEffect(() => {
@@ -49,11 +50,22 @@ const BibliotecaBunker = () => {
         fetchLibros();
     }, []);
 
-    // Lógica de Paginación
+    // Resetear a página 1 cuando se busca algo
+    useEffect(() => {
+        setPaginaActual(1);
+    }, [busqueda]);
+
+    // Lógica de Filtrado y Paginación
+    const librosFiltrados = libros.filter(libro => {
+        const query = busqueda.toLowerCase();
+        return (libro.titulo && libro.titulo.toLowerCase().includes(query)) ||
+               (libro.autor && libro.autor.toLowerCase().includes(query));
+    });
+
     const indiceUltimoLibro = paginaActual * librosPorPagina;
     const indicePrimerLibro = indiceUltimoLibro - librosPorPagina;
-    const librosPaginados = libros.slice(indicePrimerLibro, indiceUltimoLibro);
-    const totalPaginas = Math.ceil(libros.length / librosPorPagina);
+    const librosPaginados = librosFiltrados.slice(indicePrimerLibro, indiceUltimoLibro);
+    const totalPaginas = Math.ceil(librosFiltrados.length / librosPorPagina);
 
     return (
         <div className="biblioteca-bunker-container fade-in">
@@ -79,6 +91,16 @@ const BibliotecaBunker = () => {
                 </div>
             ) : (
                 <>
+                    <div className="biblioteca-search-container" style={{ textAlign: 'center', margin: '30px 0' }}>
+                        <input 
+                            type="text" 
+                            placeholder="🔍 Buscar libro por título o autor..." 
+                            value={busqueda}
+                            onChange={(e) => setBusqueda(e.target.value)}
+                            style={{ width: '100%', maxWidth: '500px', padding: '12px 20px', borderRadius: '25px', border: '1px solid #ffb100', background: '#111', color: '#fff', fontSize: '1rem', outline: 'none' }}
+                        />
+                    </div>
+
                     <div className="biblioteca-grid">
                         {librosPaginados.length > 0 ? (
                             librosPaginados.map((libro, index) => (
