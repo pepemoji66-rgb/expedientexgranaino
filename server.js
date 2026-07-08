@@ -614,10 +614,14 @@ ${contenidoSeo}
 };
 
 const obtenerUrlsRequest = (req) => {
-    const protocol = req.protocol === 'http' || req.protocol === 'https' ? req.protocol : 'https';
+    // En Render (y otros proxies), req.protocol devuelve 'http' aunque la web usa HTTPS
+    // Usamos x-forwarded-proto para detectar el protocolo real del cliente
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    // Siempre forzamos https en producción (expedientexgranaino.com)
+    const finalProtocol = (protocol === 'https' || req.get('host').includes('expedientexgranaino.com')) ? 'https' : protocol;
     const host = req.get('host');
-    const paginaUrl = `${protocol}://${host}${req.originalUrl}`;
-    const baseImgUrl = `${protocol}://${host}`;
+    const paginaUrl = `${finalProtocol}://${host}${req.originalUrl}`;
+    const baseImgUrl = `${finalProtocol}://${host}`;
     return { paginaUrl, baseImgUrl };
 };
 
