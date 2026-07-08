@@ -100,21 +100,42 @@ app.use((req, res, next) => {
 // --- 🛡️ MIDDLEWARE ANTI-BOTS Y TRÁFICO FANTASMA DE CENTROS DE DATOS ---
 app.use((req, res, next) => {
     const userAgent = req.headers['user-agent'] || '';
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
-    
+    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+
+    // Solo bloqueamos peticiones a páginas HTML y al sitemap — no bloqueamos assets (imágenes, CSS, JS)
+    const esRecursoEstatico = /\.(js|css|png|jpg|jpeg|gif|webp|ico|svg|woff|woff2|ttf|map|json)(\?.*)?$/.test(req.path);
+    if (esRecursoEstatico) return next();
+
     // Lista blanca: Buscadores legítimos indispensables para SEO y Compartir en Redes
     const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot/i.test(userAgent);
+    if (isLegitBot) return next();
 
-    if (isLegitBot) {
-        return next(); // Permitimos pasar a los bots de Google y redes sociales sin trabas
+    // Lista negra por User-Agent: Firmas de bots conocidos
+    const isMaliciousUA = /headless|selenium|puppeteer|webdriver|scrapy|crawl|spider|libwww|perl|python-urllib|python-requests|wget|curl\/|go-http|java\/|apachebench|mj12bot|semrushbot|ahrefsbot|dotbot|rogerbot|exabot|semrush|sogou|megaindex|semalt|uipresence|zgrab|masscan|nmap|sqlmap/i.test(userAgent);
+    if (isMaliciousUA) {
+        console.warn(`🛡️ ANTI-BOTS [UA]: Bloqueado -> UA: "${userAgent.substring(0, 80)}" | IP: ${ip}`);
+        return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
     }
 
-    // Lista negra: Firmas de bots de scraping, headless browsers y herramientas de test automatizados
-    const isMaliciousBot = /headless|selenium|puppeteer|webdriver|scrapy|crawl|spider|axios|python|wget|curl|golang|java|libwww|perl|php|ruby|insomnia|postman|apachebench|cyberfodder|mj12bot|semrushbot|ahrefsbot|dotbot|rogerbot|exabot|semrush|sogou|megaindex|semalt|uipresence/i.test(userAgent);
+    // Lista negra por IP: Rangos de centros de datos conocidos en EE. UU. (AWS Oregon, Azure, GCloud, DO)
+    // Estos rangos son los que generan tráfico fantasma en Boardman y Prineville (Oregón)
+    const ipPartes = ip.split('.').map(Number);
+    const primerOcteto = ipPartes[0];
+    const segundoOcteto = ipPartes[1];
 
-    // Bloqueo inmediato con código 403 Forbidden a los bots en lista negra
-    if (isMaliciousBot) {
-        console.warn(`🛡️  BÚNKER ANTI-BOTS: Acceso Bloqueado (User-Agent Sospechoso) -> UA: "${userAgent}" | IP: ${ip}`);
+    const esDatacenter = (
+        // AWS us-east / us-west (Boardman, Prineville - Oregón)
+        (primerOcteto === 3 && segundoOcteto >= 80 && segundoOcteto <= 130) ||
+        (primerOcteto === 52 && [32, 33, 34, 35, 36, 37, 38, 39, 88, 89].includes(segundoOcteto)) ||
+        (primerOcteto === 54 && [148, 149, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255].includes(segundoOcteto)) ||
+        // DigitalOcean
+        (primerOcteto === 104 && segundoOcteto >= 16 && segundoOcteto <= 31) ||
+        // Sin User-Agent: petición automatizada que no se identifica
+        (!userAgent || userAgent.trim() === '')
+    );
+
+    if (esDatacenter) {
+        console.warn(`🛡️ ANTI-BOTS [IP]: Bloqueado -> IP: ${ip} | UA: "${userAgent.substring(0, 60)}"`);
         return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
     }
 
