@@ -1549,28 +1549,28 @@ app.get('/sitemap.xml', async (req, res) => {
         
         estaticas.forEach(p => urlsUnicas.add(`${domain}${p}`));
 
-        // 2. Obtener expedientes
+        // 2. Obtener expedientes (con ?src=expedientes para que Google las indexe correctamente)
         try {
             const exps = await db.query("SELECT id FROM expedientes WHERE estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'");
-            exps.forEach(e => urlsUnicas.add(`${domain}/leer-historia/${e.id}`));
+            exps.forEach(e => urlsUnicas.add(`${domain}/leer-historia/${e.id}?src=expedientes`));
         } catch (e) { console.error("Error sitemap exps:", e.message); }
 
         // 3. Obtener casos abiertos (True Crime)
         try {
             const casos = await db.query("SELECT id FROM casos_abiertos WHERE estado = 'aprobado'");
-            casos.forEach(c => urlsUnicas.add(`${domain}/leer-historia/${c.id}`));
+            casos.forEach(c => urlsUnicas.add(`${domain}/leer-historia/${c.id}?src=casos`));
         } catch (e) { console.error("Error sitemap casos:", e.message); }
 
         // 4. Obtener misterios históricos
         try {
             const misterios = await db.query("SELECT id FROM misterios_historicos WHERE estado = 'aprobado'");
-            misterios.forEach(m => urlsUnicas.add(`${domain}/leer-historia/${m.id}`));
+            misterios.forEach(m => urlsUnicas.add(`${domain}/leer-historia/${m.id}?src=misterios`));
         } catch (e) { console.error("Error sitemap misterios:", e.message); }
 
         // 5. Obtener noticias
         try {
             const noticias = await db.query("SELECT id FROM noticias WHERE estado = 'aprobado'");
-            noticias.forEach(n => urlsUnicas.add(`${domain}/leer-historia/${n.id}`));
+            noticias.forEach(n => urlsUnicas.add(`${domain}/leer-historia/${n.id}?src=noticias`));
         } catch (e) { console.error("Error sitemap noticias:", e.message); }
 
         // Construir el XML final con los datos del Set
