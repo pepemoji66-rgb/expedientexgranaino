@@ -30,8 +30,7 @@ const expedientesRoutes = require('./routes/expedientes');
 const galeriaRoutes = require('./routes/galeria');
 const adminRoutes = require('./routes/adminRoutes');
 const horoscopoRoutes = require('./routes/horoscopo');
-const cartaAstralRoutes = require('./routes/carta_astral');
-const tarotRoutes = require('./routes/tarot');
+
 const efemeridesRoutes = require('./routes/efemerides');
 const noticiasExternasRoutes = require('./routes/noticias_externas');
 const archipegRoutes = require('./routes/archipeg');
@@ -481,8 +480,7 @@ app.use('/api/auth', authRoutes(db));
 app.use('/api/expedientes', expedientesRoutes(db, uploadLugares));
 app.use('/api/admin', adminRoutes(db));
 app.use('/api/horoscopo', horoscopoRoutes(db, genAI));
-app.use('/api/carta-astral', cartaAstralRoutes(db, genAI));
-app.use('/api/tarot', tarotRoutes(db, genAI));
+
 app.use('/api/efemerides', efemeridesRoutes(db, genAI));
 app.use('/api/noticias-externas', noticiasExternasRoutes(db, genAI));
 app.use('/api/archipeg', archipegRoutes(db));
@@ -1029,69 +1027,6 @@ app.get('/horoscopo', (req, res) => {
     });
 });
 
-// Sección Tarot (/tarot) - SEO enriquecido
-app.get('/tarot', (req, res) => {
-    const indexPath = path.join(__dirname, 'build', 'index.html');
-    fs.readFile(indexPath, 'utf8', (err, html) => {
-        if (err) return res.sendFile(indexPath);
-
-        const contenidoSeo = `
-<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
-    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">🔮 EL ORÁCULO DEL BÚNKER: RITUAL DEL TAROT</h1>
-    <p>El <strong>Tarot de Expediente X Granaíno</strong> es una interfaz mística interactiva diseñada para canalizar el inconsciente colectivo de los investigadores. A través de la selección de 5 Arcanos Mayores, el sistema sintoniza su vibración para interpretar su estado actual, sus desafíos y la proyección del misterio en su camino personal.</p>
-    
-    <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">El Significado de la Tirada Táctica</h2>
-    <p>La consulta al oráculo se realiza mediante un ritual de cinco posiciones que estructuran la lectura:</p>
-    <ul>
-        <li><strong>Posición 1 (El Origen / Pasado reciente):</strong> Representa las influencias previas y los cimientos de la situación actual.</li>
-        <li><strong>Posición 2 (El Desafío / Presente):</strong> Señala el obstáculo principal o la anomalía que debe enfrentar en este momento.</li>
-        <li><strong>Posición 3 (El Destino / Futuro próximo):</strong> Indica el sendero hacia el cual se dirigen las energías si no hay interferencia.</li>
-        <li><strong>Posición 4 (La Herramienta / Consejo):</strong> La frecuencia o cualidad que el agente debe potenciar para resolver su conflicto.</li>
-        <li><strong>Posición 5 (La Revelación / Conclusión):</strong> El resultado final de la sintonización cósmica.</li>
-    </ul>
-    <p style="margin-top:20px;color:#666;font-size:0.75rem;">Consulte al oráculo con respeto y de forma pausada. No sature la frecuencia con lecturas consecutivas para mantener la pureza de la señal.</p>
-</article>`;
-
-        const pagina = inyectarContenidoSEO(
-            html,
-            'El Oráculo del Búnker | Lectura de Tarot Online — Expediente X Granaíno',
-            'Realice el ritual de los Arcanos en el Oráculo del Búnker. Tirada interactiva de 5 cartas para descifrar sus frecuencias energéticas.',
-            contenidoSeo
-        );
-        res.send(pagina);
-    });
-});
-
-// Sección Carta Astral (/carta-astral) - SEO enriquecido
-app.get('/carta-astral', (req, res) => {
-    const indexPath = path.join(__dirname, 'build', 'index.html');
-    fs.readFile(indexPath, 'utf8', (err, html) => {
-        if (err) return res.sendFile(indexPath);
-
-        const contenidoSeo = `
-<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
-    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">🌌 CARTA ASTRAL DEL AGENTE: COORDENADAS NATALES</h1>
-    <p>La <strong>Carta Astral de Expediente X Granaíno</strong> calcula la posición exacta de los cuerpos celestes en el momento y lugar de nacimiento del agente. Este mapa natal sirve como huella cósmica del investigador, revelando su predisposición hacia la percepción anómala y sus cualidades analíticas.</p>
-    
-    <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">Componentes Críticos de la Sintonización Astral</h2>
-    <ul>
-        <li><strong>Signo Solar:</strong> Representa el núcleo de la personalidad, la voluntad y la energía vital básica del agente.</li>
-        <li><strong>Signo Lunar:</strong> Define el mundo emocional, los instintos subconscientes y la capacidad intuitiva ante fenómenos paranormales.</li>
-        <li><strong>Ascendente:</strong> La máscara exterior, cómo se presenta el investigador ante el mundo y el inicio del camino de su vida.</li>
-        <li><strong>Posiciones Planetarias:</strong> Mercurio (comunicación e informes), Venus (relaciones de red), Marte (acción de campo) y los planetas exteriores que marcan las tendencias generacionales del misterio.</li>
-    </ul>
-    <p style="margin-top:20px;color:#666;font-size:0.75rem;">Para obtener una lectura precisa, ingrese su fecha, hora y ciudad de nacimiento en los módulos del búnker. Los datos son procesados localmente con fines de cálculo astrológico.</p>
-</article>`;
-
-        const pagina = inyectarContenidoSEO(
-            html,
-            'Carta Astral del Agente | Coordenadas Celestes Natales — Expediente X Granaíno',
-            'Calcule su carta natal en el Búnker. Análisis detallado de su signo solar, lunar, ascendente y posiciones planetarias.',
-            contenidoSeo
-        );
-        res.send(pagina);
-    });
-});
 
 // Sección de Noticias (/noticias) - SEO enriquecido
 app.get('/noticias', async (req, res) => {
