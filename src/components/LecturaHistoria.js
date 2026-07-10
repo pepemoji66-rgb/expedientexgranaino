@@ -543,25 +543,9 @@ const LecturaHistoria = ({ userAuth }) => {
                         >
                             🏠 {language === 'en' ? 'BUNKER HOME' : 'VOLVER A INICIO'}
                         </button>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        {historia.latitud && historia.longitud && (
-                            <button
-                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esNoticia ? 'noticia-' : 'exp-') + historia.id } })}
-                                className="forms-btn-submit"
-                                style={{ 
-                                    width: 'auto', background: '#fff', color: '#000', 
-                                    padding: '10px 20px', cursor: 'pointer', 
-                                    border: '2px solid #000', borderRadius: '2px', 
-                                    fontWeight: '900', boxShadow: '0 0 15px rgba(255,255,255,0.4)' 
-                                }}
-                            >
-                                {t('readViewRadar')}
-                            </button>
-                        )}
-                    </div>
                 </div>
+                </div>
+
 
                 <h2 className="admin-title" style={{ textAlign: 'left', color: 'var(--color-principal)', borderBottom: '1px solid rgba(0,255,65,0.3)', paddingBottom: '15px' }}>
                     {historia.titulo ? historia.titulo.toUpperCase() : t('readNoTitle')}
