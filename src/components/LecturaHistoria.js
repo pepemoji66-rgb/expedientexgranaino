@@ -678,6 +678,27 @@ const LecturaHistoria = ({ userAuth }) => {
                     <p>ORIGEN: <span style={{ color: '#fff' }}>
                         {(historia.usuario_nombre || historia.agente || t('readSystemCentral')).toUpperCase()}
                     </span></p>
+                    {comentarios.length > 0 && (
+                        <p style={{ marginTop: '10px' }}>
+                            <span 
+                                onClick={() => {
+                                    const el = document.querySelector('.comentarios-container');
+                                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                }} 
+                                style={{ 
+                                    color: '#00d4ff', 
+                                    cursor: 'pointer', 
+                                    textDecoration: 'underline',
+                                    fontWeight: 'bold',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                💬 {language === 'en' ? 'TRANSMISSIONS RECEIVED:' : 'TRANSMISIONES RECIBIDAS:'} {comentarios.length} {comentarios.length === 1 ? (language === 'en' ? 'Comment' : 'Comentario') : (language === 'en' ? 'Comments' : 'Comentarios')} ({language === 'en' ? 'Click to read' : 'Pulsar para leer'})
+                            </span>
+                        </p>
+                    )}
                 </div>
 
                 {/* IMAGEN PRINCIPAL DE LA NOTICIA / EXPEDIENTE */}
