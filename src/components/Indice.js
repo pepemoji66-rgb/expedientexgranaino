@@ -190,73 +190,68 @@ const Indice = ({ userAuth, stats, setTema }) => {
 
             {/* ÚLTIMAS TRANSMISIONES / COMENTARIOS DE AGENTES */}
             {comentariosRecientes.length > 0 && (
-                <div className="home-content-section" style={{ marginBottom: '35px' }}>
+                <div className="home-content-section" style={{ marginBottom: '45px' }}>
                     <div className="section-title-wrap">
-                        <h2 className="section-title-neon" style={{ color: '#00d4ff', textShadow: '0 0 10px rgba(0, 212, 255, 0.4)' }}>
-                            // {language === 'en' ? 'LATEST INCOMING TRANSMISSIONS' : 'ÚLTIMAS TRANSMISIONES RECIBIDAS (COMENTARIOS DE AGENTES)'}
+                        <h2 className="section-title-neon" style={{ color: 'var(--color-principal)', textShadow: '0 0 10px rgba(0, 255, 65, 0.2)' }}>
+                            // {language === 'en' ? 'INCOMING LOG / RECENT AGENT TRANSMISSIONS' : 'REGISTRO DE TRANSMISIONES / APORTACIONES RECIENTES'}
                         </h2>
                     </div>
-                    <div className="recent-comments-grid" style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '15px',
-                        width: '100%',
-                        marginTop: '15px'
+                    <div style={{
+                        background: 'rgba(5, 7, 12, 0.75)',
+                        border: '1px solid rgba(var(--rgb-principal), 0.15)',
+                        borderRadius: '4px',
+                        padding: '20px',
+                        fontFamily: 'monospace',
+                        boxShadow: 'inset 0 0 20px rgba(0,0,0,0.9)'
                     }}>
-                        {comentariosRecientes.map((c) => {
-                            const parts = (c.item_key || '').split('-');
-                            const tipo = parts[0];
-                            const id = parts[1];
-                            const srcParam = tipo === 'exp' ? 'expedientes' : tipo === 'caso' ? 'casos' : tipo === 'misterio' ? 'misterios' : 'noticias';
-                            const linkUrl = `/leer-historia/${id}?src=${srcParam}`;
-                            
-                            return (
-                                <div key={c.id} 
-                                     onClick={() => navigate(linkUrl)}
-                                     style={{
-                                         background: 'rgba(0, 212, 255, 0.02)',
-                                         border: '1px solid rgba(0, 212, 255, 0.12)',
-                                         borderRadius: '4px',
-                                         padding: '15px',
-                                         cursor: 'pointer',
-                                         transition: 'all 0.3s ease',
-                                         position: 'relative'
-                                     }}
-                                     onMouseEnter={(e) => {
-                                         e.currentTarget.style.borderColor = '#00d4ff';
-                                         e.currentTarget.style.boxShadow = '0 0 12px rgba(0, 212, 255, 0.25)';
-                                         e.currentTarget.style.background = 'rgba(0, 212, 255, 0.04)';
-                                     }}
-                                     onMouseLeave={(e) => {
-                                         e.currentTarget.style.borderColor = 'rgba(0, 212, 255, 0.12)';
-                                         e.currentTarget.style.boxShadow = 'none';
-                                         e.currentTarget.style.background = 'rgba(0, 212, 255, 0.02)';
-                                     }}
-                                >
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#888', marginBottom: '8px', fontFamily: 'Courier New' }}>
-                                        <span style={{ color: 'var(--color-principal)' }}>👤 {c.agente.toUpperCase()}</span>
-                                        <span>📅 {new Date(c.fecha).toLocaleDateString()}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {comentariosRecientes.map((c, i) => {
+                                const parts = (c.item_key || '').split('-');
+                                const tipo = parts[0];
+                                const id = parts[1];
+                                const srcParam = tipo === 'exp' ? 'expedientes' : tipo === 'caso' ? 'casos' : tipo === 'misterio' ? 'misterios' : 'noticias';
+                                const linkUrl = `/leer-historia/${id}?src=${srcParam}`;
+                                
+                                return (
+                                    <div key={c.id} 
+                                         onClick={() => navigate(linkUrl)}
+                                         style={{
+                                             borderBottom: i < comentariosRecientes.length - 1 ? '1px dashed rgba(255,255,255,0.05)' : 'none',
+                                             paddingBottom: i < comentariosRecientes.length - 1 ? '15px' : '0',
+                                             cursor: 'pointer',
+                                             display: 'flex',
+                                             flexDirection: 'column',
+                                             gap: '6px',
+                                             transition: 'all 0.2s ease'
+                                         }}
+                                         onMouseEnter={(e) => {
+                                             e.currentTarget.style.opacity = 0.9;
+                                             e.currentTarget.style.paddingLeft = '5px';
+                                         }}
+                                         onMouseLeave={(e) => {
+                                             e.currentTarget.style.opacity = 1;
+                                             e.currentTarget.style.paddingLeft = '0';
+                                         }}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', fontSize: '0.78rem' }}>
+                                            <span style={{ color: 'var(--color-principal)', fontWeight: 'bold' }}>
+                                                📟 [AGENTE_{c.agente.toUpperCase()}]
+                                            </span>
+                                            <span style={{ color: '#666', fontSize: '0.7rem' }}>
+                                                {new Date(c.fecha).toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div style={{ color: '#eee', fontSize: '0.85rem', paddingLeft: '15px', borderLeft: '2px solid var(--color-principal)', margin: '4px 0', lineBreak: 'anywhere' }}>
+                                            "{c.mensaje}"
+                                        </div>
+                                        <div style={{ fontSize: '0.72rem', color: '#8892b0', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <span>🎯 {language === 'en' ? 'TARGET:' : 'OBJETIVO:'}</span>
+                                            <span style={{ color: '#00d4ff', textDecoration: 'underline' }}>{c.titulo_articulo?.toUpperCase() || 'VER EVIDENCIA'}</span>
+                                        </div>
                                     </div>
-                                    <p style={{ 
-                                        color: '#ccc', 
-                                        fontSize: '0.82rem', 
-                                        lineHeight: '1.4', 
-                                        marginBottom: '10px', 
-                                        fontStyle: 'italic',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: 'vertical'
-                                    }}>
-                                        "{c.mensaje}"
-                                    </p>
-                                    <div style={{ fontSize: '0.75rem', color: '#00d4ff', fontWeight: 'bold', fontFamily: 'Courier New', textTransform: 'uppercase' }}>
-                                        🎯 {language === 'en' ? 'IN:' : 'EN:'} {c.titulo_articulo || 'VER EVIDENCIA'}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             )}
