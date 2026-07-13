@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
@@ -49,6 +49,49 @@ const AmazonBibliography = ({ libros, tituloSeccion, customStyle }) => {
     );
 };
 
+// Divide el texto en oraciones/chunks más cortos para que no falle en iOS/Safari móvil
+const splitText = (text, maxLen = 180) => {
+    const sentences = text.split(/([.!?])/g);
+    const chunks = [];
+    let currentChunk = '';
+    
+    for (let i = 0; i < sentences.length; i++) {
+        const part = sentences[i];
+        if (part === undefined || part === null) continue;
+        
+        if (part === '.' || part === '!' || part === '?') {
+            currentChunk += part;
+            continue;
+        }
+        
+        if (currentChunk.length + part.length > maxLen) {
+            if (currentChunk.trim()) {
+                chunks.push(currentChunk.trim());
+            }
+            currentChunk = '';
+            
+            let remaining = part;
+            while (remaining.length > maxLen) {
+                let sliceIndex = remaining.lastIndexOf(' ', maxLen);
+                if (sliceIndex === -1 || sliceIndex < 20) {
+                    sliceIndex = maxLen;
+                }
+                chunks.push(remaining.substring(0, sliceIndex).trim());
+                remaining = remaining.substring(sliceIndex).trim();
+            }
+            currentChunk = remaining;
+        } else {
+            currentChunk += (currentChunk ? ' ' : '') + part;
+        }
+    }
+    
+    if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+    }
+    
+    return chunks;
+};
+
 const LecturaHistoria = ({ userAuth }) => {
     const { language, t, forceTranslationUpdate } = useLanguage();
     const { id } = useParams();
@@ -58,6 +101,65 @@ const LecturaHistoria = ({ userAuth }) => {
     const src = queryParams.get('src');
     
     const [historia, setHistoria] = useState(null);
+    
+    // ESTADO DE AUDIO (ROBOCOP) MULTICHOICE SEQUENTIAL PARA MÓVIL
+    const [reproduciendoAudio, setReproduciendoAudio] = useState(false);
+    const audioIndexRef = useRef(0);
+    const audioChunksRef = useRef([]);
+    const reproduciendoAudioRef = useRef(false);
+    const currentUtteranceRef = useRef(null);
+
+    const reproducirSiguienteChunk = () => {
+        if (!reproduciendoAudioRef.current) return;
+        
+        const index = audioIndexRef.current;
+        const chunks = audioChunksRef.current;
+        
+        if (index >= chunks.length) {
+            setReproduciendoAudio(false);
+            reproduciendoAudioRef.current = false;
+            audioIndexRef.current = 0;
+            return;
+        }
+        
+        const texto = chunks[index];
+        if (!texto) {
+            audioIndexRef.current = index + 1;
+            reproducirSiguienteChunk();
+            return;
+        }
+        
+        const ut = new SpeechSynthesisUtterance(texto);
+        ut.lang = language === 'en' ? 'en-US' : 'es-ES';
+        ut.rate = 0.95;
+        ut.pitch = 0.95;
+        
+        if (window.speechSynthesis) {
+            const voces = window.speechSynthesis.getVoices();
+            const langPrefix = language === 'en' ? 'en' : 'es';
+            const maleNames = ['Pablo', 'Jorge', 'Alvaro', 'David', 'Mark', 'Guy', 'Male'];
+            const vozElegida = voces.find(v => v.lang.startsWith(langPrefix) && maleNames.some(name => v.name.includes(name)));
+            if (vozElegida) {
+                ut.voice = vozElegida;
+            }
+        }
+        
+        ut.onend = () => {
+            if (!reproduciendoAudioRef.current) return;
+            audioIndexRef.current = index + 1;
+            reproducirSiguienteChunk();
+        };
+        
+        ut.onerror = (e) => {
+            console.error("SpeechSynthesis error:", e);
+            if (!reproduciendoAudioRef.current) return;
+            audioIndexRef.current = index + 1;
+            reproducirSiguienteChunk();
+        };
+        
+        currentUtteranceRef.current = ut;
+        window.speechSynthesis.speak(ut);
+    };
     const [esRelatoAdmin, setEsRelatoAdmin] = useState(false);
     const [esNoticia, setEsNoticia] = useState(false);
     const [esMisterio, setEsMisterio] = useState(false);
@@ -351,8 +453,15 @@ const LecturaHistoria = ({ userAuth }) => {
     useEffect(() => {
         window.scrollTo(0, 0); // SUBIDA AUTOMÁTICA AL CARGAR
         obtenerHistoria();
+        
+        // Prime the voices database on mobile/Safari
+        if (window.speechSynthesis) {
+            window.speechSynthesis.getVoices();
+        }
+        
         return () => {
             if (window.speechSynthesis) {
+                reproduciendoAudioRef.current = false;
                 window.speechSynthesis.cancel();
             }
         };
@@ -472,6 +581,16 @@ const LecturaHistoria = ({ userAuth }) => {
         else url += '?src=expedientes';
 
         const textoCompartir = `🛸 ¡EXPEDIENTE DESCLASIFICADO! "${(historia.titulo || '').toUpperCase()}" — Investígalo en el Búnker Granaíno 👁️ #MisterioGranadino #ExpedienteXGranaino #TrueCrime`;
+
+        if (red === 'copiar') {
+            try {
+                navigator.clipboard.writeText(url);
+                alert("📋 ¡Enlace copiado al portapapeles con éxito! Puedes pegarlo directamente en tus redes o chats.");
+            } catch (err) {
+                alert("No se pudo copiar el enlace automáticamente. Cópialo de la barra del navegador.");
+            }
+            return;
+        }
 
         // Solo usar navigator.share en móviles para evitar el bug de PC
         if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -687,35 +806,36 @@ const LecturaHistoria = ({ userAuth }) => {
                                     alert("🔊 El sistema de síntesis de voz no está disponible en este navegador o dispositivo.");
                                     return;
                                 }
-                                if (window.speechSynthesis.speaking) {
+                                
+                                if (reproduciendoAudio) {
                                     window.speechSynthesis.cancel();
+                                    reproduciendoAudioRef.current = false;
+                                    setReproduciendoAudio(false);
+                                    audioIndexRef.current = 0;
                                 } else {
+                                    window.speechSynthesis.cancel(); // Flush stuck state
+                                    
                                     const textoAConversar = historia.contenido || historia.cuerpo || "";
                                     const textoLimpio = textoAConversar
                                         .replace(/<[^>]*>?/gm, '')
                                         .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
                                         .replace(/\s+/g, ' ').trim();
-
-                                    const ut = new SpeechSynthesisUtterance(textoLimpio);
-                                    ut.lang = language === 'en' ? 'en-US' : 'es-ES';
-                                    ut.rate = 0.95;
-                                    ut.pitch = 0.95;
-
-                                    const voces = window.speechSynthesis.getVoices();
-                                    const langPrefix = language === 'en' ? 'en' : 'es';
-                                    const maleNames = ['Pablo', 'Jorge', 'Alvaro', 'David', 'Mark', 'Guy', 'Male'];
-                                    const vozElegida = voces.find(v => v.lang.startsWith(langPrefix) && maleNames.some(name => v.name.includes(name)));
-                                    if (vozElegida) {
-                                        ut.voice = vozElegida;
-                                    }
-
-                                    window.speechSynthesis.speak(ut);
+                                    
+                                    if (!textoLimpio) return;
+                                    
+                                    const chunks = splitText(textoLimpio, 180);
+                                    audioChunksRef.current = chunks;
+                                    audioIndexRef.current = 0;
+                                    reproduciendoAudioRef.current = true;
+                                    setReproduciendoAudio(true);
+                                    
+                                    reproducirSiguienteChunk();
                                 }
                             }}
                             style={{
-                                background: 'transparent',
-                                color: '#00d4ff',
-                                border: '1px solid #00d4ff',
+                                background: reproduciendoAudio ? 'rgba(255, 51, 51, 0.1)' : 'transparent',
+                                color: reproduciendoAudio ? '#ff3333' : '#00d4ff',
+                                border: reproduciendoAudio ? '1px solid #ff3333' : '1px solid #00d4ff',
                                 padding: '10px 20px',
                                 fontWeight: 'bold',
                                 cursor: 'pointer',
@@ -729,7 +849,11 @@ const LecturaHistoria = ({ userAuth }) => {
                                 gap: '8px'
                             }}
                         >
-                            🔊 {language === 'en' ? 'LISTEN AUDIO (A.I. VOICE)' : 'ESCUCHAR RELATO (VOZ I.A.)'}
+                            {reproduciendoAudio ? (
+                                <>⏹️ {language === 'en' ? 'STOP AUDIO (A.I. VOICE)' : 'DETENER AUDIO (VOZ I.A.)'}</>
+                            ) : (
+                                <>🔊 {language === 'en' ? 'LISTEN AUDIO (A.I. VOICE)' : 'ESCUCHAR RELATO (VOZ I.A.)'}</>
+                            )}
                         </button>
                     </div>
 
@@ -761,6 +885,7 @@ const LecturaHistoria = ({ userAuth }) => {
                             <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>💬 WHATSAPP</button>
                             <button onClick={() => compartirHistoria('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📘 FACEBOOK</button>
                             <button onClick={() => compartirHistoria('twitter')} className="btn-share-tactico" style={{ background: '#000', color: '#fff', border: '1px solid #555', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>𝕏 PUBLICAR EN X</button>
+                            <button onClick={() => compartirHistoria('copiar')} className="btn-share-tactico" style={{ background: '#444', color: '#fff', border: '1px solid #666', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>🔗 COPIAR ENLACE</button>
                         </div>
                     </div>
                 </div>
