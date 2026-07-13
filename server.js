@@ -580,6 +580,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     html = html.replace(/<meta [^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
     html = html.replace(/<meta [^>]*name=["']description["'][^>]*>/gi, '');
     html = html.replace(/<meta [^>]*name=["']keywords["'][^>]*>/gi, '');
+    html = html.replace(/<link [^>]*rel=["']canonical["'][^>]*>/gi, '');
 
     // Generación de Datos Estructurados (JSON-LD) para SEO
     let schemaType = "WebSite";
