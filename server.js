@@ -1423,10 +1423,9 @@ app.get('/leer-historia/:id', async (req, res) => {
             // Construir el parámetro src correspondiente
             const params = src ? `?src=${src}` : (esCaso ? '?src=casos' : esMisterio ? '?src=misterios' : esNoticia ? '?src=noticias' : '?src=expedientes');
             
-            // Forzar URL canónica LIMPIA PERO ÚNICA PARA CADA TIPO
-            const protocol = req.protocol === 'http' || req.protocol === 'https' ? req.protocol : 'https';
-            const host = req.get('host');
-            const paginaUrl = `${protocol}://${host}/leer-historia/${historia.id}${params}`;
+            // Forzar URL canónica LIMPIA PERO ÚNICA PARA CADA TIPO (usando baseImgUrl HTTPS segura)
+            const { baseImgUrl } = obtenerUrlsRequest(req);
+            const paginaUrl = `${baseImgUrl}/leer-historia/${historia.id}${params}`;
 
             const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
