@@ -363,6 +363,49 @@ app.get('/api/comentarios', async (req, res) => {
     } catch (err) { res.status(200).json([]); }
 });
 
+app.get('/api/comentarios/recientes', async (req, res) => {
+    try {
+        const comentarios = await db.query("SELECT * FROM comentarios WHERE item_key IS NOT NULL ORDER BY id DESC LIMIT 5");
+        const resultados = [];
+        
+        for (const c of comentarios) {
+            let titulo = "Expediente";
+            const itemKey = c.item_key;
+            if (itemKey) {
+                const parts = itemKey.split('-');
+                const tipo = parts[0];
+                const id = parts[1];
+                
+                try {
+                    let art = [];
+                    if (tipo === 'exp') {
+                        art = await db.query("SELECT titulo FROM expedientes WHERE id = ?", [id]);
+                    } else if (tipo === 'caso') {
+                        art = await db.query("SELECT titulo FROM casos_abiertos WHERE id = ?", [id]);
+                    } else if (tipo === 'misterio') {
+                        art = await db.query("SELECT titulo FROM misterios_historicos WHERE id = ?", [id]);
+                    } else if (tipo === 'noticia') {
+                        art = await db.query("SELECT titulo FROM noticias WHERE id = ?", [id]);
+                    }
+                    if (art && art.length > 0) {
+                        titulo = art[0].titulo;
+                    }
+                } catch (e) {
+                    console.error("Error looking up article title for comment:", e);
+                }
+            }
+            resultados.push({
+                ...c,
+                titulo_articulo: titulo
+            });
+        }
+        res.json(resultados);
+    } catch (err) { 
+        console.error("Error en /api/comentarios/recientes:", err);
+        res.status(200).json([]); 
+    }
+});
+
 // --- ENDPOINT: Último comentario global (para sistema de notificaciones) ---
 app.get('/api/comentarios/ultimo', async (req, res) => {
     try {

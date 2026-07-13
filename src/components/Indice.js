@@ -17,6 +17,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
     const [recentCasos, setRecentCasos] = useState([]);
     const [recentVideos, setRecentVideos] = useState([]);
     const [recentMisterios, setRecentMisterios] = useState([]);
+    const [comentariosRecientes, setComentariosRecientes] = useState([]);
     const [loadingContent, setLoadingContent] = useState(true);
 
     const coloresDisponibles = [
@@ -31,12 +32,13 @@ const Indice = ({ userAuth, stats, setTema }) => {
         const fetchHomeData = async () => {
             try {
                 setLoadingContent(true);
-                const [resExp, resNot, resCasos, resVideos, resMisterios] = await Promise.allSettled([
+                const [resExp, resNot, resCasos, resVideos, resMisterios, resComs] = await Promise.allSettled([
                     axios.get(`${API_BASE_URL}/api/expedientes/ultimos`),
                     axios.get(`${API_BASE_URL}/api/noticias/ultimas`),
                     axios.get(`${API_BASE_URL}/api/casos`),
                     axios.get(`${API_BASE_URL}/api/videos/publicos`),
-                    axios.get(`${API_BASE_URL}/api/misterios-historicos`)
+                    axios.get(`${API_BASE_URL}/api/misterios-historicos`),
+                    axios.get(`${API_BASE_URL}/api/comentarios/recientes`)
                 ]);
 
                 if (resExp.status === 'fulfilled' && Array.isArray(resExp.value.data)) {
@@ -53,6 +55,9 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 }
                 if (resMisterios.status === 'fulfilled' && Array.isArray(resMisterios.value.data)) {
                     setRecentMisterios(resMisterios.value.data.slice(0, 3));
+                }
+                if (resComs.status === 'fulfilled' && Array.isArray(resComs.value.data)) {
+                    setComentariosRecientes(resComs.value.data);
                 }
             } catch (err) {
                 console.error("Error loading home page content:", err);
@@ -182,6 +187,79 @@ const Indice = ({ userAuth, stats, setTema }) => {
 
             {/* SECCIÓN PREVISUALIZACIONES DE CONTENIDO ("CHICHA" PARA ADSENSE Y UX) */}
             <div className="home-sections-divider">// {language === 'en' ? 'DECLASS CENTRAL CORE' : 'NÚCLEO CENTRAL DE DESCLASIFICACIÓN'}</div>
+
+            {/* ÚLTIMAS TRANSMISIONES / COMENTARIOS DE AGENTES */}
+            {comentariosRecientes.length > 0 && (
+                <div className="home-content-section" style={{ marginBottom: '35px' }}>
+                    <div className="section-title-wrap">
+                        <h2 className="section-title-neon" style={{ color: '#00d4ff', textShadow: '0 0 10px rgba(0, 212, 255, 0.4)' }}>
+                            // {language === 'en' ? 'LATEST INCOMING TRANSMISSIONS' : 'ÚLTIMAS TRANSMISIONES RECIBIDAS (COMENTARIOS DE AGENTES)'}
+                        </h2>
+                    </div>
+                    <div className="recent-comments-grid" style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: '15px',
+                        width: '100%',
+                        marginTop: '15px'
+                    }}>
+                        {comentariosRecientes.map((c) => {
+                            const parts = (c.item_key || '').split('-');
+                            const tipo = parts[0];
+                            const id = parts[1];
+                            const srcParam = tipo === 'exp' ? 'expedientes' : tipo === 'caso' ? 'casos' : tipo === 'misterio' ? 'misterios' : 'noticias';
+                            const linkUrl = `/leer-historia/${id}?src=${srcParam}`;
+                            
+                            return (
+                                <div key={c.id} 
+                                     onClick={() => navigate(linkUrl)}
+                                     style={{
+                                         background: 'rgba(0, 212, 255, 0.02)',
+                                         border: '1px solid rgba(0, 212, 255, 0.12)',
+                                         borderRadius: '4px',
+                                         padding: '15px',
+                                         cursor: 'pointer',
+                                         transition: 'all 0.3s ease',
+                                         position: 'relative'
+                                     }}
+                                     onMouseEnter={(e) => {
+                                         e.currentTarget.style.borderColor = '#00d4ff';
+                                         e.currentTarget.style.boxShadow = '0 0 12px rgba(0, 212, 255, 0.25)';
+                                         e.currentTarget.style.background = 'rgba(0, 212, 255, 0.04)';
+                                     }}
+                                     onMouseLeave={(e) => {
+                                         e.currentTarget.style.borderColor = 'rgba(0, 212, 255, 0.12)';
+                                         e.currentTarget.style.boxShadow = 'none';
+                                         e.currentTarget.style.background = 'rgba(0, 212, 255, 0.02)';
+                                     }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#888', marginBottom: '8px', fontFamily: 'Courier New' }}>
+                                        <span style={{ color: 'var(--color-principal)' }}>👤 {c.agente.toUpperCase()}</span>
+                                        <span>📅 {new Date(c.fecha).toLocaleDateString()}</span>
+                                    </div>
+                                    <p style={{ 
+                                        color: '#ccc', 
+                                        fontSize: '0.82rem', 
+                                        lineHeight: '1.4', 
+                                        marginBottom: '10px', 
+                                        fontStyle: 'italic',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical'
+                                    }}>
+                                        "{c.mensaje}"
+                                    </p>
+                                    <div style={{ fontSize: '0.75rem', color: '#00d4ff', fontWeight: 'bold', fontFamily: 'Courier New', textTransform: 'uppercase' }}>
+                                        🎯 {language === 'en' ? 'IN:' : 'EN:'} {c.titulo_articulo || 'VER EVIDENCIA'}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {/* SECCIÓN EXPEDIENTES RECIENTES */}
             <div className="home-content-section">
