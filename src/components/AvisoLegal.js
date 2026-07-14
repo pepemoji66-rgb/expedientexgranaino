@@ -40,6 +40,11 @@ const AvisoLegal = () => {
                 <p>El titular se reserva el derecho de efectuar sin previo aviso las modificaciones que considere oportunas en su portal, pudiendo cambiar, suprimir o añadir tanto los contenidos y servicios que se presten a través de la misma como la forma en la que éstos aparezcan presentados o localizados en su portal.</p>
             </section>
 
+            <section style={{ marginBottom: '30px' }}>
+                <h2 style={{ color: 'var(--color-principal)', fontSize: '1.2rem' }}>6. PROGRAMA DE AFILIADOS DE AMAZON</h2>
+                <p>En calidad de Afiliado de Amazon, este sitio web obtiene ingresos por las compras adscritas que cumplen los requisitos aplicables de acuerdo con lo establecido en el Acuerdo Operativo del Programa de Afiliados de Amazon.</p>
+            </section>
+
             <div style={{ textAlign: 'center', marginTop: '50px', fontSize: '0.7rem', color: '#666' }}>
                 [ REGISTRO DE SEGURIDAD LEGAL - MAYO 2026 ]
             </div>

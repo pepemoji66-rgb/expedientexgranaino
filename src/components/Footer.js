@@ -56,6 +56,9 @@ const Footer = ({ visitasTotales = 0 }) => {
                     <span className="contact-label">{t('footerContact')}</span>
                     <a href="mailto:archipegv2@gmail.com" className="contact-link">archipegv2@gmail.com</a>
                 </div>
+                <p style={{ fontSize: '0.62rem', color: '#666', marginTop: '15px', letterSpacing: '0.5px' }}>
+                    Como afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables.
+                </p>
             </div>
         </footer>
     );
