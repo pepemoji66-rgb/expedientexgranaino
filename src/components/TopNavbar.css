@@ -49,7 +49,7 @@
 .top-navbar-links {
     list-style: none;
     display: flex;
-    gap: 2px; /* Mínimo espacio entre enlaces */
+    gap: 12px; /* Espaciado elegante y cómodo */
     margin: 0;
     padding: 0;
     flex: 1;
@@ -58,14 +58,14 @@
 }
 
 .top-nav-link {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
-    font-size: 0.65rem; /* Reducido de 0.7rem */
+    font-size: 0.7rem; /* Letra legible */
     font-weight: 700;
-    padding: 6px 4px; /* Muy compacto */
+    padding: 8px 10px; /* Con aire y desahogo */
     text-transform: uppercase;
     transition: 0.3s;
-    letter-spacing: 0.5px; /* Casi sin espacio entre letras */
+    letter-spacing: 1px; /* Espaciado militar/esotérico */
     position: relative;
     display: flex;
     flex-direction: column;
@@ -322,15 +322,19 @@
 }
 
 /* RESPONSIVE */
-@media (max-width: 1250px) {
-    .top-navbar-container { padding: 0 15px; }
-    .top-navbar-links { gap: 5px; }
-    .top-nav-link { padding: 8px 8px; font-size: 0.6rem; }
+@media (max-width: 1440px) {
+    .top-navbar-links { gap: 6px; }
+    .top-nav-link { padding: 6px 6px; font-size: 0.65rem; letter-spacing: 0.5px; }
 }
 
-/* MOBILE MENU BUTTON (NOW GLOBAL) */
+@media (max-width: 1366px) {
+    .top-navbar-links { gap: 4px; }
+    .top-nav-link { padding: 6px 4px; font-size: 0.6rem; letter-spacing: 0.3px; }
+}
+
+/* MOBILE MENU BUTTON */
 .mobile-menu-btn {
-    display: flex;
+    display: none; /* Oculto en ordenadores grandes */
     background: transparent;
     border: 1px solid var(--color-principal);
     color: var(--color-principal);
@@ -348,11 +352,11 @@
     box-shadow: 0 0 15px rgba(var(--rgb-principal), 0.4);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1280px) {
     .top-navbar-links { display: none; }
     
     .mobile-menu-btn {
-        display: flex;
+        display: flex; /* Activo en portátiles y dispositivos móviles */
     }
     
     .top-navbar-container {
