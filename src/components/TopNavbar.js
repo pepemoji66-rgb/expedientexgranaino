@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
     Home,
@@ -28,24 +28,28 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     const location = useLocation();
     const { language, toggleLanguage, t } = useLanguage();
 
-    const menuItems = [
-        { path: "/", label: t('navHome'), icon: <Home size={16} /> },
-        { path: "/galeria", label: t('navGallery'), icon: <Image size={16} /> },
-        { path: "/videos", label: t('navVideos'), icon: <Video size={16} /> },
-        { path: "/noticias", label: t('navNews'), icon: <Newspaper size={16} /> },
-        { path: "/expedientes", label: t('navFiles'), icon: <FileText size={16} /> },
-        { path: "/lugares", label: t('navMap'), icon: <Map size={16} /> },
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const evidenceMenuItems = [
+        { path: "/galeria", label: "🖼️ " + t('navGallery') },
+        { path: "/videos", label: "📼 " + t('navVideos') },
+        { path: "/noticias", label: "📰 " + t('navNews') },
+        { path: "/expedientes", label: "📁 " + t('navFiles') },
+        { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
+        { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
+    ];
+
+    const otherMenuItems = [
+        { path: "/lugares", label: t('navMap') },
+        { path: "/biblioteca", label: "📚 " + (language === 'en' ? 'LIBRARY' : 'BIBLIOTECA') },
+        { path: "/archipeg", label: language === 'en' ? "💻 SOFTWARE" : "💻 SOFTWARE" }
     ];
 
     if (userAuth) {
-        menuItems.push(
-            { path: "/horoscopo", label: t('navHoroscope'), icon: <Sparkles size={16} /> }
+        otherMenuItems.push(
+            { path: "/horoscopo", label: t('navHoroscope') }
         );
     }
-    menuItems.push({ path: "/casos-abiertos", label: "💀 TRUE CRIME", icon: <FileText size={16} /> });
-    menuItems.push({ path: "/misterios-historicos", label: "👁️ " + t('navMysteries'), icon: <Eye size={16} /> });
-    menuItems.push({ path: "/biblioteca", label: "📚 BIBLIOTECA", icon: <FileText size={16} /> });
-    menuItems.push({ path: "/archipeg", label: language === 'en' ? "💻 My Software" : "💻 Mi Software", icon: <Monitor size={16} /> });
 
     return (
         <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>
@@ -59,7 +63,37 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
 
                 {/* CENTRAL NAVIGATION (DESKTOP) */}
                 <ul className="top-navbar-links">
-                    {menuItems.map((item) => (
+                    <li>
+                        <Link to="/" className={`top-nav-link ${location.pathname === '/' ? 'active' : ''}`}>
+                            <span className="label">{t('navHome')}</span>
+                            <div className="nav-underline"></div>
+                        </Link>
+                    </li>
+
+                    {/* DESPLEGABLE DE EVIDENCIAS */}
+                    <li 
+                        className={`nav-dropdown-wrapper ${dropdownOpen ? 'open' : ''}`}
+                        onMouseEnter={() => setDropdownOpen(true)}
+                        onMouseLeave={() => setDropdownOpen(false)}
+                    >
+                        <span className={`top-nav-link dropdown-trigger ${evidenceMenuItems.some(x => location.pathname === x.path) ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
+                            <span className="label">📂 {language === 'en' ? 'EVIDENCES' : 'EVIDENCIAS'} <span className="dropdown-arrow">▼</span></span>
+                            <div className="nav-underline"></div>
+                        </span>
+                        
+                        <ul className="dropdown-submenu">
+                            {evidenceMenuItems.map((sub) => (
+                                <li key={sub.path}>
+                                    <Link to={sub.path} className={`dropdown-sub-link ${location.pathname === sub.path ? 'active' : ''}`}>
+                                        {sub.label}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </li>
+
+                    {/* OTRAS SECCIONES */}
+                    {otherMenuItems.map((item) => (
                         <li key={item.path}>
                             <Link
                                 to={item.path}
@@ -100,11 +134,6 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                     <div className="user-area desktop-only">
                         {userAuth ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                {(userAuth.rol === 'admin' || userAuth.email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase()) && (
-                                    <Link to="/panel-mando" className="btn-access-tactical" style={{ borderColor: 'var(--color-principal)', color: 'var(--color-principal)', height: '32px', display: 'flex', alignItems: 'center' }}>
-                                        {t('sysControlPanel').replace('⚡ ', '')}
-                                    </Link>
-                                )}
                                 <Link to="/acceso" className="btn-access-tactical" style={{ height: '32px', display: 'flex', alignItems: 'center' }}>{t('navProfile')}</Link>
                                 <button onClick={cerrarSesion} className="btn-logout-mini" title={t('sysLogoutBtn')}>
                                     <LogOut size={14} />

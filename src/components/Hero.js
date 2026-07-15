@@ -255,22 +255,6 @@ const Hero = ({ userAuth }) => {
                 {/* BARRA SUPERIOR DE ACCIONES RÁPIDAS */}
                 <div className="hero-top-actions">
                     <div className="action-buttons-group">
-                        {novedadesGlobales.length > 0 && (
-                            <Link 
-                                to={
-                                    novedadesGlobales[0].type === 'noticia' ? "/noticias" : 
-                                    novedadesGlobales[0].type === 'video' ? "/galeria" : 
-                                    novedadesGlobales[0].type === 'caso' ? "/casos-abiertos" : 
-                                    novedadesGlobales[0].type === 'misterio' ? "/misterios-historicos" : 
-                                    "/expedientes"
-                                } 
-                                className="btn-nuevo-archivo-blink"
-                            >
-                                <span className="blink-dot"></span> {t('heroNewFile')}
-                            </Link>
-                        )}
-                        
-                        {/* PLACA DE AGENTE INTEGRADA EN PANEL DE MANDOS */}
                         {userAuth && (
                             <div className="hero-agent-badge">
                                 <span className="agent-status-led"></span>
