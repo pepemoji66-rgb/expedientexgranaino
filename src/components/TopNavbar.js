@@ -75,6 +75,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                         className={`nav-dropdown-wrapper ${dropdownOpen ? 'open' : ''}`}
                         onMouseEnter={() => setDropdownOpen(true)}
                         onMouseLeave={() => setDropdownOpen(false)}
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
                     >
                         <span className={`top-nav-link dropdown-trigger ${evidenceMenuItems.some(x => location.pathname === x.path) ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
                             <span className="label">📂 {language === 'en' ? 'EVIDENCES' : 'EVIDENCIAS'} <span className="dropdown-arrow">▼</span></span>

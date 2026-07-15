@@ -54,7 +54,6 @@
     padding: 0;
     flex: 1;
     justify-content: center;
-    overflow: hidden; /* Evita desbordes */
 }
 
 .top-nav-link {
@@ -334,7 +333,7 @@
 
 /* MOBILE MENU BUTTON */
 .mobile-menu-btn {
-    display: none; /* Oculto en ordenadores grandes */
+    display: flex; /* Visible en todos los dispositivos para acceso al menú lateral */
     background: transparent;
     border: 1px solid var(--color-principal);
     color: var(--color-principal);
