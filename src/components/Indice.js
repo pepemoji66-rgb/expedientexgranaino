@@ -413,9 +413,17 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 <div className="home-grid-cards">
                     {recentVideos.length > 0 ? (
                         recentVideos.map((vid) => {
-                            const primerCaptura = vid.capturas && vid.capturas.trim() !== '' ? vid.capturas.split(',')[0].trim() : '';
-                            const bgUrl = primerCaptura 
-                                ? (primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`)
+                            const capturasList = vid.capturas ? vid.capturas.split(',').map(c => c.trim()).filter(c => c) : [];
+                            const esUrlImagen = (c) => {
+                                if (!c) return false;
+                                if (!c.startsWith('http')) return true;
+                                const isVideo = c.includes('youtube.com') || c.includes('youtu.be') || c.includes('.mp4') || c.includes('.webm') || c.includes('.mov');
+                                if (isVideo) return false;
+                                return c.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) || c.includes('/image/upload/');
+                            };
+                            const mejorCaptura = capturasList.find(esUrlImagen) || '';
+                            const bgUrl = mejorCaptura 
+                                ? (mejorCaptura.startsWith('http') ? mejorCaptura : `${API_BASE_URL}/imagenes/${mejorCaptura}`)
                                 : `${API_BASE_URL}/imagenes/video_default.png`;
                             return (
                                 <div key={vid.id} className="home-card video-card-home" onClick={() => navigate(`/videos?id=${vid.id}`)}>

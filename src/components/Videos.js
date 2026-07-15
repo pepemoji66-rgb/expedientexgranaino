@@ -265,9 +265,17 @@ const Videos = ({ userAuth }) => {
                             <div className="badge-prioridad">NIVEL 4</div>
                             <div className="video-frame-wrapper">
                                 {(() => {
-                                    const primerCaptura = vid.capturas && vid.capturas.trim() !== '' ? vid.capturas.split(',')[0].trim() : '';
-                                    const posterUrl = primerCaptura 
-                                        ? (primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`)
+                                    const capturasList = vid.capturas ? vid.capturas.split(',').map(c => c.trim()).filter(c => c) : [];
+                                    const esUrlImagen = (c) => {
+                                        if (!c) return false;
+                                        if (!c.startsWith('http')) return true;
+                                        const isVideo = c.includes('youtube.com') || c.includes('youtu.be') || c.includes('.mp4') || c.includes('.webm') || c.includes('.mov');
+                                        if (isVideo) return false;
+                                        return c.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) || c.includes('/image/upload/');
+                                    };
+                                    const mejorCaptura = capturasList.find(esUrlImagen) || '';
+                                    const posterUrl = mejorCaptura 
+                                        ? (mejorCaptura.startsWith('http') ? mejorCaptura : `${API_BASE_URL}/imagenes/${mejorCaptura}`)
                                         : undefined;
                                     return (
                                         <video 
@@ -323,21 +331,30 @@ const Videos = ({ userAuth }) => {
                                 <div className="video-premium-player-col">
                                     <div className="video-frame-wrapper">
                                         {(() => {
-                                            const primerCaptura = vid.capturas && vid.capturas.trim() !== '' ? vid.capturas.split(',')[0].trim() : '';
+                                            const capturasList = vid.capturas ? vid.capturas.split(',').map(c => c.trim()).filter(c => c) : [];
+                                            const esUrlImagen = (c) => {
+                                                if (!c) return false;
+                                                if (!c.startsWith('http')) return true;
+                                                const isVideo = c.includes('youtube.com') || c.includes('youtu.be') || c.includes('.mp4') || c.includes('.webm') || c.includes('.mov');
+                                                if (isVideo) return false;
+                                                return c.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) || c.includes('/image/upload/');
+                                            };
+                                            const mejorCaptura = capturasList.find(esUrlImagen) || '';
                                             let bgUrl = '';
                                             let isYoutube = vid.url && (vid.url.includes('youtube.com') || vid.url.includes('youtu.be'));
                                             let isLocal = vid.url && !vid.url.includes('http');
+                                            let isDirectVideo = vid.url && (vid.url.endsWith('.mp4') || vid.url.endsWith('.webm') || vid.url.endsWith('.ogg') || vid.url.includes('/video/upload/'));
                                             
                                             if (isYoutube) {
                                                 const ytId = getYoutubeId(vid.url);
                                                 bgUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : `${API_BASE_URL}/imagenes/video_default.png`;
-                                            } else if (primerCaptura) {
-                                                bgUrl = primerCaptura.startsWith('http') ? primerCaptura : `${API_BASE_URL}/imagenes/${primerCaptura}`;
+                                            } else if (mejorCaptura) {
+                                                bgUrl = mejorCaptura.startsWith('http') ? mejorCaptura : `${API_BASE_URL}/imagenes/${mejorCaptura}`;
                                             } else {
                                                 bgUrl = `${API_BASE_URL}/imagenes/video_default.png`;
                                             }
 
-                                            if (isLocal || isYoutube) {
+                                            if (isLocal || isYoutube || isDirectVideo) {
                                                 return (
                                                     <div 
                                                         className="video-preview-interactive" 
@@ -349,7 +366,7 @@ const Videos = ({ userAuth }) => {
                                                                 <div className="play-triangle"></div>
                                                             </div>
                                                             <span className="video-type-tag">
-                                                                {isLocal ? "📂 ARCHIVO LOCAL" : "📡 CANAL YOUTUBE"}
+                                                                {isYoutube ? "📡 CANAL YOUTUBE" : isLocal ? "📂 ARCHIVO LOCAL" : "☁️ CLOUD VIDEO"}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -407,11 +424,30 @@ const Videos = ({ userAuth }) => {
                                         <div className="video-premium-evidences">
                                             <span className="evidences-label">EVIDENCIAS DIGITALES ADJUNTAS:</span>
                                             <div className="evidences-grid-mini">
-                                                {vid.capturas.split(',').map((url, idx) => (
-                                                    <div key={idx} onClick={() => abrirCaptura(url.trim())} className="evidence-thumb-wrapper">
-                                                        <img src={url.trim()} alt="Evidencia" />
-                                                    </div>
-                                                ))}
+                                                {vid.capturas.split(',').map((url, idx) => {
+                                                    const trimmedUrl = url.trim();
+                                                    const isImg = trimmedUrl.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) || trimmedUrl.includes('/image/upload/');
+                                                    
+                                                    if (isImg) {
+                                                        return (
+                                                            <div key={idx} onClick={() => abrirCaptura(trimmedUrl)} className="evidence-thumb-wrapper">
+                                                                <img src={trimmedUrl} alt="Evidencia" />
+                                                            </div>
+                                                        );
+                                                    } else {
+                                                        return (
+                                                            <a key={idx} href={trimmedUrl} target="_blank" rel="noopener noreferrer" className="evidence-thumb-wrapper doc-link-thumb" style={{
+                                                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                                                background: 'rgba(0, 255, 65, 0.05)', border: '1px dashed var(--color-principal)',
+                                                                textDecoration: 'none', color: 'var(--color-principal)', fontSize: '0.65rem', padding: '5px',
+                                                                fontFamily: 'monospace', textAlign: 'center', height: '100%', width: '100%', minWidth: '60px', minHeight: '45px'
+                                                            }}>
+                                                                <span style={{ fontSize: '1rem' }}>📄</span>
+                                                                <span style={{ fontSize: '0.45rem', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', display: 'block', marginTop: '2px' }}>DOC_INFO</span>
+                                                            </a>
+                                                        );
+                                                    }
+                                                })}
                                             </div>
                                         </div>
                                     )}

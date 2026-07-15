@@ -165,10 +165,14 @@ const Hero = ({ userAuth }) => {
                 const capturasList = item.capturas
                     ? item.capturas.split(',').map(c => c.trim()).filter(c => c)
                     : [];
-                const esUrlImagen = (c) => c.startsWith('http') && !c.includes('youtube.com') && !c.includes('youtu.be') && !c.includes('.mp4') && !c.includes('.webm') && !c.includes('.mov');
-                const mejorCaptura = capturasList.find(esUrlImagen)
-                    || capturasList.find(c => !c.startsWith('http'))  // archivo local como fallback
-                    || '';
+                const esUrlImagen = (c) => {
+                    if (!c) return false;
+                    if (!c.startsWith('http')) return true;
+                    const isVideo = c.includes('youtube.com') || c.includes('youtu.be') || c.includes('.mp4') || c.includes('.webm') || c.includes('.mov');
+                    if (isVideo) return false;
+                    return c.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) || c.includes('/image/upload/');
+                };
+                const mejorCaptura = capturasList.find(esUrlImagen) || '';
                 const buildVideoImageUrl = (captura) => {
                     if (!captura) return null;
                     if (captura.startsWith('http')) return captura;
