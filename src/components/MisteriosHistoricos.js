@@ -28,13 +28,14 @@ const buildAmazonMaps = (todos) => {
                     keys.add(`misterios_historicos-${id}`);
                     links.set(`misterio-${id}`, link);
                     links.set(`misterios_historicos-${id}`, link);
-                } else if (k.startsWith('caso') || k.startsWith('casos_abiertos') || k.startsWith('exp')) {
+                } else if (k.startsWith('caso') || k.startsWith('casos_abiertos')) {
                     keys.add(`caso-${id}`);
                     keys.add(`casos_abiertos-${id}`);
-                    keys.add(`exp-${id}`);
-                    keys.add(`expedientes-${id}`);
                     links.set(`caso-${id}`, link);
                     links.set(`casos_abiertos-${id}`, link);
+                } else if (k.startsWith('exp') || k.startsWith('expedientes')) {
+                    keys.add(`exp-${id}`);
+                    keys.add(`expedientes-${id}`);
                     links.set(`exp-${id}`, link);
                     links.set(`expedientes-${id}`, link);
                 } else if (k.startsWith('noticia') || k.startsWith('noticias')) {
