@@ -488,6 +488,49 @@ app.delete('/api/comentarios/:id', async (req, res) => {
     }
 });
 
+// --- COLABORADORES DEL BÚNKER ---
+// Inicializar tabla si no existe
+db.query(`CREATE TABLE IF NOT EXISTS colaboradores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(300),
+    redes VARCHAR(200),
+    fecha_alta DATE,
+    avatar VARCHAR(10) DEFAULT '🛸',
+    destacado TINYINT(1) DEFAULT 0,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`, (err) => { if (err) console.warn('Tabla colaboradores ya existe o error:', err.message); });
+
+app.get('/api/colaboradores', async (req, res) => {
+    try {
+        const results = await db.query("SELECT * FROM colaboradores ORDER BY destacado DESC, creado_en DESC");
+        res.json(results);
+    } catch (err) { res.status(200).json([]); }
+});
+
+app.post('/api/colaboradores', async (req, res) => {
+    const { nombre, descripcion, redes, fecha_alta, avatar, destacado } = req.body;
+    if (!nombre) return res.status(400).json({ error: "Falta el nombre." });
+    try {
+        await db.execute(
+            "INSERT INTO colaboradores (nombre, descripcion, redes, fecha_alta, avatar, destacado) VALUES (?, ?, ?, ?, ?, ?)",
+            [nombre, descripcion || '', redes || '', fecha_alta || null, avatar || '🛸', destacado ? 1 : 0]
+        );
+        res.json({ mensaje: "Colaborador añadido al búnker." });
+    } catch (err) {
+        res.status(500).json({ error: "Error al añadir colaborador." });
+    }
+});
+
+app.delete('/api/colaboradores/:id', async (req, res) => {
+    try {
+        await db.execute("DELETE FROM colaboradores WHERE id = ?", [req.params.id]);
+        res.json({ mensaje: "Colaborador eliminado." });
+    } catch (err) {
+        res.status(500).json({ error: "Error al eliminar colaborador." });
+    }
+});
+
 app.post('/api/chat-ia', async (req, res) => {
     const { pregunta } = req.body;
     if (!pregunta) return res.status(400).json({ respuesta: "Falta señal de entrada, hermano." });

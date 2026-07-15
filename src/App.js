@@ -31,6 +31,7 @@ import AtarfeDossier from './components/AtarfeDossier';
 import Archipeg from './components/Archipeg';
 import MisteriosHistoricos from './components/MisteriosHistoricos';
 import BibliotecaBunker from './components/BibliotecaBunker';
+import ColaboradoresBunker from './components/ColaboradoresBunker';
 import { useLanguage } from './context/LanguageContext';
 import { safeLocalStorage } from './utils/storage';
 
@@ -242,6 +243,7 @@ function App() {
                 { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
                 { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
                 { path: "/biblioteca", label: "📚 BIBLIOTECA DEL BÚNKER" },
+                { path: "/colaboradores", label: "🏅 COLABORADORES" },
                 { path: "/archipeg", label: "💻 ARCHIPEG V3" }
               ].map((route) => (
                 <li key={route.path} style={{ marginBottom: '15px' }}>
@@ -347,6 +349,7 @@ function App() {
                <Route path="/especial-atarfe" element={<AtarfeDossier />} />
                <Route path="/archipeg" element={<Archipeg userAuth={userAuth} />} />
                <Route path="/biblioteca" element={<BibliotecaBunker />} />
+               <Route path="/colaboradores" element={<ColaboradoresBunker userAuth={userAuth} />} />
 
             </Routes>
           </div>

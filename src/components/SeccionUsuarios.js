@@ -137,19 +137,10 @@ const Seccionusuarios = ({ setAuth }) => {
                 <div className="acceso-tabs" role="tablist">
                     <button
                         role="tab"
-                        aria-selected={esLogin}
-                        className={`acceso-tab ${esLogin ? 'active' : ''}`}
-                        onClick={() => !esLogin && toggleModo()}
+                        aria-selected={true}
+                        className="acceso-tab active"
                     >
-                        {language === 'en' ? '🔑 ACCESS' : '🔑 ACCEDER'}
-                    </button>
-                    <button
-                        role="tab"
-                        aria-selected={!esLogin}
-                        className={`acceso-tab ${!esLogin ? 'active' : ''}`}
-                        onClick={() => esLogin && toggleModo()}
-                    >
-                        {language === 'en' ? '📋 REGISTER' : '📋 REGISTRARSE'}
+                        🔑 {language === 'en' ? 'ADMIN ACCESS' : 'ACCESO ADMIN'}
                     </button>
                 </div>
 
@@ -290,16 +281,8 @@ const Seccionusuarios = ({ setAuth }) => {
                                 : (language === 'en' ? '🛸 JOIN THE BUNKER' : '🛸 UNIRSE AL BÚNKER')}
                     </button>
 
-                    {/* SWITCH LOGIN/REGISTRO */}
-                    <p className="acceso-switch-modo">
-                        {esLogin
-                            ? (language === 'en' ? "No account yet? " : "¿Sin credenciales aún? ")
-                            : (language === 'en' ? "Already an agent? " : "¿Ya eres agente? ")}
-                        <button type="button" className="acceso-switch-btn" onClick={toggleModo}>
-                            {esLogin
-                                ? (language === 'en' ? 'REGISTER FREE' : 'REGISTRO GRATUITO')
-                                : (language === 'en' ? 'LOG IN' : 'IDENTIFICARSE')}
-                        </button>
+                    <p className="acceso-switch-modo" style={{ color: '#333', fontSize: '0.7rem', textAlign: 'center' }}>
+                        🔒 Acceso restringido al administrador del búnker
                     </p>
                 </form>
             </div>
