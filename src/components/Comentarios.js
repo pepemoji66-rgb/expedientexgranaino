@@ -3,16 +3,22 @@ import axios from 'axios';
 import API_BASE_URL from '../config';
 import './Comentarios.css';
 
-const Comentarios = ({ userAuth }) => {
+const Comentarios = ({ userAuth, itemKey }) => {
     const [comentarios, setComentarios] = useState([]);
     const [nuevoComentario, setNuevoComentario] = useState('');
+    const [nickVisitante, setNickVisitante] = useState('');
     const [enviando, setEnviando] = useState(false);
+    const [enviado, setEnviado] = useState(false);
 
     const isAdmin = userAuth && (userAuth.email === 'archipegv2@gmail.com' || userAuth.rol === 'admin');
 
+    const endpoint = itemKey
+        ? `${API_BASE_URL}/api/comentarios/${itemKey}`
+        : `${API_BASE_URL}/api/comentarios`;
+
     const cargarComentarios = async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/api/comentarios`);
+            const res = await axios.get(endpoint);
             setComentarios(res.data);
         } catch (err) {
             console.error("Error al cargar comentarios:", err);
@@ -21,21 +27,27 @@ const Comentarios = ({ userAuth }) => {
 
     useEffect(() => {
         cargarComentarios();
-    }, []);
+    }, [itemKey]);
 
     const enviarComentario = async (e) => {
         e.preventDefault();
         if (!nuevoComentario.trim()) return;
-        if (!userAuth) return alert("Debes estar registrado para comentar.");
+
+        // Si hay sesión activa, usar el nombre del usuario. Si no, usar el nick escrito o "AGENTE ANÓNIMO"
+        const nombreFinal = userAuth
+            ? userAuth.nombre
+            : (nickVisitante.trim() || 'AGENTE ANÓNIMO');
 
         setEnviando(true);
         try {
-            await axios.post(`${API_BASE_URL}/api/comentarios`, {
-                agente: userAuth.nombre,
+            await axios.post(endpoint, {
+                agente: nombreFinal,
                 mensaje: nuevoComentario
             });
             setNuevoComentario('');
-            cargarComentarios();
+            setNickVisitante('');
+            setEnviado(true);
+            setTimeout(() => setEnviado(false), 5000);
         } catch (err) {
             alert("Error al enviar la señal.");
         } finally {
@@ -55,67 +67,52 @@ const Comentarios = ({ userAuth }) => {
 
     return (
         <div className="comentarios-container">
-            <h2 className="titulo-seccion-bunker">📡 COMUNICACIONES DE AGENTES</h2>
-            
-            <form onSubmit={enviarComentario} className="form-comentario">
-                <textarea
-                    value={nuevoComentario}
-                    onChange={(e) => setNuevoComentario(e.target.value)}
-                    placeholder={userAuth ? "Escribe tu informe o comentario aquí..." : "REGÍSTRATE PARA COMENTAR EN EL BÚNKER"}
-                    className="input-bunker-comentario"
-                    required
-                    disabled={!userAuth}
-                ></textarea>
-                <button type="submit" disabled={enviando || !userAuth} className="btn-enviar-comentario">
-                    {enviando ? 'TRANSMITIENDO...' : 'ENVIAR AL ARCHIVO'}
-                </button>
-            </form>
+            <h2 className="titulo-seccion-bunker">📡 COMUNICACIONES DEL BÚNKER</h2>
+
+            {enviado ? (
+                <div className="comentario-enviado-ok">
+                    <span>✅</span>
+                    <div>
+                        <strong>SEÑAL RECIBIDA</strong>
+                        <p>Tu mensaje ha sido enviado y está pendiente de revisión. Si todo está en orden, lo verás publicado pronto.</p>
+                    </div>
+                </div>
+            ) : (
+                <form onSubmit={enviarComentario} className="form-comentario">
+                    {!userAuth && (
+                        <input
+                            type="text"
+                            value={nickVisitante}
+                            onChange={(e) => setNickVisitante(e.target.value)}
+                            placeholder="¿Cómo quieres que te llamen? (opcional)"
+                            className="input-bunker-nick"
+                            maxLength={40}
+                        />
+                    )}
+                    <textarea
+                        value={nuevoComentario}
+                        onChange={(e) => setNuevoComentario(e.target.value)}
+                        placeholder="Escribe tu comentario, teoría o avistamiento aquí..."
+                        className="input-bunker-comentario"
+                        required
+                    ></textarea>
+                    <button type="submit" disabled={enviando} className="btn-enviar-comentario">
+                        {enviando ? 'TRANSMITIENDO...' : '📡 ENVIAR AL BÚNKER'}
+                    </button>
+                    <p className="comentario-aviso-moderacion">
+                        ⚠️ Los comentarios son revisados antes de publicarse. Por favor, sé respetuoso.
+                    </p>
+                </form>
+            )}
 
             <div className="lista-comentarios">
                 {comentarios.length > 0 ? (
                     comentarios.map((c) => (
                         <div key={c.id} className="comentario-card fade-in">
                             <div className="comentario-header">
-                                <span className="comentario-agente">👤 AGENTE: {c.agente?.toUpperCase()}</span>
+                                <span className="comentario-agente">👤 {c.agente?.toUpperCase()}</span>
                                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                                     <span className="comentario-fecha">{new Date(c.fecha).toLocaleString()}</span>
-                                    <button 
-                                        className="btn-descifrar-msg" 
-                                        onClick={async (e) => {
-                                            const btn = e.currentTarget;
-                                            const originalText = c.mensaje;
-                                            btn.innerText = '⌛';
-                                            
-                                            // Detectar idioma del traductor de Google (si existe)
-                                            const getLang = () => {
-                                                const cookie = document.cookie.split('; ').find(row => row.startsWith('googtrans='));
-                                                if (cookie) return cookie.split('/').pop();
-                                                return 'es'; 
-                                            };
-
-                                            try {
-                                                const res = await axios.post(`${API_BASE_URL}/api/traducir-tactico`, { 
-                                                    texto: originalText,
-                                                    idioma: getLang() 
-                                                });
-                                                const card = btn.closest('.comentario-card');
-                                                let tradBox = card.querySelector('.traduccion-tactica');
-                                                if (!tradBox) {
-                                                    tradBox = document.createElement('div');
-                                                    tradBox.className = 'traduccion-tactica slide-down';
-                                                    card.appendChild(tradBox);
-                                                }
-                                                tradBox.innerHTML = `<strong>🤖 DESCIFRADO (${getLang().toUpperCase()}):</strong> ${res.data.respuesta}`;
-                                                btn.innerText = '✅';
-                                            } catch {
-                                                btn.innerText = '❌';
-                                            }
-
-                                        }}
-                                        title="Descifrar señal (Traducción IA)"
-                                    >
-                                        🤖
-                                    </button>
                                     {isAdmin && (
                                         <button onClick={() => borrarComentario(c.id)} className="btn-borrar-comentario">
                                             🗑️
@@ -125,10 +122,9 @@ const Comentarios = ({ userAuth }) => {
                             </div>
                             <p className="comentario-mensaje">{c.mensaje}</p>
                         </div>
-
                     ))
                 ) : (
-                    <p className="no-comentarios">FRECUENCIA LIMPIA. ESPERANDO INFORMES...</p>
+                    <p className="no-comentarios">FRECUENCIA LIMPIA. SÉ EL PRIMERO EN DEJAR UN MENSAJE...</p>
                 )}
             </div>
         </div>
@@ -137,3 +133,4 @@ const Comentarios = ({ userAuth }) => {
 
 
 export default Comentarios;
+

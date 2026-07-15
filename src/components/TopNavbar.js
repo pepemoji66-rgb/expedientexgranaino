@@ -141,9 +141,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                                     <span className="desktop-only">{t('navLogout')}</span>
                                 </button>
                             </div>
-                        ) : (
-                            <Link to="/acceso" className="btn-access-tactical">{t('navLogin')}</Link>
-                        )}
+                        ) : null}
                     </div>
 
                     {/* BOTÓN HAMBURGUESA (MÓVIL) */}

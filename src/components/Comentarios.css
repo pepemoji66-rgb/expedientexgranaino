@@ -144,3 +144,67 @@
 .lista-comentarios::-webkit-scrollbar-thumb {
     background: #222;
 }
+
+/* Aviso de moderación */
+.comentario-aviso-moderacion {
+    font-size: 0.7rem;
+    color: #555;
+    text-align: center;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Confirmación de envío */
+.comentario-enviado-ok {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 255, 65, 0.05);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    border-radius: 4px;
+    padding: 25px 30px;
+    margin-bottom: 30px;
+    font-family: 'Inter', sans-serif;
+}
+
+.comentario-enviado-ok span {
+    font-size: 2rem;
+}
+
+.comentario-enviado-ok strong {
+    display: block;
+    color: #00ff41;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.comentario-enviado-ok p {
+    color: #8892b0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Badge de moderación para el panel admin - tab comentarios */
+.badge-pendiente {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff4444;
+    color: #fff;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    margin-left: 6px;
+    animation: pulse-badge 1.5s infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+}
+

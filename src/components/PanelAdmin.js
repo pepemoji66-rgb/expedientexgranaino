@@ -68,6 +68,9 @@ const PanelAdmin = () => {
     // ESTADO PARA AMAZON AFILIADOS (NINJA)
     const [amazonJson, setAmazonJson] = useState('');
 
+    // ESTADO PARA COMENTARIOS PENDIENTES
+    const [comentariosPendientes, setComentariosPendientes] = useState(0);
+
     useEffect(() => {
         if (itemParaEditar) {
             const id = itemParaEditar.id || itemParaEditar._id;
@@ -93,7 +96,7 @@ const PanelAdmin = () => {
     const cargarDatos = useCallback(async () => {
         setCargando(true);
         try {
-            const [resU, resV, resE, resI, resL, resN, resM, resC, resCOM, resARCH] = await Promise.allSettled([
+            const [resU, resV, resE, resI, resL, resN, resM, resC, resCOM, resARCH, resPendientes] = await Promise.allSettled([
                 axios.get(`${API_BASE_URL}/api/usuarios`),
                 axios.get(`${API_BASE_URL}/api/videos/todos`),
                 axios.get(`${API_BASE_URL}/api/expedientes/todos`),
@@ -103,7 +106,8 @@ const PanelAdmin = () => {
                 axios.get(`${API_BASE_URL}/api/misterios-historicos/todos`),
                 axios.get(`${API_BASE_URL}/api/casos/todos`),
                 axios.get(`${API_BASE_URL}/api/admin/todos-comentarios`),
-                axios.get(`${API_BASE_URL}/api/archipeg/solicitudes`)
+                axios.get(`${API_BASE_URL}/api/archipeg/solicitudes`),
+                axios.get(`${API_BASE_URL}/api/comentarios/pendientes/count`)
             ]);
 
             const parse = (res) => {
@@ -126,6 +130,11 @@ const PanelAdmin = () => {
                 comentarios: parse(resCOM),
                 archipeg: parse(resARCH)
             });
+
+            // Actualizar badge de comentarios pendientes
+            if (resPendientes.status === 'fulfilled') {
+                setComentariosPendientes(resPendientes.value.data.total || 0);
+            }
         } catch (err) {
             console.error("❌ Error en la recepción de datos", err);
         } finally {
@@ -177,7 +186,7 @@ const PanelAdmin = () => {
                 casos_abiertos: { base: '/casos', approve: '/casos/aprobar' },
                 misterios_historicos: { base: '/misterios-historicos', approve: '/misterios-historicos/aprobar' },
                 chat: { base: '/borrar-mensaje' },
-                comentarios: { base: '/comentarios' },
+                comentarios: { base: '/comentarios', approve: '/comentarios' },
                 archipeg: { base: '/archipeg/solicitudes', approve: '/archipeg/solicitudes' }
             };
 
@@ -189,6 +198,8 @@ const PanelAdmin = () => {
                 finalUrl = accion === 'aprobar' 
                     ? `${url}/archipeg/solicitudes/${id}/aprobar` 
                     : `${url}/archipeg/solicitudes/${id}`;
+            } else if (tipo === 'comentarios' && accion === 'aprobar') {
+                finalUrl = `${url}/comentarios/${id}/aprobar`;
             } else {
                 finalUrl = accion === 'aprobar' ? `${url}${route.approve}/${id}` : `${url}${route.base}/${id}`;
             }
@@ -618,6 +629,9 @@ const PanelAdmin = () => {
                     return (
                         <button key={t} className={tab === t ? 'active' : ''} onClick={() => { setTab(t); setPaginaActual(1); }}>
                             {label}
+                            {t === 'comentarios' && comentariosPendientes > 0 && (
+                                <span className="badge-pendiente">{comentariosPendientes}</span>
+                            )}
                         </button>
                     );
                 })}

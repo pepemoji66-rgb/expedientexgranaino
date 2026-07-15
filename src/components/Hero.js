@@ -277,14 +277,8 @@ const Hero = ({ userAuth }) => {
                         <Link to="/expedientes" className="btn-mufon-red">
                             {t('heroNavReport')}
                         </Link>
-                        <Link to="/acceso" className="btn-mufon-red">
-                            {t('heroNavReg')}
-                        </Link>
                         <Link to="/galeria" className="btn-mufon-black">
                             {t('heroNavMedia')}
-                        </Link>
-                        <Link to="/acceso" className="btn-mufon-outline">
-                            {t('heroNavAccess')}
                         </Link>
                     </div>
                 </div>

@@ -355,10 +355,28 @@ app.get('/api/admin/todos-comentarios', async (req, res) => {
     } catch (err) { res.status(200).json([]); }
 });
 
+// --- CONTEO DE COMENTARIOS PENDIENTES (para badge de alerta en panel admin) ---
+app.get('/api/comentarios/pendientes/count', async (req, res) => {
+    try {
+        const result = await db.query("SELECT COUNT(*) as total FROM comentarios WHERE aprobado = 0");
+        res.json({ total: result[0].total });
+    } catch (err) { res.status(200).json({ total: 0 }); }
+});
+
+// --- APROBAR COMENTARIO ---
+app.put('/api/comentarios/:id/aprobar', async (req, res) => {
+    try {
+        await db.execute("UPDATE comentarios SET aprobado = 1 WHERE id = ?", [req.params.id]);
+        res.json({ mensaje: "Comentario aprobado y publicado." });
+    } catch (err) {
+        res.status(500).json({ error: "No se pudo aprobar el comentario." });
+    }
+});
+
 app.get('/api/comentarios', async (req, res) => {
     try {
-        // En la home mostramos solo los aprobados o los últimos 50 (donde item_key es null)
-        const results = await db.query("SELECT * FROM comentarios WHERE item_key IS NULL ORDER BY id DESC LIMIT 50");
+        // Solo mostramos comentarios aprobados por el admin
+        const results = await db.query("SELECT * FROM comentarios WHERE item_key IS NULL AND aprobado = 1 ORDER BY id DESC LIMIT 50");
         res.json(results);
     } catch (err) { res.status(200).json([]); }
 });
@@ -417,7 +435,8 @@ app.get('/api/comentarios/ultimo', async (req, res) => {
 app.get('/api/comentarios/:itemKey', async (req, res) => {
     const { itemKey } = req.params;
     try {
-        const results = await db.query("SELECT * FROM comentarios WHERE item_key = ? ORDER BY id ASC", [itemKey]);
+        // Solo mostramos comentarios aprobados por el admin
+        const results = await db.query("SELECT * FROM comentarios WHERE item_key = ? AND aprobado = 1 ORDER BY id ASC", [itemKey]);
         res.json(results);
     } catch (err) {
         console.error("Error al obtener comentarios de item:", err);
@@ -429,13 +448,13 @@ app.post('/api/comentarios', async (req, res) => {
     const { agente, mensaje } = req.body;
     if (!agente || !mensaje) return res.status(400).json({ error: "Faltan datos." });
     try {
-        await db.execute("INSERT INTO comentarios (agente, mensaje, fecha, aprobado) VALUES (?, ?, NOW(), 1)", [agente, mensaje]);
-        await podarComentarios(null, 100); // Auto-limpieza de la Home
+        // aprobado = 0: queda pendiente de revisión por el admin
+        await db.execute("INSERT INTO comentarios (agente, mensaje, fecha, aprobado) VALUES (?, ?, NOW(), 0)", [agente, mensaje]);
 
-        // ALERTA TELEGRAM: Nuevo comentario
-        enviarAlertaTelegram(`💬 NUEVO COMENTARIO en la Home de ${agente}: "${mensaje.substring(0, 50)}${mensaje.length > 50 ? '...' : ''}"`);
+        // ALERTA TELEGRAM: Nuevo comentario pendiente de aprobación
+        enviarAlertaTelegram(`🔔 NUEVO COMENTARIO PENDIENTE de ${agente}: "${mensaje.substring(0, 50)}${mensaje.length > 50 ? '...' : ''}"\n⚡ Entra al Panel de Mando para aprobarlo.`);
 
-        res.json({ mensaje: "Comunicación enviada al archivo." });
+        res.json({ mensaje: "Comunicación enviada. Pendiente de revisión por el administrador." });
     } catch (err) {
         console.error("Error al guardar comentario:", err);
         res.status(500).json({ error: "Error al guardar comentario." });
@@ -447,13 +466,13 @@ app.post('/api/comentarios/:itemKey', async (req, res) => {
     const { agente, mensaje } = req.body;
     if (!agente || !mensaje) return res.status(400).json({ error: "Faltan datos." });
     try {
-        await db.execute("INSERT INTO comentarios (agente, mensaje, item_key, fecha, aprobado) VALUES (?, ?, ?, NOW(), 1)", [agente, mensaje, itemKey]);
-        await podarComentarios(itemKey, 50); // Auto-limpieza por expediente (Máximo 50 comentarios)
+        // aprobado = 0: queda pendiente de revisión por el admin
+        await db.execute("INSERT INTO comentarios (agente, mensaje, item_key, fecha, aprobado) VALUES (?, ?, ?, NOW(), 0)", [agente, mensaje, itemKey]);
 
-        // ALERTA TELEGRAM: Nuevo comentario en expediente
-        enviarAlertaTelegram(`💬 NUEVO COMENTARIO en expediente [${itemKey}] de ${agente}: "${mensaje.substring(0, 50)}${mensaje.length > 50 ? '...' : ''}"`);
+        // ALERTA TELEGRAM: Nuevo comentario pendiente de aprobación
+        enviarAlertaTelegram(`🔔 NUEVO COMENTARIO PENDIENTE en [${itemKey}] de ${agente}: "${mensaje.substring(0, 50)}${mensaje.length > 50 ? '...' : ''}"\n⚡ Entra al Panel de Mando para aprobarlo.`);
 
-        res.json({ mensaje: "Comunicación enviada al archivo." });
+        res.json({ mensaje: "Comunicación enviada. Pendiente de revisión por el administrador." });
     } catch (err) {
         console.error("Error al guardar comentario en expediente:", err);
         res.status(500).json({ error: "Error al guardar comentario." });
