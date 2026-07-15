@@ -258,20 +258,18 @@ function App() {
               ))}
 
 
-              {userAuth && (
-                <li style={{ marginTop: '30px', paddingRight: '30px' }}>
-                  <Link to="/acceso" onClick={toggleMenu} style={{
-                    color: 'white',
-                    padding: '12px', display: 'block', textAlign: 'center',
-                    background: 'rgba(var(--rgb-principal), 0.05)',
-                    border: '1px solid rgba(var(--rgb-principal), 0.2)',
-                    fontWeight: 'bold', textDecoration: 'none',
-                    fontSize: '0.8rem', fontFamily: 'monospace', borderRadius: '4px'
-                  }}>
-                    {`${t('sysAgentLabel')} ${userAuth.nombre?.toUpperCase()}`}
-                  </Link>
-                </li>
-              )}
+              <li style={{ marginTop: '30px', paddingRight: '30px' }}>
+                <Link to="/acceso" onClick={toggleMenu} style={{
+                  color: 'white',
+                  padding: '12px', display: 'block', textAlign: 'center',
+                  background: 'rgba(var(--rgb-principal), 0.05)',
+                  border: '1px solid rgba(var(--rgb-principal), 0.2)',
+                  fontWeight: 'bold', textDecoration: 'none',
+                  fontSize: '0.8rem', fontFamily: 'monospace', borderRadius: '4px'
+                }}>
+                  {userAuth ? `${t('sysAgentLabel')} ${userAuth.nombre?.toUpperCase()}` : `🔑 ${t('sysAccessBunker')}`}
+                </Link>
+              </li>
 
               {/* RECONOCIMIENTO DEL JEFE: La Llave Maestra de Pepe */}
               {userAuth && (
