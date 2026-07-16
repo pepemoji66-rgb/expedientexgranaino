@@ -1758,13 +1758,13 @@ app.get('/leer-historia/:id', async (req, res) => {
         return res.sendFile(path.join(__dirname, 'build', 'index.html'));
     }
     try {
-        const [rows] = await db.promise().query('SELECT titulo, descripcion, imagen_url FROM casos_abiertos WHERE id = ?', [req.params.id]);
+        const [rows] = await db.promise().query('SELECT titulo, contenido, imagen_url FROM casos_abiertos WHERE id = ?', [req.params.id]);
         if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
         const item = rows[0];
         const imgUrl = item.imagen_url
             ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
             : DEFAULT_IMAGE;
-        const desc = (item.descripcion || 'Caso sin resolver documentado en el Búnker de Expediente X Granaíno.').replace(/<[^>]+>/g, '').substring(0, 160);
+        const desc = (item.contenido || 'Caso sin resolver documentado en el Búnker de Expediente X Granaíno.').replace(/<[^>]+>/g, '').substring(0, 160);
         const html = injectOgTags(getIndexHtml(), {
             url: `${SITE_URL}/leer-historia/${req.params.id}`,
             title: `${item.titulo} | Expediente X Granaíno`,
