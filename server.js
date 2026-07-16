@@ -1722,26 +1722,31 @@ const isSocialCrawler = (ua) => {
 };
 
 const injectOgTags = (html, tags) => {
+    // Escapamos caracteres especiales para evitar problemas en los atributos HTML
+    const esc = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Inyectamos las metatags dinámicas justo después de <head>
+    // Los crawlers respetan la PRIMERA ocurrencia de cada propiedad OG,
+    // así que estas tienen prioridad sobre las estáticas que vienen después
     const ogBlock = `
   <!-- OG DINÁMICO SERVIDOR -->
+  <title>${esc(tags.title)}</title>
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Expediente X Granaíno" />
-  <meta property="og:url" content="${tags.url}" />
-  <meta property="og:title" content="${tags.title}" />
-  <meta property="og:description" content="${tags.description}" />
-  <meta property="og:image" content="${tags.image}" />
+  <meta property="og:url" content="${esc(tags.url)}" />
+  <meta property="og:title" content="${esc(tags.title)}" />
+  <meta property="og:description" content="${esc(tags.description)}" />
+  <meta property="og:image" content="${esc(tags.image)}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${tags.title}" />
-  <meta name="twitter:description" content="${tags.description}" />
-  <meta name="twitter:image" content="${tags.image}" />
+  <meta name="twitter:title" content="${esc(tags.title)}" />
+  <meta name="twitter:description" content="${esc(tags.description)}" />
+  <meta name="twitter:image" content="${esc(tags.image)}" />
   <!-- /OG DINÁMICO -->`;
-    // Reemplazamos el bloque OG estático existente por el dinámico
-    return html
-        .replace(/<title>[^<]*<\/title>/, `<title>${tags.title}</title>`)
-        .replace(/<!-- Open Graph \/ Facebook -->[\s\S]*?<!-- Twitter -->[\s\S]*?<meta name="twitter:image:alt"[^>]*>/,
-            ogBlock);
+
+    // Insertamos justo después de <head> (funciona aunque el HTML esté minificado)
+    return html.replace(/<head>/, `<head>${ogBlock}`);
 };
 
 const getIndexHtml = () => {
