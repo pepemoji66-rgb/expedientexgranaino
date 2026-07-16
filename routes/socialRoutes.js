@@ -196,7 +196,7 @@ module.exports = (db, enviarAlertaTelegram) => {
                 titulo: datos.titulo,
                 contenido: datos.contenido,
                 url: datos.url,
-                imagen_url: datos.imagen_url,
+                imagen_url: datos.imagen_url || 'https://expedientexgranaino.com/social-preview.png',
                 plataformas: datos.plataformas,
                 fecha: new Date().toISOString(),
                 origen: 'ExpedienteX Búnker'
@@ -322,7 +322,7 @@ module.exports = (db, enviarAlertaTelegram) => {
                     titulo,
                     contenido: contenido || '',
                     url: urlFinal,
-                    imagen_url: imagen_url || '',
+                    imagen_url: imagen_url || 'https://expedientexgranaino.com/social-preview.png',
                     plataformas: plataformasSinApi
                 });
                 resultados.push(resultado);
