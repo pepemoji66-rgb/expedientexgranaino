@@ -59,7 +59,7 @@ const PanelAdmin = () => {
 
     // ESTADOS DE REDES SOCIALES
     const [modalRedes, setModalRedes] = useState(null); // item a publicar
-    const [redesSeleccionadas, setRedesSeleccionadas] = useState({ twitter: true, facebook: true });
+    const [redesSeleccionadas, setRedesSeleccionadas] = useState({ instagram: true, facebook: true });
     const [publicandoRedes, setPublicandoRedes] = useState(false);
     const [resultadoRedes, setResultadoRedes] = useState(null);
     const [publicarAlSubir, setPublicarAlSubir] = useState(false);
@@ -410,7 +410,7 @@ const PanelAdmin = () => {
     // --- FUNCIÓN: PUBLICAR EN REDES SOCIALES ---
     const publicarEnRedes = async (item) => {
         const plataformas = [];
-        if (redesSeleccionadas.twitter) plataformas.push('twitter');
+        if (redesSeleccionadas.instagram) plataformas.push('instagram');
         if (redesSeleccionadas.facebook) plataformas.push('facebook');
 
         if (plataformas.length === 0) {
@@ -550,7 +550,7 @@ const PanelAdmin = () => {
                     }
 
                     const plataformas = [];
-                    if (redesSeleccionadas.twitter) plataformas.push('twitter');
+                    if (redesSeleccionadas.instagram) plataformas.push('instagram');
                     if (redesSeleccionadas.facebook) plataformas.push('facebook');
 
                     if (plataformas.length > 0) {
@@ -904,7 +904,7 @@ const PanelAdmin = () => {
                                                             onClick={() => {
                                                                 setModalRedes(item);
                                                                 setResultadoRedes(null);
-                                                                setRedesSeleccionadas({ twitter: true, facebook: true });
+                                                                setRedesSeleccionadas({ instagram: true, facebook: true });
                                                             }}
                                                         >
                                                             📡 REDES
@@ -1120,18 +1120,20 @@ const PanelAdmin = () => {
                                 <div className="redes-plataformas-subir">
                                     <label className="plataforma-check">
                                         <input 
-                                            type="checkbox" 
-                                            checked={redesSeleccionadas.twitter} 
-                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, twitter: e.target.checked})}
+                                            type="checkbox"
+                                            id="check-instagram-subir"
+                                            checked={redesSeleccionadas.instagram} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, instagram: e.target.checked})}
                                         />
-                                        <span className="plataforma-icon twitter">𝕏</span> Twitter/X
-                                        {estadoRedes && !estadoRedes.twitter.configurado && !estadoRedes.webhook.configurado && (
-                                            <span className="plataforma-warn">⚠️ Sin claves</span>
+                                        <span className="plataforma-icon instagram">📸</span> Instagram
+                                        {estadoRedes && !estadoRedes.webhook.configurado && (
+                                            <span className="plataforma-warn">⚠️ Sin webhook</span>
                                         )}
                                     </label>
                                     <label className="plataforma-check">
                                         <input 
-                                            type="checkbox" 
+                                            type="checkbox"
+                                            id="check-facebook-subir"
                                             checked={redesSeleccionadas.facebook} 
                                             onChange={e => setRedesSeleccionadas({...redesSeleccionadas, facebook: e.target.checked})}
                                         />
@@ -1141,7 +1143,7 @@ const PanelAdmin = () => {
                                         )}
                                     </label>
                                     {estadoRedes && estadoRedes.webhook.configurado && (
-                                        <div className="webhook-activo">🔗 Webhook activo (Make/Zapier)</div>
+                                        <div className="webhook-activo">🔗 Make.com activo → Instagram + Facebook</div>
                                     )}
                                     {estadoRedes && !estadoRedes.alguno_activo && (
                                         <div className="redes-aviso-config">⚠️ Configura las claves de las APIs o un webhook en el archivo .env para activar esta función</div>
@@ -1571,24 +1573,26 @@ const PanelAdmin = () => {
                                     <p className="redes-seleccion-titulo">Selecciona las plataformas:</p>
                                     <label className="plataforma-check-modal">
                                         <input 
-                                            type="checkbox" 
-                                            checked={redesSeleccionadas.twitter} 
-                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, twitter: e.target.checked})}
+                                            type="checkbox"
+                                            id="check-instagram-modal"
+                                            checked={redesSeleccionadas.instagram} 
+                                            onChange={e => setRedesSeleccionadas({...redesSeleccionadas, instagram: e.target.checked})}
                                             disabled={publicandoRedes}
                                         />
-                                        <span className="plataforma-icon-lg twitter">𝕏</span>
+                                        <span className="plataforma-icon-lg instagram">📸</span>
                                         <div>
-                                            <strong>Twitter / X</strong>
+                                            <strong>Instagram</strong>
                                             {estadoRedes && (
-                                                <small className={estadoRedes.twitter.configurado || estadoRedes.webhook.configurado ? 'cfg-ok' : 'cfg-warn'}>
-                                                    {estadoRedes.twitter.configurado ? '✅ API Directa' : estadoRedes.webhook.configurado ? '🔗 Vía Webhook' : '⚠️ Sin configurar'}
+                                                <small className={estadoRedes.webhook.configurado ? 'cfg-ok' : 'cfg-warn'}>
+                                                    {estadoRedes.webhook.configurado ? '🔗 Vía Make.com' : '⚠️ Sin webhook'}
                                                 </small>
                                             )}
                                         </div>
                                     </label>
                                     <label className="plataforma-check-modal">
                                         <input 
-                                            type="checkbox" 
+                                            type="checkbox"
+                                            id="check-facebook-modal"
                                             checked={redesSeleccionadas.facebook} 
                                             onChange={e => setRedesSeleccionadas({...redesSeleccionadas, facebook: e.target.checked})}
                                             disabled={publicandoRedes}
@@ -1598,7 +1602,7 @@ const PanelAdmin = () => {
                                             <strong>Facebook</strong>
                                             {estadoRedes && (
                                                 <small className={estadoRedes.facebook.configurado || estadoRedes.webhook.configurado ? 'cfg-ok' : 'cfg-warn'}>
-                                                    {estadoRedes.facebook.configurado ? '✅ API Directa' : estadoRedes.webhook.configurado ? '🔗 Vía Webhook' : '⚠️ Sin configurar'}
+                                                    {estadoRedes.facebook.configurado ? '✅ API Directa' : estadoRedes.webhook.configurado ? '🔗 Vía Make.com' : '⚠️ Sin configurar'}
                                                 </small>
                                             )}
                                         </div>
@@ -1611,7 +1615,7 @@ const PanelAdmin = () => {
                                 <button 
                                     className="btn-lanzar-redes" 
                                     onClick={() => publicarEnRedes(modalRedes)}
-                                    disabled={publicandoRedes || (!redesSeleccionadas.twitter && !redesSeleccionadas.facebook)}
+                                    disabled={publicandoRedes || (!redesSeleccionadas.instagram && !redesSeleccionadas.facebook)}
                                 >
                                     {publicandoRedes ? (
                                         <><span className="spinner-redes"></span> TRANSMITIENDO...</>
