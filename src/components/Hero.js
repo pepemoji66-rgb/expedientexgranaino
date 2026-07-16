@@ -247,7 +247,7 @@ const Hero = ({ userAuth }) => {
                 className={`hero-global-mufon hero-slide-${activeSlide?.id}`}
                 style={{ 
                     backgroundImage: `url(${activeSlide?.image})`,
-                    backgroundPosition: activeSlide?.backgroundPosition || 'center'
+                    backgroundPosition: activeSlide?.backgroundPosition || 'center 30%'
                 }}
             >
                 <div className="hero-overlay-dark"></div>
