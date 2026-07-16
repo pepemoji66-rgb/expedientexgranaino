@@ -1710,10 +1710,157 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 });
 
+// =====================================================================
+// OPEN GRAPH DINÁMICO — Para que Facebook/WhatsApp/Twitter muestren
+// la imagen y título correctos al compartir una página de contenido
+// =====================================================================
+const isSocialCrawler = (ua) => {
+    if (!ua) return false;
+    const bots = ['facebookexternalhit', 'twitterbot', 'whatsapp', 'telegrambot', 'linkedinbot', 'slackbot', 'discordbot', 'applebot', 'googlebot'];
+    const uaLow = ua.toLowerCase();
+    return bots.some(bot => uaLow.includes(bot));
+};
+
+const injectOgTags = (html, tags) => {
+    const ogBlock = `
+  <!-- OG DINÁMICO SERVIDOR -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Expediente X Granaíno" />
+  <meta property="og:url" content="${tags.url}" />
+  <meta property="og:title" content="${tags.title}" />
+  <meta property="og:description" content="${tags.description}" />
+  <meta property="og:image" content="${tags.image}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${tags.title}" />
+  <meta name="twitter:description" content="${tags.description}" />
+  <meta name="twitter:image" content="${tags.image}" />
+  <!-- /OG DINÁMICO -->`;
+    // Reemplazamos el bloque OG estático existente por el dinámico
+    return html
+        .replace(/<title>[^<]*<\/title>/, `<title>${tags.title}</title>`)
+        .replace(/<!-- Open Graph \/ Facebook -->[\s\S]*?<!-- Twitter -->[\s\S]*?<meta name="twitter:image:alt"[^>]*>/,
+            ogBlock);
+};
+
+const getIndexHtml = () => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    return fs.readFileSync(indexPath, 'utf-8');
+};
+
+const SITE_URL = 'https://expedientexgranaino.com';
+const DEFAULT_IMAGE = `${SITE_URL}/social-preview.png?v=7.0`;
+
+// Casos Abiertos (True Crime)
+app.get('/leer-historia/:id', async (req, res) => {
+    if (!isSocialCrawler(req.headers['user-agent'])) {
+        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+    try {
+        const [rows] = await db.promise().query('SELECT titulo, descripcion, imagen_url FROM casos_abiertos WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+        const item = rows[0];
+        const imgUrl = item.imagen_url
+            ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
+            : DEFAULT_IMAGE;
+        const desc = (item.descripcion || 'Caso sin resolver documentado en el Búnker de Expediente X Granaíno.').replace(/<[^>]+>/g, '').substring(0, 160);
+        const html = injectOgTags(getIndexHtml(), {
+            url: `${SITE_URL}/leer-historia/${req.params.id}`,
+            title: `${item.titulo} | Expediente X Granaíno`,
+            description: desc,
+            image: imgUrl
+        });
+        res.set('Content-Type', 'text/html').send(html);
+    } catch (e) {
+        console.error('OG casos:', e.message);
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+});
+
+// Noticias
+app.get('/noticias/:id', async (req, res) => {
+    if (!isSocialCrawler(req.headers['user-agent'])) {
+        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+    try {
+        const [rows] = await db.promise().query('SELECT titulo, cuerpo, imagen_url FROM noticias WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+        const item = rows[0];
+        const imgUrl = item.imagen_url
+            ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
+            : DEFAULT_IMAGE;
+        const desc = (item.cuerpo || '').replace(/<[^>]+>/g, '').substring(0, 160);
+        const html = injectOgTags(getIndexHtml(), {
+            url: `${SITE_URL}/noticias/${req.params.id}`,
+            title: `${item.titulo} | Expediente X Granaíno`,
+            description: desc || 'Última hora paranormal desde el Búnker.',
+            image: imgUrl
+        });
+        res.set('Content-Type', 'text/html').send(html);
+    } catch (e) {
+        console.error('OG noticias:', e.message);
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+});
+
+// Expedientes
+app.get('/expedientes/:id', async (req, res) => {
+    if (!isSocialCrawler(req.headers['user-agent'])) {
+        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+    try {
+        const [rows] = await db.promise().query('SELECT titulo, descripcion, imagen_url FROM expedientes WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+        const item = rows[0];
+        const imgUrl = item.imagen_url
+            ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
+            : DEFAULT_IMAGE;
+        const desc = (item.descripcion || 'Expediente OVNI documentado en Granada.').replace(/<[^>]+>/g, '').substring(0, 160);
+        const html = injectOgTags(getIndexHtml(), {
+            url: `${SITE_URL}/expedientes/${req.params.id}`,
+            title: `${item.titulo} | Expediente X Granaíno`,
+            description: desc,
+            image: imgUrl
+        });
+        res.set('Content-Type', 'text/html').send(html);
+    } catch (e) {
+        console.error('OG expedientes:', e.message);
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+});
+
+// Misterios Históricos
+app.get('/misterios-historicos/:id', async (req, res) => {
+    if (!isSocialCrawler(req.headers['user-agent'])) {
+        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+    try {
+        const [rows] = await db.promise().query('SELECT titulo, contenido, imagen_url FROM misterios_historicos WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+        const item = rows[0];
+        const imgUrl = item.imagen_url
+            ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
+            : DEFAULT_IMAGE;
+        const desc = (item.contenido || 'Misterio histórico sin resolver.').replace(/<[^>]+>/g, '').substring(0, 160);
+        const html = injectOgTags(getIndexHtml(), {
+            url: `${SITE_URL}/misterios-historicos/${req.params.id}`,
+            title: `${item.titulo} | Expediente X Granaíno`,
+            description: desc,
+            image: imgUrl
+        });
+        res.set('Content-Type', 'text/html').send(html);
+    } catch (e) {
+        console.error('OG misterios:', e.message);
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+});
+
 // Ruta de captura general: el resto de páginas del SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
+
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 BÚNKER EXPEDIENTE X ABIERTO EN PUERTO ${PORT}`);
