@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { renderizarTextoConMedios } from '../utils/renderMedios';
 import AdSlot from './AdSlot';
 import './casosabiertos.css';
 import API_BASE_URL from '../config';
@@ -539,7 +540,9 @@ const CasosAbiertos = ({ userAuth }) => {
                                 🔊 {language === 'en' ? 'LISTEN CASE (A.I. VOICE)' : 'ESCUCHAR CASO (VOZ I.A.)'}
                             </button>
 
-                            <div className="modal-caso-body-html" dangerouslySetInnerHTML={{ __html: language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido }} />
+                            <div className="modal-caso-body-html">
+                                {renderizarTextoConMedios(language === 'en' && casoExpandido.contenido_en ? casoExpandido.contenido_en : casoExpandido.contenido)}
+                            </div>
 
                             {casoExpandido.fuente_url && (
                                 <div style={{ marginTop: '20px', textAlign: 'center' }}>

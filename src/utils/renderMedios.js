@@ -1,21 +1,22 @@
 import React from 'react';
 
 /**
- * Función para transformar URLs de YouTube y códigos de iVoox en reproductores incrustados.
- * Esto permite añadir contenido multimedia simplemente pegando enlaces en el texto de las noticias o expedientes.
+ * Función para transformar texto en elementos React:
+ * 1. Transformar iVoox, YouTube y Spotify iframes en reproductores incrustados.
+ * 2. Convertir hipervínculos HTML (<a href="...">texto</a>), Markdown ([texto](url)) o URLs sueltas en enlaces 
+ *    que SIEMPRE abren en pestaña nueva (target="_blank" rel="noopener noreferrer").
+ * 3. Incrustar videos de YouTube e imágenes directo en el texto.
  */
 export const renderizarTextoConMedios = (texto) => {
     if (!texto) return null;
-    
-    // Separamos el texto por saltos de línea para mantener los párrafos
-    const lineas = texto.split('\n');
-    
+
+    const lineas = typeof texto === 'string' ? texto.split('\n') : [String(texto)];
+
     return lineas.map((linea, indexLinea) => {
-        // 1. Detección de IFRAMES de iVoox o YouTube pegados directamente
+        // 1. Detección de IFRAMES (iVoox, YouTube, Spotify)
         const matchIframe = linea.match(/<iframe.*src="([^"]+)".*><\/iframe>/i);
         if (matchIframe) {
             const urlSrc = matchIframe[1];
-            // Solo permitimos iframes de iVoox o Youtube por seguridad
             if (urlSrc.includes('ivoox.com') || urlSrc.includes('youtube.com') || urlSrc.includes('spotify.com')) {
                 return (
                     <div key={indexLinea} className="embed-container" style={{ margin: '15px 0', width: '100%' }}>
@@ -33,67 +34,122 @@ export const renderizarTextoConMedios = (texto) => {
             }
         }
 
-        // 2. Detección de URLs de YouTube e IMÁGENES en texto plano
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        const partes = linea.split(urlRegex);
+        // 2. Parsear enlaces HTML (<a href="...">...</a>), Markdown ([texto](url)), y URLs simples (https://...)
+        // Group 1: <a href="URL">TEXT</a> -> G1=URL, G2=TEXT
+        // Group 3: [TEXT](URL) -> G3=TEXT, G4=URL
+        // Group 5: Raw URL
+        const tokenRegex = /(?:<a\s+[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>)|(?:\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))|(https?:\/\/[^\s<]+)/gi;
 
-        if (partes.length > 1) {
+        const componentes = [];
+        let lastIndex = 0;
+        let match;
+
+        while ((match = tokenRegex.exec(linea)) !== null) {
+            if (match.index > lastIndex) {
+                componentes.push(linea.substring(lastIndex, match.index));
+            }
+
+            const htmlHref = match[1];
+            const htmlContent = match[2];
+            const mdText = match[3];
+            const mdUrl = match[4];
+            const rawUrl = match[5];
+
+            let targetUrl = '';
+            let anchorText = '';
+
+            if (htmlHref) {
+                targetUrl = htmlHref;
+                anchorText = htmlContent.replace(/<[^>]+>/g, '').trim() || htmlHref;
+            } else if (mdUrl) {
+                targetUrl = mdUrl;
+                anchorText = mdText;
+            } else if (rawUrl) {
+                targetUrl = rawUrl;
+                anchorText = rawUrl;
+            }
+
+            if (targetUrl) {
+                // Vídeo de YouTube suelto
+                if (!htmlHref && !mdUrl && targetUrl.match(/(youtube\.com\/watch\?v=|youtu\.be\/)/)) {
+                    const videoId = targetUrl.includes('v=') 
+                        ? targetUrl.split('v=')[1]?.split('&')[0] 
+                        : targetUrl.split('youtu.be/')[1]?.split('?')[0];
+
+                    if (videoId) {
+                        componentes.push(
+                            <span key={`yt-${indexLinea}-${match.index}`} style={{ display: 'block', margin: '15px 0' }}>
+                                <iframe 
+                                    width="100%" 
+                                    height="315" 
+                                    src={`https://www.youtube.com/embed/${videoId}`} 
+                                    frameBorder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowFullScreen>
+                                </iframe>
+                            </span>
+                        );
+                        lastIndex = tokenRegex.lastIndex;
+                        continue;
+                    }
+                }
+
+                // Imagen suelta
+                if (!htmlHref && !mdUrl && targetUrl.match(/\.(jpeg|jpg|gif|png|webp)/i)) {
+                    componentes.push(
+                        <img 
+                            key={`img-${indexLinea}-${match.index}`}
+                            src={targetUrl} 
+                            alt="evidencia" 
+                            style={{ 
+                                maxWidth: '100%', 
+                                height: 'auto', 
+                                display: 'block', 
+                                margin: '20px auto',
+                                borderRadius: '4px',
+                                boxShadow: '0 5px 15px rgba(0,0,0,0.5)'
+                            }} 
+                        />
+                    );
+                    lastIndex = tokenRegex.lastIndex;
+                    continue;
+                }
+
+                // Hipervínculo -> SIEMPRE abre en pestaña nueva (target="_blank")
+                componentes.push(
+                    <a 
+                        key={`link-${indexLinea}-${match.index}`} 
+                        href={targetUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{ 
+                            color: 'var(--color-principal)', 
+                            textDecoration: 'underline', 
+                            fontWeight: 'bold',
+                            wordBreak: 'break-word'
+                        }}
+                    >
+                        {anchorText}
+                    </a>
+                );
+            }
+
+            lastIndex = tokenRegex.lastIndex;
+        }
+
+        if (lastIndex < linea.length) {
+            componentes.push(linea.substring(lastIndex));
+        }
+
+        if (componentes.length > 0) {
             return (
-                <p key={indexLinea} style={{ minHeight: '1em', marginBottom: '10px' }}>
-                    {partes.map((parte, indexParte) => {
-                        // YouTube
-                        if (parte.match(/(youtube\.com\/watch\?v=|youtu\.be\/)/)) {
-                            const videoId = parte.includes('v=') 
-                                ? parte.split('v=')[1]?.split('&')[0] 
-                                : parte.split('youtu.be/')[1]?.split('?')[0];
-                                
-                            if (videoId) {
-                                return (
-                                    <span key={indexParte} style={{ display: 'block', margin: '15px 0' }}>
-                                        <iframe 
-                                            width="100%" 
-                                            height="315" 
-                                            src={`https://www.youtube.com/embed/${videoId}`} 
-                                            frameBorder="0" 
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                            allowFullScreen>
-                                        </iframe>
-                                    </span>
-                                );
-                            }
-                        }
-                        
-                        // IMÁGENES (jpg, png, webp, gif)
-                        if (parte.match(/\.(jpeg|jpg|gif|png|webp)/i)) {
-                            return (
-                                <img 
-                                    key={indexParte}
-                                    src={parte} 
-                                    alt="evidencia" 
-                                    style={{ 
-                                        maxWidth: '100%', 
-                                        height: 'auto', 
-                                        display: 'block', 
-                                        margin: '20px auto',
-                                        borderRadius: '4px',
-                                        boxShadow: '0 5px 15px rgba(0,0,0,0.5)'
-                                    }} 
-                                />
-                            );
-                        }
-
-                        // Enlaces normales (no multimedia)
-                        if (parte.startsWith('http')) {
-                            return <a key={indexParte} href={parte} target="_blank" rel="noreferrer" style={{ color: 'var(--color-principal)' }}>{parte}</a>;
-                        }
-
-                        return <span key={indexParte}>{parte}</span>;
-                    })}
+                <p key={indexLinea} style={{ minHeight: '1em', marginBottom: '12px', lineHeight: '1.6' }}>
+                    {componentes}
                 </p>
             );
         }
 
-        // 3. Texto normal (si no tiene enlaces ni iframes)
-        return <p key={indexLinea} style={{ minHeight: '1em', marginBottom: '10px' }}>{linea}</p>;
+        return <p key={indexLinea} style={{ minHeight: '1em', marginBottom: '12px', lineHeight: '1.6' }}>{linea}</p>;
     });
 };
+

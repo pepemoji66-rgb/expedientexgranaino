@@ -71,6 +71,43 @@ const PanelAdmin = () => {
     // ESTADO PARA COMENTARIOS PENDIENTES
     const [comentariosPendientes, setComentariosPendientes] = useState(0);
 
+    // --- HERRAMIENTAS DE ENLACES DE RETENCIÓN (SEO & ADSENSE) ---
+    const insertarEnlaceEnSubida = () => {
+        const texto = prompt("Texto a mostrar (ej: El Fantasma del Pub Gran Casino):");
+        if (!texto) return;
+        const url = prompt("URL del artículo o enlace (ej: https://expedientexgranaino.com/leer-historia/34):");
+        if (!url) return;
+        const snippet = `<a href="${url}" target="_blank" rel="noopener noreferrer">${texto}</a>`;
+        setContenidoSubida(prev => prev ? prev + ' ' + snippet : snippet);
+    };
+
+    const insertarRecomendacionEnSubida = () => {
+        const titulo = prompt("Título del artículo recomendado (ej: El Fantasma del Pub Gran Casino):");
+        if (!titulo) return;
+        const url = prompt("URL del artículo recomendado (ej: https://expedientexgranaino.com/leer-historia/34):");
+        if (!url) return;
+        const snippet = `\n\nSi te ha gustado este caso, no te puedes perder nuestro expediente sobre <a href="${url}" target="_blank" rel="noopener noreferrer">${titulo}</a>, donde analizamos otro de los grandes misterios de nuestra tierra.`;
+        setContenidoSubida(prev => prev ? prev + snippet : snippet);
+    };
+
+    const insertarEnlaceEnEdicion = () => {
+        const texto = prompt("Texto a mostrar (ej: El Fantasma del Pub Gran Casino):");
+        if (!texto) return;
+        const url = prompt("URL del artículo o enlace (ej: https://expedientexgranaino.com/leer-historia/34):");
+        if (!url) return;
+        const snippet = `<a href="${url}" target="_blank" rel="noopener noreferrer">${texto}</a>`;
+        setEditForm(prev => ({ ...prev, contenido: prev.contenido ? prev.contenido + ' ' + snippet : snippet }));
+    };
+
+    const insertarRecomendacionEnEdicion = () => {
+        const titulo = prompt("Título del artículo recomendado (ej: El Fantasma del Pub Gran Casino):");
+        if (!titulo) return;
+        const url = prompt("URL del artículo recomendado (ej: https://expedientexgranaino.com/leer-historia/34):");
+        if (!url) return;
+        const snippet = `\n\nSi te ha gustado este caso, no te puedes perder nuestro expediente sobre <a href="${url}" target="_blank" rel="noopener noreferrer">${titulo}</a>, donde analizamos otro de los grandes misterios de nuestra tierra.`;
+        setEditForm(prev => ({ ...prev, contenido: prev.contenido ? prev.contenido + snippet : snippet }));
+    };
+
     useEffect(() => {
         if (itemParaEditar) {
             const id = itemParaEditar.id || itemParaEditar._id;
@@ -980,6 +1017,25 @@ const PanelAdmin = () => {
                             <>
                                 <div className="form-group-admin">
                                     <label>CONTENIDO / DESCRIPCIÓN:</label>
+                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(0,255,65,0.03)', padding: '6px 10px', border: '1px solid rgba(0,255,65,0.15)', borderRadius: '4px' }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-principal)', fontWeight: 'bold' }}>🔗 ENLACES DE RETENCIÓN (SEO):</span>
+                                        <button 
+                                            type="button" 
+                                            onClick={insertarEnlaceEnSubida} 
+                                            style={{ background: 'rgba(0, 255, 65, 0.1)', color: 'var(--color-principal)', border: '1px solid var(--color-principal)', padding: '4px 10px', fontSize: '0.75rem', borderRadius: '3px', cursor: 'pointer', fontWeight: 'bold' }}
+                                            title="Inserta un hipervínculo en pestaña nueva"
+                                        >
+                                            ➕ Insertar Enlace Interno
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={insertarRecomendacionEnSubida} 
+                                            style={{ background: 'rgba(255, 177, 0, 0.1)', color: '#ffb100', border: '1px solid #ffb100', padding: '4px 10px', fontSize: '0.75rem', borderRadius: '3px', cursor: 'pointer', fontWeight: 'bold' }}
+                                            title="Inserta el bloque de recomendación al final"
+                                        >
+                                            📌 Recomendación Final
+                                        </button>
+                                    </div>
                                     <textarea 
                                         className="textarea-bunker-admin"
                                         value={contenidoSubida} 
@@ -1196,6 +1252,23 @@ const PanelAdmin = () => {
                             {(tab === 'casos_abiertos' || tab === 'misterios_historicos') && (
                                 <>
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>DESCRIPCIÓN / CASO:</label>
+                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(0,255,65,0.03)', padding: '6px 10px', border: '1px solid rgba(0,255,65,0.15)', borderRadius: '4px' }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-principal)', fontWeight: 'bold' }}>🔗 ENLACES DE RETENCIÓN (SEO):</span>
+                                        <button 
+                                            type="button" 
+                                            onClick={insertarEnlaceEnEdicion} 
+                                            style={{ background: 'rgba(0, 255, 65, 0.1)', color: 'var(--color-principal)', border: '1px solid var(--color-principal)', padding: '4px 10px', fontSize: '0.75rem', borderRadius: '3px', cursor: 'pointer', fontWeight: 'bold' }}
+                                        >
+                                            ➕ Insertar Enlace Interno
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={insertarRecomendacionEnEdicion} 
+                                            style={{ background: 'rgba(255, 177, 0, 0.1)', color: '#ffb100', border: '1px solid #ffb100', padding: '4px 10px', fontSize: '0.75rem', borderRadius: '3px', cursor: 'pointer', fontWeight: 'bold' }}
+                                        >
+                                            📌 Recomendación Final
+                                        </button>
+                                    </div>
                                     <textarea 
                                         value={editForm.contenido} 
                                         onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
@@ -1270,6 +1343,23 @@ const PanelAdmin = () => {
                                     </select>
 
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CONTENIDO:</label>
+                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(0,255,65,0.03)', padding: '6px 10px', border: '1px solid rgba(0,255,65,0.15)', borderRadius: '4px' }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-principal)', fontWeight: 'bold' }}>🔗 ENLACES DE RETENCIÓN (SEO):</span>
+                                        <button 
+                                            type="button" 
+                                            onClick={insertarEnlaceEnEdicion} 
+                                            style={{ background: 'rgba(0, 255, 65, 0.1)', color: 'var(--color-principal)', border: '1px solid var(--color-principal)', padding: '4px 10px', fontSize: '0.75rem', borderRadius: '3px', cursor: 'pointer', fontWeight: 'bold' }}
+                                        >
+                                            ➕ Insertar Enlace Interno
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={insertarRecomendacionEnEdicion} 
+                                            style={{ background: 'rgba(255, 177, 0, 0.1)', color: '#ffb100', border: '1px solid #ffb100', padding: '4px 10px', fontSize: '0.75rem', borderRadius: '3px', cursor: 'pointer', fontWeight: 'bold' }}
+                                        >
+                                            📌 Recomendación Final
+                                        </button>
+                                    </div>
                                     <textarea 
                                         value={editForm.contenido} 
                                         onChange={e => setEditForm({...editForm, contenido: e.target.value})} 
