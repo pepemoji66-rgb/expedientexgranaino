@@ -86,7 +86,7 @@ const PanelAdmin = () => {
         if (!titulo) return;
         const url = prompt("URL del artículo recomendado (ej: https://expedientexgranaino.com/leer-historia/34):");
         if (!url) return;
-        const snippet = `\n\nSi te ha gustado este caso, no te puedes perder nuestro expediente sobre <a href="${url}" target="_blank" rel="noopener noreferrer">${titulo}</a>, donde analizamos otro de los grandes misterios de nuestra tierra.`;
+        const snippet = `\n\nSi te ha gustado este caso, no te puedes perder nuestro expediente sobre <a href="${url}" target="_blank" rel="noopener noreferrer">${titulo}</a>, donde analizamos otro fascinante misterio de nuestros archivos.`;
         setContenidoSubida(prev => prev ? prev + snippet : snippet);
     };
 
@@ -104,7 +104,7 @@ const PanelAdmin = () => {
         if (!titulo) return;
         const url = prompt("URL del artículo recomendado (ej: https://expedientexgranaino.com/leer-historia/34):");
         if (!url) return;
-        const snippet = `\n\nSi te ha gustado este caso, no te puedes perder nuestro expediente sobre <a href="${url}" target="_blank" rel="noopener noreferrer">${titulo}</a>, donde analizamos otro de los grandes misterios de nuestra tierra.`;
+        const snippet = `\n\nSi te ha gustado este caso, no te puedes perder nuestro expediente sobre <a href="${url}" target="_blank" rel="noopener noreferrer">${titulo}</a>, donde analizamos otro fascinante misterio de nuestros archivos.`;
         setEditForm(prev => ({ ...prev, contenido: prev.contenido ? prev.contenido + snippet : snippet }));
     };
 
