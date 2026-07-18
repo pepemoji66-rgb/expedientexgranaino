@@ -165,13 +165,35 @@ const Indice = ({ userAuth, stats, setTema }) => {
 
                     {showDossier && (
                         <div className="dossier-content-tech fade-in">
-                            <h3>{t('dossierTitle')}</h3>
-                            <p>
-                                {t('dossierDesc1')}
-                            </p>
-                            <p>
-                                {t('dossierDesc2')}
-                            </p>
+                            <div className="dossier-fundador-wrapper" style={{ display: 'flex', gap: '22px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '15px' }}>
+                                <div style={{ textAlign: 'center', margin: '0 auto' }}>
+                                    <img 
+                                        src="/jose-moreno-investigador.jpg" 
+                                        alt="José Moreno Jiménez" 
+                                        style={{
+                                            width: '110px',
+                                            height: '125px',
+                                            borderRadius: '6px',
+                                            objectFit: 'cover',
+                                            border: '2px solid var(--color-principal, #00ff41)',
+                                            boxShadow: '0 0 15px rgba(0, 255, 65, 0.3)',
+                                            display: 'block'
+                                        }} 
+                                    />
+                                    <span style={{ fontSize: '0.65rem', color: 'var(--color-principal, #00ff41)', fontFamily: 'monospace', fontWeight: 'bold', display: 'block', marginTop: '4px' }}>
+                                        JOSÉ MORENO
+                                    </span>
+                                </div>
+                                <div style={{ flex: '1', minWidth: '240px' }}>
+                                    <h3>{t('dossierTitle')}</h3>
+                                    <p style={{ margin: '8px 0' }}>
+                                        {t('dossierDesc1')}
+                                    </p>
+                                    <p style={{ margin: '8px 0' }}>
+                                        {t('dossierDesc2')}
+                                    </p>
+                                </div>
+                            </div>
                             <div className="dossier-actions-personal">
                                 <Link to="/especial-atarfe" className="btn-technical-link highlight">
                                     {t('dossierViewAtarfe')}
