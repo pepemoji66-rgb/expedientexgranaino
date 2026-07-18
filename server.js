@@ -1768,30 +1768,69 @@ const getIndexHtml = () => {
 const SITE_URL = 'https://expedientexgranaino.com';
 const DEFAULT_IMAGE = `${SITE_URL}/social-preview.png?v=7.0`;
 
-// Casos Abiertos (True Crime)
+// Casos Abiertos, Noticias, Expedientes y Misterios (Ruta unificada /leer-historia/:id)
 app.get('/leer-historia/:id', async (req, res) => {
     if (!isSocialCrawler(req.headers['user-agent'])) {
         return res.sendFile(path.join(__dirname, 'build', 'index.html'));
     }
     try {
-        const [rows] = await db.promise().query('SELECT titulo, contenido, imagen_url FROM casos_abiertos WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+        const id = req.params.id;
+        const src = (req.query.src || '').toLowerCase();
+
+        let table = 'casos_abiertos';
+        let descCol = 'contenido';
+
+        if (src.includes('noticia')) {
+            table = 'noticias';
+            descCol = 'cuerpo';
+        } else if (src.includes('expediente') || src === 'exp') {
+            table = 'expedientes';
+            descCol = 'descripcion';
+        } else if (src.includes('misterio')) {
+            table = 'misterios_historicos';
+            descCol = 'contenido';
+        }
+
+        let [rows] = await db.promise().query(`SELECT titulo, ${descCol} AS desc_text, imagen_url FROM ${table} WHERE id = ?`, [id]);
+        
+        // Fallback: si no existe en esa tabla específica, probar dinámicamente en el resto de tablas
+        if (!rows || rows.length === 0) {
+            const tablasFallback = [
+                { t: 'casos_abiertos', d: 'contenido' },
+                { t: 'noticias', d: 'cuerpo' },
+                { t: 'expedientes', d: 'descripcion' },
+                { t: 'misterios_historicos', d: 'contenido' }
+            ];
+            for (const fb of tablasFallback) {
+                if (fb.t === table) continue;
+                try {
+                    const [rFb] = await db.promise().query(`SELECT titulo, ${fb.d} AS desc_text, imagen_url FROM ${fb.t} WHERE id = ?`, [id]);
+                    if (rFb && rFb.length > 0) {
+                        rows = rFb;
+                        break;
+                    }
+                } catch (errFb) {}
+            }
+        }
+
+        if (!rows || rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+
         const item = rows[0];
         const imgUrl = cloudinaryOgImage(
             item.imagen_url
                 ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
                 : DEFAULT_IMAGE
         );
-        const desc = (item.contenido || 'Caso sin resolver documentado en el Búnker de Expediente X Granaíno.').replace(/<[^>]+>/g, '').substring(0, 160);
+        const desc = (item.desc_text || 'Documentado en el Búnker de Expediente X Granaíno.').replace(/<[^>]+>/g, '').substring(0, 160);
         const html = injectOgTags(getIndexHtml(), {
-            url: `${SITE_URL}/leer-historia/${req.params.id}`,
+            url: `${SITE_URL}/leer-historia/${id}${src ? '?src=' + src : ''}`,
             title: `${item.titulo} | Expediente X Granaíno`,
             description: desc,
             image: imgUrl
         });
         res.set('Content-Type', 'text/html').send(html);
     } catch (e) {
-        console.error('OG casos:', e.message);
+        console.error('OG leer-historia:', e.message);
         res.sendFile(path.join(__dirname, 'build', 'index.html'));
     }
 });
