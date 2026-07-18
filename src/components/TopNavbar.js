@@ -41,6 +41,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
 
     const otherMenuItems = [
         { path: "/lugares", label: t('navMap') },
+        { path: "/sobre-nosotros", label: "🕵️ " + (language === 'en' ? 'ABOUT ME' : 'SOBRE MÍ') },
         { path: "/biblioteca", label: "📚 " + (language === 'en' ? 'LIBRARY' : 'BIBLIOTECA') },
         { path: "/archipeg", label: language === 'en' ? "💻 SOFTWARE" : "💻 SOFTWARE" }
     ];

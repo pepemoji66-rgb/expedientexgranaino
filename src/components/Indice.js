@@ -531,6 +531,46 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 </Link>
             </div>
 
+            {/* TARJETA DESTACADA DEL FUNDADOR / INVESTIGADOR JEFE */}
+            <div className="home-fundador-card" style={{
+                background: 'rgba(5, 12, 18, 0.85)',
+                border: '1px solid var(--color-principal, #00ff41)',
+                borderRadius: '8px',
+                padding: '20px',
+                marginBottom: '35px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '20px',
+                flexWrap: 'wrap',
+                boxShadow: '0 0 20px rgba(0, 255, 65, 0.15)'
+            }}>
+                <img 
+                    src="/jose-moreno-investigador.jpg" 
+                    alt="José Moreno Jiménez" 
+                    style={{
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid var(--color-principal, #00ff41)',
+                        boxShadow: '0 0 10px rgba(0, 255, 65, 0.4)'
+                    }} 
+                />
+                <div style={{ flex: '1', minWidth: '220px' }}>
+                    <h4 style={{ color: 'var(--color-principal, #00ff41)', margin: '0 0 5px 0', fontSize: '1rem', letterSpacing: '1px' }}>
+                        🕵️ {language === 'en' ? 'FOUNDER & CHIEF INVESTIGATOR' : 'FUNDADOR E INVESTIGADOR JEFE'}
+                    </h4>
+                    <p style={{ color: '#ccc', margin: '0 0 8px 0', fontSize: '0.85rem', lineHeight: '1.4' }}>
+                        <strong>José Moreno Jiménez</strong> — {language === 'en' 
+                            ? 'Exploring UAPs, paranormal phenomena, and unexplained mysteries in Granada and worldwide.' 
+                            : 'Documentando fenómenos anómalos, avistamientos OVNI y misterios sin resolver en Granada y el resto del mundo.'}
+                    </p>
+                    <Link to="/sobre-nosotros" style={{ color: '#00d4ff', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                        {language === 'en' ? 'READ FULL BIO & DOSSIER ➔' : 'VER BIOGRAFÍA Y DOSSIER COMPLETO ➔'}
+                    </Link>
+                </div>
+            </div>
+
             {/* RADAR DE INTELIGENCIA EXTERNA */}
             <NoticiasExternas />
 
