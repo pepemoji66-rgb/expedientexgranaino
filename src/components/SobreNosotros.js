@@ -59,6 +59,19 @@ const SobreNosotros = () => {
             <section className="sobre-seccion">
                 <h2 className="subtitulo-bunker">{t('aboutOrigin')}</h2>
                 <div className="perfil-investigador">
+                    <div className="perfil-foto-card">
+                        <div className="foto-frame-tactico">
+                            <img 
+                                src="/jose-moreno-investigador.jpg" 
+                                alt="José Moreno Jiménez - Fundador e Investigador de Expediente X Granaíno" 
+                                className="foto-fundador-bunker" 
+                            />
+                            <div className="badge-fundador-bunker">
+                                <span className="badge-nombre">🛡️ JOSÉ MORENO JIMÉNEZ</span>
+                                <span className="badge-cargo">FUNDADOR E INVESTIGADOR JEFE</span>
+                            </div>
+                        </div>
+                    </div>
                     <div className="perfil-info">
                         <p>
                             {t('aboutOriginDesc1')}

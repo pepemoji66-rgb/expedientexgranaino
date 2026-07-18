@@ -85,6 +85,83 @@
     margin-top: 60px;
 }
 
+/* PERFIL DE INVESTIGADOR Y FOTO */
+.perfil-investigador {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(0, 255, 65, 0.25);
+    border-radius: 8px;
+    padding: 25px;
+    margin-top: 20px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+.perfil-foto-card {
+    flex-shrink: 0;
+    width: 210px;
+    text-align: center;
+}
+
+.foto-frame-tactico {
+    position: relative;
+    border: 2px solid var(--color-principal, #00ff41);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.25);
+    background: #000;
+}
+
+.foto-fundador-bunker {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.foto-frame-tactico:hover .foto-fundador-bunker {
+    transform: scale(1.03);
+}
+
+.badge-fundador-bunker {
+    background: rgba(5, 10, 15, 0.95);
+    border-top: 1px solid var(--color-principal, #00ff41);
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.badge-nombre {
+    color: var(--color-principal, #00ff41);
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+}
+
+.badge-cargo {
+    color: #ffb100;
+    font-size: 0.65rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.perfil-info {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .perfil-investigador {
+        flex-direction: column;
+        text-align: center;
+    }
+    .perfil-foto-card {
+        width: 180px;
+    }
+}
+
 .btn-contacto-pro {
     display: inline-block;
     margin-top: 15px;
