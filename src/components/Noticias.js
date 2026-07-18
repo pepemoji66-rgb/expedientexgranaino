@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Forms from './Forms';
 import { useLanguage } from '../context/LanguageContext';
+import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './noticias.css';
 import API_BASE_URL from '../config';
@@ -57,6 +58,8 @@ const Noticias = ({ userAuth }) => {
     // --- CONFIGURACIÓN DE SEÑAL MAESTRA ---
 
     const [noticias, setNoticias] = useState([]);
+    const [busqueda, setBusqueda] = useState('');
+    const [letraSeleccionada, setLetraSeleccionada] = useState('TODOS');
     const [cargando, setCargando] = useState(true);
     const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
     const [amazonKeys, setAmazonKeys] = useState(new Set());
@@ -113,6 +116,10 @@ const Noticias = ({ userAuth }) => {
             if (forceTranslationUpdate) forceTranslationUpdate();
         }
     }, [API_BASE_URL, forceTranslationUpdate]);
+
+    useEffect(() => {
+        setPaginaActual(1);
+    }, [busqueda, letraSeleccionada]);
 
     useEffect(() => {
         obtenerNoticias();
@@ -179,12 +186,13 @@ const Noticias = ({ userAuth }) => {
         }
     };
 
-    // --- CÁLCULOS DE PAGINACIÓN ---
+    // --- CÁLCULOS DE FILTRADO Y PAGINACIÓN ---
+    const noticiasFiltradas = filtrarItemsBunker(noticias, busqueda, letraSeleccionada);
     const indiceUltimoItem = paginaActual * noticiasPorPagina;
     const indicePrimerItem = indiceUltimoItem - noticiasPorPagina;
 
-    const noticiasPaginadas = Array.isArray(noticias) ? noticias.slice(indicePrimerItem, indiceUltimoItem) : [];
-    const totalPaginas = Array.isArray(noticias) ? Math.ceil(noticias.length / noticiasPorPagina) : 0;
+    const noticiasPaginadas = Array.isArray(noticiasFiltradas) ? noticiasFiltradas.slice(indicePrimerItem, indiceUltimoItem) : [];
+    const totalPaginas = Array.isArray(noticiasFiltradas) ? Math.ceil(noticiasFiltradas.length / noticiasPorPagina) : 0;
 
     // Función para limpiar la ruta de la imagen
     const getUrlImagen = (imgRaw) => {
@@ -207,6 +215,16 @@ const Noticias = ({ userAuth }) => {
                 <h1 className="titulo-noticias">{t('newsGlobalAlerts')}</h1>
                 <div className="linea-decorativa"></div>
             </header>
+
+            {/* BUSCADOR Y ÍNDICE A-Z TÁCTICO */}
+            <BuscadorAZ 
+                busqueda={busqueda}
+                onBusquedaChange={setBusqueda}
+                letraSeleccionada={letraSeleccionada}
+                onLetraChange={setLetraSeleccionada}
+                totalResultados={noticiasFiltradas.length}
+                placeholder="Buscar noticias por alerta, titular, ubicación..."
+            />
 
             <div className="noticias-grid">
                 {Array.isArray(noticiasPaginadas) && noticiasPaginadas.length > 0 ? (

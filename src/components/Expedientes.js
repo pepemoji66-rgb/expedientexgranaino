@@ -6,6 +6,7 @@ import API_BASE_URL from '../config';
 import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
 import { safeLocalStorage } from '../utils/storage';
+import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
 import './expedientes.css';
 import './lecturahistoria.css';
 
@@ -98,6 +99,7 @@ const buildAmazonMaps = (todos) => {
 const Expedientes = () => {
     const { language, t, forceTranslationUpdate } = useLanguage();
     const [busqueda, setBusqueda] = useState('');
+    const [letraSeleccionada, setLetraSeleccionada] = useState('TODOS');
     const [filtroActivo, setFiltroActivo] = useState('todos');
     const [tipoRegistro, setTipoRegistro] = useState('agente');
     const [datos, setDatos] = useState([]);
@@ -159,7 +161,7 @@ const Expedientes = () => {
 
     useEffect(() => {
         setPaginaActual(1);
-    }, [busqueda, filtroActivo]);
+    }, [busqueda, letraSeleccionada, filtroActivo]);
 
     const cargarDatos = useCallback(async () => {
         setCargando(true);
@@ -373,23 +375,14 @@ const Expedientes = () => {
         }
     };
 
-    // Filtrado por buscador y píldoras
-    const datosFiltrados = datos.filter(item => {
-        // Filtro por tipo (píldoras)
+    // Filtrado por píldoras + BuscadorAZ (palabra clave + abecedario A-Z)
+    const datosPorPill = datos.filter(item => {
         if (filtroActivo === 'jefe' && item.tipo !== 'jefe') return false;
         if (filtroActivo === 'agente' && item.tipo === 'jefe') return false;
-
-        // Filtro por búsqueda
-        if (busqueda.trim() !== '') {
-            const query = busqueda.toLowerCase();
-            const titulo = (item.titulo || '').toLowerCase();
-            const contenido = (item.contenido || '').toLowerCase();
-            const autor = (item.usuario_nombre || '').toLowerCase();
-            return titulo.includes(query) || contenido.includes(query) || autor.includes(query);
-        }
-
         return true;
     });
+
+    const datosFiltrados = filtrarItemsBunker(datosPorPill, busqueda, letraSeleccionada);
 
     // Conteos para píldoras
     const countTodos = datos.length;
@@ -412,22 +405,15 @@ const Expedientes = () => {
                 <p>{t('expProtocol')}</p>
             </div>
 
-            {/* BUSCADOR DE EXPEDIENTES FUTURISTA */}
-            <div className="buscador-expedientes-container">
-                <div className="buscador-wrapper">
-                    <span className="buscador-icono">🔍</span>
-                    <input
-                        type="text"
-                        className="input-buscador-neon"
-                        placeholder={t('expSearchPlaceholder')}
-                        value={busqueda}
-                        onChange={(e) => setBusqueda(e.target.value)}
-                    />
-                    {busqueda && (
-                        <button className="btn-limpiar-busqueda" onClick={() => setBusqueda('')}>×</button>
-                    )}
-                </div>
-            </div>
+            {/* BUSCADOR Y ÍNDICE A-Z TÁCTICO */}
+            <BuscadorAZ 
+                busqueda={busqueda}
+                onBusquedaChange={setBusqueda}
+                letraSeleccionada={letraSeleccionada}
+                onLetraChange={setLetraSeleccionada}
+                totalResultados={datosFiltrados.length}
+                placeholder={t('expSearchPlaceholder') || "Buscar expedientes por título, informe, ubicación..."}
+            />
 
             {/* PÍLDORAS DE FILTRADO DINÁMICO */}
             <div className="filtros-expedientes-pills">

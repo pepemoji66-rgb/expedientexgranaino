@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
+import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
 import AdSlot from './AdSlot';
 import './casosabiertos.css';
 import API_BASE_URL from '../config';
@@ -55,6 +56,8 @@ const CasosAbiertos = ({ userAuth }) => {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [casos, setCasos] = useState([]);
+    const [busqueda, setBusqueda] = useState('');
+    const [letraSeleccionada, setLetraSeleccionada] = useState('TODOS');
     const [casoExpandido, setCasoExpandido] = useState(null);
     const [paginaActual, setPaginaActual] = useState(1);
     const [amazonKeys, setAmazonKeys] = useState(new Set());
@@ -81,6 +84,10 @@ const CasosAbiertos = ({ userAuth }) => {
     }, []);
 
     // Detener Robocop al cerrar el modal
+    useEffect(() => {
+        setPaginaActual(1);
+    }, [busqueda, letraSeleccionada]);
+
     useEffect(() => {
         if (!casoExpandido && window.speechSynthesis) {
             window.speechSynthesis.cancel();
@@ -261,10 +268,11 @@ const CasosAbiertos = ({ userAuth }) => {
         }
     };
 
+    const casosFiltrados = filtrarItemsBunker(casos, busqueda, letraSeleccionada);
     const indexOfLastCaso = paginaActual * casosPorPagina;
     const indexOfFirstCaso = indexOfLastCaso - casosPorPagina;
-    const casosActuales = casos.slice(indexOfFirstCaso, indexOfLastCaso);
-    const totalPaginas = Math.ceil(casos.length / casosPorPagina);
+    const casosActuales = casosFiltrados.slice(indexOfFirstCaso, indexOfLastCaso);
+    const totalPaginas = Math.ceil(casosFiltrados.length / casosPorPagina);
 
     return (
         <div className="casos-container fade-in">
@@ -276,6 +284,16 @@ const CasosAbiertos = ({ userAuth }) => {
             </p>
 
             <AdSlot id="casos-top" />
+
+            {/* BUSCADOR Y ÍNDICE A-Z TÁCTICO */}
+            <BuscadorAZ 
+                busqueda={busqueda}
+                onBusquedaChange={setBusqueda}
+                letraSeleccionada={letraSeleccionada}
+                onLetraChange={setLetraSeleccionada}
+                totalResultados={casosFiltrados.length}
+                placeholder="Buscar casos por True Crime, título, investigación..."
+            />
 
             <div className="grid-casos">
                 {casosActuales.length > 0 ? (

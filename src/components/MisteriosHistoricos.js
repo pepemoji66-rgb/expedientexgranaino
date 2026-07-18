@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
 import AdSlot from './AdSlot';
 import './misterioshistoricos.css';
 import API_BASE_URL from '../config';
@@ -54,10 +55,16 @@ const MisteriosHistoricos = () => {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [misterios, setMisterios] = useState([]);
+    const [busqueda, setBusqueda] = useState('');
+    const [letraSeleccionada, setLetraSeleccionada] = useState('TODOS');
     const [paginaActual, setPaginaActual] = useState(1);
     const [amazonKeys, setAmazonKeys] = useState(new Set());
     const [amazonLinks, setAmazonLinks] = useState(new Map());
     const misteriosPorPagina = 9;
+
+    useEffect(() => {
+        setPaginaActual(1);
+    }, [busqueda, letraSeleccionada]);
 
     useEffect(() => {
         cargarMisterios();
@@ -81,11 +88,12 @@ const MisteriosHistoricos = () => {
         }
     };
 
-    // Paginación
+    // Filtrado por palabra clave e índice A-Z + Paginación
+    const misteriosFiltrados = filtrarItemsBunker(misterios, busqueda, letraSeleccionada);
     const indiceUltimo = paginaActual * misteriosPorPagina;
     const indicePrimero = indiceUltimo - misteriosPorPagina;
-    const misteriosPaginados = misterios.slice(indicePrimero, indiceUltimo);
-    const totalPaginas = Math.ceil(misterios.length / misteriosPorPagina);
+    const misteriosPaginados = misteriosFiltrados.slice(indicePrimero, indiceUltimo);
+    const totalPaginas = Math.ceil(misteriosFiltrados.length / misteriosPorPagina);
 
     return (
         <div className="misterios-container">
@@ -119,6 +127,16 @@ const MisteriosHistoricos = () => {
             </div>
 
             <AdSlot slotId="misterios-top" />
+
+            {/* BUSCADOR Y ÍNDICE A-Z TÁCTICO */}
+            <BuscadorAZ 
+                busqueda={busqueda}
+                onBusquedaChange={setBusqueda}
+                letraSeleccionada={letraSeleccionada}
+                onLetraChange={setLetraSeleccionada}
+                totalResultados={misteriosFiltrados.length}
+                placeholder="Buscar misterios históricos por enigma, título, cultura..."
+            />
 
             {/* GRID DE MISTERIOS */}
             <div className="misterios-grid">
