@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import NoticiasExternas from './NoticiasExternas';
+import FiltrosTematicos from './FiltrosTematicos';
 import { useLanguage } from '../context/LanguageContext';
 import { API_BASE_URL } from '../config';
 import './Indice.css';
@@ -19,6 +20,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
     const [recentMisterios, setRecentMisterios] = useState([]);
     const [comentariosRecientes, setComentariosRecientes] = useState([]);
     const [loadingContent, setLoadingContent] = useState(true);
+    const [filtroTematico, setFiltroTematico] = useState('todos');
 
     const coloresDisponibles = [
         { hex: '#00d4ff', label: 'CIAN' },
@@ -210,6 +212,9 @@ const Indice = ({ userAuth, stats, setTema }) => {
             {/* SECCIÓN PREVISUALIZACIONES DE CONTENIDO ("CHICHA" PARA ADSENSE Y UX) */}
             <div className="home-sections-divider">// {language === 'en' ? 'DECLASS CENTRAL CORE' : 'NÚCLEO CENTRAL DE DESCLASIFICACIÓN'}</div>
 
+            {/* CARRUSEL DE FILTROS TEMÁTICOS */}
+            <FiltrosTematicos filtroActivo={filtroTematico} onFiltroChange={setFiltroTematico} />
+
             {/* ÚLTIMAS TRANSMISIONES / COMENTARIOS DE AGENTES */}
             {comentariosRecientes.length > 0 && (
                 <div className="home-content-section" style={{ marginBottom: '45px' }}>
@@ -279,6 +284,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
             )}
 
             {/* SECCIÓN EXPEDIENTES RECIENTES */}
+            {(filtroTematico === 'todos' || filtroTematico === 'ovnis') && (
             <div className="home-content-section">
                 <div className="section-title-wrap">
                     <h2 className="section-title-neon">// {language === 'en' ? 'RECENT DOSSIERS' : 'EXPEDIENTES RECIENTES'}</h2>
@@ -313,8 +319,10 @@ const Indice = ({ userAuth, stats, setTema }) => {
                     )}
                 </div>
             </div>
+            )}
 
             {/* SECCIÓN ÚLTIMAS NOTICIAS */}
+            {(filtroTematico === 'todos' || filtroTematico === 'ovnis') && (
             <div className="home-content-section">
                 <div className="section-title-wrap">
                     <h2 className="section-title-neon">// {language === 'en' ? 'LATEST NEWS' : 'ÚLTIMAS NOTICIAS'}</h2>
@@ -349,8 +357,10 @@ const Indice = ({ userAuth, stats, setTema }) => {
                     )}
                 </div>
             </div>
+            )}
 
             {/* SECCIÓN CASOS ABIERTOS (TRUE CRIME) */}
+            {(filtroTematico === 'todos' || filtroTematico === 'cronica_negra') && (
             <div className="home-content-section">
                 <div className="section-title-wrap">
                     <h2 className="section-title-neon">// {language === 'en' ? 'OPEN CASES (TRUE CRIME)' : 'CASOS ABIERTOS (TRUE CRIME)'}</h2>
@@ -387,8 +397,10 @@ const Indice = ({ userAuth, stats, setTema }) => {
                     )}
                 </div>
             </div>
+            )}
 
             {/* SECCIÓN MISTERIOS HISTÓRICOS */}
+            {(filtroTematico === 'todos' || filtroTematico === 'misterios') && (
             <div className="home-content-section">
                 <div className="section-title-wrap">
                     <h2 className="section-title-neon">// {language === 'en' ? 'HISTORICAL MYSTERIES' : 'MISTERIOS HISTÓRICOS'}</h2>
@@ -425,8 +437,10 @@ const Indice = ({ userAuth, stats, setTema }) => {
                     )}
                 </div>
             </div>
+            )}
 
             {/* SECCIÓN VÍDEOS CLASIFICADOS */}
+            {(filtroTematico === 'todos' || filtroTematico === 'ovnis') && (
             <div className="home-content-section">
                 <div className="section-title-wrap">
                     <h2 className="section-title-neon">// {language === 'en' ? 'CLASSIFIED VIDEOS' : 'VÍDEOS CLASIFICADOS'}</h2>
@@ -470,6 +484,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
                     )}
                 </div>
             </div>
+            )}
 
             {/* SECCIÓN RADAR VISUAL */}
             <div className="radar-section">

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './galeria.css';
 import { useLanguage } from '../context/LanguageContext';
+import FiltrosTematicos from './FiltrosTematicos';
 import { API_BASE_URL } from '../config';
 
 const Galeria = ({ userAuth }) => {
@@ -268,8 +269,30 @@ const Galeria = ({ userAuth }) => {
         setIsDragging(false);
     };
 
-    const confActual = config[pestanaActiva];
-    const listaActual = registros[pestanaActiva] || [];
+    // Mapeo entre botones de FiltrosTematicos y pestañas de la galería
+    const handleFiltroChange = (id) => {
+        setPaginaActual(1);
+        if (id === 'ovnis') setPestanaActiva('relatos');
+        else if (id === 'cronica_negra') setPestanaActiva('truecrime');
+        else if (id === 'misterios') setPestanaActiva('misterios');
+        else if (id === 'galeria') setPestanaActiva('noticias');
+        else setPestanaActiva('todos');
+    };
+
+    const filtroMapeado = pestanaActiva === 'relatos' ? 'ovnis' : 
+                         pestanaActiva === 'truecrime' ? 'cronica_negra' : 
+                         pestanaActiva === 'misterios' ? 'misterios' : 
+                         pestanaActiva === 'noticias' ? 'galeria' : 'todos';
+
+    const confActual = config[pestanaActiva] || config['noticias'];
+    
+    let listaActual = [];
+    if (pestanaActiva === 'todos') {
+        listaActual = [...(registros.relatos || []), ...(registros.misterios || []), ...(registros.truecrime || []), ...(registros.noticias || [])];
+    } else {
+        listaActual = registros[pestanaActiva] || [];
+    }
+
     const totalPaginas = Math.ceil(listaActual.length / imagenesPorPagina);
     const imagenesActuales = Array.isArray(listaActual) ? listaActual.slice((paginaActual - 1) * imagenesPorPagina, paginaActual * imagenesPorPagina) : [];
 
@@ -284,30 +307,8 @@ const Galeria = ({ userAuth }) => {
                 </button>
             </header>
 
-            <nav className="pestanas-galeria-container">
-                <div className="pestanas-galeria-wrapper">
-                    <button className={`btn-pestana-moderno ${pestanaActiva === 'noticias' ? 'active' : ''}`} onClick={() => { setPestanaActiva('noticias'); setPaginaActual(1); }}>
-                        <span className="icon-folder">📰</span>
-                        <span className="text-folder">{t('galleryTabNews')}</span>
-                        <div className="indicator-neon"></div>
-                    </button>
-                    <button className={`btn-pestana-moderno ${pestanaActiva === 'relatos' ? 'active' : ''}`} onClick={() => { setPestanaActiva('relatos'); setPaginaActual(1); }}>
-                        <span className="icon-folder">📜</span>
-                        <span className="text-folder">{t('galleryTabStories')}</span>
-                        <div className="indicator-neon"></div>
-                    </button>
-                    <button className={`btn-pestana-moderno ${pestanaActiva === 'misterios' ? 'active' : ''}`} onClick={() => { setPestanaActiva('misterios'); setPaginaActual(1); }}>
-                        <span className="icon-folder">👽</span>
-                        <span className="text-folder">{t('galleryTabMisterios') || 'MISTERIOS'}</span>
-                        <div className="indicator-neon"></div>
-                    </button>
-                    <button className={`btn-pestana-moderno ${pestanaActiva === 'truecrime' ? 'active' : ''}`} onClick={() => { setPestanaActiva('truecrime'); setPaginaActual(1); }}>
-                        <span className="icon-folder">💀</span>
-                        <span className="text-folder">{t('galleryTabTrueCrime') || 'TRUE CRIME'}</span>
-                        <div className="indicator-neon"></div>
-                    </button>
-                </div>
-            </nav>
+            {/* CARRUSEL DE FILTROS TEMÁTICOS */}
+            <FiltrosTematicos filtroActivo={filtroMapeado} onFiltroChange={handleFiltroChange} />
 
             <main className="galeria-main-content">
                 <div className="galeria-grid">
