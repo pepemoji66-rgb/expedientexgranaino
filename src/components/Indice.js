@@ -322,7 +322,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
             )}
 
             {/* SECCIÓN ÚLTIMAS NOTICIAS */}
-            {(filtroTematico === 'todos' || filtroTematico === 'ovnis') && (
+            {(filtroTematico === 'todos' || filtroTematico === 'noticias') && (
             <div className="home-content-section">
                 <div className="section-title-wrap">
                     <h2 className="section-title-neon">// {language === 'en' ? 'LATEST NEWS' : 'ÚLTIMAS NOTICIAS'}</h2>

@@ -273,16 +273,16 @@ const Galeria = ({ userAuth }) => {
     const handleFiltroChange = (id) => {
         setPaginaActual(1);
         if (id === 'ovnis') setPestanaActiva('relatos');
+        else if (id === 'noticias') setPestanaActiva('noticias');
         else if (id === 'cronica_negra') setPestanaActiva('truecrime');
         else if (id === 'misterios') setPestanaActiva('misterios');
-        else if (id === 'galeria') setPestanaActiva('noticias');
         else setPestanaActiva('todos');
     };
 
     const filtroMapeado = pestanaActiva === 'relatos' ? 'ovnis' : 
+                         pestanaActiva === 'noticias' ? 'noticias' : 
                          pestanaActiva === 'truecrime' ? 'cronica_negra' : 
-                         pestanaActiva === 'misterios' ? 'misterios' : 
-                         pestanaActiva === 'noticias' ? 'galeria' : 'todos';
+                         pestanaActiva === 'misterios' ? 'misterios' : 'todos';
 
     const confActual = config[pestanaActiva] || config['noticias'];
     
@@ -307,8 +307,8 @@ const Galeria = ({ userAuth }) => {
                 </button>
             </header>
 
-            {/* CARRUSEL DE FILTROS TEMÁTICOS */}
-            <FiltrosTematicos filtroActivo={filtroMapeado} onFiltroChange={handleFiltroChange} />
+            {/* CARRUSEL DE FILTROS TEMÁTICOS (SIN BOTÓN REDUNDANTE DE GALERÍA) */}
+            <FiltrosTematicos filtroActivo={filtroMapeado} onFiltroChange={handleFiltroChange} hideShortcut={true} />
 
             <main className="galeria-main-content">
                 <div className="galeria-grid">

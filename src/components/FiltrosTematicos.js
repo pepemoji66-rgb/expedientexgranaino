@@ -4,13 +4,14 @@ import './FiltrosTematicos.css';
 
 const BOTONES_FILTRO = [
     { id: 'todos', label: 'TODOS' },
-    { id: 'ovnis', label: 'OVNIS' },
+    { id: 'ovnis', label: 'OVNIS Y EXPEDIENTES' },
+    { id: 'noticias', label: 'NOTICIAS' },
     { id: 'cronica_negra', label: 'CRÓNICA NEGRA' },
     { id: 'misterios', label: 'MISTERIOS HISTÓRICOS' },
     { id: 'galeria', label: 'GALERÍA VISUAL', isShortcut: true }
 ];
 
-const FiltrosTematicos = ({ filtroActivo = 'todos', onFiltroChange }) => {
+const FiltrosTematicos = ({ filtroActivo = 'todos', onFiltroChange, hideShortcut = false }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -26,12 +27,16 @@ const FiltrosTematicos = ({ filtroActivo = 'todos', onFiltroChange }) => {
         }
     };
 
+    const botonesVisibles = hideShortcut 
+        ? BOTONES_FILTRO.filter(b => !b.isShortcut)
+        : BOTONES_FILTRO;
+
     return (
         <div className="filtros-tematicos-container">
             <div className="filtros-carrusel-scroll">
                 <div className="filtros-buttons-wrapper">
-                    {BOTONES_FILTRO.map((item) => {
-                        const isSelected = filtroActivo === item.id || (item.id === 'galeria' && location.pathname === '/galeria');
+                    {botonesVisibles.map((item) => {
+                        const isSelected = filtroActivo === item.id || (!hideShortcut && item.id === 'galeria' && location.pathname === '/galeria');
                         return (
                             <button
                                 key={item.id}
