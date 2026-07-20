@@ -462,9 +462,9 @@ const PanelAdmin = () => {
             // Construir la URL pública del contenido
             let urlContenido = 'https://expedientexgranaino.com';
             if (item.id) {
-                const seccion = tab === 'expedientes' || tab === 'misterios_historicos' ? 'leer-historia' : tab === 'noticias' ? 'noticias' : tab === 'imagenes' ? 'galeria' : tab === 'videos' ? 'videos' : tab === 'casos_abiertos' ? 'casos-abiertos' : '';
+                const seccion = (tab === 'expedientes' || tab === 'misterios_historicos' || tab === 'casos_abiertos') ? 'leer-historia' : tab === 'noticias' ? 'noticias' : tab === 'imagenes' ? 'galeria' : tab === 'videos' ? 'videos' : '';
                 if (seccion === 'leer-historia') {
-                    const params = tab === 'misterios_historicos' ? '?src=misterios' : tab === 'expedientes' ? '?src=expedientes' : '';
+                    const params = tab === 'misterios_historicos' ? '?src=misterios' : tab === 'casos_abiertos' ? '?src=casos' : tab === 'expedientes' ? '?src=expedientes' : '';
                     urlContenido = `https://expedientexgranaino.com/${seccion}/${item.id}${params}`;
                 } else if (seccion) {
                     urlContenido = `https://expedientexgranaino.com/${seccion}`;

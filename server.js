@@ -1378,26 +1378,28 @@ app.get('/leer-historia/:id', async (req, res) => {
         let esCaso = false;
 
         try {
+            const srcLow = (src || '').toLowerCase();
+
             // Intentar primero búsqueda dirigida según 'src'
-            if (src === 'casos') {
+            if (srcLow.includes('caso') || srcLow.includes('truecrime') || srcLow.includes('cronica')) {
                 const casos = await db.query("SELECT * FROM casos_abiertos WHERE id = ?", [id]);
                 if (casos && casos.length > 0) {
                     historia = casos[0];
                     esCaso = true;
                 }
-            } else if (src === 'misterios') {
+            } else if (srcLow.includes('misterio')) {
                 const misterios = await db.query("SELECT * FROM misterios_historicos WHERE id = ?", [id]);
                 if (misterios && misterios.length > 0) {
                     historia = misterios[0];
                     esMisterio = true;
                 }
-            } else if (src === 'noticias') {
+            } else if (srcLow.includes('noticia')) {
                 const noticias = await db.query("SELECT * FROM noticias WHERE id = ?", [id]);
                 if (noticias && noticias.length > 0) {
                     historia = noticias[0];
                     esNoticia = true;
                 }
-            } else if (src === 'expedientes') {
+            } else if (srcLow.includes('expediente') || srcLow === 'exp') {
                 const relatosAdmin = await db.query(
                     "SELECT * FROM expedientes WHERE id = ? AND tipo = 'jefe'",
                     [id]
@@ -1416,51 +1418,42 @@ app.get('/leer-historia/:id', async (req, res) => {
                 }
             }
 
-            // Fallback: Si no se encontró nada con la búsqueda dirigida, buscar secuencialmente
+            // Fallback inteligente: Si no se especificó src o no se encontró en la dirigida
             if (!historia) {
-                // 1. Buscar en relatos del admin / jefe
-                const relatosAdmin = await db.query(
-                    "SELECT * FROM expedientes WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND tipo = 'jefe'",
-                    [id]
-                );
-                if (relatosAdmin && relatosAdmin.length > 0) {
-                    historia = relatosAdmin[0];
-                    esRelatoAdmin = true;
+                // 1. Buscar en casos abiertos / True Crime
+                const casos = await db.query("SELECT * FROM casos_abiertos WHERE id = ?", [id]);
+                if (casos && casos.length > 0) {
+                    historia = casos[0];
+                    esCaso = true;
                 } else {
-                    // 2. Buscar en expedientes de agentes
-                    const expedientesPublicos = await db.query(
-                        "SELECT * FROM expedientes WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND (tipo = 'agente' OR tipo IS NULL)",
-                        [id]
-                    );
-                    if (expedientesPublicos && expedientesPublicos.length > 0) {
-                        historia = expedientesPublicos[0];
+                    // 2. Buscar en noticias
+                    const noticias = await db.query("SELECT * FROM noticias WHERE id = ?", [id]);
+                    if (noticias && noticias.length > 0) {
+                        historia = noticias[0];
+                        esNoticia = true;
                     } else {
-                        // 3. Buscar en noticias
-                        const noticias = await db.query(
-                            "SELECT * FROM noticias WHERE id = ? AND (estado = 'aprobado' OR estado IS NULL)",
-                            [id]
-                        );
-                        if (noticias && noticias.length > 0) {
-                            historia = noticias[0];
-                            esNoticia = true;
+                        // 3. Buscar en misterios históricos
+                        const misterios = await db.query("SELECT * FROM misterios_historicos WHERE id = ?", [id]);
+                        if (misterios && misterios.length > 0) {
+                            historia = misterios[0];
+                            esMisterio = true;
                         } else {
-                            // 4. Buscar en misterios históricos
-                            const misterios = await db.query(
-                                "SELECT * FROM misterios_historicos WHERE id = ?",
+                            // 4. Buscar en expedientes de jefe / admin
+                            const relatosAdmin = await db.query(
+                                "SELECT * FROM expedientes WHERE id = ? AND tipo = 'jefe'",
                                 [id]
                             );
-                            if (misterios && misterios.length > 0) {
-                                historia = misterios[0];
-                                esMisterio = true;
+                            if (relatosAdmin && relatosAdmin.length > 0) {
+                                historia = relatosAdmin[0];
+                                esRelatoAdmin = true;
                             } else {
-                                // 5. Buscar en casos abiertos / True Crime
-                                const casos = await db.query(
-                                    "SELECT * FROM casos_abiertos WHERE id = ?",
+                                // 5. Buscar en expedientes de agentes
+                                const expedientesPublicos = await db.query(
+                                    "SELECT * FROM expedientes WHERE id = ?",
                                     [id]
                                 );
-                                if (casos && casos.length > 0) {
-                                    historia = casos[0];
-                                    esCaso = true;
+                                if (expedientesPublicos && expedientesPublicos.length > 0) {
+                                    historia = expedientesPublicos[0];
                                 }
                             }
                         }
@@ -1768,72 +1761,9 @@ const getIndexHtml = () => {
 const SITE_URL = 'https://expedientexgranaino.com';
 const DEFAULT_IMAGE = `${SITE_URL}/social-preview.png?v=7.0`;
 
-// Casos Abiertos, Noticias, Expedientes y Misterios (Ruta unificada /leer-historia/:id)
-app.get('/leer-historia/:id', async (req, res) => {
-    if (!isSocialCrawler(req.headers['user-agent'])) {
-        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
-    try {
-        const id = req.params.id;
-        const src = (req.query.src || '').toLowerCase();
-
-        let table = 'casos_abiertos';
-        let descCol = 'contenido';
-
-        if (src.includes('noticia')) {
-            table = 'noticias';
-            descCol = 'cuerpo';
-        } else if (src.includes('expediente') || src === 'exp') {
-            table = 'expedientes';
-            descCol = 'descripcion';
-        } else if (src.includes('misterio')) {
-            table = 'misterios_historicos';
-            descCol = 'contenido';
-        }
-
-        let [rows] = await db.promise().query(`SELECT titulo, ${descCol} AS desc_text, imagen_url FROM ${table} WHERE id = ?`, [id]);
-        
-        // Fallback: si no existe en esa tabla específica, probar dinámicamente en el resto de tablas
-        if (!rows || rows.length === 0) {
-            const tablasFallback = [
-                { t: 'casos_abiertos', d: 'contenido' },
-                { t: 'noticias', d: 'cuerpo' },
-                { t: 'expedientes', d: 'descripcion' },
-                { t: 'misterios_historicos', d: 'contenido' }
-            ];
-            for (const fb of tablasFallback) {
-                if (fb.t === table) continue;
-                try {
-                    const [rFb] = await db.promise().query(`SELECT titulo, ${fb.d} AS desc_text, imagen_url FROM ${fb.t} WHERE id = ?`, [id]);
-                    if (rFb && rFb.length > 0) {
-                        rows = rFb;
-                        break;
-                    }
-                } catch (errFb) {}
-            }
-        }
-
-        if (!rows || rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-
-        const item = rows[0];
-        const imgUrl = cloudinaryOgImage(
-            item.imagen_url
-                ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
-                : DEFAULT_IMAGE
-        );
-        const desc = (item.desc_text || 'Documentado en el Búnker de Expediente X Granaíno.').replace(/<[^>]+>/g, '').substring(0, 160);
-        const html = injectOgTags(getIndexHtml(), {
-            url: `${SITE_URL}/leer-historia/${id}${src ? '?src=' + src : ''}`,
-            title: `${item.titulo} | Expediente X Granaíno`,
-            description: desc,
-            image: imgUrl
-        });
-        res.set('Content-Type', 'text/html').send(html);
-    } catch (e) {
-        console.error('OG leer-historia:', e.message);
-        res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
-});
+// =====================================================================
+// RUTAS INDIVIDUALES ESPECÍFICAS DE SECCIÓN (Para crawlers sociales)
+// =====================================================================
 
 // Noticias
 app.get('/noticias/:id', async (req, res) => {
