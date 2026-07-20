@@ -68,12 +68,12 @@ module.exports = (db, upload) => {
         }
     });
 
-    // Subir un nuevo expediente (Desde la App o Panel)
+    // Subir un nuevo expediente o contenido público (Desde la App o Panel)
     router.post('/subir-expediente', upload.single('imagen'), async (req, res) => {
-        const { titulo, contenido, usuario_nombre, latitud, longitud, tipo } = req.body;
+        const { titulo, contenido, usuario_nombre, latitud, longitud, tipo, categoria } = req.body;
         const imagen_url = req.file ? (req.file.path || req.file.filename) : null;
 
-        if (!usuario_nombre || !contenido) {
+        if (!contenido) {
             return res.status(400).json({ error: "Faltan datos críticos para el registro." });
         }
 
@@ -93,31 +93,54 @@ module.exports = (db, upload) => {
                 } catch (uErr) {}
             }
 
-            const sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, latitud, longitud, estado, tipo, imagen_url, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-            const [result] = await db.execute(sql, [titulo, contenido, finalNombre, latitud || 0, longitud || 0, estado, finalTipo, imagen_url]);
+            const catLow = (categoria || 'expediente').toLowerCase();
+            let insertId = null;
+
+            if (catLow === 'noticia') {
+                const sql = "INSERT INTO noticias (titulo, cuerpo, usuario_nombre, imagen_url, estado, fecha) VALUES (?, ?, ?, ?, ?, NOW())";
+                const [r] = await db.execute(sql, [titulo || 'Alerta Paranormal', contenido, finalNombre, imagen_url, estado]);
+                insertId = r.insertId;
+            } else if (catLow === 'caso' || catLow === 'cronica_negra' || catLow === 'truecrime') {
+                const sql = "INSERT INTO casos_abiertos (titulo, contenido, latitud, longitud, imagen_url, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+                const [r] = await db.execute(sql, [titulo || 'Caso Abierto', contenido, latitud || 0, longitud || 0, imagen_url, estado]);
+                insertId = r.insertId;
+            } else if (catLow === 'misterio') {
+                const sql = "INSERT INTO misterios_historicos (titulo, contenido, latitud, longitud, imagen_url, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+                const [r] = await db.execute(sql, [titulo || 'Misterio Histórico', contenido, latitud || 0, longitud || 0, imagen_url, estado]);
+                insertId = r.insertId;
+            } else if (catLow === 'video') {
+                const sql = "INSERT INTO videos (titulo, descripcion, usuario, url, capturas, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+                const [r] = await db.execute(sql, [titulo || 'Evidencia de Vídeo', contenido, finalNombre, imagen_url || '', imagen_url || '', estado]);
+                insertId = r.insertId;
+            } else {
+                // Default: expedientes
+                const sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, latitud, longitud, estado, tipo, imagen_url, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                const [r] = await db.execute(sql, [titulo || 'Expediente OVNI', contenido, finalNombre, latitud || 0, longitud || 0, estado, finalTipo, imagen_url]);
+                insertId = r.insertId;
+            }
 
             // 📸 AUTO-GALERÍA: Si hay imagen, la insertamos automáticamente en la galería
             if (imagen_url) {
                 try {
                     const sqlGaleria = "INSERT INTO imagenes (titulo, url_imagen, agente, descripcion, latitud, longitud, estado, fecha) VALUES (?, ?, ?, ?, ?, ?, 'publica', NOW())";
                     await db.execute(sqlGaleria, [
-                        titulo || 'Evidencia de Expediente',
+                        titulo || 'Evidencia de Aportación',
                         imagen_url,
-                        usuario_nombre || 'Sistema',
-                        `Imagen del expediente: ${titulo || ''}`,
+                        finalNombre,
+                        `Imagen aportada (${catLow}): ${titulo || ''}`,
                         latitud || 0,
                         longitud || 0
                     ]);
-                    console.log('📸 Imagen de expediente añadida automáticamente a la galería.');
+                    console.log('📸 Imagen añadida automáticamente a la galería.');
                 } catch (galErr) {
-                    console.warn('⚠️ No se pudo auto-insertar en galería (expediente):', galErr.message);
+                    console.warn('⚠️ No se pudo auto-insertar en galería:', galErr.message);
                 }
             }
 
-            res.json({ mensaje: "✅ Expediente registrado y archivado.", id: result.insertId });
+            res.json({ mensaje: "✅ Registro enviado y archivado.", id: insertId });
         } catch (err) {
-            console.error("❌ ERROR POST EXPEDIENTE:", err);
-            res.status(500).json({ error: "Fallo al archivar el expediente." });
+            console.error("❌ ERROR POST APORTACIÓN MULTICATEGORÍA:", err);
+            res.status(500).json({ error: "Fallo al archivar el registro." });
         }
     });
 

@@ -113,6 +113,7 @@ const Expedientes = () => {
     const [longitud, setLongitud] = useState('');
     const [busquedaLugar, setBusquedaLugar] = useState('');
     const [nombreTestigo, setNombreTestigo] = useState('');
+    const [categoriaAportacion, setCategoriaAportacion] = useState('expediente');
     const [cargando, setCargando] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [amazonConfig, setAmazonConfig] = useState(null);
@@ -295,6 +296,7 @@ const Expedientes = () => {
         formData.append('latitud', latitud || 0);
         formData.append('longitud', longitud || 0);
         formData.append('tipo', tipoRegistro);
+        formData.append('categoria', categoriaAportacion);
 
         const fileInput = document.getElementById('archivo-expediente');
         if (fileInput && fileInput.files[0]) {
@@ -535,6 +537,25 @@ const Expedientes = () => {
                     {tipoRegistro === 'jefe' ? t('expWriteAdmin') : t('expWriteReport')}
                 </h2>
                 <form onSubmit={enviarExpediente} className="form-expediente">
+                    {/* Selector de Categoría Multisección */}
+                    <div className="selector-tipo-registro" style={{ marginBottom: '20px', background: 'rgba(0, 212, 255, 0.08)', padding: '15px', borderRadius: '6px', border: '1px solid rgba(0, 212, 255, 0.4)' }}>
+                        <label style={{ color: 'var(--color-principal)', fontSize: '0.78rem', display: 'block', marginBottom: '8px', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                            🎯 ¿QUÉ TIPO DE EVIDENCIA O APORTACIÓN DESEAS SUBIR?
+                        </label>
+                        <select
+                            value={categoriaAportacion}
+                            onChange={(e) => setCategoriaAportacion(e.target.value)}
+                            className="input-bunker-exp"
+                            style={{ marginBottom: 0, fontWeight: 'bold', color: '#00d4ff', background: '#050c12', cursor: 'pointer', border: '1px solid #00d4ff' }}
+                        >
+                            <option value="expediente">📁 EXPEDIENTE OVNI / UAP (Relatos e Investigaciones)</option>
+                            <option value="noticia">📰 NOTICIA PARANORMAL (Alertas y Novedades)</option>
+                            <option value="caso">💀 TRUE CRIME / CASO ABIERTO (Crímenes Reales sin Resolver)</option>
+                            <option value="misterio">👁️ MISTERIO HISTÓRICO (Enigmas Ancestrales)</option>
+                            <option value="video">🎬 VÍDEO CLASIFICADO (Evidencia Audiovisual)</option>
+                        </select>
+                    </div>
+
                     {/* Selector para administradores */}
                     {isAdmin && (
                         <div className="selector-tipo-registro" style={{ marginBottom: '20px', background: 'rgba(0, 212, 255, 0.05)', padding: '15px', borderRadius: '6px', border: '1px dashed rgba(0, 212, 255, 0.3)' }}>
