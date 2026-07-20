@@ -558,9 +558,9 @@ const Indice = ({ userAuth, stats, setTema }) => {
                     <span className="btn-icon">📝</span>
                     <span className="btn-text">{t('reportExperience')}</span>
                 </Link>
-                <Link to="/acceso" className="btn-tactical register">
-                    <span className="btn-icon">🔑</span>
-                    <span className="btn-text">{t('freeAgentRegister')}</span>
+                <Link to="/casos-abiertos" className="btn-tactical register">
+                    <span className="btn-icon">💀</span>
+                    <span className="btn-text">APORTAR CASO O CRÍMENES</span>
                 </Link>
                 <Link to="/videos" className="btn-tactical media">
                     <span className="btn-icon">📷</span>

@@ -650,6 +650,65 @@ const PanelAdmin = () => {
         <div className="panel-admin-container fade-in">
             <h2 className="titulo-neon">CONTROL DE MANDO UNIFICADO</h2>
 
+            {/* BANNER DE ALERTAS PENDIENTES DE REVISIÓN */}
+            {((datos.expedientes || []).filter(e => e.estado === 'pendiente' || e.estado === 0).length +
+              (datos.noticias || []).filter(n => n.estado === 'pendiente' || n.estado === 0).length +
+              (datos.casos_abiertos || []).filter(c => c.estado === 'pendiente' || c.estado === 0).length +
+              (datos.misterios_historicos || []).filter(m => m.estado === 'pendiente' || m.estado === 0).length +
+              comentariosPendientes) > 0 && (
+                <div style={{
+                    background: 'rgba(255, 71, 87, 0.15)',
+                    border: '2px solid #ff4757',
+                    borderRadius: '8px',
+                    padding: '18px 22px',
+                    marginBottom: '20px',
+                    boxShadow: '0 0 20px rgba(255, 71, 87, 0.35)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <span style={{ fontSize: '2.2rem' }}>🚨</span>
+                        <div>
+                            <h3 style={{ color: '#ff4757', margin: 0, fontSize: '1.2rem', fontFamily: 'Orbitron, monospace', letterSpacing: '1.5px', textShadow: '0 0 8px rgba(255, 71, 87, 0.5)' }}>
+                                ALERTA DEL BÚNKER: REVISIÓN DE REGISTROS PENDIENTES
+                            </h3>
+                            <p style={{ color: '#eee', margin: '4px 0 0 0', fontSize: '0.85rem' }}>
+                                Hay material enviado por usuarios o testigos sin revisar. Comprueba los registros para aprobarlos o descartarlos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '4px' }}>
+                        {(datos.expedientes || []).filter(e => e.estado === 'pendiente' || e.estado === 0).length > 0 && (
+                            <button onClick={() => { setTab('expedientes'); setPaginaActual(1); }} style={{ background: '#ff4757', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                📁 {(datos.expedientes || []).filter(e => e.estado === 'pendiente' || e.estado === 0).length} RELATOS PENDIENTES ➔
+                            </button>
+                        )}
+                        {(datos.casos_abiertos || []).filter(c => c.estado === 'pendiente' || c.estado === 0).length > 0 && (
+                            <button onClick={() => { setTab('casos_abiertos'); setPaginaActual(1); }} style={{ background: '#ff4757', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                💀 {(datos.casos_abiertos || []).filter(c => c.estado === 'pendiente' || c.estado === 0).length} CASOS PENDIENTES ➔
+                            </button>
+                        )}
+                        {(datos.misterios_historicos || []).filter(m => m.estado === 'pendiente' || m.estado === 0).length > 0 && (
+                            <button onClick={() => { setTab('misterios_historicos'); setPaginaActual(1); }} style={{ background: '#ff4757', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                👁️ {(datos.misterios_historicos || []).filter(m => m.estado === 'pendiente' || m.estado === 0).length} MISTERIOS PENDIENTES ➔
+                            </button>
+                        )}
+                        {(datos.noticias || []).filter(n => n.estado === 'pendiente' || n.estado === 0).length > 0 && (
+                            <button onClick={() => { setTab('noticias'); setPaginaActual(1); }} style={{ background: '#ff4757', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                📰 {(datos.noticias || []).filter(n => n.estado === 'pendiente' || n.estado === 0).length} NOTICIAS PENDIENTES ➔
+                            </button>
+                        )}
+                        {comentariosPendientes > 0 && (
+                            <button onClick={() => { setTab('comentarios'); setPaginaActual(1); }} style={{ background: '#ff4757', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                💬 {comentariosPendientes} COMENTARIOS PENDIENTES ➔
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+
             <div className="tabs-admin">
                 <button key="inicio" className={tab === 'inicio' ? 'active' : ''} onClick={() => { setTab('inicio'); setPaginaActual(1); }} style={tab !== 'inicio' ? { borderColor: '#00d4ff', color: '#00d4ff' } : {}}>
                     🏠 INICIO
@@ -663,14 +722,24 @@ const PanelAdmin = () => {
                     if (t === 'misterios_historicos') label = '👁️ MISTERIOS';
                     if (t === 'archipeg') label = '💻 ARCHIPEG';
                     
-                    return (
-                        <button key={t} className={tab === t ? 'active' : ''} onClick={() => { setTab(t); setPaginaActual(1); }}>
-                            {label}
-                            {t === 'comentarios' && comentariosPendientes > 0 && (
-                                <span className="badge-pendiente">{comentariosPendientes}</span>
-                            )}
-                        </button>
-                    );
+            const expPendientes = (datos.expedientes || []).filter(e => e.estado === 'pendiente' || e.estado === 0).length;
+            const notiPendientes = (datos.noticias || []).filter(n => n.estado === 'pendiente' || n.estado === 0).length;
+            const casosPendientes = (datos.casos_abiertos || []).filter(c => c.estado === 'pendiente' || c.estado === 0).length;
+            const misteriosPendientes = (datos.misterios_historicos || []).filter(m => m.estado === 'pendiente' || m.estado === 0).length;
+            const totalPendientesBunker = expPendientes + notiPendientes + casosPendientes + misteriosPendientes + comentariosPendientes;
+
+            return (
+                <button key={t} className={tab === t ? 'active' : ''} onClick={() => { setTab(t); setPaginaActual(1); }}>
+                    {label}
+                    {t === 'expedientes' && expPendientes > 0 && <span className="badge-pendiente">{expPendientes}</span>}
+                    {t === 'casos_abiertos' && casosPendientes > 0 && <span className="badge-pendiente">{casosPendientes}</span>}
+                    {t === 'misterios_historicos' && misteriosPendientes > 0 && <span className="badge-pendiente">{misteriosPendientes}</span>}
+                    {t === 'noticias' && notiPendientes > 0 && <span className="badge-pendiente">{notiPendientes}</span>}
+                    {t === 'comentarios' && comentariosPendientes > 0 && (
+                        <span className="badge-pendiente">{comentariosPendientes}</span>
+                    )}
+                </button>
+            );
                 })}
                 <button className={tab === 'subir' ? 'active' : ''} onClick={() => setTab('subir')} style={{ background: '#b18904', color: 'black' }}>
                     + SUBIR

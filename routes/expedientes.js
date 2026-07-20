@@ -78,19 +78,23 @@ module.exports = (db, upload) => {
         }
 
         try {
-            // Verificamos si el agente está en el búnker y aprobado
-            const userResult = await db.query("SELECT aprobado, rol FROM usuarios WHERE nombre = ?", [usuario_nombre]);
-            
-            if (userResult.length === 0 || userResult[0].aprobado !== 1) {
-                return res.status(403).json({ error: "DENEGADO", message: "Identidad no autorizada para documentar." });
+            let finalTipo = 'agente';
+            let estado = 'pendiente';
+            let finalNombre = usuario_nombre?.trim() || 'Testigo Anónimo';
+
+            // Verificamos si el usuario enviado es un administrador verificado
+            if (usuario_nombre) {
+                try {
+                    const userResult = await db.query("SELECT aprobado, rol FROM usuarios WHERE nombre = ?", [usuario_nombre]);
+                    if (userResult && userResult.length > 0 && userResult[0].rol === 'admin') {
+                        estado = 'aprobado';
+                        finalTipo = tipo || 'jefe';
+                    }
+                } catch (uErr) {}
             }
 
-            // Si el usuario es admin, el estado es aprobado automáticamente y el tipo puede ser 'jefe'
-            const finalTipo = tipo || (userResult[0].rol === 'admin' ? 'jefe' : 'agente');
-            const estado = userResult[0].rol === 'admin' ? 'aprobado' : 'pendiente';
-
             const sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, latitud, longitud, estado, tipo, imagen_url, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-            const [result] = await db.execute(sql, [titulo, contenido, usuario_nombre, latitud || 0, longitud || 0, estado, finalTipo, imagen_url]);
+            const [result] = await db.execute(sql, [titulo, contenido, finalNombre, latitud || 0, longitud || 0, estado, finalTipo, imagen_url]);
 
             // 📸 AUTO-GALERÍA: Si hay imagen, la insertamos automáticamente en la galería
             if (imagen_url) {

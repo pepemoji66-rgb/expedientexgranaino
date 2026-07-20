@@ -112,6 +112,7 @@ const Expedientes = () => {
     const [latitud, setLatitud] = useState('');
     const [longitud, setLongitud] = useState('');
     const [busquedaLugar, setBusquedaLugar] = useState('');
+    const [nombreTestigo, setNombreTestigo] = useState('');
     const [cargando, setCargando] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [amazonConfig, setAmazonConfig] = useState(null);
@@ -285,12 +286,12 @@ const Expedientes = () => {
 
     const enviarExpediente = async (e) => {
         e.preventDefault();
-        if (!userAuth) return alert("Identidad no verificada.");
+        const nombreFinal = userAuth ? userAuth.nombre : (nombreTestigo.trim() || 'Testigo Anónimo');
 
         const formData = new FormData();
         formData.append('titulo', nuevoTitulo);
         formData.append('contenido', nuevoContenido);
-        formData.append('usuario_nombre', userAuth.nombre);
+        formData.append('usuario_nombre', nombreFinal);
         formData.append('latitud', latitud || 0);
         formData.append('longitud', longitud || 0);
         formData.append('tipo', tipoRegistro);
@@ -304,9 +305,10 @@ const Expedientes = () => {
             await axios.post(`${API_BASE_URL}/api/expedientes/subir-expediente`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("🚀 " + t('expUpload'));
+            alert("🚀 EXPEDIENTE ENVIADO AL BÚNKER CON ÉXITO. EL ALTO MANDO LO REVISARÁ Y APROBARÁ ANTES DE PUBLICARLO EN EL ARCHIVO CENTRAL.");
             setNuevoTitulo('');
             setNuevoContenido('');
+            setNombreTestigo('');
             setLatitud('');
             setLongitud('');
             if (fileInput) fileInput.value = "";
@@ -522,66 +524,75 @@ const Expedientes = () => {
                 )}
             </div>
 
-            {/* Formulario visible para cualquier agente verificado */}
-            {userAuth && (
-                <div className="contenedor-envio-expediente">
-                    <div style={{ background: 'rgba(255,177,0,0.1)', border: '1px solid #ffb100', padding: '15px', marginBottom: '20px', borderRadius: '5px', textAlign: 'center' }}>
-                        <p style={{ color: '#ffb100', fontSize: '0.8rem', fontFamily: 'monospace', margin: 0 }}>
-                            {t('expControlArchive')}
-                        </p>
-                    </div>
-                    <h2 className="titulo-neon-p">
-                        {tipoRegistro === 'jefe' ? t('expWriteAdmin') : t('expWriteReport')}
-                    </h2>
-                    <form onSubmit={enviarExpediente} className="form-expediente">
-                        {/* Selector para administradores */}
-                        {isAdmin && (
-                            <div className="selector-tipo-registro" style={{ marginBottom: '20px', background: 'rgba(0, 212, 255, 0.05)', padding: '15px', borderRadius: '6px', border: '1px dashed rgba(0, 212, 255, 0.3)' }}>
-                                <label style={{ color: 'var(--color-principal)', fontSize: '0.75rem', display: 'block', marginBottom: '10px', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                                    📡 RANGO DE PUBLICACIÓN (ALTO MANDO DETECTADO):
+            {/* Formulario público de envío de expedientes y experiencias */}
+            <div className="contenedor-envio-expediente">
+                <div style={{ background: 'rgba(0,255,65,0.08)', border: '1px solid var(--color-principal)', padding: '15px', marginBottom: '20px', borderRadius: '5px', textAlign: 'center' }}>
+                    <p style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace', margin: 0, fontWeight: 'bold' }}>
+                        📡 ARCHIVO ABIERTO DE ATARFE Y GLOBAL: Puedes enviar tu testimonio o expediente sin necesidad de registrarte. Todas las evidencias se revisan por el Alto Mando antes de su desclasificación.
+                    </p>
+                </div>
+                <h2 className="titulo-neon-p">
+                    {tipoRegistro === 'jefe' ? t('expWriteAdmin') : t('expWriteReport')}
+                </h2>
+                <form onSubmit={enviarExpediente} className="form-expediente">
+                    {/* Selector para administradores */}
+                    {isAdmin && (
+                        <div className="selector-tipo-registro" style={{ marginBottom: '20px', background: 'rgba(0, 212, 255, 0.05)', padding: '15px', borderRadius: '6px', border: '1px dashed rgba(0, 212, 255, 0.3)' }}>
+                            <label style={{ color: 'var(--color-principal)', fontSize: '0.75rem', display: 'block', marginBottom: '10px', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                📡 RANGO DE PUBLICACIÓN (ALTO MANDO DETECTADO):
+                            </label>
+                            <div style={{ display: 'flex', gap: '20px' }}>
+                                <label style={{ color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                    <input
+                                        type="radio"
+                                        name="tipo_registro"
+                                        value="agente"
+                                        checked={tipoRegistro === 'agente'}
+                                        onChange={() => setTipoRegistro('agente')}
+                                        style={{ cursor: 'pointer', accentColor: 'var(--color-principal)' }}
+                                    />
+                                    👤 {t('expFilterAgent')}
                                 </label>
-                                <div style={{ display: 'flex', gap: '20px' }}>
-                                    <label style={{ color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                        <input
-                                            type="radio"
-                                            name="tipo_registro"
-                                            value="agente"
-                                            checked={tipoRegistro === 'agente'}
-                                            onChange={() => setTipoRegistro('agente')}
-                                            style={{ cursor: 'pointer', accentColor: 'var(--color-principal)' }}
-                                        />
-                                        👤 {t('expFilterAgent')}
-                                    </label>
-                                    <label style={{ color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                        <input
-                                            type="radio"
-                                            name="tipo_registro"
-                                            value="jefe"
-                                            checked={tipoRegistro === 'jefe'}
-                                            onChange={() => setTipoRegistro('jefe')}
-                                            style={{ cursor: 'pointer', accentColor: 'var(--color-principal)' }}
-                                        />
-                                        🛡️ {t('expFilterAdmin')}
-                                    </label>
-                                </div>
+                                <label style={{ color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                    <input
+                                        type="radio"
+                                        name="tipo_registro"
+                                        value="jefe"
+                                        checked={tipoRegistro === 'jefe'}
+                                        onChange={() => setTipoRegistro('jefe')}
+                                        style={{ cursor: 'pointer', accentColor: 'var(--color-principal)' }}
+                                    />
+                                    🛡️ {t('expFilterAdmin')}
+                                </label>
                             </div>
-                        )}
+                        </div>
+                    )}
 
+                    {!userAuth && (
                         <input
                             type="text"
                             className="input-bunker-exp"
-                            placeholder={`${t('findingTitle')}...`}
-                            value={nuevoTitulo}
-                            onChange={(e) => setNuevoTitulo(e.target.value)}
-                            required
+                            placeholder="Tu Nombre o Apodo de Testigo (Opcional - por defecto: Testigo Anónimo)..."
+                            value={nombreTestigo}
+                            onChange={(e) => setNombreTestigo(e.target.value)}
                         />
-                        <textarea
-                            className="textarea-bunker-exp"
-                            placeholder={`${t('newsDesc')}...`}
-                            value={nuevoContenido}
-                            onChange={(e) => setNuevoContenido(e.target.value)}
-                            required
-                        ></textarea>
+                    )}
+
+                    <input
+                        type="text"
+                        className="input-bunker-exp"
+                        placeholder={`${t('findingTitle')}...`}
+                        value={nuevoTitulo}
+                        onChange={(e) => setNuevoTitulo(e.target.value)}
+                        required
+                    />
+                    <textarea
+                        className="textarea-bunker-exp"
+                        placeholder={`${t('newsDesc')}...`}
+                        value={nuevoContenido}
+                        onChange={(e) => setNuevoContenido(e.target.value)}
+                        required
+                    ></textarea>
 
                         {/* BUSCADOR DE COORDENADAS */}
                         <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
@@ -596,7 +607,7 @@ const Expedientes = () => {
                                     style={{ flex: 1, marginBottom: 0 }}
                                 />
                                 <button type="button" onClick={buscarCoordenadas} style={{ padding: '10px', background: 'var(--color-principal)', color: '#000', border: 'none', padding: '0 15px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                    {t('newsSearch')}
+                                    📍 AUTO-DETECTAR COORDENADAS
                                 </button>
                             </div>
                         </div>
@@ -628,7 +639,6 @@ const Expedientes = () => {
                         </button>
                     </form>
                 </div>
-            )}
 
             {/* MODAL PARA LEER EL ARCHIVO */}
             {relatoAbierto && (

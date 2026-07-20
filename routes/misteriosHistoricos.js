@@ -53,7 +53,7 @@ module.exports = (upload) => {
             const query = `
                 INSERT INTO misterios_historicos 
                 (titulo, contenido, titulo_en, contenido_en, latitud, longitud, imagen_url, estado) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado')
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')
             `;
             const valores = [titulo, contenido, titulo_en || null, contenido_en || null, latitud || 0, longitud || 0, imagen_url || null];
             
