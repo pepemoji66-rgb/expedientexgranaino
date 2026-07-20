@@ -1799,7 +1799,7 @@ app.get('/expedientes/:id', async (req, res) => {
         return res.sendFile(path.join(__dirname, 'build', 'index.html'));
     }
     try {
-        const [rows] = await db.promise().query('SELECT titulo, descripcion, imagen_url FROM expedientes WHERE id = ?', [req.params.id]);
+        const [rows] = await db.promise().query('SELECT titulo, contenido, imagen_url FROM expedientes WHERE id = ?', [req.params.id]);
         if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
         const item = rows[0];
         const imgUrl = cloudinaryOgImage(
@@ -1807,7 +1807,7 @@ app.get('/expedientes/:id', async (req, res) => {
                 ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
                 : DEFAULT_IMAGE
         );
-        const desc = (item.descripcion || 'Expediente OVNI documentado en Granada.').replace(/<[^>]+>/g, '').substring(0, 160);
+        const desc = (item.contenido || 'Expediente OVNI documentado en Granada.').replace(/<[^>]+>/g, '').substring(0, 160);
         const html = injectOgTags(getIndexHtml(), {
             url: `${SITE_URL}/expedientes/${req.params.id}`,
             title: `${item.titulo} | Expediente X Granaíno`,
@@ -1817,6 +1817,34 @@ app.get('/expedientes/:id', async (req, res) => {
         res.set('Content-Type', 'text/html').send(html);
     } catch (e) {
         console.error('OG expedientes:', e.message);
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+});
+
+// Casos Abiertos / True Crime
+app.get('/casos-abiertos/:id', async (req, res) => {
+    if (!isSocialCrawler(req.headers['user-agent'])) {
+        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+    try {
+        const [rows] = await db.promise().query('SELECT titulo, contenido, imagen_url FROM casos_abiertos WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+        const item = rows[0];
+        const imgUrl = cloudinaryOgImage(
+            item.imagen_url
+                ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
+                : DEFAULT_IMAGE
+        );
+        const desc = (item.contenido || 'Caso abierto True Crime sin resolver.').replace(/<[^>]+>/g, '').substring(0, 160);
+        const html = injectOgTags(getIndexHtml(), {
+            url: `${SITE_URL}/casos-abiertos/${req.params.id}`,
+            title: `${item.titulo} | Expediente X Granaíno`,
+            description: desc,
+            image: imgUrl
+        });
+        res.set('Content-Type', 'text/html').send(html);
+    } catch (e) {
+        console.error('OG casos-abiertos:', e.message);
         res.sendFile(path.join(__dirname, 'build', 'index.html'));
     }
 });
