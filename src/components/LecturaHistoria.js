@@ -217,12 +217,14 @@ const LecturaHistoria = ({ userAuth }) => {
 
     const bannerData = amazonConfig?.banner;
     let biblioData = amazonConfig?.bibliografia;
-    if (!biblioData && amazonConfig?.enlace_amazon) {
+    const enlaceCualquiera = amazonConfig?.enlace_amazon || amazonConfig?.url_afiliado || amazonConfig?.link || amazonConfig?.url;
+    if (!biblioData && enlaceCualquiera) {
         biblioData = [{
             titulo: amazonConfig.titulo,
             autor: amazonConfig.autor || "Redacción Búnker",
+            descripcion: amazonConfig.descripcion || "",
             imagen_url: amazonConfig.imagen_url,
-            link: amazonConfig.enlace_amazon
+            link: enlaceCualquiera
         }];
     }
 
