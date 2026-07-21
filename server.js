@@ -703,15 +703,31 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     // Eliminamos el aviso por defecto de React para que el bot de Google (y AdSense) no lo lea como prioritario
     html = html.replace(/<noscript>You need to enable JavaScript to run this app\.<\/noscript>/ig, '');
 
-    // Inyectamos el bloque de contenido estático ANTES del div#root
-    // Visible para bots (AdSense, Googlebot) y revisores humanos
-    // Visually hidden para usuarios que tienen JS activo (React lo oculta al montar)
+    // Inyectamos el bloque de contenido estático dentro del div#root para SSR limpio
+    // Legible directamente por los robots de Googlebot y AdSense como contenido real visible
     html = html.replace(
         '<div id="root"></div>',
-        `<div id="seo-static-content" aria-hidden="true" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;font-size:0;">
-${contenidoSeo}
-</div>
-<div id="root"></div>`
+        `<div id="root">
+            <main id="seo-prerendered-content" style="max-width:1000px;margin:20px auto;padding:25px;font-family:sans-serif;color:#222;line-height:1.7;background:#ffffff;border-radius:8px;">
+                ${contenidoSeo}
+                <hr style="margin:30px 0;border:0;border-top:1px solid #ddd;" />
+                <footer style="font-size:0.85rem;color:#555;">
+                    <p><strong>Expediente X Granaíno — Archivo de Investigación Paranormal y Ufológica</strong></p>
+                    <p style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <a href="https://expedientexgranaino.com/">Inicio</a> | 
+                        <a href="https://expedientexgranaino.com/expedientes">Expedientes OVNI</a> | 
+                        <a href="https://expedientexgranaino.com/casos-abiertos">Casos Abiertos / True Crime</a> | 
+                        <a href="https://expedientexgranaino.com/misterios-historicos">Misterios Históricos</a> | 
+                        <a href="https://expedientexgranaino.com/noticias">Noticias Paranormales</a> | 
+                        <a href="https://expedientexgranaino.com/sobre-nosotros">Sobre Nosotros</a> | 
+                        <a href="https://expedientexgranaino.com/privacidad">Política de Privacidad</a> | 
+                        <a href="https://expedientexgranaino.com/cookies">Política de Cookies</a> | 
+                        <a href="https://expedientexgranaino.com/aviso-legal">Aviso Legal</a>
+                    </p>
+                    <p>© ${new Date().getFullYear()} Expediente X Granaíno. Todos los derechos reservados.</p>
+                </footer>
+            </main>
+        </div>`
     );
 
     return html;
