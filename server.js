@@ -1769,16 +1769,6 @@ const injectOgTags = (html, tags) => {
     return html.replace(/<head>/, `<head>${ogBlock}`);
 };
 
-// Transforma URLs de Cloudinary para que tengan el tamaño mínimo exigido por Facebook (200x200)
-// y el tamaño óptimo para redes sociales (1200x630)
-const cloudinaryOgImage = (url) => {
-    if (!url) return url;
-    // Solo transformamos URLs de Cloudinary
-    if (!url.includes('res.cloudinary.com')) return url;
-    // Insertamos los parámetros de transformación justo después de /upload/
-    return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,f_jpg,q_auto/');
-};
-
 const getIndexHtml = () => {
 
     const indexPath = path.join(__dirname, 'build', 'index.html');
