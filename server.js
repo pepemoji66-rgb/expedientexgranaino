@@ -622,20 +622,31 @@ io.on('connection', (socket) => {
 
 // ==============================================
 // PRE-RENDER SSR PARA BOTS (AdSense / Googlebot)
+// Transforma URLs de Cloudinary para que tengan el tamaño mínimo exigido por Facebook (200x200)
+// y el tamaño óptimo para redes sociales (1200x630)
+const cloudinaryOgImage = (url) => {
+    if (!url) return url;
+    if (!url.includes('res.cloudinary.com')) return url;
+    return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,f_jpg,q_auto/');
+};
+
+// ==============================================
 // Inyecta contenido HTML rico antes de servir el SPA
 // ==============================================
 
 const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl = null, paginaUrl = null) => {
     // Reemplazamos el title genérico por uno específico de página
     html = html.replace(
-        /<title>[^<]*<\/title>/,
+        /<title>[^<]*<\/title>/i,
         `<title>${titulo}</title>`
     );
 
-    const desc = (descripcion || '').replace(/"/g, '&quot;');
+    const desc = (descripcion || '').replace(/"/g, '&quot;').replace(/\n/g, ' ').trim();
     const title = (titulo || '').replace(/"/g, '&quot;');
-    const img = imagenUrl || 'https://expedientexgranaino.com/social-preview.png?v=5.0';
+    const rawImg = imagenUrl || 'https://expedientexgranaino.com/social-preview.png?v=7.0';
+    const img = cloudinaryOgImage(rawImg);
     const url = paginaUrl || 'https://expedientexgranaino.com/';
+    const esHistoria = url.includes('/leer-historia/') || url.includes('/expedientes/') || url.includes('/noticias/') || url.includes('/casos-abiertos/') || url.includes('/misterios-historicos/');
 
     // Limpiamos los tags originales en index.html para evitar duplicaciones
     html = html.replace(/<meta [^>]*property=["']og:[^"']*["'][^>]*>/gi, '');
@@ -645,10 +656,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     html = html.replace(/<link [^>]*rel=["']canonical["'][^>]*>/gi, '');
 
     // Generación de Datos Estructurados (JSON-LD) para SEO
-    let schemaType = "WebSite";
-    if (url.includes('/leer-historia/')) {
-        schemaType = "NewsArticle";
-    }
+    let schemaType = esHistoria ? "NewsArticle" : "WebSite";
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -680,25 +688,28 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     }
 
     // Inyectamos meta description, OG, Twitter Cards, canonical y JSON-LD
-    html = html.replace(
-        '</head>',
-        `<meta name="google-site-verification" content="wu1T4bL_7euJUjS-742pfAGN6xKEynd3X9P9BDUr0Dc" />
+    const ogBlock = `
+<meta name="google-site-verification" content="wu1T4bL_7euJUjS-742pfAGN6xKEynd3X9P9BDUr0Dc" />
 <meta name="description" content="${desc}" />
 <meta name="keywords" content="OVNI Granada, fenómenos paranormales, ufología Andalucía, avistamientos UFO, psicofonías, misterio, investigación paranormal, Expediente X" />
 <link rel="canonical" href="${url}" />
-<meta property="og:type" content="website" />
+<meta property="og:type" content="${esHistoria ? 'article' : 'website'}" />
+<meta property="og:site_name" content="Expediente X Granaíno" />
 <meta property="og:url" content="${url}" />
 <meta property="og:title" content="${title}" />
 <meta property="og:description" content="${desc}" />
 <meta property="og:image" content="${img}" />
+<meta property="og:image:secure_url" content="${img}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="${url}" />
 <meta name="twitter:title" content="${title}" />
 <meta name="twitter:description" content="${desc}" />
 <meta name="twitter:image" content="${img}" />
-<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-</head>`
-    );
+<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`;
+
+    html = html.replace('</head>', `${ogBlock}\n</head>`);
 
     // Eliminamos el aviso por defecto de React para que el bot de Google (y AdSense) no lo lea como prioritario
     html = html.replace(/<noscript>You need to enable JavaScript to run this app\.<\/noscript>/ig, '');
@@ -1777,120 +1788,21 @@ const getIndexHtml = () => {
 const SITE_URL = 'https://expedientexgranaino.com';
 const DEFAULT_IMAGE = `${SITE_URL}/social-preview.png?v=7.0`;
 
-// =====================================================================
-// RUTAS INDIVIDUALES ESPECÍFICAS DE SECCIÓN (Para crawlers sociales)
-// =====================================================================
-
-// Noticias
-app.get('/noticias/:id', async (req, res) => {
-    if (!isSocialCrawler(req.headers['user-agent'])) {
-        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
-    try {
-        const [rows] = await db.promise().query('SELECT titulo, cuerpo, imagen_url FROM noticias WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-        const item = rows[0];
-        const imgUrl = cloudinaryOgImage(
-            item.imagen_url
-                ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
-                : DEFAULT_IMAGE
-        );
-        const desc = (item.cuerpo || '').replace(/<[^>]+>/g, '').substring(0, 160);
-        const html = injectOgTags(getIndexHtml(), {
-            url: `${SITE_URL}/noticias/${req.params.id}`,
-            title: `${item.titulo} | Expediente X Granaíno`,
-            description: desc || 'Última hora paranormal desde el Búnker.',
-            image: imgUrl
-        });
-        res.set('Content-Type', 'text/html').send(html);
-    } catch (e) {
-        console.error('OG noticias:', e.message);
-        res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
+// Redirecciones 301 limpias para URLs directas de sección hacia la ruta unificada /leer-historia/:id?src=
+app.get('/noticias/:id', (req, res) => {
+    res.redirect(301, `/leer-historia/${req.params.id}?src=noticias`);
 });
 
-// Expedientes
-app.get('/expedientes/:id', async (req, res) => {
-    if (!isSocialCrawler(req.headers['user-agent'])) {
-        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
-    try {
-        const [rows] = await db.promise().query('SELECT titulo, contenido, imagen_url FROM expedientes WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-        const item = rows[0];
-        const imgUrl = cloudinaryOgImage(
-            item.imagen_url
-                ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
-                : DEFAULT_IMAGE
-        );
-        const desc = (item.contenido || 'Expediente OVNI documentado en Granada.').replace(/<[^>]+>/g, '').substring(0, 160);
-        const html = injectOgTags(getIndexHtml(), {
-            url: `${SITE_URL}/expedientes/${req.params.id}`,
-            title: `${item.titulo} | Expediente X Granaíno`,
-            description: desc,
-            image: imgUrl
-        });
-        res.set('Content-Type', 'text/html').send(html);
-    } catch (e) {
-        console.error('OG expedientes:', e.message);
-        res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
+app.get('/expedientes/:id', (req, res) => {
+    res.redirect(301, `/leer-historia/${req.params.id}?src=expedientes`);
 });
 
-// Casos Abiertos / True Crime
-app.get('/casos-abiertos/:id', async (req, res) => {
-    if (!isSocialCrawler(req.headers['user-agent'])) {
-        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
-    try {
-        const [rows] = await db.promise().query('SELECT titulo, contenido, imagen_url FROM casos_abiertos WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-        const item = rows[0];
-        const imgUrl = cloudinaryOgImage(
-            item.imagen_url
-                ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
-                : DEFAULT_IMAGE
-        );
-        const desc = (item.contenido || 'Caso abierto True Crime sin resolver.').replace(/<[^>]+>/g, '').substring(0, 160);
-        const html = injectOgTags(getIndexHtml(), {
-            url: `${SITE_URL}/casos-abiertos/${req.params.id}`,
-            title: `${item.titulo} | Expediente X Granaíno`,
-            description: desc,
-            image: imgUrl
-        });
-        res.set('Content-Type', 'text/html').send(html);
-    } catch (e) {
-        console.error('OG casos-abiertos:', e.message);
-        res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
+app.get('/casos-abiertos/:id', (req, res) => {
+    res.redirect(301, `/leer-historia/${req.params.id}?src=casos`);
 });
 
-// Misterios Históricos
-app.get('/misterios-historicos/:id', async (req, res) => {
-    if (!isSocialCrawler(req.headers['user-agent'])) {
-        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
-    try {
-        const [rows] = await db.promise().query('SELECT titulo, contenido, imagen_url FROM misterios_historicos WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) return res.sendFile(path.join(__dirname, 'build', 'index.html'));
-        const item = rows[0];
-        const imgUrl = cloudinaryOgImage(
-            item.imagen_url
-                ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${SITE_URL}/imagenes/${item.imagen_url}`)
-                : DEFAULT_IMAGE
-        );
-        const desc = (item.contenido || 'Misterio histórico sin resolver.').replace(/<[^>]+>/g, '').substring(0, 160);
-        const html = injectOgTags(getIndexHtml(), {
-            url: `${SITE_URL}/misterios-historicos/${req.params.id}`,
-            title: `${item.titulo} | Expediente X Granaíno`,
-            description: desc,
-            image: imgUrl
-        });
-        res.set('Content-Type', 'text/html').send(html);
-    } catch (e) {
-        console.error('OG misterios:', e.message);
-        res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
+app.get('/misterios-historicos/:id', (req, res) => {
+    res.redirect(301, `/leer-historia/${req.params.id}?src=misterios`);
 });
 
 // Ruta de captura general: el resto de páginas del SPA
