@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
 import AdSlot from './AdSlot';
+import Paginacion, { getPaginaGuardada } from './Paginacion';
 import './misterioshistoricos.css';
 import API_BASE_URL from '../config';
 
@@ -57,7 +58,7 @@ const MisteriosHistoricos = () => {
     const [misterios, setMisterios] = useState([]);
     const [busqueda, setBusqueda] = useState('');
     const [letraSeleccionada, setLetraSeleccionada] = useState('TODOS');
-    const [paginaActual, setPaginaActual] = useState(1);
+    const [paginaActual, setPaginaActual] = useState(() => getPaginaGuardada('page_misterios'));
     const [amazonKeys, setAmazonKeys] = useState(new Set());
     const [amazonLinks, setAmazonLinks] = useState(new Map());
     const misteriosPorPagina = 9;
@@ -219,17 +220,7 @@ const MisteriosHistoricos = () => {
             </div>
 
             {/* PAGINACIÓN */}
-            {totalPaginas > 1 && (
-                <div className="paginacion-admin" style={{ marginTop: '30px' }}>
-                    <button disabled={paginaActual === 1} onClick={() => setPaginaActual(p => p - 1)}>
-                        {language === 'en' ? 'BACK' : 'ATRÁS'}
-                    </button>
-                    <span>{language === 'en' ? `PAGE ${paginaActual} / ${totalPaginas}` : `PÁG ${paginaActual} / ${totalPaginas}`}</span>
-                    <button disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(p => p + 1)}>
-                        {language === 'en' ? 'NEXT' : 'SIGUIENTE'}
-                    </button>
-                </div>
-            )}
+            <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} onChange={setPaginaActual} storageKey="page_misterios" />
 
             <AdSlot slotId="misterios-bottom" />
         </div>

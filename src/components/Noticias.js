@@ -8,6 +8,7 @@ import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './noticias.css';
 import API_BASE_URL from '../config';
 import NoticiasExternas from './NoticiasExternas';
+import Paginacion, { getPaginaGuardada } from './Paginacion';
 
 const buildAmazonMaps = (todos) => {
     const keys = new Set();
@@ -67,7 +68,7 @@ const Noticias = ({ userAuth }) => {
     const navigate = useNavigate();
 
     // --- LÓGICA DE PAGINACIÓN ---
-    const [paginaActual, setPaginaActual] = useState(1);
+    const [paginaActual, setPaginaActual] = useState(() => getPaginaGuardada('page_noticias'));
     const noticiasPorPagina = 12;
 
     const [nuevaNoticia, setNuevaNoticia] = useState({
@@ -288,13 +289,7 @@ const Noticias = ({ userAuth }) => {
                 )}
             </div>
 
-            {totalPaginas > 1 && (
-                <div className="paginacion-bunker">
-                    <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(paginaActual - 1); window.scrollTo(0, 0); }}>{t('newsPrev')}</button>
-                    <span className="pagi-info">{paginaActual} / {totalPaginas}</span>
-                    <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(paginaActual + 1); window.scrollTo(0, 0); }}>{t('newsNext')}</button>
-                </div>
-            )}
+            <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} onChange={setPaginaActual} storageKey="page_noticias" />
 
             {/* SECCIÓN DE INTELIGENCIA EXTERNA (PARA QUE NO SE VEA SOLO) */}
             <div className="inteligencia-externa-container">

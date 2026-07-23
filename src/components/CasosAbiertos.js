@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
 import AdSlot from './AdSlot';
+import Paginacion, { getPaginaGuardada } from './Paginacion';
 import './casosabiertos.css';
 import API_BASE_URL from '../config';
 
@@ -59,7 +60,7 @@ const CasosAbiertos = ({ userAuth }) => {
     const [busqueda, setBusqueda] = useState('');
     const [letraSeleccionada, setLetraSeleccionada] = useState('TODOS');
     const [casoExpandido, setCasoExpandido] = useState(null);
-    const [paginaActual, setPaginaActual] = useState(1);
+    const [paginaActual, setPaginaActual] = useState(() => getPaginaGuardada('page_casos'));
     const [amazonKeys, setAmazonKeys] = useState(new Set());
     const [amazonLinks, setAmazonLinks] = useState(new Map());
     const casosPorPagina = 9;
@@ -387,13 +388,7 @@ const CasosAbiertos = ({ userAuth }) => {
                 )}
             </div>
 
-            {totalPaginas > 1 && (
-                <div className="paginacion-casos">
-                    <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo(0, 0); }}>ATRÁS</button>
-                    <span>PÁG {paginaActual} / {totalPaginas}</span>
-                    <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0, 0); }}>SIGUIENTE</button>
-                </div>
-            )}
+            <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} onChange={setPaginaActual} storageKey="page_casos" />
 
             {/* FORMULARIO DE ENVÍO DE CASOS */}
             {userAuth && (

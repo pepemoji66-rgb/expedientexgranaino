@@ -7,6 +7,7 @@ import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
 import { safeLocalStorage } from '../utils/storage';
 import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
+import Paginacion, { getPaginaGuardada } from './Paginacion';
 import './expedientes.css';
 import './lecturahistoria.css';
 
@@ -105,7 +106,7 @@ const Expedientes = () => {
     const [datos, setDatos] = useState([]);
     const [relatoAbierto, setRelatoAbierto] = useState(null);
     const navigate = useNavigate();
-    const [paginaActual, setPaginaActual] = useState(1);
+    const [paginaActual, setPaginaActual] = useState(() => getPaginaGuardada('page_expedientes'));
     const expedientesPorPagina = 9;
     const [nuevoTitulo, setNuevoTitulo] = useState('');
     const [nuevoContenido, setNuevoContenido] = useState('');
@@ -515,13 +516,7 @@ const Expedientes = () => {
                             )}
                         </div>
 
-                        {totalPaginas > 1 && (
-                            <div className="paginacion-expedientes">
-                                <button disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo(0, 0); }}>ATRÁS</button>
-                                <span>PÁG {paginaActual} / {totalPaginas}</span>
-                                <button disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo(0, 0); }}>SIGUIENTE</button>
-                            </div>
-                        )}
+                        <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} onChange={setPaginaActual} storageKey="page_expedientes" />
                     </>
                 )}
             </div>

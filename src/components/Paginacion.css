@@ -1,0 +1,104 @@
+/* ====================================================
+   PAGINACIÓN V2 — COMPONENTE REUTILIZABLE DEL BÚNKER
+   Botones numéricos + navegación + memoria de página
+   ==================================================== */
+
+.paginacion-bunker-v2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 40px auto 20px;
+    flex-wrap: wrap;
+    padding: 0 10px;
+}
+
+/* Contenedor de los botones numéricos */
+.paginacion-bunker-v2 .pag-numeros {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Botón base (navegación y números) */
+.paginacion-bunker-v2 .pag-btn {
+    background: transparent;
+    border: 1px solid rgba(var(--rgb-principal, 0, 212, 255), 0.35);
+    color: var(--color-principal, #00d4ff);
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    min-width: 38px;
+    text-align: center;
+}
+
+/* Hover en botones activos */
+.paginacion-bunker-v2 .pag-btn:hover:not(:disabled) {
+    background: rgba(var(--rgb-principal, 0, 212, 255), 0.15);
+    border-color: var(--color-principal, #00d4ff);
+    box-shadow: 0 0 12px rgba(var(--rgb-principal, 0, 212, 255), 0.25);
+    transform: translateY(-1px);
+}
+
+/* Botón deshabilitado (página actual o límite) */
+.paginacion-bunker-v2 .pag-btn:disabled {
+    cursor: default;
+}
+
+/* Botones de navegación (ATRÁS / SIGUIENTE) deshabilitados */
+.paginacion-bunker-v2 .pag-nav:disabled {
+    color: #444;
+    border-color: #333;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Botón de página ACTIVA (la página en la que estamos) */
+.paginacion-bunker-v2 .pag-activa {
+    background: var(--color-principal, #00d4ff) !important;
+    color: #000 !important;
+    border-color: var(--color-principal, #00d4ff) !important;
+    box-shadow: 0 0 15px rgba(var(--rgb-principal, 0, 212, 255), 0.5);
+    cursor: default;
+}
+
+/* Puntos suspensivos */
+.paginacion-bunker-v2 .pag-dots {
+    color: #666;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    padding: 0 4px;
+    user-select: none;
+}
+
+/* Botones de navegación (ATRÁS / SIGUIENTE) */
+.paginacion-bunker-v2 .pag-nav {
+    font-size: 0.78rem;
+    padding: 8px 16px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* ── RESPONSIVE: Móvil ── */
+@media (max-width: 600px) {
+    .paginacion-bunker-v2 {
+        gap: 5px;
+    }
+
+    .paginacion-bunker-v2 .pag-btn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        min-width: 32px;
+    }
+
+    .paginacion-bunker-v2 .pag-nav {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+    }
+}
