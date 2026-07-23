@@ -3,6 +3,7 @@ import axios from 'axios';
 import './paneladmin.css';
 import { API_BASE_URL, ADMIN_EMAIL } from '../config';
 import { safeLocalStorage } from '../utils/storage';
+import Paginacion from './Paginacion';
 
 const PanelAdmin = () => {
     const [tab, setTab] = useState('inicio');
@@ -35,7 +36,7 @@ const PanelAdmin = () => {
     });
     const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
     const [archivoEdit, setArchivoEdit] = useState(null);
-    const [paginaActual, setPaginaActual] = useState(1);
+    const [paginaActual, setPaginaActual] = useState(1); // Se resetea a 1 al cambiar de pestaña
     const itemsPorPagina = 10;
     const [filtroBusqueda, setFiltroBusqueda] = useState('');
 
@@ -1024,13 +1025,7 @@ const PanelAdmin = () => {
                                 })}
                             </tbody>
                         </table>
-                        {totalPaginas > 1 && (
-                            <div className="paginacion-admin">
-                                <button disabled={paginaActual === 1} onClick={() => setPaginaActual(p => p - 1)}>ATRÁS</button>
-                                <span>PÁG {paginaActual} / {totalPaginas}</span>
-                                <button disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(p => p + 1)}>SIGUIENTE</button>
-                            </div>
-                        )}
+                        <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} onChange={setPaginaActual} storageKey="page_admin" scrollToTop={false} />
                     </div>
                 </>
             ) : (
