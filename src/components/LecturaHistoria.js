@@ -100,7 +100,25 @@ const LecturaHistoria = ({ userAuth }) => {
     const queryParams = new URLSearchParams(location.search);
     const src = queryParams.get('src');
     
-    const [historia, setHistoria] = useState(null);
+    const getInitialHistoria = () => {
+        if (typeof window !== 'undefined' && window.__INITIAL_HISTORIA__) {
+            const h = window.__INITIAL_HISTORIA__;
+            if (String(h.id) === String(id)) {
+                return h;
+            }
+        }
+        return null;
+    };
+
+    const initialData = getInitialHistoria();
+    const initialTypes = (typeof window !== 'undefined' && window.__INITIAL_HISTORIA_TYPE__) || {};
+
+    const [historia, setHistoria] = useState(initialData);
+    const [esRelatoAdmin, setEsRelatoAdmin] = useState(initialData ? !!initialTypes.esRelatoAdmin : false);
+    const [esNoticia, setEsNoticia] = useState(initialData ? !!initialTypes.esNoticia : false);
+    const [esMisterio, setEsMisterio] = useState(initialData ? !!initialTypes.esMisterio : false);
+    const [esCaso, setEsCaso] = useState(initialData ? !!initialTypes.esCaso : false);
+    const [cargando, setCargando] = useState(!initialData);
     
     // ESTADO DE AUDIO (ROBOCOP) MULTICHOICE SEQUENTIAL PARA MÓVIL
     const [reproduciendoAudio, setReproduciendoAudio] = useState(false);
@@ -160,11 +178,7 @@ const LecturaHistoria = ({ userAuth }) => {
         currentUtteranceRef.current = ut;
         window.speechSynthesis.speak(ut);
     };
-    const [esRelatoAdmin, setEsRelatoAdmin] = useState(false);
-    const [esNoticia, setEsNoticia] = useState(false);
-    const [esMisterio, setEsMisterio] = useState(false);
-    const [esCaso, setEsCaso] = useState(false);
-    const [cargando, setCargando] = useState(true);
+    
     const [amazonConfig, setAmazonConfig] = useState(null);
 
     // ESTADO DE COMENTARIOS
@@ -429,6 +443,10 @@ const LecturaHistoria = ({ userAuth }) => {
             }
         } catch (err) {
             console.error("❌ Error al recuperar el relato del búnker", err);
+            const initialH = getInitialHistoria();
+            if (initialH && String(initialH.id) === String(id)) {
+                setHistoria(initialH);
+            }
         } finally {
             setCargando(false);
             if (forceTranslationUpdate) forceTranslationUpdate();
@@ -437,7 +455,12 @@ const LecturaHistoria = ({ userAuth }) => {
 
     useEffect(() => {
         window.scrollTo(0, 0); // SUBIDA AUTOMÁTICA AL CARGAR
-        obtenerHistoria();
+        const initialH = getInitialHistoria();
+        if (initialH && String(initialH.id) === String(id) && language !== 'en') {
+            setCargando(false);
+        } else {
+            obtenerHistoria();
+        }
         
         // Prime the voices database on mobile/Safari
         if (window.speechSynthesis) {

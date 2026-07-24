@@ -1518,7 +1518,12 @@ app.get('/leer-historia/:id', async (req, res) => {
     <div style="white-space:pre-line;">${cuerpoTexto}</div>
 </article>`;
 
-            const pagina = inyectarContenidoSEO(
+            // Sanitizar objeto para inyección en script tag de forma segura
+            const jsonHistoria = JSON.stringify(historia).replace(/</g, '\\u003c');
+            const jsonTypes = JSON.stringify({ esRelatoAdmin, esNoticia, esMisterio, esCaso }).replace(/</g, '\\u003c');
+            const initialScript = `<script>window.__INITIAL_HISTORIA__ = ${jsonHistoria}; window.__INITIAL_HISTORIA_TYPE__ = ${jsonTypes};</script>`;
+
+            let pagina = inyectarContenidoSEO(
                 html,
                 titulo,
                 desc,
@@ -1526,6 +1531,7 @@ app.get('/leer-historia/:id', async (req, res) => {
                 imagenUrl,
                 paginaUrl
             );
+            pagina = pagina.replace('</head>', `${initialScript}\n</head>`);
             res.send(pagina);
         } else {
             res.sendFile(indexPath);
