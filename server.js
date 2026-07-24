@@ -1651,78 +1651,103 @@ app.get('/sitemap.xml', async (req, res) => {
         const domain = 'https://expedientexgranaino.com';
         const today = new Date().toISOString().split('T')[0];
 
-        // Usamos un Set de JavaScript para almacenar URLs y garantizar que sean 100% ÚNICAS
-        const urlsUnicas = new Set();
+        // Array de URLs con sus metadatos individuales
+        const urls = [];
 
-        // 1. URLs estáticas básicas (Añadimos al Set)
+        // 1. URLs estáticas principales del Búnker
         const estaticas = [
-            '/',
-            '/noticias',
-            '/expedientes',
-            '/casos-abiertos',
-            '/misterios-historicos',
-            '/especial-atarfe',
-            '/videos',
-            '/galeria',
-            '/lugares',
-            '/biblioteca',
-            '/sobre-nosotros',
-            '/privacidad',
-            '/cookies',
-            '/legal'
+            { path: '/',                     priority: '1.0', changefreq: 'daily' },
+            { path: '/expedientes',          priority: '0.9', changefreq: 'daily' },
+            { path: '/casos-abiertos',       priority: '0.9', changefreq: 'daily' },
+            { path: '/misterios-historicos', priority: '0.9', changefreq: 'daily' },
+            { path: '/noticias',             priority: '0.9', changefreq: 'daily' },
+            { path: '/especial-atarfe',      priority: '0.8', changefreq: 'weekly' },
+            { path: '/videos',               priority: '0.7', changefreq: 'weekly' },
+            { path: '/galeria',              priority: '0.7', changefreq: 'weekly' },
+            { path: '/lugares',              priority: '0.7', changefreq: 'weekly' },
+            { path: '/biblioteca',           priority: '0.7', changefreq: 'weekly' },
+            { path: '/horoscopo',            priority: '0.6', changefreq: 'daily' },
+            { path: '/colaboradores',        priority: '0.5', changefreq: 'monthly' },
+            { path: '/archipeg',             priority: '0.5', changefreq: 'monthly' },
+            { path: '/sobre-nosotros',       priority: '0.5', changefreq: 'monthly' },
+            { path: '/acceso',               priority: '0.4', changefreq: 'monthly' },
+            { path: '/privacidad',           priority: '0.3', changefreq: 'yearly' },
+            { path: '/cookies',              priority: '0.3', changefreq: 'yearly' },
+            { path: '/legal',                priority: '0.3', changefreq: 'yearly' }
         ];
-        
-        estaticas.forEach(p => urlsUnicas.add(`${domain}${p}`));
 
-        // 2. Obtener expedientes (con ?src=expedientes para que Google las indexe correctamente)
+        estaticas.forEach(p => {
+            urls.push({
+                loc: `${domain}${p.path}`,
+                lastmod: today,
+                changefreq: p.changefreq,
+                priority: p.priority
+            });
+        });
+
+        // Consulta unificada: incluimos todos los estados activos para TODAS las tablas
+        const estadosActivos = "estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'";
+
+        // 2. Expedientes / Relatos
         try {
-            const exps = await db.query("SELECT id FROM expedientes WHERE estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'");
-            exps.forEach(e => urlsUnicas.add(`${domain}/leer-historia/${e.id}?src=expedientes`));
-        } catch (e) { console.error("Error sitemap exps:", e.message); }
+            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha_actualizacion, '%Y-%m-%d'), DATE_FORMAT(fecha_creacion, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE ${estadosActivos}`);
+            exps.forEach(e => urls.push({
+                loc: `${domain}/leer-historia/${e.id}?src=expedientes`,
+                lastmod: e.lastmod || today,
+                changefreq: 'weekly',
+                priority: '0.8'
+            }));
+        } catch (e) { console.error("Sitemap exps:", e.message); }
 
-        // 3. Obtener casos abiertos (True Crime)
+        // 3. Casos Abiertos / True Crime
         try {
-            const casos = await db.query("SELECT id FROM casos_abiertos WHERE estado = 'aprobado'");
-            casos.forEach(c => urlsUnicas.add(`${domain}/leer-historia/${c.id}?src=casos`));
-        } catch (e) { console.error("Error sitemap casos:", e.message); }
+            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha_actualizacion, '%Y-%m-%d'), DATE_FORMAT(fecha_creacion, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE ${estadosActivos}`);
+            casos.forEach(c => urls.push({
+                loc: `${domain}/leer-historia/${c.id}?src=casos`,
+                lastmod: c.lastmod || today,
+                changefreq: 'weekly',
+                priority: '0.8'
+            }));
+        } catch (e) { console.error("Sitemap casos:", e.message); }
 
-        // 4. Obtener misterios históricos
+        // 4. Misterios Históricos
         try {
-            const misterios = await db.query("SELECT id FROM misterios_historicos WHERE estado = 'aprobado'");
-            misterios.forEach(m => urlsUnicas.add(`${domain}/leer-historia/${m.id}?src=misterios`));
-        } catch (e) { console.error("Error sitemap misterios:", e.message); }
+            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha_actualizacion, '%Y-%m-%d'), DATE_FORMAT(fecha_creacion, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE ${estadosActivos}`);
+            misterios.forEach(m => urls.push({
+                loc: `${domain}/leer-historia/${m.id}?src=misterios`,
+                lastmod: m.lastmod || today,
+                changefreq: 'weekly',
+                priority: '0.8'
+            }));
+        } catch (e) { console.error("Sitemap misterios:", e.message); }
 
-        // 5. Obtener noticias
+        // 5. Noticias
         try {
-            const noticias = await db.query("SELECT id FROM noticias WHERE estado = 'aprobado'");
-            noticias.forEach(n => urlsUnicas.add(`${domain}/leer-historia/${n.id}?src=noticias`));
-        } catch (e) { console.error("Error sitemap noticias:", e.message); }
+            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha_actualizacion, '%Y-%m-%d'), DATE_FORMAT(fecha_creacion, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE ${estadosActivos}`);
+            noticias.forEach(n => urls.push({
+                loc: `${domain}/leer-historia/${n.id}?src=noticias`,
+                lastmod: n.lastmod || today,
+                changefreq: 'weekly',
+                priority: '0.8'
+            }));
+        } catch (e) { console.error("Sitemap noticias:", e.message); }
 
-        // Construir el XML final con los datos del Set
+        // Eliminar duplicados por URL
+        const urlsUnicas = new Map();
+        urls.forEach(u => { if (!urlsUnicas.has(u.loc)) urlsUnicas.set(u.loc, u); });
+
+        // Construir el XML final
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
-        urlsUnicas.forEach(url => {
-            // Asignar prioridades según la sección
-            let priority = '0.7';
-            let changefreq = 'weekly';
-
-            if (url === `${domain}/` || url === `${domain}`) {
-                priority = '1.0';
-                changefreq = 'daily';
-            } else if (url.includes('/noticias') || url.includes('/expedientes') || url.includes('/casos-abiertos') || url.includes('/misterios-historicos')) {
-                priority = '0.9';
-                changefreq = 'daily';
-            } else if (url.includes('/privacidad') || url.includes('/cookies') || url.includes('/legal')) {
-                priority = '0.3';
-                changefreq = 'yearly';
-            }
-
-            xml += `  <url>\n    <loc>${url}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>\n`;
+        urlsUnicas.forEach(u => {
+            xml += `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>\n`;
         });
 
         xml += `</urlset>`;
 
+        console.log(`🗺️ Sitemap generado: ${urlsUnicas.size} URLs indexadas`);
         res.header('Content-Type', 'application/xml');
+        res.header('Cache-Control', 'public, max-age=3600'); // Cache 1 hora
         res.send(xml);
     } catch (err) {
         console.error("Fallo general en generación de sitemap.xml:", err);
