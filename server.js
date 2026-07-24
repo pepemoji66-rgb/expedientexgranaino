@@ -1690,7 +1690,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
         // 2. Expedientes / Relatos
         try {
-            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha_actualizacion, '%Y-%m-%d'), DATE_FORMAT(fecha_creacion, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE ${estadosActivos}`);
+            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE ${estadosActivos}`);
             exps.forEach(e => urls.push({
                 loc: `${domain}/leer-historia/${e.id}?src=expedientes`,
                 lastmod: e.lastmod || today,
@@ -1701,7 +1701,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
         // 3. Casos Abiertos / True Crime
         try {
-            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha_actualizacion, '%Y-%m-%d'), DATE_FORMAT(fecha_creacion, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE ${estadosActivos}`);
+            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE ${estadosActivos}`);
             casos.forEach(c => urls.push({
                 loc: `${domain}/leer-historia/${c.id}?src=casos`,
                 lastmod: c.lastmod || today,
@@ -1712,7 +1712,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
         // 4. Misterios Históricos
         try {
-            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha_actualizacion, '%Y-%m-%d'), DATE_FORMAT(fecha_creacion, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE ${estadosActivos}`);
+            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE ${estadosActivos}`);
             misterios.forEach(m => urls.push({
                 loc: `${domain}/leer-historia/${m.id}?src=misterios`,
                 lastmod: m.lastmod || today,
@@ -1723,7 +1723,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
         // 5. Noticias
         try {
-            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha_actualizacion, '%Y-%m-%d'), DATE_FORMAT(fecha_creacion, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE ${estadosActivos}`);
+            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE ${estadosActivos}`);
             noticias.forEach(n => urls.push({
                 loc: `${domain}/leer-historia/${n.id}?src=noticias`,
                 lastmod: n.lastmod || today,
