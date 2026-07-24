@@ -270,10 +270,9 @@ const LecturaHistoria = ({ userAuth }) => {
             // Si viene especificado que es un caso abierto (True Crime), lo buscamos con prioridad
             if (src === 'casos') {
                 try {
-                    const resCasos = await axios.get(`${API_BASE_URL}/api/casos`);
-                    const encontradaCaso = resCasos.data.find(h => h.id == id);
-                    if (encontradaCaso) {
-                        const hist = await traducirAlVuelo(encontradaCaso);
+                    const resCaso = await axios.get(`${API_BASE_URL}/api/casos/detalle/${id}`);
+                    if (resCaso.data && resCaso.data.id) {
+                        const hist = await traducirAlVuelo(resCaso.data);
                         setHistoria(hist);
                         setEsRelatoAdmin(false);
                         setEsNoticia(false);
@@ -283,17 +282,16 @@ const LecturaHistoria = ({ userAuth }) => {
                         return;
                     }
                 } catch (errC) {
-                    console.error("Error al buscar en casos:", errC);
+                    console.warn("Intento rápido en /api/casos/detalle falló, buscando en colección:", errC.message);
                 }
             }
 
             // Si viene especificado que es un misterio histórico, lo buscamos con máxima prioridad
             if (src === 'misterios') {
                 try {
-                    const resMisterios = await axios.get(`${API_BASE_URL}/api/misterios-historicos`);
-                    const encontradaMisterio = resMisterios.data.find(h => h.id == id);
-                    if (encontradaMisterio) {
-                        const hist = await traducirAlVuelo(encontradaMisterio);
+                    const resMisterio = await axios.get(`${API_BASE_URL}/api/misterios-historicos/${id}`);
+                    if (resMisterio.data && resMisterio.data.id) {
+                        const hist = await traducirAlVuelo(resMisterio.data);
                         setHistoria(hist);
                         setEsRelatoAdmin(false);
                         setEsNoticia(false);
@@ -303,17 +301,16 @@ const LecturaHistoria = ({ userAuth }) => {
                         return;
                     }
                 } catch (errM) {
-                    console.error("Error al buscar en misterios:", errM);
+                    console.warn("Intento rápido en /api/misterios falló, buscando en colección:", errM.message);
                 }
             }
 
             // Si viene especificado que es una noticia, la buscamos con prioridad
             if (src === 'noticias') {
                 try {
-                    const resNoticias = await axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`);
-                    const encontradaNoticia = resNoticias.data.find(h => h.id == id);
-                    if (encontradaNoticia) {
-                        const hist = await traducirAlVuelo(encontradaNoticia, 'cuerpo');
+                    const resNoticia = await axios.get(`${API_BASE_URL}/api/galeria/noticias/detalle/${id}`);
+                    if (resNoticia.data && resNoticia.data.id) {
+                        const hist = await traducirAlVuelo(resNoticia.data, 'cuerpo');
                         setHistoria(hist);
                         setEsRelatoAdmin(false);
                         setEsNoticia(true);
@@ -323,32 +320,18 @@ const LecturaHistoria = ({ userAuth }) => {
                         return;
                     }
                 } catch (errN) {
-                    console.error("Error al buscar en noticias:", errN);
+                    console.warn("Intento rápido en noticias/detalle falló:", errN.message);
                 }
             }
 
             // Si viene especificado que es un expediente (admin o público), lo buscamos con prioridad
             if (src === 'expedientes') {
                 try {
-                    const resAdmin = await axios.get(`${API_BASE_URL}/api/expedientes/relatos-admin-publicos`);
-                    const encontradaAdmin = resAdmin.data.find(h => h.id == id);
-                    if (encontradaAdmin) {
-                        const hist = await traducirAlVuelo(encontradaAdmin);
+                    const resExp = await axios.get(`${API_BASE_URL}/api/expedientes/detalle/${id}`);
+                    if (resExp.data && resExp.data.id) {
+                        const hist = await traducirAlVuelo(resExp.data);
                         setHistoria(hist);
-                        setEsRelatoAdmin(true);
-                        setEsNoticia(false);
-                        setEsMisterio(false);
-                        setEsCaso(false);
-                        setCargando(false);
-                        return;
-                    }
-
-                    const resPublicos = await axios.get(`${API_BASE_URL}/api/expedientes/expedientes-publicos`);
-                    const encontradaPublica = resPublicos.data.find(h => h.id == id);
-                    if (encontradaPublica) {
-                        const hist = await traducirAlVuelo(encontradaPublica);
-                        setHistoria(hist);
-                        setEsRelatoAdmin(false);
+                        setEsRelatoAdmin(resExp.data.tipo === 'jefe');
                         setEsNoticia(false);
                         setEsMisterio(false);
                         setEsCaso(false);
@@ -356,7 +339,7 @@ const LecturaHistoria = ({ userAuth }) => {
                         return;
                     }
                 } catch (errE) {
-                    console.error("Error al buscar en expedientes:", errE);
+                    console.warn("Intento rápido en expedientes/detalle falló:", errE.message);
                 }
             }
 

@@ -156,6 +156,19 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
         }
     });
 
+    router.get('/noticias/detalle/:id', async (req, res) => {
+        try {
+            const result = await db.query("SELECT * FROM noticias WHERE id = ?", [req.params.id]);
+            if (result && result.length > 0) {
+                res.json(result[0]);
+            } else {
+                res.status(404).json({ error: "Noticia no encontrada" });
+            }
+        } catch (err) {
+            res.status(500).json({ error: "Error al obtener noticia por ID" });
+        }
+    });
+
     // Publicación de noticias (Uso exclusivo del Alto Mando)
     router.post('/proponer-noticia', uploadGeneral.single('imagen'), async (req, res) => {
         const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, agente, fuente_url } = req.body;

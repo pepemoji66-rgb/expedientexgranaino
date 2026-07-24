@@ -14,6 +14,21 @@ module.exports = (upload) => {
         }
     });
 
+    // --- OBTENER UN CASO INDIVIDUAL POR ID (ULTRA RÁPIDO) ---
+    router.get('/detalle/:id', async (req, res) => {
+        try {
+            const casos = await db.query("SELECT * FROM casos_abiertos WHERE id = ?", [req.params.id]);
+            if (casos && casos.length > 0) {
+                res.json(casos[0]);
+            } else {
+                res.status(404).json({ error: "Caso no encontrado" });
+            }
+        } catch (err) {
+            console.error("❌ Error al obtener Caso por ID:", err);
+            res.status(500).json({ error: "Error en el servidor" });
+        }
+    });
+
     // --- OBTENER TODOS LOS CASOS (PARA ADMIN/EDICIÓN) ---
     router.get('/todos', async (req, res) => {
         try {

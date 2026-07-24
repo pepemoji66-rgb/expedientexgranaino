@@ -23,6 +23,20 @@ module.exports = (db, upload) => {
         } catch (err) { res.status(200).json([]); }
     });
 
+    // Obtener un expediente o relato individual por ID (ULTRA RÁPIDO)
+    router.get('/detalle/:id', async (req, res) => {
+        try {
+            const results = await db.query("SELECT * FROM expedientes WHERE id = ?", [req.params.id]);
+            if (results && results.length > 0) {
+                res.json(results[0]);
+            } else {
+                res.status(404).json({ error: "Expediente no encontrado" });
+            }
+        } catch (err) {
+            res.status(500).json({ error: "Error al obtener expediente por ID" });
+        }
+    });
+
     // Obtener el ÚLTIMO expediente publicado (para el Banner de Vigilancia)
     router.get('/ultimo', async (req, res) => {
         try {
