@@ -717,7 +717,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     // Inyectamos el bloque de contenido estático dentro del div#root para SSR limpio
     // Legible directamente por los robots de Googlebot y AdSense como contenido real visible
     html = html.replace(
-        '<div id="root"></div>',
+        /<div id="root">[\s\S]*?<\/div>/i,
         `<div id="root">
             <main id="seo-prerendered-content" style="max-width:1000px;margin:20px auto;padding:25px;font-family:sans-serif;color:#222;line-height:1.7;background:#ffffff;border-radius:8px;">
                 ${contenidoSeo}
