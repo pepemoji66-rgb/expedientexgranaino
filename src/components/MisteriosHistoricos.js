@@ -63,6 +63,15 @@ const MisteriosHistoricos = () => {
     const [amazonLinks, setAmazonLinks] = useState(new Map());
     const misteriosPorPagina = 9;
 
+    // Redirección directa al artículo si hay un ID en la URL
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const misterioId = urlParams.get('id');
+        if (misterioId) {
+            navigate(`/leer-historia/${misterioId}?src=misterios`, { replace: true });
+        }
+    }, [navigate]);
+
     useEffect(() => {
         setPaginaActual(1);
     }, [busqueda, letraSeleccionada]);

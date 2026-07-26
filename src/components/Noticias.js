@@ -106,6 +106,15 @@ const Noticias = ({ userAuth }) => {
         }
     ];
 
+    // Redirección directa al artículo si hay un ID en la URL
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const noticiaId = urlParams.get('id');
+        if (noticiaId) {
+            navigate(`/leer-historia/${noticiaId}?src=noticias`, { replace: true });
+        }
+    }, [navigate]);
+
     const obtenerNoticias = useCallback(async () => {
         try {
             const res = await axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`);

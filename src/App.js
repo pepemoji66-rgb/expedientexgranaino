@@ -331,6 +331,7 @@ function App() {
                 } 
               />
               <Route path="/expedientes" element={<Expedientes userAuth={userAuth} />} />
+              <Route path="/expedientes/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/lugares" element={<Lugares />} />
               <Route path="/videos" element={<Videos userAuth={userAuth} />} />
               <Route path="/horoscopo" element={<Horoscopo />} />
@@ -338,8 +339,11 @@ function App() {
               <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
               <Route path="/leer-historia/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/casos-abiertos" element={<CasosAbiertos userAuth={userAuth} />} />
+              <Route path="/casos-abiertos/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/misterios-historicos" element={<MisteriosHistoricos />} />
+              <Route path="/misterios-historicos/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/noticias" element={<Noticias userAuth={userAuth} />} />
+              <Route path="/noticias/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/privacidad" element={<PoliticaPrivacidad />} />
               <Route path="/cookies" element={<PoliticaCookies />} />
                <Route path="/legal" element={<AvisoLegal />} />

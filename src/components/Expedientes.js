@@ -134,6 +134,15 @@ const Expedientes = () => {
 
     const [userAuth, setUserAuth] = useState(null);
 
+    // Redirección directa al artículo si hay un ID en la URL
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const expId = urlParams.get('id');
+        if (expId) {
+            navigate(`/leer-historia/${expId}?src=expedientes`, { replace: true });
+        }
+    }, [navigate]);
+
     const isAdmin = userAuth && (userAuth.rol === 'admin' || userAuth.email === 'archipegv2@gmail.com');
 
     useEffect(() => {

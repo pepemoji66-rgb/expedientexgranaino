@@ -816,6 +816,9 @@ app.get('/audios', (req, res) => {
 // Sección de Casos Abiertos (/casos-abiertos) - SEO enriquecido
 app.get('/casos-abiertos', async (req, res) => {
     const casoId = req.query.id;
+    if (casoId) {
+        return res.redirect(301, `/leer-historia/${casoId}?src=casos`);
+    }
     const indexPath = path.join(__dirname, 'build', 'index.html');
     
     fs.readFile(indexPath, 'utf8', async (err, html) => {
@@ -909,6 +912,9 @@ app.get('/casos-abiertos', async (req, res) => {
 
 // Sección de Misterios Históricos (/misterios-historicos) - SEO enriquecido
 app.get('/misterios-historicos', async (req, res) => {
+    if (req.query.id) {
+        return res.redirect(301, `/leer-historia/${req.query.id}?src=misterios`);
+    }
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
@@ -1163,6 +1169,9 @@ app.get('/horoscopo', (req, res) => {
 
 // Sección de Noticias (/noticias) - SEO enriquecido
 app.get('/noticias', async (req, res) => {
+    if (req.query.id) {
+        return res.redirect(301, `/leer-historia/${req.query.id}?src=noticias`);
+    }
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
@@ -1275,6 +1284,9 @@ app.get('/videos', async (req, res) => {
 
 // Sección de Expedientes (/expedientes) - SEO enriquecido
 app.get('/expedientes', async (req, res) => {
+    if (req.query.id) {
+        return res.redirect(301, `/leer-historia/${req.query.id}?src=expedientes`);
+    }
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);

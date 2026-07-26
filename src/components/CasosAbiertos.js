@@ -95,23 +95,14 @@ const CasosAbiertos = ({ userAuth }) => {
         }
     }, [casoExpandido]);
 
-    // Desplazamiento automático si hay un ID en la URL (viniendo del mapa)
+    // Redirección directa al artículo si hay un ID en la URL
     useEffect(() => {
-        if (casos.length > 0) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const casoId = urlParams.get('id');
-            if (casoId) {
-                const element = document.getElementById(`caso-${casoId}`);
-                if (element) {
-                    setTimeout(() => {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        element.classList.add('flash-highlight');
-                        setTimeout(() => element.classList.remove('flash-highlight'), 3000);
-                    }, 500);
-                }
-            }
+        const urlParams = new URLSearchParams(window.location.search);
+        const casoId = urlParams.get('id');
+        if (casoId) {
+            navigate(`/leer-historia/${casoId}?src=casos`, { replace: true });
         }
-    }, [casos]);
+    }, [navigate]);
 
     // Traducción automática al vuelo en inglés / restauración en español
     useEffect(() => {
