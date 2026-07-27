@@ -595,6 +595,12 @@ app.use('/api/social', socialRoutes(db, enviarAlertaTelegram));
 app.use('/api/misterios-historicos', misteriosHistoricosRoutes(uploadArchivos));
 app.use('/api/ruleta', ruletaRoutes(db));
 
+// Servir ads.txt directamente para Google AdSense
+app.get('/ads.txt', (req, res) => {
+    res.type('text/plain');
+    res.send('google.com, pub-2318415961583536, DIRECT, f08c47fec0942fa0');
+});
+
 // --- SERVIDORES ESTÁTICOS ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
