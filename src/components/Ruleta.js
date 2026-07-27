@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import './ruleta.css';
 
@@ -524,6 +524,9 @@ const Ruleta = () => {
             {mostrarModal && resultado && (
                 <div className="ruleta-modal-overlay" onClick={cerrarModal}>
                     <div className="ruleta-modal" onClick={(e) => e.stopPropagation()}>
+                        <button className="modal-close-btn" onClick={cerrarModal} title={language === 'en' ? 'Close' : 'Cerrar'}>
+                            <X size={18} />
+                        </button>
                         <span className="modal-sello">
                             {language === 'en' ? 'CLASSIFIED' : 'CONFIDENCIAL'}
                         </span>
