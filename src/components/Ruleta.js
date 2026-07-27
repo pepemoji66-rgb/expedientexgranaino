@@ -367,12 +367,34 @@ const Ruleta = () => {
 
             {/* Instrucciones */}
             <div className="ruleta-instrucciones">
-                <p>
-                    {language === 'en'
-                        ? <>Press the central button and the <span className="destacado">classified radar</span> will select a random dossier from our archives. What will the wheel reveal?</>
-                        : <>Pulsa el botón central y el <span className="destacado">radar clasificado</span> seleccionará un expediente aleatorio de nuestros archivos. ¿Qué revelará la ruleta?</>
-                    }
-                </p>
+                {language === 'en' ? (
+                    <>
+                        <p>
+                            <span className="destacado">100% free, no registration required.</span> If you love mystery, the paranormal and true crime
+                            but don't know where to start or don't want to browse articles one by one, <strong>the Bunker Roulette</strong> is
+                            your best ally. One spin and our classified radar picks a random dossier from our entire archive.
+                        </p>
+                        <p>
+                            Don't like what came up? <span className="destacado">Spin again!</span> There are no limits — keep spinning
+                            until you find the case that hooks you. Over <strong>150 articles</strong> about UFOs, unsolved crimes,
+                            historical enigmas and paranormal news, all at one click away.
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <p>
+                            <span className="destacado">Totalmente gratis, sin registro ni suscripción.</span> Si te apasiona el misterio,
+                            lo paranormal y la crónica negra pero no sabes por dónde empezar o no quieres ir artículo por artículo,
+                            <strong> la Ruleta del Búnker</strong> es tu mejor aliada. Un solo giro y nuestro radar clasificado
+                            elige un expediente al azar de todo nuestro archivo.
+                        </p>
+                        <p>
+                            ¿No te convence lo que ha salido? <span className="destacado">¡Vuelve a girar!</span> No hay límites
+                            — dale las veces que quieras hasta dar con el caso que te enganche. Más de <strong>150 artículos</strong> sobre
+                            OVNIs, crímenes sin resolver, enigmas históricos y noticias paranormales, todo a un solo clic.
+                        </p>
+                    </>
+                )}
             </div>
 
             {/* Ruleta */}
@@ -422,35 +444,77 @@ const Ruleta = () => {
             <div className="ruleta-seo-content">
                 {language === 'en' ? (
                     <>
-                        <h2>🎡 The Bunker Roulette — Discover Hidden Content</h2>
+                        <h2>🎡 The Bunker Roulette — Your Free Gateway to the Unknown</h2>
                         <p>
-                            The <strong>Bunker Roulette</strong> is our exclusive exploration tool designed for those agents
-                            who dare to let fate decide what to read next. With a single spin, you can uncover classified
-                            <strong> UFO dossiers</strong>, <strong>true crime investigations</strong>, <strong>historical
-                            mysteries</strong> or <strong>paranormal news</strong> from our archives.
+                            The <strong>Bunker Roulette</strong> was created so you don&apos;t have to scroll through endless lists
+                            looking for something interesting. We built it for one simple reason: <strong>if you love mystery,
+                            you deserve a faster, more fun way to explore.</strong> One spin and the wheel selects a random
+                            article from our complete archive of classified dossiers.
                         </p>
                         <p>
-                            Each spin randomly selects a published article from our database of over 150 entries. The
-                            <strong> SURPRISE</strong> sector adds an extra layer of mystery: neither the category nor
-                            the specific article is known until the wheel stops spinning. It&apos;s the ultimate way to
-                            explore the unknown depths of Expediente X Granaíno.
+                            This tool is <strong>completely free</strong>, requires no registration, no subscription and no download.
+                            Just press the button and let the radar do the work. Each spin pulls from our database of over
+                            <strong> 150 published articles</strong> spanning four categories: <strong>UFO dossiers</strong> with
+                            field reports and eyewitness accounts, <strong>true crime</strong> investigations of unsolved cases,
+                            <strong> historical mysteries</strong> full of ancient legends and haunted places, and <strong>paranormal
+                            news</strong> covering the latest UAP sightings and official declassifications.
+                        </p>
+                        <p>
+                            The <strong>SURPRISE</strong> sector is the wildcard — the system picks a random category first,
+                            then a random article from that category. You won&apos;t know what&apos;s coming until the wheel stops.
+                            And if the result doesn&apos;t grab you? <strong>Just spin again.</strong> There are no limits, no cooldowns,
+                            no hidden costs. Spin as many times as you want.
+                        </p>
+                        <p>
+                            Found something you love? Share it directly on <strong>WhatsApp, Facebook or Twitter</strong> with the
+                            built-in share buttons. Every article opens its own dedicated page with the full text, images, maps
+                            and recommended reading — ready to be explored in depth.
+                        </p>
+                        <h2>Why We Built the Roulette</h2>
+                        <p>
+                            At <strong>Expediente X Granaíno</strong> we believe that the best discoveries happen by chance.
+                            Many of our readers told us they didn&apos;t know which article to read first. The roulette solves that:
+                            it removes the paradox of choice and turns browsing into a game. Whether you have five minutes or
+                            an entire evening, one spin is all it takes to fall into a rabbit hole of mystery.
                         </p>
                     </>
                 ) : (
                     <>
-                        <h2>🎡 La Ruleta del Búnker — Descubre Contenido Oculto</h2>
+                        <h2>🎡 La Ruleta del Búnker — Tu Acceso Gratuito a lo Desconocido</h2>
                         <p>
-                            La <strong>Ruleta del Búnker</strong> es nuestra herramienta exclusiva de exploración diseñada
-                            para aquellos agentes que se atreven a dejar que el destino decida qué leer a continuación.
-                            Con un solo giro, puedes desenterrar <strong>expedientes OVNI clasificados</strong>,
-                            <strong> investigaciones de crónica negra</strong>, <strong>misterios históricos</strong>
-                            o <strong>noticias paranormales</strong> de nuestros archivos.
+                            La <strong>Ruleta del Búnker</strong> se creó para que no tengas que recorrer listas interminables
+                            buscando algo interesante. La construimos por una razón muy sencilla: <strong>si te apasiona el
+                            misterio, mereces una forma más rápida y divertida de explorar.</strong> Un giro y la ruleta
+                            selecciona un artículo al azar de todo nuestro archivo de expedientes clasificados.
                         </p>
                         <p>
-                            Cada giro selecciona aleatoriamente un artículo publicado de nuestra base de datos con más de
-                            150 entradas. El sector <strong>SORPRESA</strong> añade una capa extra de misterio: ni la
-                            categoría ni el artículo concreto se conocen hasta que la ruleta se detiene. Es la forma
-                            definitiva de explorar las profundidades desconocidas de Expediente X Granaíno.
+                            Esta herramienta es <strong>completamente gratuita</strong>, no requiere registro, ni suscripción,
+                            ni descarga de ningún tipo. Solo pulsa el botón y deja que el radar haga el trabajo. Cada giro
+                            extrae de nuestra base de datos con más de <strong>150 artículos publicados</strong> repartidos
+                            en cuatro categorías: <strong>expedientes OVNI</strong> con informes de campo y testimonios de
+                            testigos, <strong>crónica negra</strong> con investigaciones de casos sin resolver,
+                            <strong> misterios históricos</strong> llenos de leyendas ancestrales y lugares encantados,
+                            y <strong>noticias paranormales</strong> con los últimos avistamientos y desclasificaciones oficiales.
+                        </p>
+                        <p>
+                            El sector <strong>SORPRESA</strong> es el comodín: el sistema elige primero una categoría al azar
+                            y después un artículo aleatorio dentro de esa categoría. No sabrás qué viene hasta que la ruleta
+                            se detenga. ¿Y si el resultado no te convence? <strong>Vuelve a girar sin límite.</strong> No hay
+                            restricciones, ni tiempos de espera, ni costes ocultos. Gira todas las veces que quieras.
+                        </p>
+                        <p>
+                            ¿Has encontrado algo que te ha enganchado? Compártelo directamente en <strong>WhatsApp, Facebook
+                            o Twitter</strong> con los botones de compartir integrados. Cada artículo se abre en su propia
+                            página dedicada con el texto completo, imágenes, mapas y lecturas recomendadas — listo para
+                            investigar a fondo.
+                        </p>
+                        <h2>Por Qué Creamos la Ruleta</h2>
+                        <p>
+                            En <strong>Expediente X Granaíno</strong> creemos que los mejores descubrimientos ocurren por
+                            casualidad. Muchos de nuestros lectores nos decían que no sabían qué artículo leer primero.
+                            La ruleta resuelve eso: elimina la parálisis de elección y convierte la navegación en un juego.
+                            Tanto si tienes cinco minutos como una tarde entera, un solo giro es todo lo que necesitas para
+                            caer en la madriguera del misterio.
                         </p>
                     </>
                 )}
