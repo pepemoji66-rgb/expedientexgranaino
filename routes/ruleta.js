@@ -30,7 +30,18 @@ module.exports = (db) => {
 
             let resultado = null;
 
-            if (categoria === 'sorpresa') {
+            // 15% de probabilidad de incluir el Dossier Especial de Atarfe si es expedientes o sorpresa
+            if ((categoria === 'expedientes' || categoria === 'sorpresa') && Math.random() < 0.15) {
+                resultado = {
+                    id: 'atarfe-dossier',
+                    titulo: '🛸 DOSSIER ESPECIAL: Avistamiento OVNI de Atarfe y Albolote',
+                    contenido: 'Investigación técnica de campo, mapa interactivo, testimonios de testigos y expediente desclasificado completo del histórico avistamiento OVNI registrado en el sector de Atarfe (Granada).',
+                    imagen_url: 'assets/ovni-mulhacen-1958.png',
+                    categoria: 'expedientes',
+                    fecha: new Date().toISOString(),
+                    src: 'especial-atarfe'
+                };
+            } else if (categoria === 'sorpresa') {
                 // Elegir una tabla al azar
                 const claves = Object.keys(tablas);
                 const tablaAleatoria = claves[Math.floor(Math.random() * claves.length)];

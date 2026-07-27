@@ -292,7 +292,11 @@ const Ruleta = () => {
 
     const abrirExpediente = () => {
         if (resultado) {
-            navigate(`/leer-historia/${resultado.id}?src=${resultado.src || resultado.categoria}`);
+            if (resultado.src === 'especial-atarfe') {
+                navigate('/especial-atarfe');
+            } else {
+                navigate(`/leer-historia/${resultado.id}?src=${resultado.src || resultado.categoria}`);
+            }
         }
     };
 
@@ -300,7 +304,11 @@ const Ruleta = () => {
         let url, textoCompartir;
 
         if (articuloConcreto && resultado) {
-            url = `${window.location.origin}/leer-historia/${resultado.id}?src=${resultado.src || resultado.categoria}`;
+            if (resultado.src === 'especial-atarfe') {
+                url = `${window.location.origin}/especial-atarfe`;
+            } else {
+                url = `${window.location.origin}/leer-historia/${resultado.id}?src=${resultado.src || resultado.categoria}`;
+            }
             textoCompartir = language === 'en'
                 ? `🎡 The Bunker Roulette chose: "${(resultado.titulo || '').toUpperCase()}" — Spin yours! 🛸 #ExpedienteXGranaino`
                 : `🎡 La Ruleta del Búnker ha elegido: "${(resultado.titulo || '').toUpperCase()}" — ¡Gira la tuya! 🛸 #ExpedienteXGranaino #MisterioGranadino`;
