@@ -1157,7 +1157,7 @@ app.get('/la-ruleta', (req, res) => {
 </article>`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/presentacion_hero.png`;
+        const imagenUrl = `${baseImgUrl}/assets/ruleta_bunker.jpg`;
 
         const pagina = inyectarContenidoSEO(
             html,

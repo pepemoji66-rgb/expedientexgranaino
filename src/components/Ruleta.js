@@ -296,6 +296,53 @@ const Ruleta = () => {
         }
     };
 
+    const compartirRuleta = (red, articuloConcreto = false) => {
+        let url, textoCompartir;
+
+        if (articuloConcreto && resultado) {
+            url = `${window.location.origin}/leer-historia/${resultado.id}?src=${resultado.src || resultado.categoria}`;
+            textoCompartir = language === 'en'
+                ? `🎡 The Bunker Roulette chose: "${(resultado.titulo || '').toUpperCase()}" — Spin yours! 🛸 #ExpedienteXGranaino`
+                : `🎡 La Ruleta del Búnker ha elegido: "${(resultado.titulo || '').toUpperCase()}" — ¡Gira la tuya! 🛸 #ExpedienteXGranaino #MisterioGranadino`;
+        } else {
+            url = `${window.location.origin}/la-ruleta`;
+            textoCompartir = language === 'en'
+                ? '🎡 Spin the Bunker Roulette and discover random UFO dossiers, true crime cases and mysteries! 🛸 #ExpedienteXGranaino'
+                : '🎡 ¡Gira la Ruleta del Búnker y descubre expedientes OVNI, crónica negra y misterios al azar! 🛸 #ExpedienteXGranaino #MisterioGranadino';
+        }
+
+        if (red === 'copiar') {
+            try {
+                navigator.clipboard.writeText(url);
+                alert(language === 'en'
+                    ? '📋 Link copied to clipboard!'
+                    : '📋 ¡Enlace copiado al portapapeles!');
+            } catch (err) {
+                alert(language === 'en'
+                    ? 'Could not copy the link automatically.'
+                    : 'No se pudo copiar el enlace automáticamente.');
+            }
+            return;
+        }
+
+        if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            try {
+                navigator.share({ title: 'La Ruleta del Búnker', text: textoCompartir, url });
+                return;
+            } catch (err) { /* fallback */ }
+        }
+
+        let link = '';
+        if (red === 'whatsapp') {
+            link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + ' ' + url)}`;
+        } else if (red === 'facebook') {
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        } else if (red === 'twitter') {
+            link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
+        }
+        if (link) window.open(link, '_blank', 'noopener,noreferrer');
+    };
+
     return (
         <div className="ruleta-container">
             {/* Navegación */}
@@ -313,6 +360,9 @@ const Ruleta = () => {
                         ? '[ RANDOM CONTENT RADAR — SPIN TO DISCOVER ]'
                         : '[ RADAR DE CONTENIDO ALEATORIO — GIRA Y DESCUBRE ]'}
                 </p>
+                <div className="ruleta-hero-img">
+                    <img src="/assets/ruleta_bunker.jpg" alt="La Ruleta del Búnker — Expediente X Granaíno" />
+                </div>
             </div>
 
             {/* Instrucciones */}
@@ -356,6 +406,17 @@ const Ruleta = () => {
                     </div>
                 </div>
             )}
+
+            {/* Compartir La Ruleta */}
+            <div className="ruleta-compartir">
+                <p className="compartir-titulo">{language === 'en' ? '📢 SHARE THE ROULETTE' : '📢 COMPARTE LA RULETA'}</p>
+                <div className="compartir-botones">
+                    <button onClick={() => compartirRuleta('whatsapp')} className="btn-share btn-share-whatsapp" title="WhatsApp">💬</button>
+                    <button onClick={() => compartirRuleta('facebook')} className="btn-share btn-share-facebook" title="Facebook">📘</button>
+                    <button onClick={() => compartirRuleta('twitter')} className="btn-share btn-share-twitter" title="X / Twitter">🐦</button>
+                    <button onClick={() => compartirRuleta('copiar')} className="btn-share btn-share-copiar" title={language === 'en' ? 'Copy link' : 'Copiar enlace'}>📋</button>
+                </div>
+            </div>
 
             {/* Contenido SEO */}
             <div className="ruleta-seo-content">
@@ -440,6 +501,17 @@ const Ruleta = () => {
                             <button className="btn-volver-girar" onClick={volverAGirar}>
                                 🔄 {language === 'en' ? 'SPIN AGAIN' : 'GIRAR DE NUEVO'}
                             </button>
+                        </div>
+
+                        {/* Compartir resultado */}
+                        <div className="modal-compartir">
+                            <p className="compartir-titulo-modal">{language === 'en' ? '📢 SHARE THIS FIND' : '📢 COMPARTE ESTE HALLAZGO'}</p>
+                            <div className="compartir-botones">
+                                <button onClick={() => compartirRuleta('whatsapp', true)} className="btn-share btn-share-whatsapp" title="WhatsApp">💬</button>
+                                <button onClick={() => compartirRuleta('facebook', true)} className="btn-share btn-share-facebook" title="Facebook">📘</button>
+                                <button onClick={() => compartirRuleta('twitter', true)} className="btn-share btn-share-twitter" title="X / Twitter">🐦</button>
+                                <button onClick={() => compartirRuleta('copiar', true)} className="btn-share btn-share-copiar" title={language === 'en' ? 'Copy link' : 'Copiar enlace'}>📋</button>
+                            </div>
                         </div>
                     </div>
                 </div>
