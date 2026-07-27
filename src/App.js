@@ -22,6 +22,7 @@ import PoliticaPrivacidad from './components/PoliticaPrivacidad';
 import PoliticaCookies from './components/PoliticaCookies';
 import AvisoLegal from './components/AvisoLegal';
 import Horoscopo from './components/Horoscopo';
+import Ruleta from './components/Ruleta';
 import { X } from 'lucide-react';
 import TopNavbar from './components/TopNavbar';
 
@@ -239,7 +240,7 @@ function App() {
                 { path: "/expedientes", label: t('navFiles') },
                 { path: "/especial-atarfe", label: t('sysSidebarDossier') },
                 { path: "/lugares", label: t('navMap') },
-                { path: "/horoscopo", label: t('navHoroscope') },
+                { path: "/la-ruleta", label: "🎡 LA RULETA" },
                 { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
                 { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
                 { path: "/biblioteca", label: "📚 BIBLIOTECA DEL BÚNKER" },
@@ -334,7 +335,8 @@ function App() {
               <Route path="/expedientes/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/lugares" element={<Lugares />} />
               <Route path="/videos" element={<Videos userAuth={userAuth} />} />
-              <Route path="/horoscopo" element={<Horoscopo />} />
+              <Route path="/horoscopo" element={<Navigate to="/la-ruleta" replace />} />
+              <Route path="/la-ruleta" element={<Ruleta />} />
 
               <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
               <Route path="/leer-historia/:id" element={<LecturaHistoria userAuth={userAuth} />} />

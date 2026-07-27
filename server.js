@@ -37,6 +37,7 @@ const archipegRoutes = require('./routes/archipeg');
 const casosAbiertosRoutes = require('./routes/casosAbiertos');
 const socialRoutes = require('./routes/socialRoutes');
 const misteriosHistoricosRoutes = require('./routes/misteriosHistoricos');
+const ruletaRoutes = require('./routes/ruleta');
 
 
 // --- 2.5 INICIALIZACIÓN DE LA IA Y CLOUDINARY ---
@@ -592,6 +593,7 @@ app.use('/api/archipeg', archipegRoutes(db));
 app.use('/api/casos', casosAbiertosRoutes(uploadArchivos));
 app.use('/api/social', socialRoutes(db, enviarAlertaTelegram));
 app.use('/api/misterios-historicos', misteriosHistoricosRoutes(uploadArchivos));
+app.use('/api/ruleta', ruletaRoutes(db));
 
 // --- SERVIDORES ESTÁTICOS ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -1128,39 +1130,42 @@ app.get('/cookies', (req, res) => {
 });
 
 // Sección Horóscopo (/horoscopo) - SEO enriquecido
+// Redirección 301 del horóscopo a la ruleta (mantener SEO)
 app.get('/horoscopo', (req, res) => {
+    res.redirect(301, '/la-ruleta');
+});
+
+// Sección La Ruleta del Búnker (/la-ruleta) - SEO enriquecido
+app.get('/la-ruleta', (req, res) => {
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', (err, html) => {
         if (err) return res.sendFile(indexPath);
 
         const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
-    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">✨ HORÓSCOPO DEL BÚNKER — Frecuencias Estelares</h1>
-    <p>El <strong>Horóscopo de Expediente X Granaíno</strong> es una herramienta de calibración astrológica basada en la monitorización de frecuencias cosmológicas e inteligencia artificial. Las estrellas revelan lo que las sombras ocultan. Cada día analizamos las posiciones planetarias de los doce signos del zodiaco para descifrar las tendencias y advertencias energéticas.</p>
-    
-    <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">Los Doce Sectores Zodiacales</h2>
+    <h1 style="color:#00ff41;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">🎡 LA RULETA DEL BÚNKER — Radar de Contenido Aleatorio</h1>
+    <p>La <strong>Ruleta del Búnker</strong> es la herramienta de exploración exclusiva de <strong>Expediente X Granaíno</strong>. Un radar interactivo que selecciona al azar expedientes OVNI, crónicas negras, misterios históricos y noticias paranormales de nuestros archivos clasificados. Gira la ruleta y descubre qué tiene preparado el búnker para ti.</p>
+    <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">Cinco Sectores de Investigación</h2>
     <ul>
-        <li><strong>Aries:</strong> Impulso de energía cósmica y acción. Vigilancia ante posibles interferencias.</li>
-        <li><strong>Tauro:</strong> Estabilidad en las frecuencias de campo. Momento para consolidar el archivo.</li>
-        <li><strong>Géminis:</strong> Transmisión dual. Flujo rápido de información en la red de agentes.</li>
-        <li><strong>Cáncer:</strong> Sensibilidad a las psicofonías y anomalías electromagnéticas. Proteja su búnker emocional.</li>
-        <li><strong>Leo:</strong> Brillo estelar. Su liderazgo en el sector es visible, mantenga el radar activo.</li>
-        <li><strong>Virgo:</strong> Análisis minucioso de datos. La triangulación de testimonios dará resultados.</li>
-        <li><strong>Libra:</strong> Equilibrio energético. Armonice sus instrumentos de detección paranormal.</li>
-        <li><strong>Escorpio:</strong> Profundidades del misterio. Intensidad en el rastreo de señales anómalas.</li>
-        <li><strong>Sagitario:</strong> Exploración y búsqueda de la verdad. Nuevos horizontes en ufología.</li>
-        <li><strong>Capricornio:</strong> Disciplina táctica. Estructuración sólida de informes clasificados.</li>
-        <li><strong>Acuario:</strong> Innovación tecnológica en la detección UAP. Conexión con la red global.</li>
-        <li><strong>Piscis:</strong> Conexión intuitiva. Percepción agudizada de sucesos inexplicables.</li>
+        <li><strong>🛸 Expedientes:</strong> Dossieres de campo sobre avistamientos OVNI, fenómenos paranormales y testimonios directos de agentes.</li>
+        <li><strong>🔪 Crónica Negra:</strong> True crime e investigaciones de casos sin resolver que rodean la provincia de Granada y más allá.</li>
+        <li><strong>🏛️ Misterios Históricos:</strong> Enigmas ancestrales, leyendas, lugares encantados y sucesos inexplicables del pasado.</li>
+        <li><strong>📡 Noticias:</strong> Últimas noticias sobre fenómenos aéreos no identificados, desclasificaciones oficiales y actividad paranormal.</li>
+        <li><strong>🎲 Sorpresa:</strong> El sector más impredecible: ni la categoría ni el artículo se revelan hasta que la ruleta se detiene.</li>
     </ul>
-    <p style="margin-top:20px;color:#666;font-size:0.75rem;">Advertencia: Las predicciones astrológicas del búnker son generadas para el entretenimiento y la reflexión sobre la influencia del cosmos. El destino está en sus manos, agente.</p>
+    <p>Con más de 150 artículos en nuestra base de datos, cada giro es una aventura diferente. Explora, descubre y comparte los hallazgos del búnker con otros agentes de la red.</p>
 </article>`;
+
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/presentacion_hero.png`;
 
         const pagina = inyectarContenidoSEO(
             html,
-            'Horóscopo del Búnker | Astrología y Frecuencias — Expediente X Granaíno',
-            'Consulte el horóscopo diario generado por inteligencia artificial en el Búnker. Predicciones energéticas para todos los signos del zodiaco.',
-            contenidoSeo
+            'La Ruleta del Búnker — Descubre Contenido Aleatorio | Expediente X Granaíno',
+            'Gira la ruleta del búnker y descubre expedientes OVNI, crónica negra, misterios históricos y noticias paranormales al azar. Exploración interactiva de Expediente X Granaíno.',
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
         );
         res.send(pagina);
     });
@@ -1684,7 +1689,7 @@ app.get('/sitemap.xml', async (req, res) => {
             { path: '/galeria',              priority: '0.7', changefreq: 'weekly' },
             { path: '/lugares',              priority: '0.7', changefreq: 'weekly' },
             { path: '/biblioteca',           priority: '0.7', changefreq: 'weekly' },
-            { path: '/horoscopo',            priority: '0.6', changefreq: 'daily' },
+            { path: '/la-ruleta',            priority: '0.8', changefreq: 'daily' },
             { path: '/colaboradores',        priority: '0.5', changefreq: 'monthly' },
             { path: '/archipeg',             priority: '0.5', changefreq: 'monthly' },
             { path: '/sobre-nosotros',       priority: '0.5', changefreq: 'monthly' },

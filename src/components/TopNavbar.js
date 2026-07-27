@@ -46,11 +46,10 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
         { path: "/archipeg", label: language === 'en' ? "💻 SOFTWARE" : "💻 SOFTWARE" }
     ];
 
-    if (userAuth) {
-        otherMenuItems.push(
-            { path: "/horoscopo", label: t('navHoroscope') }
-        );
-    }
+    // La Ruleta siempre visible en el menú
+    otherMenuItems.push(
+        { path: "/la-ruleta", label: "🎡 LA RULETA" }
+    );
 
     return (
         <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>
