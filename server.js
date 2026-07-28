@@ -102,9 +102,9 @@ app.use((req, res, next) => {
     const userAgent = req.headers['user-agent'] || '';
     const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
 
-    // Solo bloqueamos peticiones a páginas HTML y al sitemap — no bloqueamos assets (imágenes, CSS, JS)
-    const esRecursoEstatico = /\.(js|css|png|jpg|jpeg|gif|webp|ico|svg|woff|woff2|ttf|map|json)(\?.*)?$/.test(req.path);
-    if (esRecursoEstatico) return next();
+    // Solo bloqueamos peticiones a páginas HTML — no bloqueamos assets (imágenes, CSS, JS, txt, ads.txt)
+    const esRecursoEstatico = /\.(js|css|png|jpg|jpeg|gif|webp|ico|svg|woff|woff2|ttf|map|json|txt)(\?.*)?$/.test(req.path);
+    if (esRecursoEstatico || req.path === '/ads.txt') return next();
 
     // Lista blanca: Buscadores, redes sociales Y Amazon (afiliados, verificación de enlaces)
     const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot|amazonbot|amazon|ia_archiver|slurp/i.test(userAgent);
