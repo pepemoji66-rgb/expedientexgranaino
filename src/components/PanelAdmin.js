@@ -461,8 +461,8 @@ const PanelAdmin = () => {
 
         try {
             // Construir la URL pública del contenido
-            let urlContenido = 'https://expedientexgranaino.com';
-            if (item.id) {
+            let urlContenido = item.url || 'https://expedientexgranaino.com';
+            if (!item.url && item.id) {
                 const seccion = (tab === 'expedientes' || tab === 'misterios_historicos' || tab === 'casos_abiertos') ? 'leer-historia' : tab === 'noticias' ? 'noticias' : tab === 'imagenes' ? 'galeria' : tab === 'videos' ? 'videos' : '';
                 if (seccion === 'leer-historia') {
                     const params = tab === 'misterios_historicos' ? '?src=misterios' : tab === 'casos_abiertos' ? '?src=casos' : tab === 'expedientes' ? '?src=expedientes' : '';
@@ -742,6 +742,9 @@ const PanelAdmin = () => {
                 </button>
             );
                 })}
+                <button key="ruleta" className={tab === 'ruleta' ? 'active' : ''} onClick={() => { setTab('ruleta'); setPaginaActual(1); }} style={tab !== 'ruleta' ? { borderColor: '#ff0033', color: '#ff0033' } : {}}>
+                    🎡 LA RULETA
+                </button>
                 <button className={tab === 'subir' ? 'active' : ''} onClick={() => setTab('subir')} style={{ background: '#b18904', color: 'black' }}>
                     + SUBIR
                 </button>
@@ -758,6 +761,7 @@ const PanelAdmin = () => {
                         {[
                             { icon: '👥', count: datos.usuarios.length, label: 'Agentes', color: '#00ff41' },
                             { icon: '📁', count: datos.expedientes.length, label: 'Relatos', color: '#00d4ff' },
+                            { icon: '🎡', count: '100%', label: 'La Ruleta', color: '#ff0033' },
                             { icon: '🎬', count: datos.videos.length, label: 'Vídeos', color: '#ff6b6b' },
                             { icon: '📷', count: datos.imagenes.length, label: 'Fotos', color: '#ffd93d' },
                             { icon: '📰', count: datos.noticias.length, label: 'Noticias', color: '#6c5ce7' },
@@ -814,6 +818,89 @@ const PanelAdmin = () => {
                             <h4>📺 VISTA PREVIA DE LA LANDING</h4>
                             <div className="inicio-iframe-container">
                                 <iframe src="/promo/" title="Preview promocional" loading="lazy" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : tab === 'ruleta' ? (
+                <div className="inicio-dashboard fade-in">
+                    <div className="inicio-bienvenida" style={{ borderColor: '#ff0033' }}>
+                        <h3 style={{ color: '#ff0033' }}>🎡 LA RULETA DEL BÚNKER — CENTRO DE CONTROL Y DIFUSIÓN</h3>
+                        <p className="inicio-fecha">HERRAMIENTA DE EXPLORACIÓN DE CONTENIDO ALEATORIO Y MONETIZACIÓN</p>
+                    </div>
+
+                    <div className="glass-card" style={{ marginTop: '20px', padding: '25px', borderLeft: '4px solid #ff0033' }}>
+                        <h4 style={{ color: '#ff0033', marginTop: 0, fontFamily: 'monospace' }}>📡 DIFUSIÓN AUTOMÁTICA EN REDES SOCIALES (TELEGRAM / META)</h4>
+                        <p style={{ color: '#aaa', fontSize: '0.85rem', lineHeight: '1.6' }}>
+                            Publica un anuncio directo de La Ruleta del Búnker en tus canales sociales conectados (Telegram, Facebook, Instagram):
+                        </p>
+                        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '15px' }}>
+                            <button
+                                className="btn-publicar-redes"
+                                style={{ background: '#ff0033', color: '#fff', border: 'none', padding: '12px 24px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.85rem' }}
+                                onClick={() => {
+                                    setModalRedes({
+                                        id: 'ruleta-main',
+                                        titulo: '🎡 LA RULETA DEL BÚNKER — Radar de Contenido Aleatorio',
+                                        contenido: '¡Gira la Ruleta del Búnker y descubre expedientes OVNI, crónica negra y misterios al azar 100% Gratis! ¿Qué expediente desclasificado te tocará hoy? 🛸',
+                                        url: 'https://expedientexgranaino.com/la-ruleta',
+                                        imagen_url: '/assets/ruleta_bunker.jpg'
+                                    });
+                                    setResultadoRedes(null);
+                                    setRedesSeleccionadas({ instagram: true, facebook: true });
+                                }}
+                            >
+                                📡 DIFUNDIR EN REDES (TELEGRAM / META)
+                            </button>
+
+                            <button
+                                className="btn-accion-admin"
+                                style={{ background: '#00d4ff', color: '#000', border: 'none', padding: '12px 24px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.85rem' }}
+                                onClick={() => window.open('/la-ruleta', '_blank')}
+                            >
+                                🎡 ABRIR LA RULETA EN VIVO ➔
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* RECURSOS Y PÓSTER PARA TIKTOK / REELS */}
+                    <div className="glass-card" style={{ marginTop: '25px', padding: '25px', borderLeft: '4px solid #00ff41' }}>
+                        <h4 style={{ color: '#00ff41', marginTop: 0, fontFamily: 'monospace' }}>📱 MATERIAL PROMOCIONAL VERTICAL PARA TIKTOK, REELS Y STORIES (9:16)</h4>
+                        <p style={{ color: '#aaa', fontSize: '0.85rem', lineHeight: '1.6' }}>
+                            Utiliza este cartel diseñado en formato vertical para tus historias o publicaciones en TikTok e Instagram:
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '25px', alignItems: 'center', flexWrap: 'wrap', marginTop: '20px' }}>
+                            <div style={{ width: '150px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #00ff41', boxShadow: '0 0 20px rgba(0,255,65,0.3)' }}>
+                                <img src="/assets/tiktok_ruleta.jpg" alt="Póster TikTok 9:16" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: '250px' }}>
+                                <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 'bold', marginBottom: '8px', fontFamily: 'monospace' }}>
+                                    🖼️ Cartel Vertical 9:16 (Descarga Directa)
+                                </p>
+                                <p style={{ color: '#888', fontSize: '0.8rem', marginBottom: '15px', wordBreak: 'break-all' }}>
+                                    Enlace directo: <code style={{ color: '#00ff41' }}>https://expedientexgranaino.com/assets/tiktok_ruleta.jpg</code>
+                                </p>
+                                <a
+                                    href="/assets/tiktok_ruleta.jpg"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    download="tiktok_ruleta_bunker.jpg"
+                                    style={{
+                                        display: 'inline-block',
+                                        background: '#00ff41',
+                                        color: '#000',
+                                        fontWeight: 'bold',
+                                        padding: '12px 24px',
+                                        borderRadius: '4px',
+                                        textDecoration: 'none',
+                                        fontFamily: 'monospace',
+                                        fontSize: '0.85rem',
+                                        boxShadow: '0 0 15px rgba(0,255,65,0.4)'
+                                    }}
+                                >
+                                    📥 DESCARGAR PÓSTER 9:16 EN ALTA RESOLUCIÓN
+                                </a>
                             </div>
                         </div>
                     </div>
