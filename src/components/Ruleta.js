@@ -310,13 +310,13 @@ const Ruleta = () => {
                 url = `${window.location.origin}/leer-historia/${resultado.id}?src=${resultado.src || resultado.categoria}`;
             }
             textoCompartir = language === 'en'
-                ? `🎡 The Bunker Roulette chose: "${(resultado.titulo || '').toUpperCase()}" — Spin yours! 🛸 #ExpedienteXGranaino`
-                : `🎡 La Ruleta del Búnker ha elegido: "${(resultado.titulo || '').toUpperCase()}" — ¡Gira la tuya! 🛸 #ExpedienteXGranaino #MisterioGranadino`;
+                ? `🛸 The Bunker Roulette just declassified: "${(resultado.titulo || '').toUpperCase()}"... Spin yours free! 🎡 #ExpedienteXGranaino`
+                : `🛸 La Ruleta del Búnker me acaba de desclasificar: «${(resultado.titulo || '').toUpperCase()}»... ¡Entra a leerlo y gira la tuya gratis! 🎡 #ExpedienteXGranaino #MisterioGranadino`;
         } else {
             url = `${window.location.origin}/la-ruleta`;
             textoCompartir = language === 'en'
-                ? '🎡 Spin the Bunker Roulette and discover random UFO dossiers, true crime cases and mysteries! 🛸 #ExpedienteXGranaino'
-                : '🎡 ¡Gira la Ruleta del Búnker y descubre expedientes OVNI, crónica negra y misterios al azar! 🛸 #ExpedienteXGranaino #MisterioGranadino';
+                ? '🎡 I just spun the Bunker Roulette and discovered secret UFO dossiers and mysteries! Spin yours 100% free! 🛸 #ExpedienteXGranaino'
+                : '🎡 ¡He girado la Ruleta del Búnker y me ha desclasificado un expediente que me ha dejado helado! 👁️ ¿Te atreves a girarla? 100% Gratis 🛸 #ExpedienteXGranaino #MisterioGranadino';
         }
 
         if (red === 'copiar') {

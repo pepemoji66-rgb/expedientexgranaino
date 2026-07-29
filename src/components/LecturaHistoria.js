@@ -92,6 +92,138 @@ const splitText = (text, maxLen = 180) => {
     return chunks;
 };
 
+// ==========================================
+// COMPONENTE DE ARTÍCULOS RELACIONADOS
+// ==========================================
+const ArticulosRelacionados = ({ currentId, currentSrc }) => {
+    const { language } = useLanguage();
+    const navigate = useNavigate();
+    const [relacionados, setRelacionados] = useState([]);
+
+    useEffect(() => {
+        let isMounted = true;
+        const cargarRelacionados = async () => {
+            try {
+                const reqs = [
+                    axios.get(`${API_BASE_URL}/api/ruleta/aleatorio?categoria=expedientes`),
+                    axios.get(`${API_BASE_URL}/api/ruleta/aleatorio?categoria=casos`),
+                    axios.get(`${API_BASE_URL}/api/ruleta/aleatorio?categoria=misterios`)
+                ];
+                const res = await Promise.allSettled(reqs);
+                const items = res
+                    .filter(r => r.status === 'fulfilled' && r.value && r.value.data)
+                    .map(r => r.value.data)
+                    .filter(item => String(item.id) !== String(currentId));
+
+                if (isMounted && items.length > 0) {
+                    setRelacionados(items.slice(0, 3));
+                }
+            } catch (err) {
+                console.error("Error al cargar relacionados:", err);
+            }
+        };
+        cargarRelacionados();
+        return () => { isMounted = false; };
+    }, [currentId]);
+
+    if (!relacionados || relacionados.length === 0) return null;
+
+    const resolverImg = (url) => {
+        if (!url) return '/assets/ruleta_bunker.jpg';
+        if (url.startsWith('http')) return url;
+        if (url.startsWith('/')) return `${API_BASE_URL}${url}`;
+        return `${API_BASE_URL}/${url}`;
+    };
+
+    const nombresCat = {
+        expedientes: language === 'en' ? 'DOSSIER' : 'EXPEDIENTE',
+        casos: language === 'en' ? 'TRUE CRIME' : 'CRÓNICA NEGRA',
+        misterios: language === 'en' ? 'MYSTERY' : 'MISTERIO',
+        noticias: language === 'en' ? 'NEWS' : 'NOTICIA'
+    };
+
+    return (
+        <div className="articulos-relacionados-section fade-in" style={{
+            marginTop: '50px',
+            paddingTop: '30px',
+            borderTop: '2px dashed rgba(0, 255, 65, 0.3)',
+            width: '100%'
+        }}>
+            <h3 style={{
+                color: 'var(--color-principal, #00ff41)',
+                fontFamily: 'Courier New, monospace',
+                fontSize: '1.1rem',
+                letterSpacing: '2px',
+                textAlign: 'center',
+                marginBottom: '25px',
+                textTransform: 'uppercase'
+            }}>
+                👁️ {language === 'en' ? 'IF YOU LIKED THIS MYSTERY, CONTINUE INVESTIGATING...' : 'SI TE GUSTÓ ESTE MISTERIO, CONTINÚA INVESTIGANDO...'}
+            </h3>
+
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+                gap: '20px'
+            }}>
+                {relacionados.map((rel, idx) => (
+                    <div
+                        key={idx}
+                        onClick={() => {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            navigate(`/leer-historia/${rel.id}?src=${rel.src || rel.categoria}`);
+                        }}
+                        style={{
+                            background: '#0a0a0a',
+                            border: '1px solid #1a3a1a',
+                            borderRadius: '6px',
+                            overflow: 'hidden',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#00ff41'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(0,255,65,0.2)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#1a3a1a'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                    >
+                        <div style={{ height: '140px', overflow: 'hidden', background: '#050505', position: 'relative' }}>
+                            <span style={{
+                                position: 'absolute',
+                                top: '8px',
+                                left: '8px',
+                                background: 'rgba(0,0,0,0.85)',
+                                color: '#00ff41',
+                                border: '1px solid #00ff41',
+                                padding: '2px 6px',
+                                fontSize: '0.65rem',
+                                fontFamily: 'monospace',
+                                borderRadius: '3px',
+                                zIndex: 2
+                            }}>
+                                {nombresCat[rel.categoria] || rel.categoria}
+                            </span>
+                            <img
+                                src={resolverImg(rel.imagen_url)}
+                                alt={rel.titulo}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={e => { e.target.style.display = 'none'; }}
+                            />
+                        </div>
+                        <div style={{ padding: '15px', flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <h4 style={{ color: '#fff', fontSize: '0.9rem', fontFamily: 'Courier New, monospace', margin: '0 0 10px 0', lineHeight: '1.4' }}>
+                                {rel.titulo}
+                            </h4>
+                            <span style={{ color: '#00d4ff', fontSize: '0.75rem', fontFamily: 'monospace', textTransform: 'uppercase' }}>
+                                📖 {language === 'en' ? 'READ DOSSIER →' : 'LEER EXPEDIENTE →'}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const LecturaHistoria = ({ userAuth }) => {
     const { language, t, forceTranslationUpdate } = useLanguage();
     const { id } = useParams();
@@ -939,6 +1071,9 @@ const LecturaHistoria = ({ userAuth }) => {
                 ) : (
                     renderComentariosBox(false)
                 )}
+
+                {/* SI TE GUSTÓ ESTE MISTERIO... ARTÍCULOS RELACIONADOS */}
+                <ArticulosRelacionados currentId={id} currentSrc={src} />
 
             </div>
         </div>
