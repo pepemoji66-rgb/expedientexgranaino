@@ -335,3 +335,28 @@
     }
 }
 
+@media (max-width: 768px) {
+    .lectura-container {
+        padding: 15px !important;
+    }
+    .portada-lectura {
+        padding: 6px;
+        min-height: 140px;
+        max-height: 280px;
+    }
+    .lectura-imagen-portada {
+        max-height: 260px;
+        object-fit: contain;
+        width: 100%;
+    }
+    .cuerpo-historia {
+        padding: 15px !important;
+        font-size: 0.98rem !important;
+    }
+    .cuerpo-historia img {
+        max-height: 260px !important;
+        object-fit: contain !important;
+        width: 100% !important;
+    }
+}
+
