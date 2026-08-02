@@ -35,6 +35,7 @@ import BibliotecaBunker from './components/BibliotecaBunker';
 import ColaboradoresBunker from './components/ColaboradoresBunker';
 import { useLanguage } from './context/LanguageContext';
 import { safeLocalStorage } from './utils/storage';
+import useRetentionTracker from './utils/useRetentionTracker';
 
 import { API_BASE_URL, ADMIN_EMAIL } from './config';
 
@@ -53,6 +54,12 @@ const ScrollToTop = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+  return null;
+};
+
+// --- RADAR DE RETENCIÓN: Componente wrapper para el hook ---
+const RetentionTracker = ({ userAuth }) => {
+  useRetentionTracker(userAuth);
   return null;
 };
 
@@ -210,6 +217,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
+      <RetentionTracker userAuth={userAuth} />
     <div className={`App theme-${tema}`} style={{
         backgroundColor: '#020408',
         backgroundAttachment: 'fixed',

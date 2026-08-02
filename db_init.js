@@ -375,6 +375,25 @@ module.exports = async (db) => {
         )`);
         console.log("🩹 TABLA: amazon_afiliados inicializada en MySQL.");
 
+        // --- SISTEMA DE RETENCIÓN DE USUARIOS (RADAR DE PERMANENCIA) ---
+        await db.execute(`CREATE TABLE IF NOT EXISTS sesiones_retencion (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            sesion_id VARCHAR(64) NOT NULL,
+            ruta_entrada VARCHAR(255),
+            paginas_vistas INT DEFAULT 1,
+            duracion_segundos INT DEFAULT 0,
+            duracion_total_segundos INT DEFAULT 0,
+            agente VARCHAR(255) DEFAULT NULL,
+            dispositivo VARCHAR(50),
+            fecha_inicio DATETIME DEFAULT CURRENT_TIMESTAMP,
+            fecha_fin DATETIME DEFAULT NULL,
+            activa INT DEFAULT 1,
+            INDEX idx_sesion_id (sesion_id),
+            INDEX idx_fecha_inicio (fecha_inicio),
+            INDEX idx_activa (activa)
+        )`);
+        console.log("🩹 TABLA: sesiones_retencion inicializada en MySQL.");
+
         console.log("✅ Tablas MySQL verificadas.");
 
     } catch (err) {

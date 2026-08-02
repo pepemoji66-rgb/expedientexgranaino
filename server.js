@@ -207,6 +207,84 @@ app.get('/api/visitas', async (req, res) => {
     }
 });
 
+// ============================================================
+// 📊 RADAR DE RETENCIÓN — Tracking de sesiones de usuario
+// ============================================================
+
+// Registrar inicio de sesión
+app.post('/api/sesion/inicio', async (req, res) => {
+    try {
+        const { sesion_id, ruta_entrada, dispositivo, agente } = req.body;
+        if (!sesion_id) return res.status(400).json({ error: 'sesion_id requerido' });
+        
+        await db.execute(
+            `INSERT INTO sesiones_retencion (sesion_id, ruta_entrada, dispositivo, agente) VALUES (?, ?, ?, ?)`,
+            [sesion_id, ruta_entrada || '/', dispositivo || 'desktop', agente || null]
+        );
+        res.json({ ok: true });
+    } catch (err) {
+        console.error("📊 Error al iniciar sesión de retención:", err.message);
+        res.status(500).json({ error: 'Error de servidor' });
+    }
+});
+
+// Heartbeat: actualizar duración y páginas vistas
+app.post('/api/sesion/heartbeat', async (req, res) => {
+    try {
+        const { sesion_id, duracion_segundos, duracion_total_segundos, paginas_vistas, agente } = req.body;
+        if (!sesion_id) return res.status(400).json({ error: 'sesion_id requerido' });
+
+        const campos = [
+            'duracion_segundos = ?',
+            'duracion_total_segundos = ?',
+            'paginas_vistas = ?',
+            'fecha_fin = NOW()'
+        ];
+        const valores = [
+            duracion_segundos || 0,
+            duracion_total_segundos || 0,
+            paginas_vistas || 1
+        ];
+
+        // Actualizar agente si se proporciona (usuario hizo login durante la sesión)
+        if (agente) {
+            campos.push('agente = ?');
+            valores.push(agente);
+        }
+
+        valores.push(sesion_id);
+
+        await db.execute(
+            `UPDATE sesiones_retencion SET ${campos.join(', ')} WHERE sesion_id = ? AND activa = 1`,
+            valores
+        );
+        res.json({ ok: true });
+    } catch (err) {
+        console.error("📊 Error en heartbeat de retención:", err.message);
+        res.status(500).json({ error: 'Error de servidor' });
+    }
+});
+
+// Fin de sesión: marcar como cerrada
+app.post('/api/sesion/fin', async (req, res) => {
+    try {
+        const { sesion_id, duracion_segundos, duracion_total_segundos, paginas_vistas } = req.body;
+        if (!sesion_id) return res.status(400).json({ error: 'sesion_id requerido' });
+
+        await db.execute(
+            `UPDATE sesiones_retencion 
+             SET duracion_segundos = ?, duracion_total_segundos = ?, paginas_vistas = ?, 
+                 fecha_fin = NOW(), activa = 0 
+             WHERE sesion_id = ? AND activa = 1`,
+            [duracion_segundos || 0, duracion_total_segundos || 0, paginas_vistas || 1, sesion_id]
+        );
+        res.json({ ok: true });
+    } catch (err) {
+        console.error("📊 Error al finalizar sesión de retención:", err.message);
+        res.status(500).json({ error: 'Error de servidor' });
+    }
+});
+
 app.get('/api/usuarios', async (req, res) => {
     try {
         const results = await db.query("SELECT * FROM usuarios ORDER BY id DESC");
