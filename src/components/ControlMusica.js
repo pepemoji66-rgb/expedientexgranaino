@@ -10,8 +10,18 @@ const ControlMusica = () => {
     audio.volume = 0.2;
     audio.loop = true;
 
+    window.__playBunkerAudio = () => {
+      audio.play().then(() => setSonando(true)).catch(e => console.log("Autoplay audio blocked or prevented:", e));
+    };
+    window.__stopBunkerAudio = () => {
+      audio.pause();
+      setSonando(false);
+    };
+
     return () => { 
       audio.pause(); 
+      delete window.__playBunkerAudio;
+      delete window.__stopBunkerAudio;
     };
   }, [audio]);
 

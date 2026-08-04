@@ -189,10 +189,20 @@ const Ruleta = () => {
     const audioCtxRef = useRef(null);
     const tickIntervalRef = useRef(null);
 
-    // Limpiar intervalos al desmontar
+    // Activar música ambiente al entrar a La Ruleta y detenerla al salir de la sección
     useEffect(() => {
+        const timer = setTimeout(() => {
+            if (window.__playBunkerAudio) {
+                window.__playBunkerAudio();
+            }
+        }, 500);
+
         return () => {
+            clearTimeout(timer);
             if (tickIntervalRef.current) clearInterval(tickIntervalRef.current);
+            if (window.__stopBunkerAudio) {
+                window.__stopBunkerAudio();
+            }
         };
     }, []);
 
