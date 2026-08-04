@@ -253,7 +253,9 @@ function App() {
                 { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
                 { path: "/biblioteca", label: "📚 BIBLIOTECA DEL BÚNKER" },
                 { path: "/colaboradores", label: "🏅 COLABORADORES" },
-                { path: "/archipeg", label: "💻 ARCHIPEG V3" }
+                { path: "/privacidad", label: "🔒 PRIVACIDAD" },
+                { path: "/cookies", label: "🍪 COOKIES" },
+                { path: "/legal", label: "⚖️ AVISO LEGAL" }
               ].map((route) => (
                 <li key={route.path} style={{ marginBottom: '15px' }}>
                   <Link to={route.path} onClick={toggleMenu} className="nav-link" style={{
