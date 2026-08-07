@@ -92,8 +92,8 @@ module.exports = (db) => {
     } else if (tipo === 'noticias') {
       const { contenido, ubicacion, nivel_alerta } = req.body;
       const fuente_url = req.body.fuente_url || req.body.url_externa || null;
-      sql = "INSERT INTO noticias (titulo, cuerpo, imagen_url, estado, fecha, fuente_url, latitud, longitud, ubicacion, nivel_alerta) VALUES (?, ?, ?, 'aprobado', NOW(), ?, ?, ?, ?, ?)";
-      params = [titulo, contenido || '', nombreArchivo, fuente_url || '', latitud || 0, longitud || 0, ubicacion || '', nivel_alerta || 'Bajo'];
+      sql = "INSERT INTO noticias (titulo, cuerpo, imagen_url, estado, fecha, fuente_url, latitud, longitud, ubicacion, nivel_alerta, youtube_url) VALUES (?, ?, ?, 'aprobado', NOW(), ?, ?, ?, ?, ?, ?)";
+      params = [titulo, contenido || '', nombreArchivo, fuente_url || '', latitud || 0, longitud || 0, ubicacion || '', nivel_alerta || 'Bajo', req.body.youtube_url || null];
     } else if (tipo === 'imagenes') {
       const es_atarfe = req.body.es_atarfe || 0;
       sql = "INSERT INTO imagenes (titulo, url_imagen, estado, es_atarfe, fecha) VALUES (?, ?, 'publica', ?, NOW())";
@@ -104,20 +104,20 @@ module.exports = (db) => {
     } else if (tipo === 'expedientes') {
       const tipo_relato = req.body.tipo_relato || 'jefe';
       const fuente_url = req.body.url_externa || null;
-      sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, estado, tipo, imagen_url, latitud, longitud, fecha, fuente_url) VALUES (?, ?, ?, 'aprobado', ?, ?, ?, ?, NOW(), ?)";
-      params = [titulo, contenido, (tipo_relato === 'jefe' ? 'ADMINISTRADOR' : 'AGENTE'), tipo_relato, req.file ? nombreArchivo : null, latitud || 0, longitud || 0, fuente_url];
+      sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, estado, tipo, imagen_url, latitud, longitud, fecha, fuente_url, youtube_url) VALUES (?, ?, ?, 'aprobado', ?, ?, ?, ?, NOW(), ?, ?)";
+      params = [titulo, contenido, (tipo_relato === 'jefe' ? 'ADMINISTRADOR' : 'AGENTE'), tipo_relato, req.file ? nombreArchivo : null, latitud || 0, longitud || 0, fuente_url, req.body.youtube_url || null];
     } else if (tipo === 'casos_abiertos') {
       const titulo_en = req.body.titulo_en || null;
       const contenido_en = req.body.contenido_en || null;
       const fuente_url = req.body.url_externa || null;
-      sql = "INSERT INTO casos_abiertos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha, fuente_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW(), ?)";
-      params = [titulo, contenido || '', titulo_en, contenido_en, req.file ? nombreArchivo : null, latitud || 0, longitud || 0, fuente_url];
+      sql = "INSERT INTO casos_abiertos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha, fuente_url, youtube_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW(), ?, ?)";
+      params = [titulo, contenido || '', titulo_en, contenido_en, req.file ? nombreArchivo : null, latitud || 0, longitud || 0, fuente_url, req.body.youtube_url || null];
     } else if (tipo === 'misterios_historicos') {
       const titulo_en = req.body.titulo_en || null;
       const contenido_en = req.body.contenido_en || null;
       const fuente_url = req.body.fuente_url || req.body.url_externa || null;
-      sql = "INSERT INTO misterios_historicos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha, fuente_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW(), ?)";
-      params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0, fuente_url];
+      sql = "INSERT INTO misterios_historicos (titulo, contenido, titulo_en, contenido_en, imagen_url, latitud, longitud, estado, fecha, fuente_url, youtube_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'aprobado', NOW(), ?, ?)";
+      params = [titulo, contenido || '', titulo_en, contenido_en, nombreArchivo, latitud || 0, longitud || 0, fuente_url, req.body.youtube_url || null];
     }
 
     if (!sql) {

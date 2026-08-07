@@ -567,6 +567,12 @@ app.delete('/api/comentarios/:id', async (req, res) => {
     }
 });
 
+// Migraciones para añadir youtube_url a las tablas de artículos
+db.query("ALTER TABLE expedientes ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL").catch(() => {});
+db.query("ALTER TABLE casos_abiertos ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL").catch(() => {});
+db.query("ALTER TABLE misterios_historicos ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL").catch(() => {});
+db.query("ALTER TABLE noticias ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL").catch(() => {});
+
 // --- COLABORADORES DEL BÚNKER ---
 // Inicializar tabla si no existe
 db.query(`CREATE TABLE IF NOT EXISTS colaboradores (

@@ -32,7 +32,8 @@ const PanelAdmin = () => {
         url: '',
         fuente_url: '',
         tipo: '',
-        es_atarfe: 0
+        es_atarfe: 0,
+        youtube_url: ''
     });
     const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
     const [archivoEdit, setArchivoEdit] = useState(null);
@@ -53,6 +54,7 @@ const PanelAdmin = () => {
     const [urlExternaAdmin, setUrlExternaAdmin] = useState('');
     const [esAtarfeSubida, setEsAtarfeSubida] = useState(false);
     const [tipoRelatoSubida, setTipoRelatoSubida] = useState('jefe');
+    const [youtubeUrlSubida, setYoutubeUrlSubida] = useState('');
     
     // ESTADOS PARA PORTADA DE VÍDEO EN CREACIÓN
     const [archivoCapturaSubida, setArchivoCapturaSubida] = useState(null);
@@ -287,7 +289,8 @@ const PanelAdmin = () => {
             nivel_alerta: item.nivel_alerta || 'Bajo',
             es_atarfe: item.es_atarfe || 0,
             imagen_url: item.imagen_url || item.url_imagen || item.imagen || '',
-            ruta: item.ruta || item.url_audio || ''
+            ruta: item.ruta || item.url_audio || '',
+            youtube_url: item.youtube_url || ''
         });
         setArchivoEdit(null);
     };
@@ -540,6 +543,7 @@ const PanelAdmin = () => {
             if (contenidoEnSubida) formData.append('contenido_en', contenidoEnSubida);
         }
         if (tipoSubida === 'noticias' && editForm.fuente_url) formData.append('fuente_url', editForm.fuente_url);
+        if (youtubeUrlSubida) formData.append('youtube_url', youtubeUrlSubida);
         
         // Coordenadas para Lugares, Relatos, Noticias, Vídeos, Casos y Misterios
         if (tipoSubida === 'lugares' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos' || tipoSubida === 'videos') {
@@ -1195,6 +1199,16 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', minHeight: '100px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', padding: '10px' }}
                                     ></textarea>
                                 </div>
+                                
+                                <div className="form-group-admin" style={{ marginBottom: '15px' }}>
+                                    <label style={{ display: 'block', color: '#ff0000', fontSize: '0.8rem', marginBottom: '5px' }}>🎬 ENLACE YOUTUBE (OPCIONAL):</label>
+                                    <input 
+                                        type="url" value={youtubeUrlSubida} 
+                                        onChange={e => setYoutubeUrlSubida(e.target.value)} 
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff0000', border: '1px solid #333' }}
+                                    />
+                                </div>
 
                             </>
                         ) : null}
@@ -1433,6 +1447,14 @@ const PanelAdmin = () => {
                                         style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
                                     />
 
+                                    <label style={{ display: 'block', color: '#ff0000', fontSize: '0.8rem', marginBottom: '5px' }}>🎬 ENLACE YOUTUBE (OPCIONAL):</label>
+                                    <input 
+                                        type="url" value={editForm.youtube_url} 
+                                        onChange={e => setEditForm({...editForm, youtube_url: e.target.value})} 
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff0000', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAMBIAR IMAGEN DE PORTADA (OPCIONAL):</label>
                                     <input 
                                         type="file" 
@@ -1522,6 +1544,14 @@ const PanelAdmin = () => {
                                         type="url" value={editForm.fuente_url} 
                                         onChange={e => setEditForm({...editForm, fuente_url: e.target.value})} 
                                         style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+
+                                    <label style={{ display: 'block', color: '#ff0000', fontSize: '0.8rem', marginBottom: '5px' }}>🎬 ENLACE YOUTUBE (OPCIONAL):</label>
+                                    <input 
+                                        type="url" value={editForm.youtube_url} 
+                                        onChange={e => setEditForm({...editForm, youtube_url: e.target.value})} 
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff0000', border: '1px solid #333', marginBottom: '15px' }}
                                     />
 
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>IMAGEN (OPCIONAL):</label>
@@ -1660,6 +1690,15 @@ const PanelAdmin = () => {
                                         onChange={e => setEditForm({...editForm, fuente_url: e.target.value})} 
                                         style={{ width: '100%', padding: '10px', background: '#000', color: '#00d4ff', border: '1px solid #333', marginBottom: '15px' }}
                                     />
+
+                                    <label style={{ display: 'block', color: '#ff0000', fontSize: '0.8rem', marginBottom: '5px' }}>🎬 ENLACE YOUTUBE (OPCIONAL):</label>
+                                    <input 
+                                        type="url" value={editForm.youtube_url} 
+                                        onChange={e => setEditForm({...editForm, youtube_url: e.target.value})} 
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        style={{ width: '100%', padding: '10px', background: '#000', color: '#ff0000', border: '1px solid #333', marginBottom: '15px' }}
+                                    />
+
                                     <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>CAMBIAR IMAGEN (OPCIONAL):</label>
                                     <input 
                                         type="file" 

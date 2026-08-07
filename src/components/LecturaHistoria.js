@@ -1036,6 +1036,32 @@ const LecturaHistoria = ({ userAuth }) => {
                             </a>
                         </div>
                     )}
+                    
+                    {historia.youtube_url && (() => {
+                        // Extract video ID from YouTube URL
+                        const extractYouTubeId = (url) => {
+                            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+                            return match ? match[1] : null;
+                        };
+                        const videoId = extractYouTubeId(historia.youtube_url);
+                        if (!videoId) return null;
+                        return (
+                            <div style={{ margin: '25px 0', textAlign: 'center' }}>
+                                <div style={{ border: '1px solid #00ff41', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 0 20px rgba(0,255,65,0.2)', maxWidth: '560px', margin: '0 auto' }}>
+                                    <iframe 
+                                        width="100%" height="315"
+                                        src={`https://www.youtube.com/embed/${videoId}`}
+                                        title="Video YouTube"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        style={{ display: 'block' }}
+                                    />
+                                </div>
+                                <p style={{ color: '#00ff41', fontSize: '0.75rem', marginTop: '8px', fontFamily: 'Courier New, monospace', letterSpacing: '1px' }}>📺 VER EN YOUTUBE</p>
+                            </div>
+                        );
+                    })()}
 
                     {/* SECCIÓN DE COMPARTIR TÁCTICO */}
                     <div style={{ marginTop: '35px', paddingTop: '25px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>

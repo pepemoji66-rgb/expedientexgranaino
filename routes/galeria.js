@@ -171,12 +171,12 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
 
     // Publicación de noticias (Uso exclusivo del Alto Mando)
     router.post('/proponer-noticia', uploadGeneral.single('imagen'), async (req, res) => {
-        const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, agente, fuente_url } = req.body;
+        const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, agente, fuente_url, youtube_url } = req.body;
         const nombreImagen = req.file ? (req.file.path || req.file.filename) : null;
 
         try {
-            const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, imagen_url, estado, fecha, aprobado, agente, fuente_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente', NOW(), 0, ?, ?)";
-            const [result] = await db.execute(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null, nombreImagen, agente || 'Agente Anónimo', fuente_url || '']);
+            const sql = "INSERT INTO noticias (titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, imagen_url, estado, fecha, aprobado, agente, fuente_url, youtube_url) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente', NOW(), 0, ?, ?, ?)";
+            const [result] = await db.execute(sql, [titulo, cuerpo, nivel_alerta, ubicacion || 'Sin ubicación', latitud || null, longitud || null, nombreImagen, agente || 'Agente Anónimo', fuente_url || '', youtube_url || null]);
             
             // 📸 AUTO-GALERÍA: Si hay imagen, la insertamos en la galería
             if (nombreImagen) {
@@ -206,16 +206,15 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
         }
     });
 
-    // Actualización de noticias (Editar enlace, título, etc.)
     router.put('/noticias/:id', uploadGeneral.single('imagen'), async (req, res) => {
-        const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado } = req.body;
+        const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, youtube_url } = req.body;
         const imagen_url = req.file ? (req.file.path || req.file.filename) : null;
         
         try {
             if (imagen_url) {
                 await db.execute(
-                    "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ?, imagen_url = ? WHERE id = ?",
-                    [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, imagen_url, req.params.id]
+                    "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ?, imagen_url = ?, youtube_url = ? WHERE id = ?",
+                    [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, imagen_url, youtube_url || null, req.params.id]
                 );
                 // 📸 AUTO-GALERÍA: nueva imagen al editar noticia
                 try {
@@ -233,8 +232,8 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
                 }
             } else {
                 await db.execute(
-                    "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ? WHERE id = ?",
-                    [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, req.params.id]
+                    "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ?, youtube_url = ? WHERE id = ?",
+                    [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, youtube_url || null, req.params.id]
                 );
             }
             res.json({ mensaje: "Noticia actualizada en el búnker." });

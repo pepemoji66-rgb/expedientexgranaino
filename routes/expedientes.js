@@ -128,8 +128,8 @@ module.exports = (db, upload) => {
                 insertId = r.insertId;
             } else {
                 // Default: expedientes
-                const sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, latitud, longitud, estado, tipo, imagen_url, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-                const [r] = await db.execute(sql, [titulo || 'Expediente OVNI', contenido, finalNombre, latitud || 0, longitud || 0, estado, finalTipo, imagen_url]);
+                const sql = "INSERT INTO expedientes (titulo, contenido, usuario_nombre, latitud, longitud, estado, tipo, imagen_url, fecha, youtube_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
+                const [r] = await db.execute(sql, [titulo || 'Expediente OVNI', contenido, finalNombre, latitud || 0, longitud || 0, estado, finalTipo, imagen_url, req.body.youtube_url || null]);
                 insertId = r.insertId;
             }
 
@@ -232,14 +232,14 @@ module.exports = (db, upload) => {
     });
 
     router.put('/:id', upload.single('imagen'), async (req, res) => {
-        const { titulo, contenido, latitud, longitud, estado, tipo, fuente_url, url_externa } = req.body;
+        const { titulo, contenido, latitud, longitud, estado, tipo, fuente_url, url_externa, youtube_url } = req.body;
         const url_final = fuente_url || url_externa || null;
         const imagen_url = req.file ? (req.file.path || req.file.filename) : null;
         try {
             if (imagen_url) {
                 await db.execute(
-                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, imagen_url = ?, fuente_url = ? WHERE id = ?",
-                    [titulo, contenido, latitud, longitud, estado, tipo, imagen_url, url_final, req.params.id]
+                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, imagen_url = ?, fuente_url = ?, youtube_url = ? WHERE id = ?",
+                    [titulo, contenido, latitud, longitud, estado, tipo, imagen_url, url_final, youtube_url || null, req.params.id]
                 );
                 // 📸 AUTO-GALERÍA: nueva imagen al editar expediente
                 try {
@@ -257,8 +257,8 @@ module.exports = (db, upload) => {
                 }
             } else {
                 await db.execute(
-                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, fuente_url = ? WHERE id = ?",
-                    [titulo, contenido, latitud, longitud, estado, tipo, url_final, req.params.id]
+                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, fuente_url = ?, youtube_url = ? WHERE id = ?",
+                    [titulo, contenido, latitud, longitud, estado, tipo, url_final, youtube_url || null, req.params.id]
                 );
             }
             res.json({ mensaje: "Expediente actualizado con éxito." });
