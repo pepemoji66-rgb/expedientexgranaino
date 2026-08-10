@@ -754,6 +754,9 @@ const LecturaHistoria = ({ userAuth }) => {
             link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         } else if (red === 'twitter') {
             link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
+        } else if (red === 'pinterest') {
+            const imgUrl = encodeURIComponent(historia.imagen_url || 'https://expedientexgranaino.com/social-preview.png');
+            link = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${imgUrl}&description=${encodeURIComponent(textoCompartir)}`;
         }
 
         if (link) {
@@ -1072,6 +1075,7 @@ const LecturaHistoria = ({ userAuth }) => {
                             <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>💬 WHATSAPP</button>
                             <button onClick={() => compartirHistoria('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📘 FACEBOOK</button>
                             <button onClick={() => compartirHistoria('twitter')} className="btn-share-tactico" style={{ background: '#000', color: '#fff', border: '1px solid #555', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>𝕏 PUBLICAR EN X</button>
+                            <button onClick={() => compartirHistoria('pinterest')} className="btn-share-tactico" style={{ background: '#E60023', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📌 PINTEREST</button>
                             <button onClick={() => compartirHistoria('copiar')} className="btn-share-tactico" style={{ background: '#444', color: '#fff', border: '1px solid #666', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>🔗 COPIAR ENLACE</button>
                         </div>
                     </div>

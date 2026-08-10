@@ -47,6 +47,9 @@ const Footer = ({ visitasTotales = 0 }) => {
                     <a href="https://www.youtube.com/@expedientexgranaino" target="_blank" rel="noopener noreferrer" className="social-link-bunker" style={{ color: 'var(--color-principal)', fontSize: '1.5rem', transition: '0.3s' }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
                     </a>
+                    <a href="https://es.pinterest.com/ExpedienteXGranaino/" target="_blank" rel="noopener noreferrer" className="social-link-bunker" style={{ color: 'var(--color-principal)', fontSize: '1.5rem', transition: '0.3s' }} title="Pinterest">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 0-3.16 19.49c-.08-.86-.15-2.18.03-3.12l1.1-4.66s-.28-.56-.28-1.39c0-1.3.75-2.27 1.69-2.27.8 0 1.18.6 1.18 1.32 0 .8-.51 2-.78 3.11-.22.93.46 1.69 1.38 1.69 1.65 0 2.92-1.74 2.92-4.25 0-2.22-1.6-3.78-3.88-3.78-2.65 0-4.2 1.98-4.2 4.03 0 .8.31 1.66.7 2.13a.34.34 0 0 1 .08.33c-.09.37-.29 1.18-.33 1.34a.34.34 0 0 1-.47.24c-1.42-.66-2.31-2.73-2.31-4.39 0-3.57 2.6-6.85 7.48-6.85 3.93 0 6.98 2.8 6.98 6.54 0 3.9-2.46 7.04-5.88 7.04-1.15 0-2.23-.6-2.6-1.3l-.7 2.68c-.26.98-.95 2.21-1.42 2.96A10 10 0 1 0 12 2z"/></svg>
+                    </a>
                 </div>
 
                 <div className="footer-legal-links" style={{ margin: '10px 0', fontSize: '0.7rem' }}>
