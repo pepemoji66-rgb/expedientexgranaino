@@ -709,7 +709,8 @@ app.use('/audios-ambiente', express.static(path.join(__dirname, 'public/audios')
 app.use(express.static(path.join(__dirname, 'build'), {
     maxAge: '1y',
     etag: false,
-    index: false // El SSR sirve el index.html, no el static handler
+    index: false, // El SSR sirve el index.html, no el static handler
+    redirect: false // Evitar 301 automático cuando /videos o /lugares coinciden con carpetas en build/
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
     maxAge: '7d'
