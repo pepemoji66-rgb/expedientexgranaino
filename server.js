@@ -687,9 +687,17 @@ app.get('/ads.txt', (req, res) => {
 
 // --- SERVIDORES ESTÁTICOS ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/videos', express.static(path.join(__dirname, 'public/videos'), { redirect: false }));
+// Para /videos y /lugares: solo servir archivos estáticos reales (no la raíz '/')
+// Así la petición a /videos y /lugares pasa a la ruta SSR con contenido SEO
+app.use('/videos', (req, res, next) => {
+    if (req.path === '/' || req.path === '') return next();
+    express.static(path.join(__dirname, 'public/videos'))(req, res, next);
+});
 app.use('/audios', express.static(path.join(__dirname, 'uploads/audios')));
-app.use('/lugares', express.static(path.join(__dirname, 'uploads/lugares'), { redirect: false }));
+app.use('/lugares', (req, res, next) => {
+    if (req.path === '/' || req.path === '') return next();
+    express.static(path.join(__dirname, 'uploads/lugares'))(req, res, next);
+});
 
 app.use('/audios-ambiente', express.static(path.join(__dirname, 'public/audios')));
 
