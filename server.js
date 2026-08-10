@@ -687,9 +687,9 @@ app.get('/ads.txt', (req, res) => {
 
 // --- SERVIDORES ESTÁTICOS ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
+app.use('/videos', express.static(path.join(__dirname, 'public/videos'), { redirect: false }));
 app.use('/audios', express.static(path.join(__dirname, 'uploads/audios')));
-app.use('/lugares', express.static(path.join(__dirname, 'uploads/lugares')));
+app.use('/lugares', express.static(path.join(__dirname, 'uploads/lugares'), { redirect: false }));
 
 app.use('/audios-ambiente', express.static(path.join(__dirname, 'public/audios')));
 
@@ -1318,6 +1318,34 @@ app.get('/noticias', async (req, res) => {
             html,
             'Noticias de Ufología y Fenómenos Anómalos — Expediente X Granaíno',
             description,
+            contenidoSeo,
+            imagenUrl,
+            paginaUrl
+        );
+        res.send(pagina);
+    });
+});
+
+// Sección de Lugares del Misterio (/lugares) - SEO enriquecido
+app.get('/lugares', (req, res) => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) return res.sendFile(indexPath);
+
+        const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">📍 MAPA TÁCTICO DE LUGARES DEL MISTERIO — Expediente X Granaíno</h1>
+    <p>Radar interactivo con las coordenadas GPS exactas de los avistamientos OVNI, fenómenos paranormales y enclaves misteriosos documentados por la red de investigadores del Búnker. Desde Sierra Nevada hasta la Costa Tropical, pasando por la Vega de Granada y el Albaicín, cada punto del mapa representa un caso real investigado y catalogado en nuestro archivo.</p>
+    <p>Explora el mapa, descubre los puntos calientes de actividad anómala y accede directamente a los expedientes clasificados de cada ubicación. Un recurso único para investigadores de campo y entusiastas del misterio en Andalucía y el mundo.</p>
+</article>`;
+
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const imagenUrl = `${baseImgUrl}/social-preview.png?v=7.0`;
+
+        const pagina = inyectarContenidoSEO(
+            html,
+            'Mapa Táctico de Lugares del Misterio | Radar de Avistamientos — Expediente X Granaíno',
+            'Mapa interactivo con coordenadas GPS de avistamientos OVNI, fenómenos paranormales y enclaves misteriosos en Granada y Andalucía.',
             contenidoSeo,
             imagenUrl,
             paginaUrl
