@@ -6,7 +6,7 @@ import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import './lugares.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Maximize2, Facebook, Twitter, MessageCircle, Link as LinkIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Facebook, Twitter, MessageCircle, Link as LinkIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { safeLocalStorage } from '../utils/storage';
 import API_BASE_URL from '../config';
@@ -77,6 +77,7 @@ const Lugares = () => {
     const [centroMapa, setCentroMapa] = useState([20, 0]); // Volvemos al centro global
     const [idResaltado, setIdResaltado] = useState(null);
     const [filtroActivo, setFiltroActivo] = useState('todos');
+    const [filtrosPanelAbierto, setFiltrosPanelAbierto] = useState(window.innerWidth > 768);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -243,23 +244,33 @@ const Lugares = () => {
         <section className="seccion-radar-total">
             {/* PANEL DE FILTROS TÁCTICO */}
             <div className="radar-filtros-panel">
-                <div className="radar-filtros-titulo">⚙ FILTRAR OBJETIVOS</div>
-                <div className="radar-filtros-lista">
-                    {FILTROS.map(f => {
-                        const count = f.id === 'todos' ? puntos.length : puntos.filter(p => p.tipo === f.id).length;
-                        return (
-                            <button
-                                key={f.id}
-                                className={`radar-filtro-btn ${filtroActivo === f.id ? 'activo' : ''}`}
-                                onClick={() => setFiltroActivo(f.id)}
-                            >
-                                <span className="radar-filtro-emoji">{f.emoji}</span>
-                                <span className="radar-filtro-label">{f.label}</span>
-                                <span className="radar-filtro-count">{count}</span>
-                            </button>
-                        );
-                    })}
+                <div
+                    className="radar-filtros-titulo clickable"
+                    onClick={() => setFiltrosPanelAbierto(prev => !prev)}
+                >
+                    <span>⚙ FILTRAR OBJETIVOS</span>
+                    <span className="radar-filtros-chevron">
+                        {filtrosPanelAbierto ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    </span>
                 </div>
+                {filtrosPanelAbierto && (
+                    <div className="radar-filtros-lista">
+                        {FILTROS.map(f => {
+                            const count = f.id === 'todos' ? puntos.length : puntos.filter(p => p.tipo === f.id).length;
+                            return (
+                                <button
+                                    key={f.id}
+                                    className={`radar-filtro-btn ${filtroActivo === f.id ? 'activo' : ''}`}
+                                    onClick={() => setFiltroActivo(f.id)}
+                                >
+                                    <span className="radar-filtro-emoji">{f.emoji}</span>
+                                    <span className="radar-filtro-label">{f.label}</span>
+                                    <span className="radar-filtro-count">{count}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             <div className="mapa-mando-full">

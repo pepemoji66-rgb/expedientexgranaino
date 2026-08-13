@@ -325,6 +325,36 @@
     padding-bottom: 6px;
     border-bottom: 1px solid rgba(var(--rgb-principal), 0.25);
     font-family: 'Orbitron', 'Roboto Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.radar-filtros-titulo.clickable {
+    cursor: pointer;
+    user-select: none;
+    border-radius: 3px;
+    padding: 3px 4px;
+    margin: -3px -4px 8px -4px;
+    transition: background 0.15s;
+}
+
+.radar-filtros-titulo.clickable:hover {
+    background: rgba(var(--rgb-principal), 0.08);
+}
+
+.radar-filtros-chevron {
+    color: var(--color-principal);
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+}
+
+/* En móvil: sin margin-bottom cuando está cerrado */
+.radar-filtros-titulo.clickable:only-child {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .radar-filtros-lista {

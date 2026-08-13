@@ -1349,7 +1349,7 @@ app.get('/lugares', (req, res) => {
 </article>`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/social-preview.png?v=7.0`;
+        const imagenUrl = `${baseImgUrl}/mapa-preview.jpg?v=1.0`;
 
         const pagina = inyectarContenidoSEO(
             html,
