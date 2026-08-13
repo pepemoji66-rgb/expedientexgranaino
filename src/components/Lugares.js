@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
@@ -59,6 +60,14 @@ const ActualizadorMapa = ({ centro, idResaltado }) => {
     return null;
 };
 
+const FILTROS = [
+    { id: 'todos',      label: 'TODOS',       emoji: '🌐' },
+    { id: 'expediente', label: 'EXPEDIENTES',  emoji: '📁' },
+    { id: 'caso',       label: 'TRUE CRIME',   emoji: '💀' },
+    { id: 'noticia',    label: 'NOTICIAS',     emoji: '📰' },
+    { id: 'misterio',  label: 'MISTERIOS',    emoji: '👁️' },
+];
+
 const Lugares = () => {
     const { t } = useLanguage();
     const location = useLocation();
@@ -67,6 +76,7 @@ const Lugares = () => {
     const [cargando, setCargando] = useState(true);
     const [centroMapa, setCentroMapa] = useState([20, 0]); // Volvemos al centro global
     const [idResaltado, setIdResaltado] = useState(null);
+    const [filtroActivo, setFiltroActivo] = useState('todos');
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -225,8 +235,33 @@ const Lugares = () => {
         );
     };
 
+    const puntosFiltrados = filtroActivo === 'todos'
+        ? puntos
+        : puntos.filter(p => p.tipo === filtroActivo);
+
     return (
         <section className="seccion-radar-total">
+            {/* PANEL DE FILTROS TÁCTICO */}
+            <div className="radar-filtros-panel">
+                <div className="radar-filtros-titulo">⚙ FILTRAR OBJETIVOS</div>
+                <div className="radar-filtros-lista">
+                    {FILTROS.map(f => {
+                        const count = f.id === 'todos' ? puntos.length : puntos.filter(p => p.tipo === f.id).length;
+                        return (
+                            <button
+                                key={f.id}
+                                className={`radar-filtro-btn ${filtroActivo === f.id ? 'activo' : ''}`}
+                                onClick={() => setFiltroActivo(f.id)}
+                            >
+                                <span className="radar-filtro-emoji">{f.emoji}</span>
+                                <span className="radar-filtro-label">{f.label}</span>
+                                <span className="radar-filtro-count">{count}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
             <div className="mapa-mando-full">
                 <MapContainer center={centroMapa} zoom={2} minZoom={2} style={{ height: '100%', width: '100%' }} closePopupOnClick={true}>
                     <ActualizadorMapa centro={centroMapa} idResaltado={idResaltado} />
@@ -234,7 +269,20 @@ const Lugares = () => {
                         url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                         attribution='&copy; Esri'
                     />
-                    {puntos.map((m, idx) => {
+                    <MarkerClusterGroup
+                        chunkedLoading
+                        maxClusterRadius={60}
+                        showCoverageOnHover={false}
+                        iconCreateFunction={(cluster) => {
+                            const count = cluster.getChildCount();
+                            return L.divIcon({
+                                html: `<div class="cluster-bunker"><span>${count}</span></div>`,
+                                className: 'cluster-bunker-wrapper',
+                                iconSize: L.point(40, 40)
+                            });
+                        }}
+                    >
+                    {puntosFiltrados.map((m, idx) => {
                         let esEste = false;
                         if (idResaltado) {
                             const strIdRes = String(idResaltado);
@@ -292,6 +340,7 @@ const Lugares = () => {
                             </Marker>
                         );
                     })}
+                    </MarkerClusterGroup>
                 </MapContainer>
             </div>
             
@@ -299,7 +348,7 @@ const Lugares = () => {
             <div className="ui-radar-status">
                 <div className="status-item">
                     <span className="label">{t('mapObjectives')}:</span>
-                    <span className="value">{puntos.length}</span>
+                    <span className="value">{puntosFiltrados.length}</span>
                 </div>
                 <div className="status-item">
                     <span className="label">{t('mapSystemLabel')}:</span>

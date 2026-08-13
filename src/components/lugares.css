@@ -296,3 +296,151 @@
 .leaflet-popup-tip-container {
     display: none; /* Estilo más limpio sin el piquito */
 }
+
+/* ======================================================
+   PANEL DE FILTROS TÁCTICO
+   ====================================================== */
+
+.radar-filtros-panel {
+    position: absolute;
+    top: 80px;
+    right: 15px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.88);
+    border: 1px solid var(--color-principal);
+    border-radius: 8px;
+    padding: 10px 12px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 20px rgba(var(--rgb-principal), 0.25);
+    min-width: 170px;
+}
+
+.radar-filtros-titulo {
+    font-size: 0.6rem;
+    color: var(--color-principal);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(var(--rgb-principal), 0.25);
+    font-family: 'Orbitron', 'Roboto Mono', monospace;
+}
+
+.radar-filtros-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.radar-filtro-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(var(--rgb-principal), 0.15);
+    border-radius: 5px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Orbitron', 'Roboto Mono', monospace;
+    color: #aaa;
+}
+
+.radar-filtro-btn:hover {
+    background: rgba(var(--rgb-principal), 0.1);
+    border-color: rgba(var(--rgb-principal), 0.5);
+    color: #fff;
+}
+
+.radar-filtro-btn.activo {
+    background: rgba(var(--rgb-principal), 0.2);
+    border-color: var(--color-principal);
+    color: var(--color-principal);
+    box-shadow: 0 0 8px rgba(var(--rgb-principal), 0.3);
+}
+
+.radar-filtro-emoji {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.radar-filtro-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    flex: 1;
+    text-align: left;
+}
+
+.radar-filtro-count {
+    font-size: 0.65rem;
+    font-weight: bold;
+    background: rgba(var(--rgb-principal), 0.15);
+    color: var(--color-principal);
+    padding: 1px 6px;
+    border-radius: 10px;
+    min-width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.radar-filtro-btn.activo .radar-filtro-count {
+    background: var(--color-principal);
+    color: #000;
+}
+
+/* Móvil: panel en la parte superior izquierda debajo del zoom */
+@media (max-width: 768px) {
+    .radar-filtros-panel {
+        top: auto;
+        bottom: 70px;
+        right: 10px;
+        left: auto;
+        min-width: 150px;
+        padding: 8px 10px;
+    }
+
+    .radar-filtro-label {
+        font-size: 0.55rem;
+    }
+}
+
+/* ======================================================
+   CLUSTERS DE MARCADORES
+   ====================================================== */
+
+.cluster-bunker-wrapper {
+    background: transparent !important;
+    border: none !important;
+}
+
+.cluster-bunker {
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--color-principal);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 12px rgba(var(--rgb-principal), 0.6),
+                inset 0 0 8px rgba(var(--rgb-principal), 0.15);
+    animation: cluster-pulse 2s infinite ease-in-out;
+    cursor: pointer;
+}
+
+.cluster-bunker span {
+    color: var(--color-principal);
+    font-size: 0.75rem;
+    font-weight: bold;
+    font-family: 'Orbitron', 'Roboto Mono', monospace;
+    line-height: 1;
+}
+
+@keyframes cluster-pulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(var(--rgb-principal), 0.6), inset 0 0 8px rgba(var(--rgb-principal), 0.15); }
+    50%       { box-shadow: 0 0 22px rgba(var(--rgb-principal), 0.9), inset 0 0 12px rgba(var(--rgb-principal), 0.25); }
+}

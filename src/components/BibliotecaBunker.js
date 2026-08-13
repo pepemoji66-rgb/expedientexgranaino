@@ -125,7 +125,7 @@ const BibliotecaBunker = () => {
                     </div>
                     
                     {totalPaginas > 1 && (
-                        <div className="biblioteca-paginacion" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '40px' }}>
+                        <div className="biblioteca-paginacion" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '40px', flexWrap: 'wrap' }}>
                             <button 
                                 onClick={() => {
                                     setPaginaActual(prev => Math.max(prev - 1, 1));
@@ -136,9 +136,39 @@ const BibliotecaBunker = () => {
                             >
                                 ANTERIOR
                             </button>
-                            <span style={{ color: '#ffb100', display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
-                                Pág. {paginaActual} / {totalPaginas}
-                            </span>
+
+                            {/* SALTADOR DE PÁGINA */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ffb100', fontWeight: 'bold' }}>
+                                <span style={{ fontSize: '0.85rem' }}>Pág.</span>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={totalPaginas}
+                                    value={paginaActual}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value, 10);
+                                        if (!isNaN(val) && val >= 1 && val <= totalPaginas) {
+                                            setPaginaActual(val);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }
+                                    }}
+                                    style={{
+                                        width: '52px',
+                                        padding: '6px 8px',
+                                        background: '#111',
+                                        color: '#ffb100',
+                                        border: '1px solid #ffb100',
+                                        borderRadius: '4px',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.95rem',
+                                        textAlign: 'center',
+                                        outline: 'none',
+                                        MozAppearance: 'textfield',
+                                    }}
+                                />
+                                <span style={{ fontSize: '0.85rem' }}>/ {totalPaginas}</span>
+                            </div>
+
                             <button 
                                 onClick={() => {
                                     setPaginaActual(prev => Math.min(prev + 1, totalPaginas));
