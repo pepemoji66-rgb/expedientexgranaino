@@ -22,6 +22,19 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
+  <!-- Open Graph dinámico para /lugares -->
+  <script>
+    (function() {
+      if (window.location.pathname === '/lugares' || window.location.pathname.startsWith('/lugares')) {
+        document.querySelector('meta[property="og:image"]').setAttribute('content', 'https://expedientexgranaino.com/mapa-preview.jpg?v=1.0');
+        document.querySelector('meta[property="og:title"]').setAttribute('content', 'Radar Global — Expediente X Granaíño | 190 Objetivos en el Mapa');
+        document.querySelector('meta[property="og:description"]').setAttribute('content', 'Visualiza en el mapa interactivo todos los expedientes, casos de true crime, noticias y misterios históricos de Expediente X Granaíño. 190 objetivos geolocalizados en tiempo real.');
+        document.querySelector('meta[name="twitter:image"]').setAttribute('content', 'https://expedientexgranaino.com/mapa-preview.jpg?v=1.0');
+        document.querySelector('meta[name="twitter:title"]').setAttribute('content', 'Radar Global — Expediente X Granaíño | 190 Objetivos en el Mapa');
+      }
+    })();
+  </script>
+
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:domain" content="expedientexgranaino.com" />

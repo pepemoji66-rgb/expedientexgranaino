@@ -392,19 +392,33 @@
     color: #000;
 }
 
-/* Móvil: panel en la parte superior izquierda debajo del zoom */
+/* Móvil: panel arriba derecha, debajo del navbar */
 @media (max-width: 768px) {
     .radar-filtros-panel {
-        top: auto;
-        bottom: 70px;
-        right: 10px;
+        top: 65px;
+        right: 8px;
+        bottom: auto;
         left: auto;
-        min-width: 150px;
-        padding: 8px 10px;
+        min-width: 140px;
+        padding: 7px 9px;
+    }
+
+    .radar-filtros-titulo {
+        font-size: 0.55rem;
+        margin-bottom: 6px;
+    }
+
+    .radar-filtro-btn {
+        padding: 5px 8px;
     }
 
     .radar-filtro-label {
+        font-size: 0.5rem;
+    }
+
+    .radar-filtro-count {
         font-size: 0.55rem;
+        min-width: 18px;
     }
 }
 
@@ -511,7 +525,20 @@
 
 @media (max-width: 768px) {
     .radar-share-panel {
-        bottom: 70px;
-        right: 10px;
+        /* Abajo a la izquierda para no solaparse con los filtros */
+        bottom: 55px;
+        right: auto;
+        left: 8px;
+        padding: 6px 10px;
+    }
+
+    .radar-share-titulo {
+        font-size: 0.5rem;
+        margin-bottom: 6px;
+    }
+
+    .radar-share-btn {
+        width: 30px;
+        height: 30px;
     }
 }
