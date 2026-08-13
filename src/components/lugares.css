@@ -444,3 +444,74 @@
     0%, 100% { box-shadow: 0 0 12px rgba(var(--rgb-principal), 0.6), inset 0 0 8px rgba(var(--rgb-principal), 0.15); }
     50%       { box-shadow: 0 0 22px rgba(var(--rgb-principal), 0.9), inset 0 0 12px rgba(var(--rgb-principal), 0.25); }
 }
+
+/* ======================================================
+   PANEL COMPARTIR EN REDES
+   ====================================================== */
+
+.radar-share-panel {
+    position: absolute;
+    bottom: 20px;
+    right: 15px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.88);
+    border: 1px solid var(--color-principal);
+    border-radius: 8px;
+    padding: 8px 12px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 20px rgba(var(--rgb-principal), 0.2);
+}
+
+.radar-share-titulo {
+    font-size: 0.55rem;
+    color: var(--color-principal);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-family: 'Orbitron', 'Roboto Mono', monospace;
+    text-align: center;
+}
+
+.radar-share-botones {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.radar-share-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.radar-share-btn.facebook { background: #1877F2; color: #fff; }
+.radar-share-btn.twitter  { background: #000; color: #fff; border: 1px solid #333; }
+.radar-share-btn.whatsapp { background: #25D366; color: #fff; }
+.radar-share-btn.copiar   { background: transparent; color: var(--color-principal); border: 1px solid var(--color-principal); }
+
+.radar-share-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+.radar-share-btn.copiar:hover {
+    background: rgba(var(--rgb-principal), 0.15);
+    box-shadow: 0 0 10px rgba(var(--rgb-principal), 0.4);
+}
+
+@media (max-width: 768px) {
+    .radar-share-panel {
+        bottom: 70px;
+        right: 10px;
+    }
+}

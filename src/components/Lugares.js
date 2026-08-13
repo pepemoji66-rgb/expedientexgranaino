@@ -6,7 +6,7 @@ import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import './lugares.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Facebook, Twitter, MessageCircle, Link as LinkIcon } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { safeLocalStorage } from '../utils/storage';
 import API_BASE_URL from '../config';
@@ -344,7 +344,7 @@ const Lugares = () => {
                 </MapContainer>
             </div>
             
-            {/* BOTÓN DE LOCALIZACIÓN RÁPIDA (OPCIONAL) */}
+            {/* BARRA DE ESTADO */}
             <div className="ui-radar-status">
                 <div className="status-item">
                     <span className="label">{t('mapObjectives')}:</span>
@@ -353,6 +353,47 @@ const Lugares = () => {
                 <div className="status-item">
                     <span className="label">{t('mapSystemLabel')}:</span>
                     <span className="value pulse">{t('mapActive')}</span>
+                </div>
+            </div>
+
+            {/* PANEL COMPARTIR EN REDES */}
+            <div className="radar-share-panel">
+                <div className="radar-share-titulo">📡 COMPARTIR RADAR</div>
+                <div className="radar-share-botones">
+                    <a
+                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="radar-share-btn facebook"
+                        title="Compartir en Facebook"
+                    >
+                        <Facebook size={16} />
+                    </a>
+                    <a
+                        href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('🗺️ El radar de Expediente X Granaíno — todos los casos, expedientes y misterios en el mapa')}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="radar-share-btn twitter"
+                        title="Compartir en X (Twitter)"
+                    >
+                        <Twitter size={16} />
+                    </a>
+                    <a
+                        href={`https://api.whatsapp.com/send?text=${encodeURIComponent('🗺️ Mira el radar de Expediente X Granaíno: ' + window.location.href)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="radar-share-btn whatsapp"
+                        title="Compartir en WhatsApp"
+                    >
+                        <MessageCircle size={16} />
+                    </a>
+                    <button
+                        className="radar-share-btn copiar"
+                        title="Copiar enlace"
+                        onClick={() => {
+                            navigator.clipboard.writeText(window.location.href);
+                            alert('¡Enlace del mapa copiado al portapapeles!');
+                        }}
+                    >
+                        <LinkIcon size={16} />
+                    </button>
                 </div>
             </div>
         </section>
