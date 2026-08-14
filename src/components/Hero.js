@@ -11,6 +11,7 @@ import imgEvidencias from '../assets/galeria_evidencias.png';
 import imgRelatos from '../assets/misterio_relatos.png';
 import imgAtarfeReal from '../assets/atarfe_captura_real_horizontal.png';
 import imgBiblioteca from '../assets/biblioteca_banner.png';
+import imgRuleta from '../assets/ruleta_banner.jpg';
 
 const Hero = ({ userAuth }) => {
     const { t, toggleLanguage, language } = useLanguage();
@@ -57,9 +58,9 @@ const Hero = ({ userAuth }) => {
                     todasNovedades = todasNovedades.concat(dataMist.map(x => ({ ...x, type: 'misterio', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // Ordenar por fecha y coger los 3 más recientes
+                // Ordenar por fecha y coger los 2 más recientes
                 todasNovedades.sort((a, b) => b.timestamp - a.timestamp);
-                setNovedadesGlobales(todasNovedades.slice(0, 3));
+                setNovedadesGlobales(todasNovedades.slice(0, 2));
 
             } catch (err) {
                 console.error("Error al captar últimas actualizaciones para Hero:", err);
@@ -68,8 +69,22 @@ const Hero = ({ userAuth }) => {
         fetchUltimos();
     }, []);
 
-    const getSlides = () => {
+    const getSlides = () => {
         return [
+            {
+                id: 'ruleta-bunker',
+                image: imgRuleta,
+                subtitle: language === 'en' ? "FORTUNE & DESTINY" : "DESTINO Y MISTERIO",
+                title: "LA RULETA DEL BÚNKER",
+                tagline: language === 'en' ? "TEST YOUR FATE IN THE ARCHIVE" : "PRUEBA TU SUERTE EN EL ARCHIVO",
+                infoTitle: language === 'en' ? "RANDOM DOSSIER SELECTION" : "SELECCIÓN ALEATORIA DE EXPEDIENTES",
+                infoText: language === 'en' 
+                    ? "Spin the Bunker Roulette and let chance decide which secret dossier, mystery or unsolved case you will explore today."
+                    : "Gira la Ruleta del Búnker y deja que el azar decida qué expediente secreto, misterio o caso abierto explorarás hoy.",
+                highlight: language === 'en' ? "SPIN THE WHEEL" : "¡GIRA LA RULETA Y DESCUBRE TU DESTINO!",
+                btnText: language === 'en' ? "SPIN ROULETTE" : "GIRAR RULETA",
+                btnLink: "/la-ruleta"
+            },
             {
                 id: 'biblioteca-bunker',
                 image: imgBiblioteca,
@@ -81,48 +96,6 @@ const Hero = ({ userAuth }) => {
                 highlight: language === 'en' ? "SUPPORT THE PROJECT" : "APOYA AL PROYECTO",
                 btnText: language === 'en' ? "ENTER LIBRARY" : "ENTRAR A LA BIBLIOTECA",
                 btnLink: "/biblioteca"
-            },
-            {
-                id: 'archipeg-promo',
-                image: imgAtarfeReal,
-                backgroundPosition: 'right center',
-                subtitle: language === 'en' ? "DECLASSIFIED DOSSIER" : "DOSSIER DESCLASIFICADO",
-                title: "CASO OVNI ATARFE",
-                tagline: language === 'en' ? "THE ATARFE INCIDENT" : "EL INCIDENTE ATARFE Y ALBOLOTE",
-                infoTitle: language === 'en' ? "CONFIDENTIAL ARCHIVE" : "ARCHIVO CONFIDENCIAL / NIVEL 4",
-                infoText: language === 'en' 
-                    ? "Full technical report on the UFO sightings in Granada. Unedited original evidence and direct testimonies."
-                    : "Informe técnico completo sobre los avistamientos OVNI en Granada. Evidencias originales sin editar y testimonios directos.",
-                highlight: language === 'en' ? "ORIGINAL EVIDENCE" : "EVIDENCIAS ORIGINALES Y TESTIMONIOS",
-                btnText: language === 'en' ? "ACCESS DOSSIER" : "ACCEDER AL DOSSIER",
-                btnLink: "/especial-atarfe"
-            },
-            {
-                id: 'archipeg-promo',
-                image: imgEspacio,
-                subtitle: language === 'en' ? "PRIVATE SOFTWARE" : "SOFTWARE OFFLINE",
-                title: "ARCHIPEG V3",
-                tagline: language === 'en' ? "YOUR DIGITAL BUNKER" : "TU BÚNKER DIGITAL",
-                infoTitle: language === 'en' ? "PROTECT YOUR LEGACY" : "PROTEGE TU LEGADO",
-                infoText: language === 'en' ? "Download the sovereign offline software to organize and protect your UFO files completely out of the cloud." : "Descarga el software soberano sin conexión para organizar y blindar tus archivos ufológicos fuera de la red.",
-                highlight: language === 'en' ? "100% PRIVATE • SECURE • NO CLOUD" : "100% PRIVADO • SEGURO • SIN NUBE",
-                btnText: language === 'en' ? "GET ARCHIPEG" : "ADQUIRIR ARCHIPEG",
-                btnLink: "/archipeg"
-            },
-            {
-                id: 'especial-atarfe',
-                image: imgAtarfeReal,
-                backgroundPosition: 'right center',
-                subtitle: language === 'en' ? "DECLASSIFIED DOSSIER" : "DOSSIER DESCLASIFICADO",
-                title: "CASO OVNI ATARFE",
-                tagline: language === 'en' ? "THE ATARFE INCIDENT" : "EL INCIDENTE ATARFE Y ALBOLOTE",
-                infoTitle: language === 'en' ? "CONFIDENTIAL ARCHIVE" : "ARCHIVO CONFIDENCIAL / NIVEL 4",
-                infoText: language === 'en' 
-                    ? "Full technical report on the UFO sightings in Granada. Unedited original evidence and direct testimonies."
-                    : "Informe técnico completo sobre los avistamientos OVNI en Granada. Evidencias originales sin editar y testimonios directos.",
-                highlight: language === 'en' ? "ORIGINAL EVIDENCE" : "EVIDENCIAS ORIGINALES Y TESTIMONIOS",
-                btnText: language === 'en' ? "ACCESS DOSSIER" : "ACCEDER AL DOSSIER",
-                btnLink: "/especial-atarfe"
             }
         ];
     };
