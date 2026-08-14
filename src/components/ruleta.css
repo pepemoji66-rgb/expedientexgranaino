@@ -233,7 +233,7 @@
     align-items: center;
     justify-content: center;
     z-index: 2000;
-    padding: 85px 20px 30px;
+    padding: 20px 15px;
     animation: fadeInOverlay 0.4s ease;
 }
 
@@ -246,9 +246,9 @@
     background: #0a0a0a;
     border: 2px solid #ff0033;
     border-radius: 8px;
-    max-width: 500px;
+    max-width: 480px;
     width: 100%;
-    max-height: calc(85vh - 70px);
+    max-height: calc(100vh - 40px);
     overflow-y: auto;
     position: relative;
     animation: slideUpModal 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -265,10 +265,10 @@
 /* Botón de Cierre (Aspa X) */
 .modal-close-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: rgba(255, 0, 51, 0.15);
     border: 1px solid #ff0033;
@@ -291,14 +291,14 @@
 /* Sello CONFIDENCIAL */
 .modal-sello {
     position: absolute;
-    top: 13px;
-    right: 50px;
+    top: 10px;
+    right: 42px;
     font-family: 'Courier New', monospace;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     color: #ff0033;
     border: 1px solid #ff0033;
-    padding: 3px 8px;
-    letter-spacing: 3px;
+    padding: 2px 6px;
+    letter-spacing: 2px;
     text-transform: uppercase;
     transform: rotate(5deg);
     opacity: 0.75;
@@ -307,7 +307,7 @@
 /* Cabecera del modal */
 .modal-header-bar {
     background: linear-gradient(135deg, #1a0000 0%, #0a0a0a 100%);
-    padding: 15px 20px;
+    padding: 10px 15px;
     border-bottom: 1px solid #330000;
     display: flex;
     align-items: center;
@@ -316,19 +316,19 @@
 
 .modal-categoria-badge {
     font-family: 'Courier New', monospace;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #00ff41;
     background: rgba(0, 255, 65, 0.1);
     border: 1px solid rgba(0, 255, 65, 0.3);
-    padding: 3px 10px;
+    padding: 2px 8px;
     border-radius: 3px;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
 .modal-fecha {
     font-family: monospace;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #555;
     margin-left: auto;
 }
@@ -336,7 +336,7 @@
 /* Imagen */
 .modal-imagen-wrapper {
     width: 100%;
-    max-height: 250px;
+    max-height: 140px;
     overflow: hidden;
     position: relative;
     background: #050505;
@@ -347,7 +347,7 @@
 
 .modal-imagen-wrapper img {
     width: 100%;
-    max-height: 250px;
+    max-height: 140px;
     height: auto;
     object-fit: contain;
     display: block;
@@ -357,39 +357,43 @@
     content: '';
     position: absolute;
     bottom: 0; left: 0; right: 0;
-    height: 30px;
+    height: 20px;
     background: linear-gradient(transparent, #0a0a0a);
     pointer-events: none;
 }
 
 /* Contenido del modal */
 .modal-body {
-    padding: 20px 25px;
+    padding: 12px 18px;
 }
 
 .modal-titulo {
     font-family: 'Courier New', monospace;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     color: #00d4ff;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
     letter-spacing: 1px;
-    line-height: 1.4;
+    line-height: 1.3;
     text-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
 }
 
 .modal-extracto {
     font-family: monospace;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     color: #888;
-    line-height: 1.7;
-    margin-bottom: 20px;
+    line-height: 1.45;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* Botones de acción */
 .modal-acciones {
     display: flex;
-    gap: 12px;
-    padding: 0 25px 25px;
+    gap: 10px;
+    padding: 0 18px 12px;
 }
 
 .btn-abrir-expediente {
