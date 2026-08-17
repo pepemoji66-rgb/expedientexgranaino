@@ -852,7 +852,10 @@ const obtenerUrlsRequest = (req) => {
     // Siempre forzamos https en producción (expedientexgranaino.com)
     const finalProtocol = (protocol === 'https' || req.get('host').includes('expedientexgranaino.com')) ? 'https' : protocol;
     const host = req.get('host');
-    const paginaUrl = `${finalProtocol}://${host}${req.originalUrl}`;
+    // Para el canonical usamos la URL SIN query params (?src=, etc.) para evitar
+    // que Google marque las páginas como "alternativa con canónica adecuada"
+    const rutaLimpia = req.path || req.originalUrl.split('?')[0];
+    const paginaUrl = `${finalProtocol}://${host}${rutaLimpia}`;
     const baseImgUrl = `${finalProtocol}://${host}`;
     return { paginaUrl, baseImgUrl };
 };
@@ -1838,11 +1841,11 @@ app.get('/sitemap.xml', async (req, res) => {
         // Consulta unificada: incluimos todos los estados activos para TODAS las tablas
         const estadosActivos = "estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'";
 
-        // 2. Expedientes / Relatos
+        // 2. Expedientes / Relatos — URLs limpias sin ?src= para evitar "canónica alternativa"
         try {
             const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE ${estadosActivos}`);
             exps.forEach(e => urls.push({
-                loc: `${domain}/leer-historia/${e.id}?src=expedientes`,
+                loc: `${domain}/leer-historia/${e.id}`,
                 lastmod: e.lastmod || today,
                 changefreq: 'weekly',
                 priority: '0.8'
@@ -1853,7 +1856,7 @@ app.get('/sitemap.xml', async (req, res) => {
         try {
             const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE ${estadosActivos}`);
             casos.forEach(c => urls.push({
-                loc: `${domain}/leer-historia/${c.id}?src=casos`,
+                loc: `${domain}/leer-historia/${c.id}`,
                 lastmod: c.lastmod || today,
                 changefreq: 'weekly',
                 priority: '0.8'
@@ -1864,7 +1867,7 @@ app.get('/sitemap.xml', async (req, res) => {
         try {
             const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE ${estadosActivos}`);
             misterios.forEach(m => urls.push({
-                loc: `${domain}/leer-historia/${m.id}?src=misterios`,
+                loc: `${domain}/leer-historia/${m.id}`,
                 lastmod: m.lastmod || today,
                 changefreq: 'weekly',
                 priority: '0.8'
@@ -1875,7 +1878,7 @@ app.get('/sitemap.xml', async (req, res) => {
         try {
             const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE ${estadosActivos}`);
             noticias.forEach(n => urls.push({
-                loc: `${domain}/leer-historia/${n.id}?src=noticias`,
+                loc: `${domain}/leer-historia/${n.id}`,
                 lastmod: n.lastmod || today,
                 changefreq: 'weekly',
                 priority: '0.8'
