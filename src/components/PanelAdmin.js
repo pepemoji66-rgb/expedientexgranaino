@@ -731,15 +731,18 @@ const PanelAdmin = () => {
             const notiPendientes = (datos.noticias || []).filter(n => n.estado === 'pendiente' || n.estado === 0).length;
             const casosPendientes = (datos.casos_abiertos || []).filter(c => c.estado === 'pendiente' || c.estado === 0).length;
             const misteriosPendientes = (datos.misterios_historicos || []).filter(m => m.estado === 'pendiente' || m.estado === 0).length;
-            const totalPendientesBunker = expPendientes + notiPendientes + casosPendientes + misteriosPendientes + comentariosPendientes;
+            const usuariosPendientes = (datos.usuarios || []).filter(u => u.aprobado === 0 || u.aprobado === '0').length;
+            const archipegPendientes = (datos.archipeg || []).filter(a => a.estado === 'pendiente').length;
 
             return (
                 <button key={t} className={tab === t ? 'active' : ''} onClick={() => { setTab(t); setPaginaActual(1); }}>
                     {label}
+                    {t === 'usuarios' && usuariosPendientes > 0 && <span className="badge-pendiente">{usuariosPendientes}</span>}
                     {t === 'expedientes' && expPendientes > 0 && <span className="badge-pendiente">{expPendientes}</span>}
                     {t === 'casos_abiertos' && casosPendientes > 0 && <span className="badge-pendiente">{casosPendientes}</span>}
                     {t === 'misterios_historicos' && misteriosPendientes > 0 && <span className="badge-pendiente">{misteriosPendientes}</span>}
                     {t === 'noticias' && notiPendientes > 0 && <span className="badge-pendiente">{notiPendientes}</span>}
+                    {t === 'archipeg' && archipegPendientes > 0 && <span className="badge-pendiente">{archipegPendientes}</span>}
                     {t === 'comentarios' && comentariosPendientes > 0 && (
                         <span className="badge-pendiente">{comentariosPendientes}</span>
                     )}
