@@ -251,6 +251,7 @@ function App() {
                 { path: "/la-ruleta", label: "🎡 LA RULETA" },
                 { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
                 { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
+                { path: "/archipeg", label: "💻 ARCHIPEG PRO" },
                 { path: "/biblioteca", label: "📚 BIBLIOTECA DEL BÚNKER" },
                 { path: "/colaboradores", label: "🏅 COLABORADORES" },
                 { path: "/privacidad", label: "🔒 PRIVACIDAD" },
