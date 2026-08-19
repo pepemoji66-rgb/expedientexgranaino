@@ -51,6 +51,12 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
         { path: "/la-ruleta", label: "🎡 LA RULETA" }
     );
 
+    const isAdmin = userAuth && (
+        (userAuth.email && userAuth.email.toLowerCase() === (ADMIN_EMAIL || 'archipegv2@gmail.com').toLowerCase()) ||
+        (userAuth.email && userAuth.email.toLowerCase() === 'pepemoji66@gmail.com') ||
+        userAuth.rol === 'admin'
+    );
+
     return (
         <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>
             <div className="top-navbar-container">
@@ -135,6 +141,11 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                     <div className="user-area desktop-only">
                         {userAuth ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {isAdmin && (
+                                    <Link to="/panel-mando" className="btn-panel-top-nav" title="Ir al Panel de Mando">
+                                        ⚡ PANEL
+                                    </Link>
+                                )}
                                 <Link to="/acceso" className="btn-access-tactical" style={{ height: '32px', display: 'flex', alignItems: 'center' }}>{t('navProfile')}</Link>
                                 <button onClick={cerrarSesion} className="btn-logout-mini" title={t('sysLogoutBtn')}>
                                     <LogOut size={14} />
@@ -143,6 +154,13 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                             </div>
                         ) : null}
                     </div>
+
+                    {/* BOTÓN PANEL DE MANDO RÁPIDO PARA MÓVIL (SOLO ADMIN) */}
+                    {isAdmin && (
+                        <Link to="/panel-mando" className="btn-panel-top-mobile" title="Panel de Mando">
+                            ⚡ PANEL
+                        </Link>
+                    )}
 
                     {/* BOTÓN HAMBURGUESA (MÓVIL) */}
                     <button className="mobile-menu-btn" onClick={toggleMenu} aria-label="Toggle Menu">

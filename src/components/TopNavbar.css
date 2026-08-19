@@ -497,3 +497,53 @@
     background: rgba(var(--rgb-principal), 0.05);
     border-left-color: var(--color-principal);
 }
+
+/* BOTÓN RÁPIDO PANEL DE MANDO (DESKTOP Y MÓVIL) */
+.btn-panel-top-nav {
+    background: rgba(var(--rgb-principal, 0, 255, 65), 0.12);
+    color: var(--color-principal, #00ff41);
+    border: 1px solid var(--color-principal, #00ff41);
+    padding: 6px 14px;
+    border-radius: 2px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    font-family: 'monospace';
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    box-shadow: 0 0 10px rgba(var(--rgb-principal, 0, 255, 65), 0.25);
+    transition: all 0.3s ease;
+}
+
+.btn-panel-top-nav:hover {
+    background: var(--color-principal, #00ff41);
+    color: #000;
+    box-shadow: 0 0 18px var(--color-principal, #00ff41);
+    transform: translateY(-1px);
+}
+
+.btn-panel-top-mobile {
+    display: none;
+    background: rgba(var(--rgb-principal, 0, 255, 65), 0.15);
+    color: var(--color-principal, #00ff41);
+    border: 1px solid var(--color-principal, #00ff41);
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    font-family: 'monospace';
+    letter-spacing: 1px;
+    text-decoration: none;
+    align-items: center;
+    box-shadow: 0 0 8px rgba(var(--rgb-principal, 0, 255, 65), 0.25);
+    white-space: nowrap;
+}
+
+@media (max-width: 992px) {
+    .btn-panel-top-mobile {
+        display: flex;
+    }
+}
