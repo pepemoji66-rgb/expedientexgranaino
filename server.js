@@ -1406,49 +1406,96 @@ app.get('/lugares', (req, res) => {
     });
 });
 
+// Helper para extraer ID de YouTube
+function extraerYoutubeId(url) {
+    if (!url) return null;
+    const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
 // Sección de Vídeos (/videos) - SEO enriquecido
 app.get('/videos', async (req, res) => {
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
 
-        let contenidoSeo = `
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        const videoId = req.query.id ? parseInt(req.query.id, 10) : null;
+
+        let tituloSeo = 'Galería de Vídeos de Avistamientos y OVNIS — Expediente X Granaíno';
+        let descSeo = 'Grabaciones originales de avistamientos de OVNIS y anomalías aéreas registradas por nuestra red de observadores.';
+        let imagenUrl = `${baseImgUrl}/social-preview.png?v=8.0`;
+        let contenidoSeo = '';
+
+        if (videoId && !isNaN(videoId)) {
+            try {
+                const videoRows = await db.query("SELECT * FROM videos WHERE id = ?", [videoId]);
+                if (videoRows && videoRows.length > 0) {
+                    const vid = videoRows[0];
+                    tituloSeo = `📼 ${vid.titulo} — Evidencia en Vídeo | Expediente X Granaíno`;
+                    descSeo = (vid.descripcion || '').replace(/\r?\n|\r/g, ' ').slice(0, 220) || descSeo;
+
+                    // Si tiene enlace de YouTube, usamos su miniatura oficial de YouTube
+                    const ytId = extraerYoutubeId(vid.url);
+                    if (ytId) {
+                        imagenUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                    } else if (vid.capturas) {
+                        try {
+                            const caps = JSON.parse(vid.capturas);
+                            if (Array.isArray(caps) && caps.length > 0 && caps[0]) imagenUrl = caps[0];
+                        } catch (_) {
+                            if (typeof vid.capturas === 'string' && vid.capturas.startsWith('http')) imagenUrl = vid.capturas;
+                        }
+                    }
+
+                    contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">📼 EVIDENCIA EN VÍDEO: ${vid.titulo} — Expediente X Granaíno</h1>
+    <p><strong>Investigador:</strong> ${vid.usuario || 'Agente del Búnker'}</p>
+    <p>${vid.descripcion || 'Sin descripción adicional en el archivo.'}</p>
+</article>`;
+                }
+            } catch (dbErr) {
+                console.error("Error al buscar vídeo específico para SEO:", dbErr);
+            }
+        }
+
+        if (!contenidoSeo) {
+            contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">📼 ARCHIVO DE VÍDEOS CLASIFICADOS Y AVISTAMIENTOS — Expediente X Granaíno</h1>
     <p>Repositorio de grabaciones de campo del búnker. A continuación se listan las evidencias de vídeo desclasificadas por el mando central:</p>
     <ul style="list-style-type:none;padding:0;">`;
 
-        try {
-            const videos = await db.query("SELECT titulo, descripcion, usuario, fecha FROM videos WHERE estado = 'aprobado' ORDER BY id DESC LIMIT 30");
-            if (videos && videos.length > 0) {
-                videos.forEach(v => {
-                    const fechaStr = v.fecha ? new Date(v.fecha).toLocaleDateString('es-ES') : '';
-                    contenidoSeo += `
+            try {
+                const videos = await db.query("SELECT titulo, descripcion, usuario, fecha FROM videos WHERE estado = 'aprobado' ORDER BY id DESC LIMIT 30");
+                if (videos && videos.length > 0) {
+                    videos.forEach(v => {
+                        const fechaStr = v.fecha ? new Date(v.fecha).toLocaleDateString('es-ES') : '';
+                        contenidoSeo += `
         <li style="margin-bottom:25px;border-bottom:1px solid #222;padding-bottom:15px;">
             <h3 style="color:#00d4ff;margin:0 0 5px 0;">${v.titulo}</h3>
             <span style="color:#666;font-size:0.75rem;">👤 Investigador: ${v.usuario || 'Agente de campo'} | Fecha: ${fechaStr}</span>
             <p style="margin:8px 0 0 0;">${v.descripcion || 'Sin descripción adicional en el archivo.'}</p>
         </li>`;
-                });
-            } else {
-                contenidoSeo += `<li>📡 Escaneando sector... No se detectan registros de vídeo aprobados.</li>`;
+                    });
+                } else {
+                    contenidoSeo += `<li>📡 Escaneando sector... No se detectan registros de vídeo aprobados.</li>`;
+                }
+            } catch (dbErr) {
+                console.error("Error al obtener videos para SEO:", dbErr);
+                contenidoSeo += `<li>Error temporal al conectar con el archivo de vídeo.</li>`;
             }
-        } catch (dbErr) {
-            console.error("Error al obtener videos para SEO:", dbErr);
-            contenidoSeo += `<li>Error temporal al conectar con el archivo de vídeo.</li>`;
-        }
 
-        contenidoSeo += `
+            contenidoSeo += `
     </ul>
 </article>`;
-
-        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/presentacion_hero.png`;
+        }
 
         const pagina = inyectarContenidoSEO(
             html,
-            'Galería de Vídeos de Avistamientos y OVNIS — Expediente X Granaíno',
-            'Grabaciones originales de avistamientos de OVNIS y anomalías aéreas registradas por nuestra red de observadores.',
+            tituloSeo,
+            descSeo,
             contenidoSeo,
             imagenUrl,
             paginaUrl
@@ -1562,7 +1609,7 @@ app.get('/galeria', async (req, res) => {
 </article>`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/presentacion_hero.png`;
+        const imagenUrl = `${baseImgUrl}/social-preview.png?v=8.0`;
 
         const pagina = inyectarContenidoSEO(
             html,
