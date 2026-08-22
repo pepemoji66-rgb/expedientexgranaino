@@ -788,11 +788,53 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
         };
     }
 
+    // Palabras clave y etiquetas temáticas dinámicas para SEO y Redes
+    let keywordsDinamicas = "OVNI Granada, fenómenos paranormales, ufología Andalucía, avistamientos UFO, psicofonías, misterio, investigación paranormal, Expediente X Granaíno";
+    let articleTags = "";
+
+    if (url.includes('casos')) {
+        keywordsDinamicas = "True Crime Granada, crónica negra, casos abiertos, investigación criminal, sucesos Granada, misterio, Expediente X";
+        articleTags = `
+<meta property="article:tag" content="True Crime" />
+<meta property="article:tag" content="Crónica Negra" />
+<meta property="article:tag" content="Casos Abiertos" />
+<meta property="article:tag" content="Granada" />
+<meta property="article:tag" content="Expediente X Granaíno" />`;
+    } else if (url.includes('misterios')) {
+        keywordsDinamicas = "misterios históricos, historia oculta Granada, leyendas Andalucía, patrimonio misterioso, secretos históricos, Expediente X";
+        articleTags = `
+<meta property="article:tag" content="Misterios Históricos" />
+<meta property="article:tag" content="Historia Oculta" />
+<meta property="article:tag" content="Leyendas" />
+<meta property="article:tag" content="Granada" />
+<meta property="article:tag" content="Expediente X Granaíno" />`;
+    } else if (url.includes('noticias')) {
+        keywordsDinamicas = "última hora misterio, noticias paranormales, alertas ovni, fenómenos extraños Granada, actualidad ufológica, Expediente X";
+        articleTags = `
+<meta property="article:tag" content="Noticias" />
+<meta property="article:tag" content="Última Hora" />
+<meta property="article:tag" content="Alerta Paranormal" />
+<meta property="article:tag" content="Granada" />`;
+    } else if (url.includes('lugares')) {
+        keywordsDinamicas = "mapa misterio Granada, lugares encantados Andalucía, ubicaciones ovni, coordenadas paranormales, rutas del misterio";
+        articleTags = `
+<meta property="article:tag" content="Mapa del Misterio" />
+<meta property="article:tag" content="Lugares Encantados" />
+<meta property="article:tag" content="Granada" />`;
+    } else if (esHistoria) {
+        articleTags = `
+<meta property="article:tag" content="OVNI" />
+<meta property="article:tag" content="Ufología" />
+<meta property="article:tag" content="Fenómenos Paranormales" />
+<meta property="article:tag" content="Granada" />
+<meta property="article:tag" content="Expediente X Granaíno" />`;
+    }
+
     // Inyectamos meta description, OG, Twitter Cards, canonical y JSON-LD
     const ogBlock = `
 <meta name="google-site-verification" content="wu1T4bL_7euJUjS-742pfAGN6xKEynd3X9P9BDUr0Dc" />
 <meta name="description" content="${desc}" />
-<meta name="keywords" content="OVNI Granada, fenómenos paranormales, ufología Andalucía, avistamientos UFO, psicofonías, misterio, investigación paranormal, Expediente X" />
+<meta name="keywords" content="${keywordsDinamicas}" />
 <link rel="canonical" href="${url}" />
 <meta property="og:type" content="${esHistoria ? 'article' : 'website'}" />
 <meta property="og:site_name" content="Expediente X Granaíno" />
@@ -803,6 +845,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
 <meta property="og:image:secure_url" content="${img}" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
+${articleTags}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="${url}" />
 <meta name="twitter:title" content="${title}" />

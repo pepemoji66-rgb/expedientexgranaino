@@ -124,7 +124,11 @@ const Videos = ({ userAuth }) => {
 
     const compartirVideo = async (vid, red) => {
         const url = `${window.location.origin}/videos?id=${vid.id}`;
-        const texto = `🛸 ¡EVIDENCIA EN VÍDEO! Mira este avistamiento en el Búnker de ExpedienteX: "${vid.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
+        const tagsTexto = '#OVNI #UFO #AvistamientoOVNI #Granada #ExpedienteXGranaino #Ufologia #Misterio #Paranormal';
+        const hashtagsTwitter = 'OVNI,UFO,AvistamientoOVNI,Granada,ExpedienteXGranaino,Ufologia';
+        const tituloLimpio = (vid.titulo || 'Evidencia en Vídeo').toUpperCase();
+        const texto = `🛸 ¡EVIDENCIA EN VÍDEO DESCLASIFICADA! "${tituloLimpio}"\n\n👁️ Mira el metraje en el Búnker:\n\n${tagsTexto}`;
+        const textoTwitter = `🛸 ¡EVIDENCIA EN VÍDEO DESCLASIFICADA! "${tituloLimpio}"\n\n👁️ Mira el metraje en el Búnker:`;
         
         // Prioridad 1: Web Share API (Nativo en móviles)
         if (navigator.share && red !== 'copy' && red !== 'instagram') {
@@ -143,9 +147,11 @@ const Videos = ({ userAuth }) => {
         // Prioridad 2: Links directos (Fallback o Desktop)
         let link = '';
         if (red === 'twitter') {
-            link = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
+            link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoTwitter)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtagsTwitter)}`;
         } else if (red === 'whatsapp') {
-            link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' ' + url)}`;
+            link = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + '\n' + url)}`;
+        } else if (red === 'facebook') {
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(texto)}`;
         } else if (red === 'instagram') {
             try {
                 const fullText = `${texto} ${url}`;

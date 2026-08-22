@@ -720,14 +720,35 @@ const LecturaHistoria = ({ userAuth }) => {
         else if (esNoticia) url += '?src=noticias';
         else url += '?src=expedientes';
 
-        const textoCompartir = `🛸 ¡EXPEDIENTE DESCLASIFICADO! "${(historia.titulo || '').toUpperCase()}" — Investígalo en el Búnker Granaíno 👁️ #MisterioGranadino #ExpedienteXGranaino #TrueCrime`;
+        // Inteligencia de Etiquetas por Categoría
+        let tagsTexto = '';
+        let hashtagsTwitter = 'ExpedienteXGranaino,Misterio,Granada';
+
+        if (esCaso) {
+            tagsTexto = '#TrueCrime #CronicaNegra #CasosReales #MisterioGranada #Investigacion #Granada #ExpedienteXGranaino';
+            hashtagsTwitter = 'TrueCrime,CronicaNegra,CasosReales,MisterioGranada,ExpedienteXGranaino,Granada';
+        } else if (esMisterio) {
+            tagsTexto = '#MisteriosHistoricos #HistoriaOculta #Leyendas #AndaluciaMagica #Granada #ExpedienteXGranaino #Secretos';
+            hashtagsTwitter = 'MisteriosHistoricos,HistoriaOculta,Leyendas,AndaluciaMagica,Granada,ExpedienteX';
+        } else if (esNoticia) {
+            tagsTexto = '#UltimaHora #NoticiasMisterio #AlertaParanormal #Granada #ExpedienteXGranaino #FenomenoOVNI';
+            hashtagsTwitter = 'UltimaHora,NoticiasMisterio,AlertaParanormal,Granada,ExpedienteXGranaino';
+        } else {
+            tagsTexto = '#OVNI #Ufologia #FenomenoParanormal #Misterio #Granada #ExpedienteXGranaino #Desclasificado #UFO';
+            hashtagsTwitter = 'OVNI,Ufologia,FenomenoParanormal,Misterio,Granada,ExpedienteXGranaino,UFO';
+        }
+
+        const tituloLimpio = (historia.titulo || 'Expediente X Granaíno').toUpperCase();
+        const textoCompartir = `🛸 ¡EVIDENCIA DESCLASIFICADA! "${tituloLimpio}"\n\n👁️ Léelo y analízalo en el Búnker:\n\n${tagsTexto}`;
+        const textoTwitter = `🛸 ¡EVIDENCIA DESCLASIFICADA! "${tituloLimpio}"\n\n👁️ Léelo en el Búnker de Expediente X:`;
 
         if (red === 'copiar') {
             try {
-                navigator.clipboard.writeText(url);
-                alert("📋 ¡Enlace copiado al portapapeles con éxito! Puedes pegarlo directamente en tus redes o chats.");
+                const contenidoCompleto = `${textoCompartir}\n🔗 ${url}`;
+                navigator.clipboard.writeText(contenidoCompleto);
+                alert("📋 ¡Texto, enlace y etiquetas copiados al portapapeles con éxito! Puedes pegarlo directamente en cualquier red social o chat.");
             } catch (err) {
-                alert("No se pudo copiar el enlace automáticamente. Cópialo de la barra del navegador.");
+                alert("No se pudo copiar automáticamente. Cópialo de la barra del navegador.");
             }
             return;
         }
@@ -746,17 +767,17 @@ const LecturaHistoria = ({ userAuth }) => {
             }
         }
 
-        // Fallback para PC: Siempre abrimos la URL directa de cada red
+        // Enlaces directos optimizados con tags para cada plataforma
         let link = '';
         if (red === 'whatsapp') {
-            link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + ' ' + url)}`;
+            link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + '\n' + url)}`;
         } else if (red === 'facebook') {
-            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(textoCompartir)}`;
         } else if (red === 'twitter') {
-            link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoCompartir)}&url=${encodeURIComponent(url)}`;
+            link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoTwitter)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtagsTwitter)}`;
         } else if (red === 'pinterest') {
             const imgUrl = encodeURIComponent(historia.imagen_url || 'https://expedientexgranaino.com/social-preview.png');
-            link = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${imgUrl}&description=${encodeURIComponent(textoCompartir)}`;
+            link = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${imgUrl}&description=${encodeURIComponent(textoCompartir + '\n' + url)}`;
         }
 
         if (link) {
