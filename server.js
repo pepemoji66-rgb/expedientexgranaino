@@ -1180,8 +1180,8 @@ app.get('/especial-atarfe', (req, res) => {
     });
 });
 
-// Sección de Aviso Legal (/legal) - SEO enriquecido
-app.get('/legal', (req, res) => {
+// Sección de Aviso Legal (/legal y /aviso-legal) - SEO enriquecido
+app.get(['/legal', '/aviso-legal'], (req, res) => {
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', (err, html) => {
         if (err) return res.sendFile(indexPath);
@@ -1199,15 +1199,21 @@ app.get('/legal', (req, res) => {
     <p>El titular no se hace responsable, en ningún caso, de los daños y perjuicios de cualquier naturaleza que pudieran ocasionar, a título enunciativo: errores u omisiones en los contenidos, falta de disponibilidad del portal o la transmisión de virus o programas maliciosos o lesivos en los contenidos, a pesar de haber adoptado todas las medidas tecnológicas necesarias para evitarlo.</p>
 </article>`;
 
+        const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
+        // Canonical siempre apunta a /aviso-legal (URL canónica oficial)
+        const canonicalUrl = 'https://expedientexgranaino.com/aviso-legal';
         const pagina = inyectarContenidoSEO(
             html,
             'Aviso Legal | Términos de Uso — Expediente X Granaíno',
             'Aviso Legal y condiciones generales de uso del portal de investigación Expediente X Granaíno.',
-            contenidoSeo
+            contenidoSeo,
+            `${baseImgUrl}/social-preview.png?v=8.0`,
+            canonicalUrl
         );
         res.send(pagina);
     });
 });
+
 
 // Sección de Política de Privacidad (/privacidad) - SEO enriquecido
 app.get('/privacidad', (req, res) => {
@@ -1230,11 +1236,14 @@ app.get('/privacidad', (req, res) => {
     <p>Usted tiene derecho a acceso, rectificación, supresión ("derecho al olvido"), oposición y limitación del tratamiento. Para ejercer estos derechos, contacte con archipegv2@gmail.com.</p>
 </article>`;
 
+        const { paginaUrl: privUrl, baseImgUrl: privImgUrl } = obtenerUrlsRequest(req);
         const pagina = inyectarContenidoSEO(
             html,
             'Política de Privacidad | Protección de Datos — Expediente X Granaíno',
             'Política de Privacidad de Expediente X Granaíno. Información detallada sobre el tratamiento de sus datos personales y derechos ARCO.',
-            contenidoSeo
+            contenidoSeo,
+            `${privImgUrl}/social-preview.png?v=8.0`,
+            'https://expedientexgranaino.com/privacidad'
         );
         res.send(pagina);
     });
@@ -1261,11 +1270,14 @@ app.get('/cookies', (req, res) => {
     <p>Usted puede permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones de su navegador de Internet (Chrome, Safari, Firefox, Edge, etc.).</p>
 </article>`;
 
+        const { paginaUrl: cookUrl, baseImgUrl: cookImgUrl } = obtenerUrlsRequest(req);
         const pagina = inyectarContenidoSEO(
             html,
             'Política de Cookies | Frecuencia de Rastreo — Expediente X Granaíno',
             'Conozca qué cookies utiliza el Búnker de Expediente X Granaíno y cómo puede gestionarlas o desactivarlas en su navegador.',
-            contenidoSeo
+            contenidoSeo,
+            `${cookImgUrl}/social-preview.png?v=8.0`,
+            'https://expedientexgranaino.com/cookies'
         );
         res.send(pagina);
     });
@@ -1913,7 +1925,7 @@ app.get('/sitemap.xml', async (req, res) => {
             { path: '/acceso',               priority: '0.4', changefreq: 'monthly' },
             { path: '/privacidad',           priority: '0.3', changefreq: 'yearly' },
             { path: '/cookies',              priority: '0.3', changefreq: 'yearly' },
-            { path: '/legal',                priority: '0.3', changefreq: 'yearly' }
+            { path: '/aviso-legal',          priority: '0.3', changefreq: 'yearly' }
         ];
 
         estaticas.forEach(p => {
@@ -1928,51 +1940,74 @@ app.get('/sitemap.xml', async (req, res) => {
         // Consulta unificada: incluimos todos los estados activos para TODAS las tablas
         const estadosActivos = "estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'";
 
-        // 2. Expedientes / Relatos
+        // Set para evitar duplicados de ID entre tablas (mismo ID puede existir en varias tablas)
+        const idsArticulosYaIncluidos = new Set();
+
+        // 2. Expedientes / Relatos — URL canónica SIN ?src= para que Google no duplique
         try {
             const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE ${estadosActivos}`);
-            exps.forEach(e => urls.push({
-                loc: `${domain}/leer-historia/${e.id}?src=expedientes`,
-                lastmod: e.lastmod || today,
-                changefreq: 'weekly',
-                priority: '0.8'
-            }));
+            exps.forEach(e => {
+                if (!idsArticulosYaIncluidos.has(e.id)) {
+                    idsArticulosYaIncluidos.add(e.id);
+                    urls.push({
+                        loc: `${domain}/leer-historia/${e.id}`,
+                        lastmod: e.lastmod || today,
+                        changefreq: 'weekly',
+                        priority: '0.8'
+                    });
+                }
+            });
         } catch (e) { console.error("Sitemap exps:", e.message); }
 
         // 3. Casos Abiertos / True Crime
         try {
             const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE ${estadosActivos}`);
-            casos.forEach(c => urls.push({
-                loc: `${domain}/leer-historia/${c.id}?src=casos`,
-                lastmod: c.lastmod || today,
-                changefreq: 'weekly',
-                priority: '0.8'
-            }));
+            casos.forEach(c => {
+                if (!idsArticulosYaIncluidos.has(c.id)) {
+                    idsArticulosYaIncluidos.add(c.id);
+                    urls.push({
+                        loc: `${domain}/leer-historia/${c.id}`,
+                        lastmod: c.lastmod || today,
+                        changefreq: 'weekly',
+                        priority: '0.8'
+                    });
+                }
+            });
         } catch (e) { console.error("Sitemap casos:", e.message); }
 
         // 4. Misterios Históricos
         try {
             const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE ${estadosActivos}`);
-            misterios.forEach(m => urls.push({
-                loc: `${domain}/leer-historia/${m.id}?src=misterios`,
-                lastmod: m.lastmod || today,
-                changefreq: 'weekly',
-                priority: '0.8'
-            }));
+            misterios.forEach(m => {
+                if (!idsArticulosYaIncluidos.has(m.id)) {
+                    idsArticulosYaIncluidos.add(m.id);
+                    urls.push({
+                        loc: `${domain}/leer-historia/${m.id}`,
+                        lastmod: m.lastmod || today,
+                        changefreq: 'weekly',
+                        priority: '0.8'
+                    });
+                }
+            });
         } catch (e) { console.error("Sitemap misterios:", e.message); }
 
         // 5. Noticias
         try {
             const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE ${estadosActivos}`);
-            noticias.forEach(n => urls.push({
-                loc: `${domain}/leer-historia/${n.id}?src=noticias`,
-                lastmod: n.lastmod || today,
-                changefreq: 'weekly',
-                priority: '0.8'
-            }));
+            noticias.forEach(n => {
+                if (!idsArticulosYaIncluidos.has(n.id)) {
+                    idsArticulosYaIncluidos.add(n.id);
+                    urls.push({
+                        loc: `${domain}/leer-historia/${n.id}`,
+                        lastmod: n.lastmod || today,
+                        changefreq: 'weekly',
+                        priority: '0.8'
+                    });
+                }
+            });
         } catch (e) { console.error("Sitemap noticias:", e.message); }
 
-        // Eliminar duplicados por URL
+        // Eliminar duplicados por URL (por seguridad extra)
         const urlsUnicas = new Map();
         urls.forEach(u => { if (!urlsUnicas.has(u.loc)) urlsUnicas.set(u.loc, u); });
 
