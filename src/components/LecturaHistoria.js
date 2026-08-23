@@ -744,9 +744,8 @@ const LecturaHistoria = ({ userAuth }) => {
 
         if (red === 'copiar') {
             try {
-                const contenidoCompleto = `${textoCompartir}\n🔗 ${url}`;
-                navigator.clipboard.writeText(contenidoCompleto);
-                alert("📋 ¡Texto, enlace y etiquetas copiados al portapapeles con éxito! Puedes pegarlo directamente en cualquier red social o chat.");
+                navigator.clipboard.writeText(url);
+                alert("📋 ¡Enlace copiado al portapapeles! Puedes pegarlo donde quieras.");
             } catch (err) {
                 alert("No se pudo copiar automáticamente. Cópialo de la barra del navegador.");
             }
@@ -777,7 +776,8 @@ const LecturaHistoria = ({ userAuth }) => {
             link = `https://x.com/intent/tweet?text=${encodeURIComponent(textoTwitter)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtagsTwitter)}`;
         } else if (red === 'pinterest') {
             const imgUrl = encodeURIComponent(historia.imagen_url || 'https://expedientexgranaino.com/social-preview.png');
-            link = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${imgUrl}&description=${encodeURIComponent(textoCompartir + '\n' + url)}`;
+            const descPinterest = encodeURIComponent(`${tituloLimpio} — Expediente X Granaíno`);
+            link = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${imgUrl}&description=${descPinterest}`;
         }
 
         if (link) {
