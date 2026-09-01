@@ -753,8 +753,9 @@ const LecturaHistoria = ({ userAuth }) => {
             return;
         }
 
-        // Solo usar navigator.share en móviles para evitar el bug de PC
-        if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // Solo usar navigator.share en móviles para redes que no sean Facebook
+        // Facebook SIEMPRE usa el enlace directo para que cargue bien la vista previa con imagen
+        if (red !== 'facebook' && navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             try {
                 navigator.share({
                     title: historia.titulo || 'Expediente X Granaíno',
