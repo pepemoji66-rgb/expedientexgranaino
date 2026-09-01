@@ -837,10 +837,10 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
 <meta name="google-site-verification" content="wu1T4bL_7euJUjS-742pfAGN6xKEynd3X9P9BDUr0Dc" />
 <meta name="description" content="${desc}" />
 <meta name="keywords" content="${keywordsDinamicas}" />
-<link rel="canonical" href="${cleanUrl}" />
+<link rel="canonical" href="${url}" />
 <meta property="og:type" content="${esHistoria ? 'article' : 'website'}" />
 <meta property="og:site_name" content="Expediente X Granaíno" />
-<meta property="og:url" content="${cleanUrl}" />
+<meta property="og:url" content="${url}" />
 <meta property="og:title" content="${title}" />
 <meta property="og:description" content="${desc}" />
 <meta property="og:image" content="${img}" />
@@ -849,7 +849,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
 <meta property="og:image:height" content="630" />
 ${articleTags}
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:url" content="${cleanUrl}" />
+<meta name="twitter:url" content="${url}" />
 <meta name="twitter:title" content="${title}" />
 <meta name="twitter:description" content="${desc}" />
 <meta name="twitter:image" content="${img}" />
