@@ -770,7 +770,15 @@ const LecturaHistoria = ({ userAuth }) => {
 
         // Enlaces directos optimizados con tags para cada plataforma
         let link = '';
-        if (red === 'whatsapp') {
+        if (red === 'fbhistoria') {
+            // Historia de Facebook: usar navigator.share nativo para que aparezca la opción de Historia
+            if (navigator.share) {
+                navigator.share({ title: historia.titulo || 'Expediente X Granaíno', text: textoCompartir, url: url });
+            } else {
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
+            }
+            return;
+        } else if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + '\n' + url)}`;
         } else if (red === 'facebook') {
             link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(textoCompartir)}`;
@@ -1097,6 +1105,7 @@ const LecturaHistoria = ({ userAuth }) => {
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                             <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>💬 WHATSAPP</button>
                             <button onClick={() => compartirHistoria('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📘 FACEBOOK</button>
+                            <button onClick={() => compartirHistoria('fbhistoria')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: '2px solid #fff', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace', opacity: 0.85 }}>📖 HISTORIA</button>
                             <button onClick={() => compartirHistoria('twitter')} className="btn-share-tactico" style={{ background: '#000', color: '#fff', border: '1px solid #555', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>𝕏 PUBLICAR EN X</button>
                             <button onClick={() => compartirHistoria('pinterest')} className="btn-share-tactico" style={{ background: '#E60023', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📌 PINTEREST</button>
                             <button onClick={() => compartirHistoria('copiar')} className="btn-share-tactico" style={{ background: '#444', color: '#fff', border: '1px solid #666', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>🔗 COPIAR ENLACE</button>
