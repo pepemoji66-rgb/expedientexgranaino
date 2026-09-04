@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { safeLocalStorage } from '../utils/storage';
 import './Paginacion.css';
 
 /**
  * Componente de paginación reutilizable para el Búnker.
  * Muestra botones de página numerados con elipsis (...) para rangos grandes.
+ * Incluye campo "Ir a página" para saltar directamente a cualquier página.
  * Guarda la página actual en sessionStorage para restaurarla al volver atrás.
  *
  * Props:
@@ -15,6 +16,8 @@ import './Paginacion.css';
  *   scrollToTop   - Si debe hacer scroll arriba al cambiar (default: true)
  */
 const Paginacion = ({ paginaActual, totalPaginas, onChange, storageKey, scrollToTop = true }) => {
+    const [inputPagina, setInputPagina] = useState('');
+
     if (totalPaginas <= 1) return null;
 
     const cambiarPagina = (nuevaPagina) => {
@@ -26,6 +29,18 @@ const Paginacion = ({ paginaActual, totalPaginas, onChange, storageKey, scrollTo
         if (scrollToTop) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+    };
+
+    const irAPagina = () => {
+        const num = parseInt(inputPagina, 10);
+        if (!isNaN(num) && num >= 1 && num <= totalPaginas) {
+            cambiarPagina(num);
+            setInputPagina('');
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') irAPagina();
     };
 
     // Genera los números de página visibles con elipsis
@@ -101,6 +116,49 @@ const Paginacion = ({ paginaActual, totalPaginas, onChange, storageKey, scrollTo
             >
                 SIGUIENTE ▶
             </button>
+
+            {/* Campo para saltar directamente a cualquier página */}
+            {totalPaginas > 7 && (
+                <div className="pag-ir-a" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '10px' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#888', fontFamily: 'monospace' }}>Ir a:</span>
+                    <input
+                        type="number"
+                        min="1"
+                        max={totalPaginas}
+                        value={inputPagina}
+                        onChange={(e) => setInputPagina(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Pág."
+                        style={{
+                            width: '55px',
+                            padding: '6px 8px',
+                            background: '#111',
+                            border: '1px solid #444',
+                            color: '#fff',
+                            fontSize: '0.8rem',
+                            fontFamily: 'monospace',
+                            borderRadius: '3px',
+                            textAlign: 'center'
+                        }}
+                    />
+                    <button
+                        onClick={irAPagina}
+                        style={{
+                            padding: '6px 10px',
+                            background: 'var(--color-principal)',
+                            color: '#000',
+                            border: 'none',
+                            borderRadius: '3px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: '0.75rem',
+                            fontFamily: 'monospace'
+                        }}
+                    >
+                        ▶
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
@@ -121,3 +179,4 @@ export const getPaginaGuardada = (storageKey) => {
 };
 
 export default Paginacion;
+
