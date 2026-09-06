@@ -869,25 +869,25 @@ const LecturaHistoria = ({ userAuth }) => {
     );
 
     return (
-        <div className="admin-dashboard fade-in">
-            <div className="glass-card full-width" style={{ textAlign: 'left', marginTop: '50px' }}>
+        <div className="admin-dashboard fade-in lectura-page-wrapper">
+            <div className="glass-card full-width lectura-card-centered" style={{ textAlign: 'left', marginTop: '30px', maxWidth: '820px', margin: '30px auto 40px', background: 'rgba(18, 21, 24, 0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '30px 24px', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <button
                             onClick={() => navigate(-1)}
-                            className="forms-btn-submit"
-                            style={{ width: 'auto', background: '#222', padding: '10px 20px', cursor: 'pointer', border: '1px solid #444', borderRadius: '2px', fontWeight: 'bold' }}
+                            className="btn-nav-tactico"
+                            style={{ background: '#2D5A43', color: '#fff', padding: '7px 14px', cursor: 'pointer', border: '1px solid #3a7a5a', borderRadius: '4px', fontWeight: '600', fontSize: '0.78rem', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: '0.2s ease' }}
                         >
                             ⬅ {t('readBack')}
                         </button>
                         <button
                             onClick={() => navigate('/')}
-                            className="forms-btn-submit"
-                            style={{ width: 'auto', background: 'rgba(0, 212, 255, 0.1)', color: '#00d4ff', padding: '10px 20px', cursor: 'pointer', border: '1px solid #00d4ff', borderRadius: '2px', fontWeight: 'bold' }}
+                            className="btn-nav-tactico"
+                            style={{ background: '#2D5A43', color: '#fff', padding: '7px 14px', cursor: 'pointer', border: '1px solid #3a7a5a', borderRadius: '4px', fontWeight: '600', fontSize: '0.78rem', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: '0.2s ease' }}
                         >
                             🏠 {language === 'en' ? 'BUNKER HOME' : 'VOLVER A INICIO'}
                         </button>
-                </div>
+                    </div>
                 </div>
 
 
