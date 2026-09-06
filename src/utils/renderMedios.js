@@ -123,9 +123,9 @@ export const renderizarTextoConMedios = (texto) => {
                         target="_blank" 
                         rel="noopener noreferrer" 
                         style={{ 
-                            color: 'var(--color-principal)', 
+                            color: '#1a5235', 
                             textDecoration: 'underline', 
-                            fontWeight: 'bold',
+                            fontWeight: '600',
                             wordBreak: 'break-word'
                         }}
                     >
@@ -143,13 +143,13 @@ export const renderizarTextoConMedios = (texto) => {
 
         if (componentes.length > 0) {
             return (
-                <p key={indexLinea} style={{ minHeight: '1em', marginBottom: '12px', lineHeight: '1.6' }}>
+                <p key={indexLinea} style={{ minHeight: '1em', marginBottom: '1.25rem', lineHeight: '1.75' }}>
                     {componentes}
                 </p>
             );
         }
 
-        return <p key={indexLinea} style={{ minHeight: '1em', marginBottom: '12px', lineHeight: '1.6' }}>{linea}</p>;
+        return <p key={indexLinea} style={{ minHeight: '1em', marginBottom: '1.25rem', lineHeight: '1.75' }}>{linea}</p>;
     });
 };
 

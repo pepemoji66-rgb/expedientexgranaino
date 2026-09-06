@@ -11,36 +11,41 @@ import { useLanguage } from '../context/LanguageContext';
 // COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
 // ==========================================
 
-const AmazonBanner = ({ titulo, descripcion, link }) => (
-    <a href={link} target="_blank" rel="noopener noreferrer" className="amazon-banner">
-        <div className="amazon-banner-icon">📖</div>
-        <div className="amazon-banner-content">
-            <h4 className="amazon-banner-title">{titulo}</h4>
-            <p className="amazon-banner-desc">{descripcion}</p>
+const ReferenceBanner = ({ titulo, descripcion, link }) => (
+    <a href={link} target="_blank" rel="noopener noreferrer" className="reference-resource-card">
+        <div className="reference-resource-icon">📖</div>
+        <div className="reference-resource-content">
+            <h4 className="reference-resource-title">{titulo}</h4>
+            <p className="reference-resource-desc">{descripcion}</p>
         </div>
-        <div className="amazon-banner-btn">VER EN AMAZON</div>
+        <div className="btn-library-link">VER DETALLES</div>
     </a>
 );
 
-const AmazonBibliography = ({ libros, tituloSeccion, customStyle }) => {
+const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
     if (!libros || libros.length === 0) return null;
     return (
-        <div className="amazon-bibliography-section fade-in" style={customStyle}>
-            <div className="amazon-bibliography-header">
+        <div className="ref-bibliography-section fade-in" style={customStyle}>
+            <div className="ref-bibliography-header">
                 📚 <span>{tituloSeccion || "PARA SABER MÁS (BIBLIOGRAFÍA)"}</span>
             </div>
-            <div className="amazon-bibliography-grid">
+            <div className="ref-bibliography-grid">
                 {libros.map((libro, index) => (
-                    <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer" className="amazon-book-card">
-                        <div className="amazon-book-cover-container">
-                            <img src={libro.imagen_url} alt={libro.titulo} className="amazon-book-cover" />
+                    <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer" className="book-citation-block">
+                        <div className="book-citation-cover-container">
+                            <img 
+                                src={libro.imagen_url || '/logoexpedientex.jpeg'} 
+                                alt={libro.titulo} 
+                                className="book-citation-cover"
+                                onError={(e) => { e.target.src = '/logoexpedientex.jpeg'; }}
+                            />
                         </div>
-                        <div className="amazon-book-info">
+                        <div className="book-citation-info">
                             <div>
-                                <h5 className="amazon-book-title">{libro.titulo}</h5>
-                                <p className="amazon-book-author">{libro.autor}</p>
+                                <h5 className="book-citation-title">{libro.titulo}</h5>
+                                <p className="book-citation-author">{libro.autor}</p>
                             </div>
-                            <div className="amazon-book-btn">🛒 COMPRAR EN AMAZON</div>
+                            <div className="btn-library-link">📖 VER DETALLES</div>
                         </div>
                     </a>
                 ))}
@@ -258,6 +263,36 @@ const LecturaHistoria = ({ userAuth }) => {
     const audioChunksRef = useRef([]);
     const reproduciendoAudioRef = useRef(false);
     const currentUtteranceRef = useRef(null);
+    const keepAliveRef = useRef(null);
+
+    // Keep-alive para Chrome Android: SpeechSynthesis se detiene tras ~15s sin actividad
+    const iniciarKeepAlive = () => {
+        if (keepAliveRef.current) clearInterval(keepAliveRef.current);
+        keepAliveRef.current = setInterval(() => {
+            if (window.speechSynthesis && reproduciendoAudioRef.current) {
+                window.speechSynthesis.pause();
+                window.speechSynthesis.resume();
+            }
+        }, 10000);
+    };
+
+    const detenerKeepAlive = () => {
+        if (keepAliveRef.current) {
+            clearInterval(keepAliveRef.current);
+            keepAliveRef.current = null;
+        }
+    };
+
+    // Detener audio al desmontar componente o cambiar de ruta
+    useEffect(() => {
+        return () => {
+            detenerKeepAlive();
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            reproduciendoAudioRef.current = false;
+        };
+    }, []);
 
     const reproducirSiguienteChunk = () => {
         if (!reproduciendoAudioRef.current) return;
@@ -266,6 +301,7 @@ const LecturaHistoria = ({ userAuth }) => {
         const chunks = audioChunksRef.current;
         
         if (index >= chunks.length) {
+            detenerKeepAlive();
             setReproduciendoAudio(false);
             reproduciendoAudioRef.current = false;
             audioIndexRef.current = 0;
@@ -355,24 +391,39 @@ const LecturaHistoria = ({ userAuth }) => {
     // DATOS DINÁMICOS DE AMAZON DESDE API
     useEffect(() => {
         if (historia) {
+            setAmazonConfig(null); // Limpiar datos anteriores al cambiar de artículo
             axios.get(`${API_BASE_URL}/api/amazon/${currentItemKey}`).then(res => {
-                if (res.data) setAmazonConfig(res.data);
-            }).catch(e => console.error("Error amazon config:", e));
+                setAmazonConfig(res.data || null);
+            }).catch(e => {
+                console.error("Error amazon config:", e);
+                setAmazonConfig(null);
+            });
         }
     }, [historia, id, esMisterio, esNoticia, esCaso, currentItemKey]);
 
-    const bannerData = amazonConfig?.banner;
-    let biblioData = amazonConfig?.bibliografia;
-    // Soporte para todos los formatos de campo de enlace que se han usado históricamente
-    const enlaceCualquiera = amazonConfig?.enlace_amazon || amazonConfig?.url_afiliado || amazonConfig?.link || amazonConfig?.url || amazonConfig?.codigo || amazonConfig?.codigo_afiliado || amazonConfig?.enlace_afiliado;
-    if (!biblioData && enlaceCualquiera) {
-        biblioData = [{
-            titulo: amazonConfig.titulo || amazonConfig.titulo_libro,
-            autor: amazonConfig.autor || amazonConfig.autor_libro || "Redacción Búnker",
-            descripcion: amazonConfig.descripcion || "",
-            imagen_url: amazonConfig.imagen_url,
-            link: enlaceCualquiera
-        }];
+    let bannerData = null;
+    let biblioData = null;
+    try {
+        bannerData = amazonConfig?.banner || null;
+        biblioData = amazonConfig?.bibliografia;
+        if (biblioData && typeof biblioData === 'string') {
+            biblioData = JSON.parse(biblioData);
+        }
+        // Soporte para todos los formatos de campo de enlace que se han usado históricamente
+        const enlaceCualquiera = amazonConfig?.enlace_amazon || amazonConfig?.url_afiliado || amazonConfig?.link || amazonConfig?.url || amazonConfig?.codigo || amazonConfig?.codigo_afiliado || amazonConfig?.enlace_afiliado;
+        if (!biblioData && enlaceCualquiera) {
+            biblioData = [{
+                titulo: amazonConfig.titulo || amazonConfig.titulo_libro,
+                autor: amazonConfig.autor || amazonConfig.autor_libro || "Redacción Búnker",
+                descripcion: amazonConfig.descripcion || "",
+                imagen_url: amazonConfig.imagen_url,
+                link: enlaceCualquiera
+            }];
+        }
+    } catch (e) {
+        console.error("Error procesando datos de referencia:", e);
+        bannerData = null;
+        biblioData = null;
     }
 
     const obtenerHistoria = async () => {
@@ -917,29 +968,28 @@ const LecturaHistoria = ({ userAuth }) => {
                             href={biblioData[0].link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            id="amazon-cta-portada"
+                            id="ref-cta-portada"
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '10px',
-                                background: 'linear-gradient(135deg, #ff9900, #e47911)',
-                                color: '#111',
-                                fontWeight: '900',
-                                fontFamily: 'Courier New, monospace',
-                                fontSize: '0.95rem',
-                                letterSpacing: '1px',
-                                padding: '14px 30px',
+                                background: '#2D5A43',
+                                color: '#fff',
+                                fontWeight: '700',
+                                fontFamily: "'Merriweather', Georgia, serif",
+                                fontSize: '0.85rem',
+                                letterSpacing: '0.5px',
+                                padding: '12px 28px',
                                 borderRadius: '4px',
                                 textDecoration: 'none',
-                                boxShadow: '0 0 20px rgba(255,153,0,0.5)',
-                                border: '2px solid #ff9900',
+                                border: '1px solid #3a7a5a',
                                 transition: 'all 0.2s ease',
                                 textTransform: 'uppercase'
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.boxShadow='0 0 35px rgba(255,153,0,0.85)'; e.currentTarget.style.transform='scale(1.04)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.boxShadow='0 0 20px rgba(255,153,0,0.5)'; e.currentTarget.style.transform='scale(1)'; }}
+                            onMouseEnter={e => { e.currentTarget.style.background='#3a7a5a'; e.currentTarget.style.transform='scale(1.02)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background='#2D5A43'; e.currentTarget.style.transform='scale(1)'; }}
                         >
-                            🛒 <span>📚 {language === 'en' ? 'RECOMMENDED BOOK — BUY ON AMAZON' : 'LIBRO RECOMENDADO — COMPRAR EN AMAZON'}</span>
+                            📚 <span>{language === 'en' ? 'RECOMMENDED BOOK — VIEW DETAILS' : 'LIBRO RECOMENDADO — VER DETALLES'}</span>
                         </a>
                     </div>
                 )}
@@ -953,43 +1003,44 @@ const LecturaHistoria = ({ userAuth }) => {
                             href={bannerData.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            id="amazon-banner-cta-portada"
+                            id="ref-banner-cta-portada"
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '10px',
-                                background: 'linear-gradient(135deg, #ff9900, #e47911)',
-                                color: '#111',
-                                fontWeight: '900',
-                                fontFamily: 'Courier New, monospace',
-                                fontSize: '0.95rem',
-                                letterSpacing: '1px',
-                                padding: '14px 30px',
+                                background: '#2D5A43',
+                                color: '#fff',
+                                fontWeight: '700',
+                                fontFamily: "'Merriweather', Georgia, serif",
+                                fontSize: '0.85rem',
+                                letterSpacing: '0.5px',
+                                padding: '12px 28px',
                                 borderRadius: '4px',
                                 textDecoration: 'none',
-                                boxShadow: '0 0 20px rgba(255,153,0,0.5)',
-                                border: '2px solid #ff9900',
+                                border: '1px solid #3a7a5a',
                                 transition: 'all 0.2s ease',
                                 textTransform: 'uppercase'
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.boxShadow='0 0 35px rgba(255,153,0,0.85)'; e.currentTarget.style.transform='scale(1.04)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.boxShadow='0 0 20px rgba(255,153,0,0.5)'; e.currentTarget.style.transform='scale(1)'; }}
+                            onMouseEnter={e => { e.currentTarget.style.background='#3a7a5a'; e.currentTarget.style.transform='scale(1.02)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background='#2D5A43'; e.currentTarget.style.transform='scale(1)'; }}
                         >
-                            🛒 <span>📚 {language === 'en' ? 'RECOMMENDED BOOK — BUY ON AMAZON' : 'LIBRO RECOMENDADO — COMPRAR EN AMAZON'}</span>
+                            📚 <span>{language === 'en' ? 'RECOMMENDED BOOK — VIEW DETAILS' : 'LIBRO RECOMENDADO — VER DETALLES'}</span>
                         </a>
                     </div>
                 )}
 
                 <div className="cuerpo-historia" style={{
-                    color: '#e0e0e0',
-                    lineHeight: '1.8',
-                    fontSize: '1.1rem',
+                    color: '#1F2421',
+                    lineHeight: '1.75',
+                    fontSize: '1.125rem',
                     whiteSpace: 'pre-wrap',
-                    fontFamily: 'Courier New, serif',
-                    background: 'rgba(0,0,0,0.4)',
-                    padding: '30px',
-                    borderRadius: '5px',
-                    boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
+                    fontFamily: "'Merriweather', Georgia, serif",
+                    background: '#F5F5F0',
+                    padding: '40px 32px',
+                    borderRadius: '6px',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
+                    maxWidth: '760px',
+                    margin: '0 auto'
                 }}>
 
 
@@ -1003,6 +1054,7 @@ const LecturaHistoria = ({ userAuth }) => {
                                 }
                                 
                                 if (reproduciendoAudio) {
+                                    detenerKeepAlive();
                                     window.speechSynthesis.cancel();
                                     reproduciendoAudioRef.current = false;
                                     setReproduciendoAudio(false);
@@ -1023,21 +1075,22 @@ const LecturaHistoria = ({ userAuth }) => {
                                     audioIndexRef.current = 0;
                                     reproduciendoAudioRef.current = true;
                                     setReproduciendoAudio(true);
+                                    iniciarKeepAlive();
                                     
                                     reproducirSiguienteChunk();
                                 }
                             }}
                             style={{
-                                background: reproduciendoAudio ? 'rgba(255, 51, 51, 0.1)' : 'transparent',
-                                color: reproduciendoAudio ? '#ff3333' : '#00d4ff',
-                                border: reproduciendoAudio ? '1px solid #ff3333' : '1px solid #00d4ff',
+                                background: reproduciendoAudio ? '#fff0f0' : '#EAEAE5',
+                                color: reproduciendoAudio ? '#cc0000' : '#333',
+                                border: reproduciendoAudio ? '1px solid #cc0000' : '1px solid #D0D0C8',
                                 padding: '10px 20px',
                                 fontWeight: 'bold',
                                 cursor: 'pointer',
-                                fontFamily: 'monospace',
+                                fontFamily: "'Merriweather', Georgia, serif",
                                 fontSize: '0.8rem',
                                 width: '100%',
-                                borderRadius: '2px',
+                                borderRadius: '4px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -1053,18 +1106,18 @@ const LecturaHistoria = ({ userAuth }) => {
                     </div>
 
                     {/* BANNER AMAZON DINÁMICO */}
-                    {bannerData && <AmazonBanner {...bannerData} />}
+                    {bannerData && <ReferenceBanner {...bannerData} />}
 
                     {renderizarTextoConMedios(historia.contenido || historia.cuerpo || t('readNoContent'))}
                     
                     {historia.fuente_url && (
-                        <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid rgba(0,255,65,0.1)', textAlign: 'center' }}>
+                        <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid rgba(0,0,0,0.1)', textAlign: 'center' }}>
                             <a 
                                 href={historia.fuente_url} 
                                 target="_blank" 
-                                rel="noopener noreferrer"
+                                rel="noopener noreferrer" 
                                 className="btn-technical-link highlight"
-                                style={{ display: 'inline-block', textDecoration: 'none', padding: '12px 25px', background: 'rgba(0,255,65,0.05)', border: '1px solid var(--color-principal)', color: 'var(--color-principal)', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '1px' }}
+                                style={{ display: 'inline-block', textDecoration: 'none', padding: '10px 22px', background: '#EAEAE5', border: '1px solid #D0D0C8', color: '#1a5235', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '0.5px', borderRadius: '4px' }}
                             >
                                 🌐 {t('readSource')}
                             </a>
@@ -1081,7 +1134,7 @@ const LecturaHistoria = ({ userAuth }) => {
                         if (!videoId) return null;
                         return (
                             <div style={{ margin: '25px 0', textAlign: 'center' }}>
-                                <div style={{ border: '1px solid #00ff41', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 0 20px rgba(0,255,65,0.2)', maxWidth: '560px', margin: '0 auto' }}>
+                                <div style={{ border: '1px solid rgba(0,0,0,0.15)', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.15)', maxWidth: '560px', margin: '0 auto' }}>
                                     <iframe 
                                         width="100%" height="315"
                                         src={`https://www.youtube.com/embed/${videoId}`}
@@ -1092,14 +1145,14 @@ const LecturaHistoria = ({ userAuth }) => {
                                         style={{ display: 'block' }}
                                     />
                                 </div>
-                                <p style={{ color: '#00ff41', fontSize: '0.75rem', marginTop: '8px', fontFamily: 'Courier New, monospace', letterSpacing: '1px' }}>📺 VER EN YOUTUBE</p>
+                                <p style={{ color: '#555', fontSize: '0.75rem', marginTop: '8px', fontFamily: 'monospace', letterSpacing: '1px' }}>📺 VER EN YOUTUBE</p>
                             </div>
                         );
                     })()}
 
                     {/* SECCIÓN DE COMPARTIR TÁCTICO */}
-                    <div style={{ marginTop: '35px', paddingTop: '25px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
-                        <p style={{ color: 'var(--color-principal)', fontSize: '0.85rem', marginBottom: '15px', fontFamily: 'Courier New', fontWeight: 'bold', letterSpacing: '1px' }}>
+                    <div style={{ marginTop: '35px', paddingTop: '25px', borderTop: '1px solid rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                        <p style={{ color: '#2D5A43', fontSize: '0.85rem', marginBottom: '15px', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '0.5px' }}>
                             📡 {language === 'en' ? 'SHARE / COMPARTIR EN REDES' : 'DIFUNDIR EVIDENCIA / COMPARTIR EN REDES'}
                         </p>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -1126,7 +1179,7 @@ const LecturaHistoria = ({ userAuth }) => {
                         paddingTop: '30px'
                     }}>
                         <div style={{ flex: '1 1 300px', minWidth: '280px' }}>
-                            <AmazonBibliography libros={biblioData} customStyle={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }} />
+                            <ReferenceBibliography libros={biblioData} customStyle={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }} />
                         </div>
                         {renderComentariosBox(true)}
                     </div>
