@@ -356,6 +356,24 @@ const Hero = ({ userAuth }) => {
                     </>
                 )}
             </div>
+
+            {/* SECCIÓN APOYO KO-FI */}
+            <div style={{ maxWidth: '600px', margin: '30px auto 40px', padding: '22px 24px', background: 'rgba(45,90,67,0.08)', border: '1px solid rgba(45,90,67,0.25)', borderRadius: '8px', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#e8e8e8', fontFamily: 'monospace' }}>
+                    ☕ ¿Te gusta Expediente X Granaíno?
+                </p>
+                <p style={{ margin: '0 0 16px 0', fontSize: '0.85rem', color: '#aaa', fontFamily: 'monospace', lineHeight: '1.6' }}>
+                    Si puedes y quieres, una pequeña propina ayuda a mantener el servidor en pie. ¡Gracias agente! 🛸
+                </p>
+                <a
+                    href="https://ko-fi.com/expedientexgranaino"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'inline-block', background: '#2D5A43', color: '#fff', padding: '10px 24px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem', letterSpacing: '0.5px', textDecoration: 'none' }}
+                >
+                    ☕ INVÍTANOS A UN CAFÉ
+                </a>
+            </div>
         </div>
     );
 };

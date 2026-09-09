@@ -1162,6 +1162,7 @@ const LecturaHistoria = ({ userAuth }) => {
                             href="https://ko-fi.com/expedientexgranaino"
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="btn-kofi-cafe"
                             style={{ display: 'inline-block', background: '#2D5A43', color: '#fff', padding: '10px 24px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem', letterSpacing: '0.5px', textDecoration: 'none' }}
                         >
                             ☕ INVÍTANOS A UN CAFÉ
