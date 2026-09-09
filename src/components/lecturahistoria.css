@@ -164,7 +164,8 @@
     color: #2D5A43 !important;
 }
 
-.btn-kofi-cafe {
+.btn-kofi-cafe,
+.cuerpo-historia a.btn-kofi-cafe {
     color: #fff !important;
     text-decoration: none !important;
     font-weight: bold !important;
