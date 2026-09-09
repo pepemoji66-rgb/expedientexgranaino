@@ -1150,6 +1150,24 @@ const LecturaHistoria = ({ userAuth }) => {
                         );
                     })()}
 
+                    {/* SECCIÓN DE APOYO / PROPINA KO-FI */}
+                    <div style={{ marginTop: '35px', padding: '22px 24px', background: 'rgba(45,90,67,0.07)', border: '1px solid rgba(45,90,67,0.2)', borderRadius: '8px', textAlign: 'center' }}>
+                        <p style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#1F2421', fontFamily: 'Merriweather, serif' }}>
+                            ☕ ¿Te ha gustado este artículo?
+                        </p>
+                        <p style={{ margin: '0 0 16px 0', fontSize: '0.88rem', color: '#444', fontFamily: 'Merriweather, serif', lineHeight: '1.6' }}>
+                            Si puedes y quieres, una pequeña propina ayuda mucho a mantener el servidor y seguir investigando. ¡Gracias agente! 🛸
+                        </p>
+                        <a
+                            href="https://ko-fi.com/expedientexgranaino"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: 'inline-block', background: '#2D5A43', color: '#fff', padding: '10px 24px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem', letterSpacing: '0.5px', textDecoration: 'none' }}
+                        >
+                            ☕ INVÍTANOS A UN CAFÉ
+                        </a>
+                    </div>
+
                     {/* SECCIÓN DE COMPARTIR TÁCTICO */}
                     <div style={{ marginTop: '35px', paddingTop: '25px', borderTop: '1px solid rgba(0,0,0,0.1)', textAlign: 'center' }}>
                         <p style={{ color: '#2D5A43', fontSize: '0.85rem', marginBottom: '15px', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '0.5px' }}>
