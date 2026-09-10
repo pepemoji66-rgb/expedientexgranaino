@@ -84,6 +84,7 @@ function App() {
   const [comentariosNuevos, setComentariosNuevos] = useState(0);
   const [ultimoComentario, setUltimoComentario] = useState(null);
   const [mostrarToastComentario, setMostrarToastComentario] = useState(false);
+  const [otrasOpen, setOtrasOpen] = useState(false);
   const ultimoIdComentarioVisto = React.useRef(null);
 
   const [stats, setStats] = useState({
@@ -266,6 +267,41 @@ function App() {
                 </li>
               ))}
 
+              {/* OTRAS SECCIONES — desplegable secundario */}
+              <li style={{ marginTop: '20px' }}>
+                <button
+                  onClick={() => setOtrasOpen(!otrasOpen)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: '#aaa', fontFamily: 'monospace', fontSize: '0.78rem',
+                    letterSpacing: '1px', textTransform: 'uppercase', padding: 0,
+                    display: 'flex', alignItems: 'center', gap: '6px'
+                  }}
+                >
+                  <span style={{ color: 'var(--color-principal)' }}>{otrasOpen ? '▼' : '▶'}</span>
+                  OTRAS SECCIONES
+                </button>
+                {otrasOpen && (
+                  <ul style={{ listStyle: 'none', padding: '10px 0 0 14px', margin: 0 }}>
+                    {[
+                      { path: '/la-ruleta', label: '🎡 La Ruleta del Búnker' },
+                      { path: '/galeria', label: '🖼️ Galería' },
+                      { path: '/videos', label: '📼 Vídeos' },
+                      { path: '/lugares', label: '🗺️ Mapa de Avistamientos' },
+                      { path: '/especial-atarfe', label: '📂 Dossier Atarfe' },
+                    ].map(r => (
+                      <li key={r.path} style={{ marginBottom: '10px' }}>
+                        <Link to={r.path} onClick={toggleMenu} style={{
+                          color: '#999', textDecoration: 'none', fontSize: '0.78rem',
+                          fontFamily: 'monospace', letterSpacing: '0.5px', display: 'block'
+                        }}>
+                          {r.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
 
               <li style={{ marginTop: '30px', paddingRight: '30px' }}>
                 <Link to="/acceso" onClick={toggleMenu} style={{
