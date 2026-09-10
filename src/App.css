@@ -1,15 +1,30 @@
 /* =============================================
-    VARIABLES Y TEMA TÁCTICO
+    VARIABLES EDITORIALES — DIARIO DE MISTERIO
    ============================================= */
 :root {
-    --color-principal: #2D5A43;
-    --rgb-principal: 45, 90, 67;
-    --color-acento: #d4a373;
-    --bg-bunker: #0b0e14;
-    --bg-glass: rgba(16, 22, 30, 0.75);
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --glow-subtle: 0 0 15px rgba(var(--rgb-principal), 0.2);
-    --glow-strong: 0 0 30px rgba(var(--rgb-principal), 0.35);
+    --color-principal: #1e3a2b;       /* Verde militar sobrio editorial */
+    --rgb-principal: 30, 58, 43;
+    --color-rojo-crimen: #b91c1c;     /* Rojo carmesí para True Crime */
+    --color-azul-prensa: #1e293b;     /* Azul oscuro prensa */
+    --color-ambar-historia: #9a3412;  /* Terracota/ámbar historia */
+    
+    --bg-editorial: #F8F9FA;          /* Fondo marfil suave / blanco prensa */
+    --bg-tarjeta: #FFFFFF;            /* Tarjetas blanco puro */
+    --bg-header: #FFFFFF;
+    
+    --text-primary: #1A1A1A;          /* Negro grafito puro para máxima legibilidad AAA */
+    --text-secondary: #4A5568;        /* Gris medio editorial */
+    --text-muted: #718096;            /* Gris tenue para fechas y metadatos */
+    
+    --border-editorial: #E2E8F0;      /* Líneas finas estilo periódico */
+    --border-dark: #CBD5E1;
+    
+    --shadow-tarjeta: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.09);
+    
+    --font-titular: 'Playfair Display', Georgia, serif;
+    --font-cuerpo: 'Merriweather', Georgia, serif;
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 @keyframes slideInRight {
@@ -28,7 +43,10 @@ body, html {
     padding: 0;
     min-height: 100vh;
     overflow-x: hidden;
-    background-color: #0b0e14;
+    background-color: var(--bg-editorial);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
 }
 
 .App {
@@ -36,9 +54,9 @@ body, html {
     display: flex;
     flex-direction: column;
     position: relative;
-    color: #e0e6ed;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0b0e14;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    background: var(--bg-editorial);
     overflow-x: hidden;
 }
 
@@ -46,7 +64,7 @@ body, html {
     flex: 1;
     overflow-y: auto;
     position: relative;
-    background: transparent;
+    background: var(--bg-editorial);
     display: flex;
     flex-direction: column;
 }
@@ -70,21 +88,18 @@ body, html {
     height: 40px;
 }
 
-/* NAVEGACIÓN Y MENÚ (ESTILO BÚNKER) */
-/* Sidebar logic unified below */
-
+/* NAVEGACIÓN Y MENÚ (ESTILO CAJÓN EDITORIAL) */
 .sidebar {
     position: fixed;
-    right: -320px; 
-    width: 300px;
+    right: -340px; 
+    width: 320px;
     min-height: 100vh;
-    background: rgba(5, 7, 10, 0.98);
-    backdrop-filter: blur(20px);
-    border-left: 1px solid var(--border-subtle);
-    transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #FFFFFF;
+    border-left: 2px solid #1A1A1A;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 2000;
-    padding-top: 60px;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+    padding-top: 50px;
+    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
 }
@@ -93,36 +108,35 @@ body, html {
     position: absolute;
     top: 15px;
     right: 15px;
-    background: transparent;
-    border: 1px solid var(--color-principal);
-    color: var(--color-principal);
-    width: 40px;
-    height: 40px;
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    color: #1A1A1A;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
     cursor: pointer;
     z-index: 2001;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
 .sidebar-close-btn:hover {
-    background: rgba(var(--rgb-principal), 0.1);
-    box-shadow: 0 0 15px rgba(var(--rgb-principal), 0.3);
-    transform: rotate(90deg);
+    background: #1A1A1A;
+    color: #FFFFFF;
 }
 
 .sidebar.open { right: 0; }
 
 .sidebar-footer {
-    padding: 25px;
-    border-top: 1px solid var(--border-subtle);
-    background: #0a0c10;
+    padding: 20px 25px;
+    border-top: 1px solid #E2E8F0;
+    background: #F8F9FA;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
     margin-top: auto;
 }
 

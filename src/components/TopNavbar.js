@@ -1,46 +1,30 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-    Home,
-    Image,
-    Video,
-    Newspaper,
-    Mic,
-    FileText,
-    Map,
-    MessageSquare,
-    Sparkles,
-    Languages,
-    Menu,
-    X,
-    LogOut,
-    Eye,
-    Monitor
-} from 'lucide-react';
-import ControlMusica from './ControlMusica';
+import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import logoBunker from '../assets/logo_bunker.jpeg';
 import { ADMIN_EMAIL } from '../config';
 import { useLanguage } from '../context/LanguageContext';
 import './TopNavbar.css';
 
-
 const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     const location = useLocation();
     const { language, toggleLanguage, t } = useLanguage();
+    const [otrasOpen, setOtrasOpen] = useState(false);
 
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-
-    const evidenceMenuItems = [
-        { path: "/noticias", label: "📰 " + t('navNews') },
-        { path: "/expedientes", label: "📁 " + t('navFiles') },
-        { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
-        { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
+    const mainSections = [
+        { path: "/noticias", label: language === 'en' ? "NEWS" : "NOTICIAS" },
+        { path: "/expedientes", label: language === 'en' ? "DOSSIERS" : "EXPEDIENTES" },
+        { path: "/casos-abiertos", label: "TRUE CRIME" },
+        { path: "/misterios-historicos", label: language === 'en' ? "HISTORICAL MYSTERIES" : "MISTERIOS HISTÓRICOS" },
+        { path: "/sobre-nosotros", label: language === 'en' ? "ABOUT ME" : "SOBRE MÍ" }
     ];
 
-    const otherMenuItems = [
-        { path: "/sobre-nosotros", label: "🕵️ " + (language === 'en' ? 'ABOUT ME' : 'SOBRE MÍ') },
-        { path: "/biblioteca", label: "📚 " + (language === 'en' ? 'LIBRARY' : 'BIBLIOTECA') },
-        { path: "/archipeg", label: language === 'en' ? "💻 SOFTWARE" : "💻 SOFTWARE" }
+    const extraSections = [
+        { path: "/la-ruleta", label: language === 'en' ? "Bunker Roulette" : "La Ruleta del Búnker" },
+        { path: "/biblioteca", label: language === 'en' ? "Library" : "Biblioteca" },
+        { path: "/lugares", label: language === 'en' ? "Radar Map" : "Mapa de Avistamientos" },
+        { path: "/videos", label: language === 'en' ? "Videos" : "Vídeos" },
+        { path: "/galeria", label: language === 'en' ? "Evidence Gallery" : "Galería de Evidencias" }
     ];
 
     const isAdmin = userAuth && (
@@ -49,119 +33,131 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
         userAuth.rol === 'admin'
     );
 
+    const todayFormatted = new Intl.DateTimeFormat(language === 'en' ? 'en-US' : 'es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }).format(new Date());
+
     return (
-        <nav className={`top-navbar ${isOpen ? 'menu-activo' : ''}`}>
-            <div className="top-navbar-container">
-                {/* LOGO SECTOR */}
-                <div className="top-navbar-logo">
-                    <Link to="/" className="logo-link">
-                        <img src={logoBunker} alt="Expediente X Granaino" className="logo-image" />
-                    </Link>
-                </div>
+        <header className="editorial-header">
+            {/* FILA 1: UTILIDADES, LOGO Y METADATOS */}
+            <div className="header-top-bar">
+                <div className="header-top-container">
+                    <div className="header-date">
+                        <span>{todayFormatted}</span>
+                        <span className="header-location">Granada · Edición Global</span>
+                    </div>
 
-                {/* CENTRAL NAVIGATION (DESKTOP) */}
-                <ul className="top-navbar-links">
-                    <li>
-                        <Link to="/" className={`top-nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-                            <span className="label">{t('navHome')}</span>
-                            <div className="nav-underline"></div>
+                    <div className="header-branding">
+                        <Link to="/" className="brand-link">
+                            <img src={logoBunker} alt="Expediente X Granaíno" className="brand-logo-img" />
+                            <div className="brand-titles">
+                                <span className="brand-title">EXPEDIENTE X GRANAÍNO</span>
+                                <span className="brand-tagline">DIARIO INDEPENDIENTE DE INVESTIGACIÓN, ENIGMAS Y CASOS CLASIFICADOS</span>
+                            </div>
                         </Link>
-                    </li>
+                    </div>
 
-                    {/* DESPLEGABLE DE EVIDENCIAS */}
-                    <li 
-                        className={`nav-dropdown-wrapper ${dropdownOpen ? 'open' : ''}`}
-                        onMouseEnter={() => setDropdownOpen(true)}
-                        onMouseLeave={() => setDropdownOpen(false)}
-                        onClick={() => setDropdownOpen(!dropdownOpen)}
-                    >
-                        <span className={`top-nav-link dropdown-trigger ${evidenceMenuItems.some(x => location.pathname === x.path) ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
-                            <span className="label">📂 {language === 'en' ? 'EVIDENCES' : 'EVIDENCIAS'} <span className="dropdown-arrow">▼</span></span>
-                            <div className="nav-underline"></div>
-                        </span>
-                        
-                        <ul className="dropdown-submenu">
-                            {evidenceMenuItems.map((sub) => (
-                                <li key={sub.path}>
-                                    <Link to={sub.path} className={`dropdown-sub-link ${location.pathname === sub.path ? 'active' : ''}`}>
-                                        {sub.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </li>
-
-                    {/* OTRAS SECCIONES */}
-                    {otherMenuItems.map((item) => (
-                        <li key={item.path}>
-                            <Link
-                                to={item.path}
-                                className={`top-nav-link ${location.pathname === item.path ? 'active' : ''}`}
-                            >
-                                <span className="label">{item.label}</span>
-                                <div className="nav-underline"></div>
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-
-                {/* TACTICAL TOOLS & USER AREA */}
-                <div className="top-navbar-actions">
-                    <div className="tactical-tools">
-                        <div className="language-selector-bunker skiptranslate">
+                    <div className="header-top-actions">
+                        <div className="editorial-lang-switch skiptranslate">
                             <button 
                                 onClick={() => language !== 'es' && toggleLanguage()} 
-                                className={`lang-text-btn ${language === 'es' ? 'active' : ''}`}
-                                title="Español"
+                                className={`lang-btn ${language === 'es' ? 'active' : ''}`}
                             >
-                                ESP
+                                ES
                             </button>
-                            <div className="lang-separator"></div>
+                            <span className="lang-divider">/</span>
                             <button 
                                 onClick={() => language !== 'en' && toggleLanguage()} 
-                                className={`lang-text-btn ${language === 'en' ? 'active' : ''}`}
-                                title="English"
+                                className={`lang-btn ${language === 'en' ? 'active' : ''}`}
                             >
-                                ENG
+                                EN
                             </button>
                         </div>
-                        <div className="tool-item music-tool">
-                            <ControlMusica />
-                        </div>
-                    </div>
 
-                    <div className="user-area desktop-only">
                         {userAuth ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="header-user-controls">
                                 {isAdmin && (
-                                    <Link to="/panel-mando" className="btn-panel-top-nav" title="Ir al Panel de Mando">
-                                        ⚡ PANEL
+                                    <Link to="/panel-mando" className="btn-admin-header">
+                                        PANEL
                                     </Link>
                                 )}
-                                <Link to="/acceso" className="btn-access-tactical" style={{ height: '32px', display: 'flex', alignItems: 'center' }}>{t('navProfile')}</Link>
-                                <button onClick={cerrarSesion} className="btn-logout-mini" title={t('sysLogoutBtn')}>
+                                <Link to="/acceso" className="btn-account-header">
+                                    {userAuth.nombre?.split(' ')[0].toUpperCase() || 'MI CUENTA'}
+                                </Link>
+                                <button onClick={cerrarSesion} className="btn-logout-header" title="Cerrar Sesión">
                                     <LogOut size={14} />
-                                    <span className="desktop-only">{t('navLogout')}</span>
                                 </button>
                             </div>
-                        ) : null}
+                        ) : (
+                            <Link to="/acceso" className="btn-login-header">
+                                ACCESO
+                            </Link>
+                        )}
+
+                        <button className="editorial-hamburger" onClick={toggleMenu} aria-label="Menú">
+                            {isOpen ? <X size={22} /> : <Menu size={22} />}
+                        </button>
                     </div>
-
-                    {/* BOTÓN PANEL DE MANDO RÁPIDO PARA MÓVIL (SOLO ADMIN) */}
-                    {isAdmin && (
-                        <Link to="/panel-mando" className="btn-panel-top-mobile" title="Panel de Mando">
-                            ⚡ PANEL
-                        </Link>
-                    )}
-
-                    {/* BOTÓN HAMBURGUESA (MÓVIL) */}
-                    <button className="mobile-menu-btn" onClick={toggleMenu} aria-label="Toggle Menu">
-                        {isOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
                 </div>
             </div>
-            <div className="navbar-glow-line"></div>
-        </nav>
+
+            {/* FILA 2: BARRA DE NAVEGACIÓN PRINCIPAL */}
+            <nav className="header-nav-bar">
+                <div className="header-nav-container">
+                    <ul className="nav-items-list">
+                        <li>
+                            <Link to="/" className={`nav-item-link ${location.pathname === '/' ? 'active' : ''}`}>
+                                INICIO
+                            </Link>
+                        </li>
+
+                        {mainSections.map((sec) => (
+                            <li key={sec.path}>
+                                <Link 
+                                    to={sec.path} 
+                                    className={`nav-item-link ${location.pathname === sec.path ? 'active' : ''}`}
+                                >
+                                    {sec.label}
+                                </Link>
+                            </li>
+                        ))}
+
+                        {/* DESPLEGABLE OTRAS SECCIONES */}
+                        <li 
+                            className="nav-item-dropdown"
+                            onMouseEnter={() => setOtrasOpen(true)}
+                            onMouseLeave={() => setOtrasOpen(false)}
+                        >
+                            <button 
+                                className={`dropdown-btn ${extraSections.some(x => location.pathname === x.path) ? 'active' : ''}`}
+                                onClick={() => setOtrasOpen(!otrasOpen)}
+                            >
+                                {language === 'en' ? "OTHER SECTIONS" : "OTRAS SECCIONES"}
+                                <ChevronDown size={14} className={`arrow-icon ${otrasOpen ? 'open' : ''}`} />
+                            </button>
+                            {otrasOpen && (
+                                <ul className="dropdown-menu-box">
+                                    {extraSections.map((extra) => (
+                                        <li key={extra.path}>
+                                            <Link 
+                                                to={extra.path} 
+                                                className={`dropdown-link ${location.pathname === extra.path ? 'active' : ''}`}
+                                                onClick={() => setOtrasOpen(false)}
+                                            >
+                                                {extra.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
     );
 };
 

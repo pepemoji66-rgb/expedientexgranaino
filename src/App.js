@@ -225,8 +225,8 @@ function App() {
       <ScrollToTop />
       <RetentionTracker userAuth={userAuth} />
     <div className={`App theme-${tema}`} style={{
-        backgroundColor: '#020408',
-        backgroundAttachment: 'fixed',
+        backgroundColor: 'var(--bg-editorial, #F8F9FA)',
+        color: 'var(--text-primary, #1A1A1A)',
       }}>
 
 
@@ -239,64 +239,68 @@ function App() {
         <TopNavbar userAuth={userAuth} toggleMenu={toggleMenu} isOpen={isOpen} cerrarSesion={cerrarSesion} />
  
         {/* BARRA DE NAVEGACIÓN LATERAL */}
+        {/* BARRA DE NAVEGACIÓN LATERAL EDITORIAL */}
         <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
-          {/* BOTÓN DE CIERRE TÁCTICO */}
           <button className="sidebar-close-btn" onClick={toggleMenu} aria-label="Cerrar Menú">
-            <X size={28} />
+            <X size={24} />
           </button>
-          <div style={{ flexGrow: 1, paddingTop: '40px', paddingLeft: '30px', overflowY: 'auto' }}>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
+          
+          <div style={{ flexGrow: 1, paddingTop: '40px', paddingLeft: '25px', paddingRight: '25px', overflowY: 'auto' }}>
+            <div style={{ borderBottom: '1px solid #E2E8F0', paddingBottom: '12px', marginBottom: '20px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', color: '#64748B', textTransform: 'uppercase' }}>
+                SECCIONES PRINCIPALES
+              </span>
+            </div>
+
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               {[
-                { path: "/", label: t('navHome') },
-                { path: "/noticias", label: t('navNews') },
-                { path: "/expedientes", label: t('navFiles') },
-                { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
-                { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
-                { path: "/biblioteca", label: "📚 BIBLIOTECA DEL BÚNKER" },
-                { path: "/colaboradores", label: "🏅 COLABORADORES" },
-                { path: "/archipeg", label: "💻 ARCHIPEG PRO" },
-                { path: "/privacidad", label: "🔒 PRIVACIDAD" },
-                { path: "/cookies", label: "🍪 COOKIES" },
-                { path: "/legal", label: "⚖️ AVISO LEGAL" }
+                { path: "/", label: t('navHome') || "INICIO" },
+                { path: "/noticias", label: t('navNews') || "NOTICIAS" },
+                { path: "/expedientes", label: t('navFiles') || "EXPEDIENTES" },
+                { path: "/casos-abiertos", label: "TRUE CRIME" },
+                { path: "/misterios-historicos", label: t('navMysteries') || "MISTERIOS HISTÓRICOS" },
+                { path: "/sobre-nosotros", label: language === 'en' ? "ABOUT ME" : "SOBRE EL PROYECTO" },
+                { path: "/biblioteca", label: language === 'en' ? "LIBRARY" : "BIBLIOTECA" },
+                { path: "/colaboradores", label: language === 'en' ? "CONTRIBUTORS" : "COLABORADORES" }
               ].map((route) => (
-                <li key={route.path} style={{ marginBottom: '15px' }}>
-                  <Link to={route.path} onClick={toggleMenu} className="nav-link" style={{
-                    color: 'white', textDecoration: 'none', textTransform: 'uppercase',
-                    fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '1px',
-                    display: 'block', transition: '0.3s'
+                <li key={route.path} style={{ marginBottom: '14px' }}>
+                  <Link to={route.path} onClick={toggleMenu} style={{
+                    color: '#1A1A1A', textDecoration: 'none', textTransform: 'uppercase',
+                    fontSize: '0.85rem', fontWeight: '700', letterSpacing: '1px',
+                    display: 'block', transition: 'color 0.2s', padding: '4px 0'
                   }}>
-                    <span style={{ color: 'var(--color-principal)' }}>&gt;</span> {route.label}
+                    {route.label}
                   </Link>
                 </li>
               ))}
 
-              {/* OTRAS SECCIONES — desplegable secundario */}
-              <li style={{ marginTop: '20px' }}>
+              {/* OTRAS SECCIONES */}
+              <li style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #E2E8F0' }}>
                 <button
                   onClick={() => setOtrasOpen(!otrasOpen)}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer',
-                    color: '#aaa', fontFamily: 'monospace', fontSize: '0.78rem',
-                    letterSpacing: '1px', textTransform: 'uppercase', padding: 0,
-                    display: 'flex', alignItems: 'center', gap: '6px'
+                    color: '#64748B', fontSize: '0.75rem', fontWeight: '800',
+                    letterSpacing: '1.5px', textTransform: 'uppercase', padding: '6px 0',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'
                   }}
                 >
-                  <span style={{ color: 'var(--color-principal)' }}>{otrasOpen ? '▼' : '▶'}</span>
-                  OTRAS SECCIONES
+                  <span>OTRAS SECCIONES</span>
+                  <span style={{ fontSize: '0.7rem' }}>{otrasOpen ? '▲' : '▼'}</span>
                 </button>
                 {otrasOpen && (
-                  <ul style={{ listStyle: 'none', padding: '10px 0 0 14px', margin: 0 }}>
+                  <ul style={{ listStyle: 'none', padding: '8px 0 0 10px', margin: 0 }}>
                     {[
-                      { path: '/la-ruleta', label: '🎡 La Ruleta del Búnker' },
-                      { path: '/galeria', label: '🖼️ Galería' },
-                      { path: '/videos', label: '📼 Vídeos' },
-                      { path: '/lugares', label: '🗺️ Mapa de Avistamientos' },
-                      { path: '/especial-atarfe', label: '📂 Dossier Atarfe' },
+                      { path: '/la-ruleta', label: 'La Ruleta del Búnker' },
+                      { path: '/galeria', label: 'Galería de Evidencias' },
+                      { path: '/videos', label: 'Vídeos y Reportajes' },
+                      { path: '/lugares', label: 'Mapa de Avistamientos' },
+                      { path: '/especial-atarfe', label: 'Dossier Especial Atarfe' },
                     ].map(r => (
                       <li key={r.path} style={{ marginBottom: '10px' }}>
                         <Link to={r.path} onClick={toggleMenu} style={{
-                          color: '#999', textDecoration: 'none', fontSize: '0.78rem',
-                          fontFamily: 'monospace', letterSpacing: '0.5px', display: 'block'
+                          color: '#4A5568', textDecoration: 'none', fontSize: '0.8rem',
+                          fontWeight: '600', display: 'block'
                         }}>
                           {r.label}
                         </Link>
@@ -306,56 +310,53 @@ function App() {
                 )}
               </li>
 
-              <li style={{ marginTop: '30px', paddingRight: '30px' }}>
+              {/* ENLACES LEGALES */}
+              <li style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #E2E8F0' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <Link to="/privacidad" onClick={toggleMenu} style={{ color: '#94a3b8', fontSize: '0.7rem', textDecoration: 'none' }}>Privacidad</Link>
+                  <span style={{ color: '#cbd5e1' }}>·</span>
+                  <Link to="/cookies" onClick={toggleMenu} style={{ color: '#94a3b8', fontSize: '0.7rem', textDecoration: 'none' }}>Cookies</Link>
+                  <span style={{ color: '#cbd5e1' }}>·</span>
+                  <Link to="/legal" onClick={toggleMenu} style={{ color: '#94a3b8', fontSize: '0.7rem', textDecoration: 'none' }}>Aviso Legal</Link>
+                </div>
+              </li>
+
+              {/* ACCESO Y CONTROL DE PANEL */}
+              <li style={{ marginTop: '25px' }}>
                 <Link to="/acceso" onClick={toggleMenu} style={{
-                  color: 'white',
-                  padding: '12px', display: 'block', textAlign: 'center',
-                  background: 'rgba(var(--rgb-principal), 0.05)',
-                  border: '1px solid rgba(var(--rgb-principal), 0.2)',
-                  fontWeight: 'bold', textDecoration: 'none',
-                  fontSize: '0.8rem', fontFamily: 'monospace', borderRadius: '4px'
+                  color: '#1A1A1A', padding: '10px', display: 'block', textAlign: 'center',
+                  background: '#F1F5F9', border: '1px solid #CBD5E1',
+                  fontWeight: '700', textDecoration: 'none',
+                  fontSize: '0.8rem', borderRadius: '4px', letterSpacing: '1px', textTransform: 'uppercase'
                 }}>
-                  {userAuth ? `${t('sysAgentLabel')} ${userAuth.nombre?.toUpperCase()}` : `🔑 ${t('sysAccessBunker')}`}
+                  {userAuth ? `AGENTE ${userAuth.nombre?.toUpperCase()}` : `ACCESO AGENTES`}
                 </Link>
               </li>
 
-              {/* RECONOCIMIENTO DEL JEFE: La Llave Maestra de Pepe */}
               {userAuth && (
                 (userAuth.email && userAuth.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) ||
                 userAuth.rol === 'admin'
               ) && (
-                  <li style={{ marginTop: '20px', paddingRight: '30px' }}>
-                    <Link to="/panel-mando" onClick={toggleMenu} style={{
-                      color: 'var(--color-principal)', border: '2px solid var(--color-principal)',
-                      padding: '12px', display: 'block', textAlign: 'center',
-                      background: 'rgba(var(--rgb-principal), 0.1)', fontWeight: 'bold', textDecoration: 'none',
-                      borderRadius: '4px', boxShadow: '0 0 15px rgba(var(--rgb-principal), 0.3)'
-                    }}>
-                      {t('sysControlPanel')}
-                    </Link>
-                  </li>
-                )}
+                <li style={{ marginTop: '10px' }}>
+                  <Link to="/panel-mando" onClick={toggleMenu} style={{
+                    color: '#fff', border: '1px solid #1e3a2b',
+                    padding: '10px', display: 'block', textAlign: 'center',
+                    background: '#1e3a2b', fontWeight: '800', textDecoration: 'none',
+                    borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '1px'
+                  }}>
+                    PANEL DE MANDO
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 
-          {/* CONTROL DE TEMA Y MÚSICA BAJO EL MENÚ - ASEGURAMOS VISIBILIDAD */}
-          <div className="sidebar-footer">
+          <div className="sidebar-footer" style={{ background: '#F8F9FA', borderTop: '1px solid #E2E8F0', padding: '15px 25px' }}>
             {userAuth && (
-              <button onClick={cerrarSesion} className="btn-logout">
-                🔴 {t('sysLogoutBtn')}
+              <button onClick={cerrarSesion} className="btn-logout" style={{ background: '#fff', border: '1px solid #dc2626', color: '#dc2626', borderRadius: '4px', padding: '8px', cursor: 'pointer', fontWeight: 'bold', width: '100%' }}>
+                CERRAR SESIÓN
               </button>
             )}
-            <div className="theme-selector-container">
-
-              <p className="sidebar-footer-label" style={{ marginBottom: '8px', fontSize: '10px', color: '#666' }}>{t('sysVisualFreq')}</p>
-              <div className="theme-selector" style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                {['#2D5A43', '#00ff41', '#d4a373', '#00d4ff', '#ff4444'].map(c => (
-                  <div key={c} onClick={() => setTema(c)} className={`theme-dot ${tema === c ? 'active' : ''}`} style={{ 
-                    width: '18px', height: '18px', borderRadius: '50%', background: c, cursor: 'pointer', border: tema === c ? '2px solid #fff' : '1px solid transparent' 
-                  }}></div>
-                ))}
-              </div>
-            </div>
           </div>
         </nav>
 

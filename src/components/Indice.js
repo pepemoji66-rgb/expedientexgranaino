@@ -10,56 +10,127 @@ import './Indice.css';
 const Indice = ({ userAuth, stats, setTema, tema }) => {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
-    const [showDossier, setShowDossier] = useState(false);
 
-    // Estados para previsualización de contenidos ("Chicha")
-    const [recentExpedientes, setRecentExpedientes] = useState([]);
-    const [recentNoticias, setRecentNoticias] = useState([]);
-    const [recentCasos, setRecentCasos] = useState([]);
-    const [recentVideos, setRecentVideos] = useState([]);
-    const [recentMisterios, setRecentMisterios] = useState([]);
+    // 8 artículos más recientes unificados
+    const [ultimosArticulos, setUltimosArticulos] = useState([]);
     const [comentariosRecientes, setComentariosRecientes] = useState([]);
     const [loadingContent, setLoadingContent] = useState(true);
     const [filtroTematico, setFiltroTematico] = useState('todos');
-
-    const coloresDisponibles = [
-        { hex: '#2D5A43', label: 'MILITAR' },
-        { hex: '#00ff41', label: 'VERDE' },
-        { hex: '#d4a373', label: 'ÁMBAR' },
-        { hex: '#00d4ff', label: 'CIAN' },
-        { hex: '#ff4444', label: 'ROJO' }
-    ];
 
     useEffect(() => {
         const fetchHomeData = async () => {
             try {
                 setLoadingContent(true);
-                const [resExp, resNot, resCasos, resVideos, resMisterios, resComs] = await Promise.allSettled([
+                const [resExp, resNot, resCasos, resMisterios, resComs] = await Promise.allSettled([
                     axios.get(`${API_BASE_URL}/api/expedientes/ultimos`),
                     axios.get(`${API_BASE_URL}/api/noticias/ultimas`),
                     axios.get(`${API_BASE_URL}/api/casos`),
-                    axios.get(`${API_BASE_URL}/api/videos/publicos`),
                     axios.get(`${API_BASE_URL}/api/misterios-historicos`),
                     axios.get(`${API_BASE_URL}/api/comentarios/recientes`)
                 ]);
 
+                let articulosUnificados = [];
+
+                // 1. EXPEDIENTES
                 if (resExp.status === 'fulfilled' && Array.isArray(resExp.value.data)) {
-                    setRecentExpedientes(resExp.value.data);
+                    resExp.value.data.forEach(item => {
+                        const img = item.imagen_url 
+                            ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`)
+                            : null;
+                        articulosUnificados.push({
+                            id: item.id,
+                            titulo: item.titulo || 'Sin título',
+                            contenido: item.contenido || item.cuerpo || '',
+                            imagen: img,
+                            seccion: 'expediente',
+                            seccionLabel: 'EXPEDIENTE',
+                            seccionColor: '#1e3a2b',
+                            fecha: item.fecha,
+                            timestamp: new Date(item.fecha || 0).getTime(),
+                            autor: item.usuario_nombre || 'José Moreno',
+                            link: `/leer-historia/${item.id}?src=expedientes`
+                        });
+                    });
                 }
+
+                // 2. NOTICIAS
                 if (resNot.status === 'fulfilled' && Array.isArray(resNot.value.data)) {
-                    setRecentNoticias(resNot.value.data);
+                    resNot.value.data.forEach(item => {
+                        const img = item.imagen_url 
+                            ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url.split('/').pop()}`)
+                            : null;
+                        articulosUnificados.push({
+                            id: item.id,
+                            titulo: item.titulo || 'Noticia de última hora',
+                            contenido: item.cuerpo || item.contenido || '',
+                            imagen: img,
+                            seccion: 'noticia',
+                            seccionLabel: 'NOTICIA',
+                            seccionColor: '#1e293b',
+                            fecha: item.fecha,
+                            timestamp: new Date(item.fecha || 0).getTime(),
+                            autor: 'Redacción',
+                            link: `/leer-historia/${item.id}?src=noticias`
+                        });
+                    });
                 }
+
+                // 3. TRUE CRIME (CASOS ABIERTOS)
                 if (resCasos.status === 'fulfilled' && Array.isArray(resCasos.value.data)) {
-                    setRecentCasos(resCasos.value.data.slice(0, 3));
+                    resCasos.value.data.forEach(item => {
+                        const img = item.imagen_url 
+                            ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`)
+                            : null;
+                        const tit = (language === 'en' && item.titulo_en) ? item.titulo_en : item.titulo;
+                        const desc = (language === 'en' && item.contenido_en) ? item.contenido_en : item.contenido;
+                        articulosUnificados.push({
+                            id: item.id,
+                            titulo: tit || 'Caso Abierto',
+                            contenido: desc || '',
+                            imagen: img,
+                            seccion: 'caso',
+                            seccionLabel: 'TRUE CRIME',
+                            seccionColor: '#b91c1c',
+                            fecha: item.fecha,
+                            timestamp: new Date(item.fecha || 0).getTime(),
+                            autor: 'José Moreno',
+                            link: `/leer-historia/${item.id}?src=casos`
+                        });
+                    });
                 }
-                if (resVideos.status === 'fulfilled' && Array.isArray(resVideos.value.data)) {
-                    setRecentVideos(resVideos.value.data.slice(0, 3));
-                }
+
+                // 4. MISTERIOS HISTÓRICOS
                 if (resMisterios.status === 'fulfilled' && Array.isArray(resMisterios.value.data)) {
-                    setRecentMisterios(resMisterios.value.data.slice(0, 3));
+                    resMisterios.value.data.forEach(item => {
+                        const img = item.imagen_url 
+                            ? (item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`)
+                            : null;
+                        const tit = (language === 'en' && item.titulo_en) ? item.titulo_en : item.titulo;
+                        const desc = (language === 'en' && item.contenido_en) ? item.contenido_en : item.contenido;
+                        articulosUnificados.push({
+                            id: item.id,
+                            titulo: tit || 'Misterio Histórico',
+                            contenido: desc || '',
+                            imagen: img,
+                            seccion: 'misterio',
+                            seccionLabel: 'MISTERIOS HISTÓRICOS',
+                            seccionColor: '#9a3412',
+                            fecha: item.fecha,
+                            timestamp: new Date(item.fecha || 0).getTime(),
+                            autor: 'José Moreno',
+                            link: `/leer-historia/${item.id}?src=misterios`
+                        });
+                    });
                 }
+
+                // Ordenar por fecha cronológica descendente (los más recientes primero)
+                articulosUnificados.sort((a, b) => b.timestamp - a.timestamp);
+
+                // Tomar los 8 más recientes para la portada principal
+                setUltimosArticulos(articulosUnificados.slice(0, 8));
+
                 if (resComs.status === 'fulfilled' && Array.isArray(resComs.value.data)) {
-                    setComentariosRecientes(resComs.value.data);
+                    setComentariosRecientes(resComs.value.data.slice(0, 4));
                 }
             } catch (err) {
                 console.error("Error loading home page content:", err);
@@ -68,572 +139,249 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
             }
         };
         fetchHomeData();
-    }, []);
+    }, [language]);
+
+    // Filtrar si el usuario pulsa algún filtro temático
+    const articulosAMostrar = filtroTematico === 'todos'
+        ? ultimosArticulos
+        : filtroTematico === 'ovnis'
+            ? ultimosArticulos.filter(a => a.seccion === 'expediente')
+            : filtroTematico === 'noticias'
+                ? ultimosArticulos.filter(a => a.seccion === 'noticia')
+                : filtroTematico === 'cronica_negra'
+                    ? ultimosArticulos.filter(a => a.seccion === 'caso')
+                    : filtroTematico === 'misterios'
+                        ? ultimosArticulos.filter(a => a.seccion === 'misterio')
+                        : ultimosArticulos;
+
+    const articuloPrincipal = articulosAMostrar.length > 0 ? articulosAMostrar[0] : null;
+    const articulosSecundarios = articulosAMostrar.length > 1 ? articulosAMostrar.slice(1, 8) : [];
+
+    const limpiarSnippet = (texto, maxLen = 140) => {
+        if (!texto) return '';
+        const sinHtml = texto.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ');
+        if (sinHtml.length <= maxLen) return sinHtml;
+        return sinHtml.substring(0, maxLen).trim() + '...';
+    };
 
     return (
-        <div className="indice-container">
-            {/* CABECERA TÉCNICA DE MONITORIZACIÓN */}
-            <div className="monitoring-header">
-                <div className="radar-status-mini">
-                    <span className="pulse-dot"></span>
-                    {t('systemActive')}
-                </div>
-                <div className="system-clock">
-                    {new Date().toLocaleDateString()} | GMT+1
-                </div>
+        <div className="indice-editorial-container">
+            {/* BARRA DE FECHA Y EDICIÓN */}
+            <div className="editorial-edition-bar">
+                <span className="editorial-edition-date">
+                    {new Date().toLocaleDateString(language === 'en' ? 'en-GB' : 'es-ES', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric' 
+                    }).toUpperCase()}
+                </span>
+                <span className="editorial-edition-tag">
+                    {language === 'en' ? 'EDITION ARCHIVE · UNEXPLAINED DOSSIERS' : 'EDICIÓN DIGITAL · ARCHIVO DEL MISTERIO'}
+                </span>
             </div>
 
-            {/* NOTA DE DIRECTIVA DE INVESTIGACIÓN (SEO & UX) */}
-            <div className="cases-disclaimer-box">
-                <div className="disclaimer-header">
-                    <span>{t('casesDisclaimerTitle')}</span>
-                </div>
-                <div className="disclaimer-body">
-                    <p>{t('casesDisclaimerText')}</p>
-                </div>
-            </div>
-
-            {/* AVISO DE AFILIADOS DE AMAZON */}
-            <div className="cases-disclaimer-box amazon-disclosure-box" style={{ 
-                marginTop: '15px', 
-                border: '1px solid #ff9900', 
-                background: 'rgba(255, 153, 0, 0.03)',
-                boxShadow: '0 0 10px rgba(255, 153, 0, 0.1)'
-            }}>
-                <div className="disclaimer-header" style={{ color: '#ff9900', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>⚠️ {language === 'en' ? 'IMPORTANT NOTICE (AFFILIATES)' : 'AVISO IMPORTANTE (DIVULGACIÓN DE AFILIADOS)'}</span>
-                </div>
-                <div className="disclaimer-body" style={{ color: '#ccc', fontSize: '0.8rem', lineHeight: '1.4' }}>
-                    <p style={{ marginBottom: '8px' }}>
-                        {language === 'en' 
-                            ? 'The books, movies and products recommended in the Bunker are suggestions from the author to deepen your knowledge of mysteries and files. You are under no obligation to buy them when clicking, nor will you pay a single cent more (the price is exactly the same).'
-                            : 'Los libros, películas y productos recomendados en el Búnker son sugerencias del autor para profundizar en los misterios y expedientes. No tienes ninguna obligación de comprarlos al hacer clic, ni pagarás un céntimo de más por hacerlo (el precio es exactamente el mismo).'}
-                    </p>
-                    <p>
-                        {language === 'en'
-                            ? 'In fact, once you enter Amazon through any of our links, any normal purchase you decide to make on the platform (even if it is something completely different from the recommended book) also helps us. Amazon provides the Bunker chief with a small commission percentage that goes entirely to cover page maintenance expenses (server, domain, and development). Your collaboration is of great help to keep the archive open and we will be infinitely grateful!'
-                            : 'De hecho, una vez que entras a Amazon a través de cualquiera de nuestros enlaces, cualquier compra habitual que decidas hacer en la plataforma (aunque sea algo totalmente diferente al libro recomendado) también nos ayuda. Amazon aporta al jefe del Búnker un pequeño porcentaje que se destina íntegramente a cubrir los gastos de mantenimiento de la página (servidor, dominio y desarrollo tecnológico). ¡Tu colaboración es de gran ayuda para mantener el archivo abierto y te estaremos infinitamente agradecidos!'} 🛸🛰️
-                    </p>
-                </div>
-            </div>
-
-            {/* SECCIÓN DE ACCESO INMEDIATO (UX PRIORITARIA) */}
-            <div className="quick-access-gates">
-                <Link to="/lugares" className="gate-card map-gate">
-                    <div className="gate-glow"></div>
-                    <div className="gate-icon">🗺️</div>
-                    <div className="gate-content">
-                        <h3>{language === 'en' ? 'WORLD RADAR (INTERACTIVE MAP)' : 'RADAR MUNDIAL (MAPA INTERACTIVO)'}</h3>
-                        <p>{language === 'en' ? 'Visualize, filter and locate UFO sightings and paranormal anomalies geolocalized in real-time.' : 'Visualiza, filtra y localiza avistamientos OVNI y anomalías paranormales geolocalizados en tiempo real.'}</p>
-                        <span className="gate-action-btn">{language === 'en' ? 'LAUNCH RADAR ➔' : 'INICIAR RADAR ➔'}</span>
-                    </div>
-                </Link>
-                <Link to="/expedientes" className="gate-card files-gate">
-                    <div className="gate-glow"></div>
-                    <div className="gate-icon">📂</div>
-                    <div className="gate-content">
-                        <h3>{language === 'en' ? 'CLASSIFIED DOSSIERS' : 'EXPEDIENTES CLASIFICADOS'}</h3>
-                        <p>{language === 'en' ? 'Explore original reports submitted by field agents and official Command files.' : 'Explora los informes originales aportados por agentes de campo y los expedientes oficiales de Comandancia.'}</p>
-                        <span className="gate-action-btn">{language === 'en' ? 'OPEN DOSSIERS ➔' : 'ABRIR EXPEDIENTES ➔'}</span>
-                    </div>
-                </Link>
-                <Link to="/biblioteca" className="gate-card library-gate">
-                    <div className="gate-glow"></div>
-                    <div className="gate-icon">📚</div>
-                    <div className="gate-content">
-                        <h3>{language === 'en' ? 'RECOMMENDED BIBLIOGRAPHY' : 'BIBLIOTECA DEL BÚNKER'}</h3>
-                        <p>{language === 'en' ? 'Discover our selection of essential books to investigate anomalous phenomena and historical mysteries.' : 'Descubre nuestra selección de libros imprescindibles para investigar fenómenos anómalos y misterios históricos.'}</p>
-                        <span className="gate-action-btn">{language === 'en' ? 'ENTER LIBRARY ➔' : 'ENTRAR A LA BIBLIOTECA ➔'}</span>
-                    </div>
-                </Link>
-            </div>
-
-            {/* --- SECCIÓN REUBICADA: PROTOCOLOS Y SOBRE MÍ --- */}
-            <div className="bunker-protocols-top">
-                <div className="protocol-links-grid">
-                    <Link to="/privacidad" className="protocol-link">{t('navPrivacy')}</Link>
-                    <Link to="/cookies" className="protocol-link">{t('navCookies')}</Link>
-                    <Link to="/legal" className="protocol-link">{t('navLegal')}</Link>
-                    <Link to="/sobre-nosotros" className="protocol-link">{t('navAboutProject')}</Link>
-                </div>
-                
-                <div className="dossier-section-top">
-                    <button 
-                        className={`btn-dossier-tech ${showDossier ? 'open' : ''}`}
-                        onClick={() => setShowDossier(!showDossier)}
-                    >
-                        {showDossier ? t('dossierClose') : t('dossierOpen')}
-                    </button>
-
-                    {showDossier && (
-                        <div className="dossier-content-tech fade-in">
-                            <div className="dossier-fundador-wrapper" style={{ display: 'flex', gap: '22px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '15px' }}>
-                                <div style={{ textAlign: 'center', margin: '0 auto' }}>
-                                    <img 
-                                        src="/jose-moreno-investigador.jpg" 
-                                        alt="José Moreno Jiménez" 
-                                        style={{
-                                            width: '110px',
-                                            height: '125px',
-                                            borderRadius: '6px',
-                                            objectFit: 'cover',
-                                            border: '2px solid var(--color-principal)',
-                                            boxShadow: '0 0 15px rgba(var(--rgb-principal), 0.25)',
-                                            display: 'block'
-                                        }} 
-                                    />
-                                    <span style={{ fontSize: '0.65rem', color: 'var(--color-principal)', fontFamily: 'monospace', fontWeight: 'bold', display: 'block', marginTop: '4px' }}>
-                                        JOSÉ MORENO
-                                    </span>
-                                </div>
-                                <div style={{ flex: '1', minWidth: '240px' }}>
-                                    <h3 style={{ color: 'var(--color-principal)' }}>{t('dossierTitle')}</h3>
-                                    <p style={{ margin: '8px 0' }}>
-                                        {t('dossierDesc1')}
-                                    </p>
-                                    <p style={{ margin: '8px 0' }}>
-                                        {t('dossierDesc2')}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="dossier-actions-personal">
-                                <Link to="/especial-atarfe" className="btn-technical-link highlight">
-                                    {t('dossierViewAtarfe')}
-                                </Link>
-                                <Link to="/sobre-nosotros" className="btn-technical-link">
-                                    {t('dossierFullProtocols')}
-                                </Link>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* SECCIÓN PREVISUALIZACIONES DE CONTENIDO ("CHICHA" PARA ADSENSE Y UX) */}
-            <div className="home-sections-divider">// {language === 'en' ? 'DECLASS CENTRAL CORE' : 'NÚCLEO CENTRAL DE DESCLASIFICACIÓN'}</div>
-
-            {/* CARRUSEL DE FILTROS TEMÁTICOS */}
+            {/* BARRA DE FILTROS TEMÁTICOS EDITORIAL */}
             <FiltrosTematicos filtroActivo={filtroTematico} onFiltroChange={setFiltroTematico} />
 
-            {/* ÚLTIMAS TRANSMISIONES / COMENTARIOS DE AGENTES */}
-            {comentariosRecientes.length > 0 && (
-                <div className="home-content-section" style={{ marginBottom: '45px' }}>
-                    <div className="section-title-wrap">
-                        <h2 className="section-title-neon" style={{ color: 'var(--color-principal)', textShadow: '0 0 10px rgba(0, 255, 65, 0.2)' }}>
-                            // {language === 'en' ? 'INCOMING LOG / RECENT AGENT TRANSMISSIONS' : 'REGISTRO DE TRANSMISIONES / APORTACIONES RECIENTES'}
-                        </h2>
+            {/* SECCIÓN PRINCIPAL DE PORTADA (8 ARTÍCULOS) */}
+            <section className="editorial-frontpage">
+                <div className="editorial-section-header">
+                    <h2 className="editorial-section-title">
+                        {language === 'en' ? 'LATEST EDITIONS' : 'ÚLTIMAS PUBLICACIONES'}
+                    </h2>
+                    <span className="editorial-section-subtitle">
+                        {language === 'en' ? 'The 8 most recent investigations and chronicles' : 'Los 8 artículos más recientes del archivo'}
+                    </span>
+                </div>
+
+                {loadingContent ? (
+                    <div className="editorial-loading">
+                        <p>{language === 'en' ? 'Loading latest investigations...' : 'Cargando las últimas publicaciones...'}</p>
                     </div>
-                    <div style={{
-                        background: 'rgba(5, 7, 12, 0.75)',
-                        border: '1px solid rgba(var(--rgb-principal), 0.15)',
-                        borderRadius: '4px',
-                        padding: '20px',
-                        fontFamily: 'monospace',
-                        boxShadow: 'inset 0 0 20px rgba(0,0,0,0.9)'
-                    }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            {comentariosRecientes.map((c, i) => {
-                                const parts = (c.item_key || '').split('-');
-                                const tipo = parts[0];
-                                const id = parts[1];
-                                const srcParam = tipo === 'exp' ? 'expedientes' : tipo === 'caso' ? 'casos' : tipo === 'misterio' ? 'misterios' : 'noticias';
-                                const linkUrl = `/leer-historia/${id}?src=${srcParam}`;
-                                
-                                return (
-                                    <div key={c.id} 
-                                         onClick={() => navigate(linkUrl)}
-                                         style={{
-                                             borderBottom: i < comentariosRecientes.length - 1 ? '1px dashed rgba(255,255,255,0.05)' : 'none',
-                                             paddingBottom: i < comentariosRecientes.length - 1 ? '15px' : '0',
-                                             cursor: 'pointer',
-                                             display: 'flex',
-                                             flexDirection: 'column',
-                                             gap: '6px',
-                                             transition: 'all 0.2s ease'
-                                         }}
-                                         onMouseEnter={(e) => {
-                                             e.currentTarget.style.opacity = 0.9;
-                                             e.currentTarget.style.paddingLeft = '5px';
-                                         }}
-                                         onMouseLeave={(e) => {
-                                             e.currentTarget.style.opacity = 1;
-                                             e.currentTarget.style.paddingLeft = '0';
-                                         }}
+                ) : articulosAMostrar.length === 0 ? (
+                    <div className="editorial-empty">
+                        <p>{language === 'en' ? 'No articles found in this category.' : 'No se han encontrado publicaciones en esta sección.'}</p>
+                    </div>
+                ) : (
+                    <>
+                        {/* ARTÍCULO PRINCIPAL (#1 DE 8 - FORMATO GRAN TITULAR) */}
+                        {articuloPrincipal && (
+                            <article 
+                                className="editorial-lead-story" 
+                                onClick={() => navigate(articuloPrincipal.link)}
+                            >
+                                <div className="lead-story-image-wrap">
+                                    {articuloPrincipal.imagen ? (
+                                        <img 
+                                            src={articuloPrincipal.imagen} 
+                                            alt={articuloPrincipal.titulo} 
+                                            loading="eager"
+                                        />
+                                    ) : (
+                                        <div className="lead-story-placeholder">
+                                            <span>DOCUMENTACIÓN FOTOGRÁFICA</span>
+                                        </div>
+                                    )}
+                                    <span 
+                                        className="lead-story-badge"
+                                        style={{ backgroundColor: articuloPrincipal.seccionColor }}
                                     >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', fontSize: '0.78rem' }}>
-                                            <span style={{ color: 'var(--color-principal)', fontWeight: 'bold' }}>
-                                                📟 [AGENTE_{c.agente.toUpperCase()}]
-                                            </span>
-                                            <span style={{ color: '#666', fontSize: '0.7rem' }}>
-                                                {new Date(c.fecha).toLocaleString()}
-                                            </span>
-                                        </div>
-                                        <div style={{ color: '#eee', fontSize: '0.85rem', paddingLeft: '15px', borderLeft: '2px solid var(--color-principal)', margin: '4px 0', lineBreak: 'anywhere' }}>
-                                            "{c.mensaje}"
-                                        </div>
-                                        <div style={{ fontSize: '0.72rem', color: '#8892b0', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                            <span>🎯 {language === 'en' ? 'TARGET:' : 'OBJETIVO:'}</span>
-                                            <span style={{ color: '#00d4ff', textDecoration: 'underline' }}>{c.titulo_articulo?.toUpperCase() || 'VER EVIDENCIA'}</span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* SECCIÓN EXPEDIENTES RECIENTES */}
-            {(filtroTematico === 'todos' || filtroTematico === 'ovnis') && (
-            <div className="home-content-section">
-                <div className="section-title-wrap">
-                    <h2 className="section-title-neon">// {language === 'en' ? 'RECENT DOSSIERS' : 'EXPEDIENTES RECIENTES'}</h2>
-                    <Link to="/expedientes" className="section-view-all">{language === 'en' ? 'VIEW ALL FILES ➔' : 'VER TODOS ➔'}</Link>
-                </div>
-                <div className="home-grid-cards">
-                    {recentExpedientes.length > 0 ? (
-                        recentExpedientes.map((exp) => (
-                            <div key={exp.id} className="home-card expediente-card-home" onClick={() => navigate(`/leer-historia/${exp.id}?src=expedientes`)}>
-                                {exp.imagen_url ? (
-                                    <div className="card-image-wrap">
-                                        <img src={exp.imagen_url.startsWith('http') ? exp.imagen_url : `${API_BASE_URL}/imagenes/${exp.imagen_url}`} alt={exp.titulo} />
-                                    </div>
-                                ) : (
-                                    <div className="card-image-placeholder-home">
-                                        <span>📁 DOSSIER</span>
-                                    </div>
-                                )}
-                                <div className="card-info-wrap">
-                                    <span className="card-category">📁 {exp.tipo?.toUpperCase() || 'AGENTE'}</span>
-                                    <h3>{exp.titulo || 'SIN TITULO'}</h3>
-                                    <p className="card-snippet">{exp.contenido ? exp.contenido.replace(/<[^>]+>/g, '').substring(0, 120) + '...' : ''}</p>
-                                    <div className="card-footer-info">
-                                        <span>👤 {exp.usuario_nombre || 'Anónimo'}</span>
-                                        <span>📅 {exp.fecha ? new Date(exp.fecha).toLocaleDateString() : ''}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="no-content-indicator">{language === 'en' ? 'Scanning for recent files...' : 'Escaneando expedientes recientes...'}</p>
-                    )}
-                </div>
-            </div>
-            )}
-
-            {/* SECCIÓN ÚLTIMAS NOTICIAS */}
-            {(filtroTematico === 'todos' || filtroTematico === 'noticias') && (
-            <div className="home-content-section">
-                <div className="section-title-wrap">
-                    <h2 className="section-title-neon">// {language === 'en' ? 'LATEST NEWS' : 'ÚLTIMAS NOTICIAS'}</h2>
-                    <Link to="/noticias" className="section-view-all">{language === 'en' ? 'VIEW ALL NEWS ➔' : 'VER TODAS ➔'}</Link>
-                </div>
-                <div className="home-grid-cards">
-                    {recentNoticias.length > 0 ? (
-                        recentNoticias.map((news) => (
-                            <div key={news.id} className="home-card news-card-home" onClick={() => navigate(`/leer-historia/${news.id}?src=noticias`)}>
-                                <div className="card-image-wrap">
-                                    <img 
-                                        src={news.imagen_url ? (news.imagen_url.startsWith('http') ? news.imagen_url : `${API_BASE_URL}/imagenes/${news.imagen_url.split('/').pop()}`) : "/img-default.jpg"} 
-                                        alt={news.titulo}
-                                        onError={(e) => { e.target.src = `https://placehold.co/400x250/000/00ff41?text=NOTICIA`; }}
-                                    />
-                                    <span className={`card-badge-alert alert-${news.nivel_alerta?.toLowerCase()}`}>
-                                        {news.nivel_alerta?.toUpperCase() || 'BAJO'}
+                                        {articuloPrincipal.seccionLabel}
                                     </span>
                                 </div>
-                                <div className="card-info-wrap">
-                                    <h3>{news.titulo}</h3>
-                                    <p className="card-snippet">{news.cuerpo ? news.cuerpo.replace(/<[^>]+>/g, '').substring(0, 120) + '...' : ''}</p>
-                                    <div className="card-footer-info">
-                                        <span>📍 {news.ubicacion || 'Sector Central'}</span>
-                                        <span>📅 {news.fecha ? new Date(news.fecha).toLocaleDateString() : ''}</span>
+
+                                <div className="lead-story-content">
+                                    <span className="lead-story-kicker">
+                                        {articuloPrincipal.seccionLabel} · REPORTAJE PRINCIPAL
+                                    </span>
+                                    <h3 className="lead-story-title">
+                                        {articuloPrincipal.titulo}
+                                    </h3>
+                                    <p className="lead-story-excerpt">
+                                        {limpiarSnippet(articuloPrincipal.contenido, 260)}
+                                    </p>
+                                    <div className="lead-story-meta">
+                                        <span className="lead-story-author">Por {articuloPrincipal.autor}</span>
+                                        <span className="lead-story-divider">·</span>
+                                        <span className="lead-story-date">
+                                            {articuloPrincipal.fecha ? new Date(articuloPrincipal.fecha).toLocaleDateString(language === 'en' ? 'en-GB' : 'es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
+                                        </span>
+                                    </div>
+                                    <div className="lead-story-cta">
+                                        <span className="btn-read-lead">
+                                            {language === 'en' ? 'READ FULL DOSSIER' : 'LEER ARTÍCULO COMPLETO'} →
+                                        </span>
                                     </div>
                                 </div>
+                            </article>
+                        )}
+
+                        {/* ARTÍCULOS SECUNDARIOS (#2 A #8 - GRID EDITORIAL DE 3 COLUMNAS) */}
+                        {articulosSecundarios.length > 0 && (
+                            <div className="editorial-articles-grid">
+                                {articulosSecundarios.map((art) => (
+                                    <article 
+                                        key={`${art.seccion}-${art.id}`} 
+                                        className="editorial-card"
+                                        onClick={() => navigate(art.link)}
+                                    >
+                                        <div className="editorial-card-image-wrap">
+                                            {art.imagen ? (
+                                                <img 
+                                                    src={art.imagen} 
+                                                    alt={art.titulo} 
+                                                    loading="lazy" 
+                                                />
+                                            ) : (
+                                                <div className="editorial-card-placeholder">
+                                                    <span>{art.seccionLabel}</span>
+                                                </div>
+                                            )}
+                                            <span 
+                                                className="editorial-card-badge"
+                                                style={{ backgroundColor: art.seccionColor }}
+                                            >
+                                                {art.seccionLabel}
+                                            </span>
+                                        </div>
+
+                                        <div className="editorial-card-body">
+                                            <h4 className="editorial-card-title">
+                                                {art.titulo}
+                                            </h4>
+                                            <p className="editorial-card-excerpt">
+                                                {limpiarSnippet(art.contenido, 110)}
+                                            </p>
+                                            <div className="editorial-card-meta">
+                                                <span className="editorial-card-author">{art.autor}</span>
+                                                <span className="editorial-card-divider">·</span>
+                                                <span className="editorial-card-date">
+                                                    {art.fecha ? new Date(art.fecha).toLocaleDateString(language === 'en' ? 'en-GB' : 'es-ES', { day: 'numeric', month: 'short' }) : ''}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </article>
+                                ))}
                             </div>
-                        ))
-                    ) : (
-                        <p className="no-content-indicator">{language === 'en' ? 'Scanning for news alerts...' : 'Escaneando alertas de noticias...'}</p>
-                    )}
-                </div>
-            </div>
-            )}
+                        )}
+                    </>
+                )}
+            </section>
 
-            {/* SECCIÓN CASOS ABIERTOS (TRUE CRIME) */}
-            {(filtroTematico === 'todos' || filtroTematico === 'cronica_negra') && (
-            <div className="home-content-section">
-                <div className="section-title-wrap">
-                    <h2 className="section-title-neon">// {language === 'en' ? 'OPEN CASES (TRUE CRIME)' : 'CASOS ABIERTOS (TRUE CRIME)'}</h2>
-                    <Link to="/casos-abiertos" className="section-view-all">{language === 'en' ? 'VIEW ALL CASES ➔' : 'VER TODOS ➔'}</Link>
-                </div>
-                <div className="home-grid-cards">
-                    {recentCasos.length > 0 ? (
-                        recentCasos.map((caso) => {
-                            const tituloMostrar = language === 'en' && caso.titulo_en ? caso.titulo_en : caso.titulo;
-                            const contenidoMostrar = language === 'en' && caso.contenido_en ? caso.contenido_en : caso.contenido;
+            {/* SECCIÓN: NOTAS Y TRANSMISIONES RECIENTES DE LECTORES */}
+            {comentariosRecientes.length > 0 && (
+                <section className="editorial-transmissions-section">
+                    <div className="editorial-section-header">
+                        <h3 className="editorial-section-title">
+                            {language === 'en' ? 'READERS & AGENTS TRANSMISSIONS' : 'TRANSMISIONES Y COMENTARIOS DE LECTORES'}
+                        </h3>
+                    </div>
+
+                    <div className="editorial-comments-grid">
+                        {comentariosRecientes.map((c) => {
+                            const parts = (c.item_key || '').split('-');
+                            const tipo = parts[0];
+                            const id = parts[1];
+                            const srcParam = tipo === 'exp' ? 'expedientes' : tipo === 'caso' ? 'casos' : tipo === 'misterio' ? 'misterios' : 'noticias';
+                            const linkUrl = `/leer-historia/${id}?src=${srcParam}`;
+
                             return (
-                                <div key={caso.id} className="home-card caso-card-home" onClick={() => navigate(`/leer-historia/${caso.id}?src=casos`)}>
-                                    <div className="card-image-wrap">
-                                        {caso.imagen_url ? (
-                                            <img src={caso.imagen_url.startsWith('http') ? caso.imagen_url : `${API_BASE_URL}/imagenes/${caso.imagen_url}`} alt={tituloMostrar} />
-                                        ) : (
-                                            <div className="caso-image-placeholder-home">💀 NO EVIDENCE AVAILABLE</div>
-                                        )}
-                                        <span className="card-badge-unsolved">UNSOLVED</span>
+                                <div 
+                                    key={c.id} 
+                                    className="editorial-comment-card"
+                                    onClick={() => navigate(linkUrl)}
+                                >
+                                    <div className="comment-card-header">
+                                        <span className="comment-author">
+                                            {c.agente ? c.agente.toUpperCase() : 'LECTOR'}
+                                        </span>
+                                        <span className="comment-date">
+                                            {new Date(c.fecha).toLocaleDateString()}
+                                        </span>
                                     </div>
-                                    <div className="card-info-wrap">
-                                        <h3>{tituloMostrar?.toUpperCase()}</h3>
-                                        <p className="card-snippet" dangerouslySetInnerHTML={{ __html: contenidoMostrar ? contenidoMostrar.replace(/<[^>]+>/g, '').substring(0, 120) + '...' : '' }}></p>
-                                        <div className="card-footer-info">
-                                            <span>📍 {caso.latitud && caso.latitud !== 0 ? 'COORDENADAS FIJADAS' : 'ARCHIVO CENTRAL'}</span>
-                                            <span>📅 {caso.fecha ? new Date(caso.fecha).toLocaleDateString() : ''}</span>
-                                        </div>
+                                    <p className="comment-text">"{c.mensaje}"</p>
+                                    <div className="comment-target">
+                                        <span>En: </span>
+                                        <span className="comment-target-title">
+                                            {c.titulo_articulo || 'Ver expediente'}
+                                        </span>
                                     </div>
                                 </div>
                             );
-                        })
-                    ) : (
-                        <p className="no-content-indicator">{language === 'en' ? 'Scanning for unsolved cases...' : 'Escaneando misterios sin resolver...'}</p>
-                    )}
-                </div>
-            </div>
+                        })}
+                    </div>
+                </section>
             )}
 
-            {/* SECCIÓN MISTERIOS HISTÓRICOS */}
-            {(filtroTematico === 'todos' || filtroTematico === 'misterios') && (
-            <div className="home-content-section">
-                <div className="section-title-wrap">
-                    <h2 className="section-title-neon">// {language === 'en' ? 'HISTORICAL MYSTERIES' : 'MISTERIOS HISTÓRICOS'}</h2>
-                    <Link to="/misterios-historicos" className="section-view-all">{language === 'en' ? 'VIEW ALL ENIGMAS ➔' : 'VER TODOS ➔'}</Link>
-                </div>
-                <div className="home-grid-cards">
-                    {recentMisterios.length > 0 ? (
-                        recentMisterios.map((misterio) => {
-                            const tituloMostrar = language === 'en' && misterio.titulo_en ? misterio.titulo_en : misterio.titulo;
-                            const contenidoMostrar = language === 'en' && misterio.contenido_en ? misterio.contenido_en : misterio.contenido;
-                            return (
-                                <div key={misterio.id} className="home-card misterio-card-home" onClick={() => navigate(`/leer-historia/${misterio.id}?src=misterios`)}>
-                                    <div className="card-image-wrap">
-                                        {misterio.imagen_url ? (
-                                            <img src={misterio.imagen_url.startsWith('http') ? misterio.imagen_url : `${API_BASE_URL}/imagenes/${misterio.imagen_url}`} alt={tituloMostrar} />
-                                        ) : (
-                                            <div className="misterio-image-placeholder-home">👁️ MYSTERY</div>
-                                        )}
-                                        <span className="card-badge-unsolved">ENIGMA</span>
-                                    </div>
-                                    <div className="card-info-wrap">
-                                        <h3>{tituloMostrar?.toUpperCase()}</h3>
-                                        <p className="card-snippet">{contenidoMostrar ? contenidoMostrar.replace(/<[^>]+>/g, '').substring(0, 120) + '...' : ''}</p>
-                                        <div className="card-footer-info">
-                                            <span>📍 {misterio.latitud && misterio.latitud !== 0 ? 'COORDENADAS GPS' : 'ARCHIVO HISTÓRICO'}</span>
-                                            <span>📅 {misterio.fecha ? new Date(misterio.fecha).toLocaleDateString() : ''}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <p className="no-content-indicator">{language === 'en' ? 'Scanning for historical enigmas...' : 'Escaneando enigmas históricos...'}</p>
-                    )}
-                </div>
-            </div>
-            )}
+            {/* RADAR DE PRENSA EXTERNA (FEED DE ACTUALIDAD) */}
+            <section className="editorial-external-news-section">
+                <NoticiasExternas />
+            </section>
 
-            {/* SECCIÓN VÍDEOS CLASIFICADOS */}
-            {(filtroTematico === 'todos' || filtroTematico === 'ovnis') && (
-            <div className="home-content-section">
-                <div className="section-title-wrap">
-                    <h2 className="section-title-neon">// {language === 'en' ? 'CLASSIFIED VIDEOS' : 'VÍDEOS CLASIFICADOS'}</h2>
-                    <Link to="/videos" className="section-view-all">{language === 'en' ? 'VIEW ALL VIDEOS ➔' : 'VER TODOS ➔'}</Link>
+            {/* TARJETA EDITORIAL DEL FUNDADOR */}
+            <section className="editorial-author-block">
+                <div className="author-block-avatar">
+                    <img 
+                        src="/jose-moreno-investigador.jpg" 
+                        alt="José Moreno Jiménez" 
+                    />
                 </div>
-                <div className="home-grid-cards">
-                    {recentVideos.length > 0 ? (
-                        recentVideos.map((vid) => {
-                            const capturasList = vid.capturas ? vid.capturas.split(',').map(c => c.trim()).filter(c => c) : [];
-                            const esUrlImagen = (c) => {
-                                if (!c) return false;
-                                if (!c.startsWith('http')) return true;
-                                const isVideo = c.includes('youtube.com') || c.includes('youtu.be') || c.includes('.mp4') || c.includes('.webm') || c.includes('.mov');
-                                if (isVideo) return false;
-                                return c.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) || c.includes('/image/upload/');
-                            };
-                            const mejorCaptura = capturasList.find(esUrlImagen) || '';
-                            const bgUrl = mejorCaptura 
-                                ? (mejorCaptura.startsWith('http') ? mejorCaptura : `${API_BASE_URL}/imagenes/${mejorCaptura}`)
-                                : `${API_BASE_URL}/imagenes/video_default.png`;
-                            return (
-                                <div key={vid.id} className="home-card video-card-home" onClick={() => navigate(`/videos?id=${vid.id}`)}>
-                                    <div className="card-image-wrap video-thumb-wrap">
-                                        <img src={bgUrl} alt={vid.titulo} onError={(e) => { e.target.src = `https://placehold.co/400x250/000/00ff41?text=VIDEO`; }} />
-                                        <div className="play-button-overlay">▶</div>
-                                    </div>
-                                    <div className="card-info-wrap">
-                                        <span className="card-category">📼 {vid.usuario ? `AGENTE: ${vid.usuario.toUpperCase()}` : 'ALTO MANDO'}</span>
-                                        <h3>{vid.titulo?.toUpperCase()}</h3>
-                                        <p className="card-snippet">{vid.descripcion ? vid.descripcion.replace(/<[^>]+>/g, '').substring(0, 120) + '...' : 'Evidencia audiovisual desclasificada por la red de observadores.'}</p>
-                                        <div className="card-footer-info">
-                                            <span>📍 GRANADA - GLOBAL</span>
-                                            <span>📅 {vid.fecha ? new Date(vid.fecha).toLocaleDateString() : ''}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <p className="no-content-indicator">{language === 'en' ? 'Scanning for video records...' : 'Escaneando registros en vídeo...'}</p>
-                    )}
-                </div>
-            </div>
-            )}
-
-            {/* SECCIÓN RADAR VISUAL */}
-            <div className="radar-section">
-                <div className="radar-scanner technical">
-                    <div className="radar-line"></div>
-                    <div className="radar-circle c1"></div>
-                    <div className="radar-circle c2"></div>
-                    <div className="radar-circle c3"></div>
-                </div>
-                
-                <div className="intel-summary-technical">
-                    <div className="intel-item">
-                        <span className="intel-status-label">{t('systemStatusLabel')}</span>
-                        <span className="intel-status-value">{t('systemStatusValue')}</span>
-                    </div>
-                    <div className="intel-item">
-                        <span className="intel-status-label">{t('sectorLabel')}</span>
-                        <span className="intel-status-value">{t('sectorValue')}</span>
-                    </div>
-                    <div className="intel-item">
-                        <span className="intel-status-label">{t('accessLevelLabel')}</span>
-                        <span className="intel-status-value">{userAuth ? t('accessLevelAgent') : t('accessLevelVisitor')}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* TELETIPO DE INTELIGENCIA */}
-            <div className="intel-ticker">
-                <div className="ticker-label">{t('recentIntel')}</div>
-                <div className="ticker-wrapper">
-                    <div className="ticker-content">
-                        {t('tickerText')}
-                    </div>
-                </div>
-            </div>
-
-            {/* CALIBRACIÓN DE FRECUENCIA */}
-            <div className="frequency-calibration">
-                <span className="calib-label">{t('visualCalibration')}</span>
-                <div className="calib-dots">
-                    {coloresDisponibles.map(c => (
-                        <div 
-                            key={c.hex}
-                            onClick={() => setTema(c.hex)}
-                            className={`calib-dot ${c.hex === tema ? 'active' : ''}`}
-                            style={{ backgroundColor: c.hex }}
-                            title={c.label}
-                        ></div>
-                    ))}
-                </div>
-            </div>
-
-            {/* GAMIFICACIÓN DE RANGOS */}
-            <div className="gamification-banner" style={{ background: 'rgba(var(--rgb-principal), 0.08)', border: '1px solid rgba(var(--rgb-principal), 0.25)', padding: '18px 20px', marginBottom: '24px', textAlign: 'center', borderRadius: '8px' }}>
-                <h3 style={{ color: 'var(--color-principal)', margin: '0 0 10px 0', fontSize: '1.05rem', textTransform: 'uppercase', letterSpacing: '2px' }}>{t('rankSystemTitle')}</h3>
-                <p style={{ color: '#cbd5e1', fontSize: '0.88rem', margin: '0 0 12px 0' }}>
-                    {t('rankSystemDesc')}
-                </p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', fontSize: '0.8rem', color: '#ccc' }}>
-                    {t('rankLevels')}
-                </div>
-            </div>
-
-            {/* ACCIONES TÁCTICAS */}
-            <div className="tactical-actions-grid">
-                <Link to="/lugares" className="btn-tactical map">
-                    <span className="btn-icon">🗺️</span>
-                    <span className="btn-text">{t('accessWorldRadar')}</span>
-                </Link>
-                <Link to="/expedientes" className="btn-tactical report">
-                    <span className="btn-icon">📝</span>
-                    <span className="btn-text">{t('reportExperience')}</span>
-                </Link>
-                <Link to="/casos-abiertos" className="btn-tactical register">
-                    <span className="btn-icon">💀</span>
-                    <span className="btn-text">APORTAR CASO O CRÍMENES</span>
-                </Link>
-                <Link to="/videos" className="btn-tactical media">
-                    <span className="btn-icon">📷</span>
-                    <span className="btn-text">{t('contributeMedia')}</span>
-                </Link>
-            </div>
-
-            {/* TARJETA DESTACADA DEL FUNDADOR / INVESTIGADOR JEFE */}
-            <div className="home-fundador-card" style={{
-                background: 'rgba(16, 22, 30, 0.75)',
-                border: '1px solid rgba(var(--rgb-principal), 0.25)',
-                borderRadius: '8px',
-                padding: '20px',
-                marginBottom: '35px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '20px',
-                flexWrap: 'wrap',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
-            }}>
-                <img 
-                    src="/jose-moreno-investigador.jpg" 
-                    alt="José Moreno Jiménez" 
-                    style={{
-                        width: '80px',
-                        height: '80px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        border: '2px solid var(--color-principal)',
-                        boxShadow: '0 0 10px rgba(var(--rgb-principal), 0.3)'
-                    }} 
-                />
-                <div style={{ flex: '1', minWidth: '220px' }}>
-                    <h4 style={{ color: 'var(--color-principal)', margin: '0 0 5px 0', fontSize: '1rem', letterSpacing: '1px' }}>
-                        🕵️ {language === 'en' ? 'FOUNDER & CHIEF INVESTIGATOR' : 'FUNDADOR E INVESTIGADOR JEFE'}
-                    </h4>
-                    <p style={{ color: '#94a3b8', margin: '0 0 8px 0', fontSize: '0.85rem', lineHeight: '1.4' }}>
-                        <strong style={{ color: '#f1f5f9' }}>José Moreno Jiménez</strong> — {language === 'en' 
-                            ? 'Exploring UAPs, paranormal phenomena, and unexplained mysteries in Granada and worldwide.' 
-                            : 'Documentando fenómenos anómalos, avistamientos OVNI y misterios sin resolver en Granada y el resto del mundo.'}
+                <div className="author-block-info">
+                    <span className="author-block-role">
+                        {language === 'en' ? 'DIRECTOR & INVESTIGATIVE JOURNALIST' : 'DIRECTOR Y PERIODISTA DE INVESTIGACIÓN'}
+                    </span>
+                    <h4 className="author-block-name">José Moreno Jiménez</h4>
+                    <p className="author-block-bio">
+                        {language === 'en' 
+                            ? 'Specialist in ufology, historical anomalies, and unsolved criminal cases in southern Spain. Directing the independent documentary archive Expediente X Granaíno.' 
+                            : 'Especialista en ufología, anomalías históricas y casos sin resolver en el sur de España. Director del archivo documental independiente Expediente X Granaíno.'}
                     </p>
-                    <Link to="/sobre-nosotros" style={{ color: 'var(--color-principal)', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                        {language === 'en' ? 'READ FULL BIO & DOSSIER ➔' : 'VER BIOGRAFÍA Y DOSSIER COMPLETO ➔'}
+                    <Link to="/sobre-nosotros" className="author-block-link">
+                        {language === 'en' ? 'Read full author dossier →' : 'Conocer más sobre el proyecto y trayectoria →'}
                     </Link>
                 </div>
-            </div>
-
-            {/* RADAR DE INTELIGENCIA EXTERNA */}
-            <NoticiasExternas />
-
-            {/* BANNER PROMOCIONAL ARCHIPEG PRO */}
-            <div className="archipeg-promo-banner">
-                <div className="archipeg-promo-glow"></div>
-                <div className="archipeg-promo-content">
-                    <div className="archipeg-promo-icon">💻</div>
-                    <div className="archipeg-promo-text">
-                        <h3 className="archipeg-promo-title">ARCHIPEG PRO</h3>
-                        <p className="archipeg-promo-subtitle">
-                            {language === 'en' 
-                                ? 'Your Digital Bunker — Organize your photos & videos from your hard drive. 100% private, no cloud.' 
-                                : 'Tu Búnker Digital — Organiza tus fotos y vídeos desde tu disco duro. 100% privado, sin nube.'}
-                        </p>
-                    </div>
-                    <div className="archipeg-promo-actions">
-                        <Link to="/archipeg" className="archipeg-promo-btn primary">
-                            {language === 'en' ? 'DISCOVER' : 'DESCUBRIR'} ➔
-                        </Link>
-                        <a href="https://buy.stripe.com/5kQ28r4UU9jT9YndSl3Ru00" target="_blank" rel="noopener noreferrer" className="archipeg-promo-btn secondary">
-                            💳 {language === 'en' ? 'GET IT (5€)' : 'ADQUIRIR (5€)'}
-                        </a>
-                    </div>
-                </div>
-            </div>
+            </section>
         </div>
     );
 };

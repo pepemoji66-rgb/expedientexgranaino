@@ -908,3 +908,487 @@
         max-width: 180px;
     }
 }
+
+/* =========================================================
+   ESTILOS EDITORIALES: DIARIO MODERNO EXPEDIENTE X GRANAÍNO
+   ========================================================= */
+
+.indice-editorial-container {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem;
+    color: var(--text-primary, #1A1A1A);
+    font-family: var(--font-ui, 'Inter', -apple-system, sans-serif);
+}
+
+/* 1. BARRA DE EDICIÓN Y FECHA */
+.editorial-edition-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 2px solid #1A1A1A;
+    margin-bottom: 1.8rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #4A5568;
+    text-transform: uppercase;
+}
+
+.editorial-edition-tag {
+    color: #b91c1c;
+    letter-spacing: 1px;
+}
+
+/* 2. CABECERA DE SECCIÓN EDITORIAL */
+.editorial-section-header {
+    border-bottom: 1px solid #1A1A1A;
+    padding-bottom: 0.5rem;
+    margin: 2.5rem 0 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.editorial-section-title {
+    font-family: var(--font-titular, 'Playfair Display', Georgia, serif);
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #1A1A1A;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.editorial-section-subtitle {
+    font-size: 0.8rem;
+    color: #64748B;
+    font-weight: 500;
+    font-style: italic;
+}
+
+.editorial-loading,
+.editorial-empty {
+    padding: 3rem;
+    text-align: center;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    color: #64748B;
+    font-size: 0.9rem;
+}
+
+/* 3. ARTÍCULO PRINCIPAL (LEAD STORY #1) */
+.editorial-lead-story {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 2.2rem;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    padding: 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: var(--shadow-tarjeta, 0 2px 8px rgba(0,0,0,0.04));
+    transition: all 0.25s ease;
+    margin-bottom: 2rem;
+}
+
+.editorial-lead-story:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover, 0 8px 24px rgba(0,0,0,0.08));
+    border-color: #CBD5E1;
+}
+
+.lead-story-image-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/10;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #000;
+}
+
+.lead-story-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.editorial-lead-story:hover .lead-story-image-wrap img {
+    transform: scale(1.03);
+}
+
+.lead-story-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.lead-story-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.lead-story-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.lead-story-kicker {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #b91c1c;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+}
+
+.lead-story-title {
+    font-family: var(--font-titular, 'Playfair Display', Georgia, serif);
+    font-size: 1.85rem;
+    line-height: 1.25;
+    font-weight: 900;
+    color: #1A1A1A;
+    margin: 0 0 0.9rem 0;
+    transition: color 0.2s ease;
+}
+
+.editorial-lead-story:hover .lead-story-title {
+    color: #b91c1c;
+}
+
+.lead-story-excerpt {
+    font-family: var(--font-cuerpo, 'Merriweather', Georgia, serif);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #4A5568;
+    margin-bottom: 1.2rem;
+}
+
+.lead-story-meta {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-bottom: 1.2rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-weight: 500;
+}
+
+.lead-story-author {
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+.lead-story-cta .btn-read-lead {
+    display: inline-block;
+    color: #1A1A1A;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #1A1A1A;
+    padding-bottom: 2px;
+    transition: all 0.2s ease;
+}
+
+.editorial-lead-story:hover .lead-story-cta .btn-read-lead {
+    color: #b91c1c;
+    border-color: #b91c1c;
+}
+
+/* 4. GRID EDITORIAL DE ARTÍCULOS (#2 A #8) */
+.editorial-articles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.8rem;
+    margin-top: 1.5rem;
+}
+
+.editorial-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-tarjeta, 0 2px 8px rgba(0,0,0,0.04));
+    transition: all 0.25s ease;
+}
+
+.editorial-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover, 0 8px 24px rgba(0,0,0,0.08));
+    border-color: #CBD5E1;
+}
+
+.editorial-card-image-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    background: #000;
+}
+
+.editorial-card-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.editorial-card:hover .editorial-card-image-wrap img {
+    transform: scale(1.04);
+}
+
+.editorial-card-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.editorial-card-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #FFFFFF;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.editorial-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.editorial-card-title {
+    font-family: var(--font-titular, 'Playfair Display', Georgia, serif);
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.35;
+    color: #1A1A1A;
+    margin: 0 0 0.6rem 0;
+    transition: color 0.2s ease;
+}
+
+.editorial-card:hover .editorial-card-title {
+    color: #b91c1c;
+}
+
+.editorial-card-excerpt {
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: #4A5568;
+    margin: 0 0 1rem 0;
+    flex: 1;
+}
+
+.editorial-card-meta {
+    font-size: 0.75rem;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #F1F5F9;
+}
+
+.editorial-card-author {
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+/* 5. SECCIÓN DE COMENTARIOS / TRANSMISIONES */
+.editorial-transmissions-section {
+    margin-top: 3rem;
+}
+
+.editorial-comments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+}
+
+.editorial-comment-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-left: 3px solid #1e3a2b;
+    padding: 1.1rem;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.editorial-comment-card:hover {
+    box-shadow: var(--shadow-tarjeta, 0 2px 8px rgba(0,0,0,0.04));
+    transform: translateY(-2px);
+    border-left-color: #b91c1c;
+}
+
+.comment-card-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.comment-author {
+    font-weight: 800;
+    color: #1A1A1A;
+}
+
+.comment-date {
+    color: #718096;
+}
+
+.comment-text {
+    font-size: 0.85rem;
+    font-style: italic;
+    line-height: 1.45;
+    color: #334155;
+    margin: 0 0 0.6rem 0;
+}
+
+.comment-target {
+    font-size: 0.72rem;
+    color: #64748B;
+}
+
+.comment-target-title {
+    font-weight: 700;
+    color: #1e3a2b;
+    text-decoration: underline;
+}
+
+/* 6. RADAR DE PRENSA EXTERNA */
+.editorial-external-news-section {
+    margin-top: 3rem;
+}
+
+/* 7. TARJETA EDITORIAL DEL FUNDADOR */
+.editorial-author-block {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-top: 3px solid #1A1A1A;
+    padding: 1.8rem 2rem;
+    border-radius: 4px;
+    margin-top: 3.5rem;
+}
+
+.author-block-avatar img {
+    width: 95px;
+    height: 95px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #E2E8F0;
+}
+
+.author-block-info {
+    flex: 1;
+}
+
+.author-block-role {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #b91c1c;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.author-block-name {
+    font-family: var(--font-titular, 'Playfair Display', Georgia, serif);
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #1A1A1A;
+    margin: 0 0 0.5rem 0;
+}
+
+.author-block-bio {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #4A5568;
+    margin: 0 0 0.8rem 0;
+}
+
+.author-block-link {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1A1A1A;
+    text-decoration: none;
+    border-bottom: 1px solid #1A1A1A;
+    transition: color 0.15s ease;
+}
+
+.author-block-link:hover {
+    color: #b91c1c;
+    border-color: #b91c1c;
+}
+
+/* 8. RESPONSIVE */
+@media (max-width: 960px) {
+    .editorial-articles-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .editorial-lead-story {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+        padding: 1rem;
+    }
+
+    .lead-story-title {
+        font-size: 1.4rem;
+    }
+
+    .editorial-articles-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+
+    .editorial-author-block {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+}

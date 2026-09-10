@@ -222,13 +222,6 @@ const Hero = ({ userAuth }) => {
                                 <span className="agent-code">AGENTE_{userAuth.nombre?.split(' ')[0].toUpperCase()}</span>
                                 {userAuth.rango && (
                                     <span className="agent-rango-tag">
-                                        {userAuth.rango === 'Agente en Prácticas' ? '🔰 ' :
-                                         userAuth.rango === 'Cabo' ? '🎖️ ' :
-                                         userAuth.rango === 'Cabo 1º' ? '🎖️🎖️ ' :
-                                         userAuth.rango === 'Sargento' ? '⭐ ' :
-                                         userAuth.rango === 'Teniente' ? '⭐⭐ ' :
-                                         userAuth.rango === 'Capitán' ? '⭐⭐⭐ ' :
-                                         userAuth.rango === 'Comandante' ? '🦅 ' : '🛡️ '}
                                         {userAuth.rango.toUpperCase()}
                                     </span>
                                 )}
@@ -346,20 +339,20 @@ const Hero = ({ userAuth }) => {
             </div>
 
             {/* SECCIÓN APOYO KO-FI */}
-            <div style={{ maxWidth: '600px', margin: '30px auto 40px', padding: '22px 24px', background: 'rgba(45,90,67,0.08)', border: '1px solid rgba(45,90,67,0.25)', borderRadius: '8px', textAlign: 'center' }}>
-                <p style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#e8e8e8', fontFamily: 'monospace' }}>
-                    ☕ ¿Te gusta Expediente X Granaíno?
+            <div style={{ maxWidth: '600px', margin: '30px auto 40px', padding: '22px 24px', background: 'rgba(30,58,43,0.06)', border: '1px solid rgba(30,58,43,0.2)', borderRadius: '8px', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-primary, #1A1A1A)', fontFamily: 'var(--font-ui, Inter, sans-serif)' }}>
+                    Apoyo a la Investigación Independiente
                 </p>
-                <p style={{ margin: '0 0 16px 0', fontSize: '0.85rem', color: '#aaa', fontFamily: 'monospace', lineHeight: '1.6' }}>
-                    Si puedes y quieres, una pequeña propina ayuda a mantener el servidor en pie. ¡Gracias agente! 🛸
+                <p style={{ margin: '0 0 16px 0', fontSize: '0.88rem', color: 'var(--text-secondary, #4A5568)', lineHeight: '1.6' }}>
+                    Si deseas colaborar con el mantenimiento de los servidores y el trabajo de campo documental, puedes realizar una aportación voluntaria.
                 </p>
                 <a
                     href="https://ko-fi.com/expedientexgranaino"
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ display: 'inline-block', background: '#2D5A43', color: '#fff', padding: '10px 24px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem', letterSpacing: '0.5px', textDecoration: 'none' }}
+                    style={{ display: 'inline-block', background: 'var(--color-principal, #1e3a2b)', color: '#fff', padding: '10px 24px', borderRadius: '4px', fontWeight: '600', fontSize: '0.82rem', letterSpacing: '0.5px', textDecoration: 'none' }}
                 >
-                    ☕ INVÍTANOS A UN CAFÉ
+                    COLABORAR CON EL PROYECTO
                 </a>
             </div>
         </div>
