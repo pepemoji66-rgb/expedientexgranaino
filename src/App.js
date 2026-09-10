@@ -8,7 +8,6 @@ import 'leaflet/dist/leaflet.css';
 
 // Componentes del Búnker
 import Indice from './components/Indice';
-import Hero from './components/Hero';
 import SeccionUsuarios from './components/SeccionUsuarios';
 import Expedientes from './components/Expedientes';
 import PanelAdmin from './components/PanelAdmin';
@@ -80,7 +79,7 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [userAuth, setUserAuth] = useState(null);
   const [tema, setTema] = useState(() => {
-    return safeLocalStorage.getItem('bunker_tema') || '#2D5A43';
+    return safeLocalStorage.getItem('bunker_tema') || '#1e3a2b';
   });
   const [visitasTotales, setVisitasTotales] = useState(0);
   const [comentariosNuevos, setComentariosNuevos] = useState(0);
@@ -366,7 +365,6 @@ function App() {
             <Routes>
               <Route path="/" element={
                 <div className="home-layout">
-                  <Hero userAuth={userAuth} />
                   <Indice userAuth={userAuth} stats={stats} setTema={setTema} tema={tema} />
                 </div>
               } />

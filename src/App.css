@@ -218,8 +218,8 @@ body, html {
     border-radius: 8px;
 }
 
-.neon-text-green, .central-titulo, h1, h2, h3, h4 {
-  color: var(--color-principal) !important;
+.neon-text-green, .central-titulo {
+  color: var(--color-principal);
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(var(--rgb-principal), 0.5);
   font-family: 'Courier New', monospace;
   letter-spacing: 2px;

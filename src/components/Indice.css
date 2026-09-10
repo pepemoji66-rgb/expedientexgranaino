@@ -955,13 +955,14 @@
 }
 
 .editorial-section-title {
-    font-family: var(--font-titular, 'Playfair Display', Georgia, serif);
-    font-size: 1.4rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: #1A1A1A;
-    margin: 0;
-    text-transform: uppercase;
+    font-family: var(--font-titular, 'Playfair Display', Georgia, serif) !important;
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    color: #1A1A1A !important;
+    text-shadow: none !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
 }
 
 .editorial-section-subtitle {
@@ -1065,17 +1066,19 @@
 }
 
 .lead-story-title {
-    font-family: var(--font-titular, 'Playfair Display', Georgia, serif);
-    font-size: 1.85rem;
-    line-height: 1.25;
-    font-weight: 900;
-    color: #1A1A1A;
-    margin: 0 0 0.9rem 0;
+    font-family: var(--font-titular, 'Playfair Display', Georgia, serif) !important;
+    font-size: 1.85rem !important;
+    line-height: 1.25 !important;
+    font-weight: 900 !important;
+    color: #1A1A1A !important;
+    text-shadow: none !important;
+    letter-spacing: 0 !important;
+    margin: 0 0 0.9rem 0 !important;
     transition: color 0.2s ease;
 }
 
 .editorial-lead-story:hover .lead-story-title {
-    color: #b91c1c;
+    color: #b91c1c !important;
 }
 
 .lead-story-excerpt {
@@ -1196,17 +1199,19 @@
 }
 
 .editorial-card-title {
-    font-family: var(--font-titular, 'Playfair Display', Georgia, serif);
-    font-size: 1.15rem;
-    font-weight: 800;
-    line-height: 1.35;
-    color: #1A1A1A;
-    margin: 0 0 0.6rem 0;
+    font-family: var(--font-titular, 'Playfair Display', Georgia, serif) !important;
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    line-height: 1.35 !important;
+    color: #1A1A1A !important;
+    text-shadow: none !important;
+    letter-spacing: 0 !important;
+    margin: 0 0 0.6rem 0 !important;
     transition: color 0.2s ease;
 }
 
 .editorial-card:hover .editorial-card-title {
-    color: #b91c1c;
+    color: #b91c1c !important;
 }
 
 .editorial-card-excerpt {
@@ -1335,11 +1340,13 @@
 }
 
 .author-block-name {
-    font-family: var(--font-titular, 'Playfair Display', Georgia, serif);
-    font-size: 1.4rem;
-    font-weight: 900;
-    color: #1A1A1A;
-    margin: 0 0 0.5rem 0;
+    font-family: var(--font-titular, 'Playfair Display', Georgia, serif) !important;
+    font-size: 1.4rem !important;
+    font-weight: 900 !important;
+    color: #1A1A1A !important;
+    text-shadow: none !important;
+    margin: 0 0 0.5rem 0 !important;
+    letter-spacing: 0 !important;
 }
 
 .author-block-bio {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import NoticiasExternas from './NoticiasExternas';
 import FiltrosTematicos from './FiltrosTematicos';
 import { useLanguage } from '../context/LanguageContext';
 import { API_BASE_URL } from '../config';
@@ -166,6 +165,9 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
 
     return (
         <div className="indice-editorial-container">
+            {/* BARRA DE FILTROS TEMÁTICOS EDITORIAL (ARRIBA DEL TODO) */}
+            <FiltrosTematicos filtroActivo={filtroTematico} onFiltroChange={setFiltroTematico} />
+
             {/* BARRA DE FECHA Y EDICIÓN */}
             <div className="editorial-edition-bar">
                 <span className="editorial-edition-date">
@@ -180,9 +182,6 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                     {language === 'en' ? 'EDITION ARCHIVE · UNEXPLAINED DOSSIERS' : 'EDICIÓN DIGITAL · ARCHIVO DEL MISTERIO'}
                 </span>
             </div>
-
-            {/* BARRA DE FILTROS TEMÁTICOS EDITORIAL */}
-            <FiltrosTematicos filtroActivo={filtroTematico} onFiltroChange={setFiltroTematico} />
 
             {/* SECCIÓN PRINCIPAL DE PORTADA (8 ARTÍCULOS) */}
             <section className="editorial-frontpage">
@@ -354,11 +353,6 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                 </section>
             )}
 
-            {/* RADAR DE PRENSA EXTERNA (FEED DE ACTUALIDAD) */}
-            <section className="editorial-external-news-section">
-                <NoticiasExternas />
-            </section>
-
             {/* TARJETA EDITORIAL DEL FUNDADOR */}
             <section className="editorial-author-block">
                 <div className="author-block-avatar">
@@ -369,13 +363,13 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                 </div>
                 <div className="author-block-info">
                     <span className="author-block-role">
-                        {language === 'en' ? 'DIRECTOR & INVESTIGATIVE JOURNALIST' : 'DIRECTOR Y PERIODISTA DE INVESTIGACIÓN'}
+                        {language === 'en' ? 'CREATOR & WEB DEVELOPER' : 'CREADOR Y DESARROLLADOR DE LA PLATAFORMA'}
                     </span>
                     <h4 className="author-block-name">José Moreno Jiménez</h4>
                     <p className="author-block-bio">
                         {language === 'en' 
                             ? 'Specialist in ufology, historical anomalies, and unsolved criminal cases in southern Spain. Directing the independent documentary archive Expediente X Granaíno.' 
-                            : 'Especialista en ufología, anomalías históricas y casos sin resolver en el sur de España. Director del archivo documental independiente Expediente X Granaíno.'}
+                            : 'Especialista en ufología, anomalías históricas y casos sin resolver en el sur de España. Creador y gestor del archivo documental independiente Expediente X Granaíno.'}
                     </p>
                     <Link to="/sobre-nosotros" className="author-block-link">
                         {language === 'en' ? 'Read full author dossier →' : 'Conocer más sobre el proyecto y trayectoria →'}
