@@ -58,9 +58,9 @@ const Hero = ({ userAuth }) => {
                     todasNovedades = todasNovedades.concat(dataMist.map(x => ({ ...x, type: 'misterio', timestamp: new Date(x.fecha).getTime() })));
                 }
 
-                // Ordenar por fecha y coger los 2 más recientes
+                // Ordenar por fecha y coger los 3 más recientes
                 todasNovedades.sort((a, b) => b.timestamp - a.timestamp);
-                setNovedadesGlobales(todasNovedades.slice(0, 2));
+                setNovedadesGlobales(todasNovedades.slice(0, 3));
 
             } catch (err) {
                 console.error("Error al captar últimas actualizaciones para Hero:", err);
@@ -84,18 +84,6 @@ const Hero = ({ userAuth }) => {
                 highlight: language === 'en' ? "SPIN THE WHEEL" : "¡GIRA LA RULETA Y DESCUBRE TU DESTINO!",
                 btnText: language === 'en' ? "SPIN ROULETTE" : "GIRAR RULETA",
                 btnLink: "/la-ruleta"
-            },
-            {
-                id: 'biblioteca-bunker',
-                image: imgBiblioteca,
-                subtitle: language === 'en' ? "RECOMMENDED READING" : "LECTURAS RECOMENDADAS",
-                title: "BIBLIOTECA DEL BÚNKER",
-                tagline: language === 'en' ? "EXPAND YOUR KNOWLEDGE" : "AMPLÍA TUS CONOCIMIENTOS",
-                infoTitle: language === 'en' ? "ESOTERIC ARCHIVE" : "ARCHIVO ESOTÉRICO Y UFOLÓGICO",
-                infoText: language === 'en' ? "Discover our curated collection of books about UFOs, paranormal phenomena, and historical mysteries." : "Descubre nuestra colección de libros imprescindibles sobre OVNIs, fenómenos paranormales y misterios históricos.",
-                highlight: language === 'en' ? "SUPPORT THE PROJECT" : "APOYA AL PROYECTO",
-                btnText: language === 'en' ? "ENTER LIBRARY" : "ENTRAR A LA BIBLIOTECA",
-                btnLink: "/biblioteca"
             }
         ];
     };
@@ -114,10 +102,10 @@ const Hero = ({ userAuth }) => {
                     title: (item.titulo || 'NUEVO EXPEDIENTE').toUpperCase(),
                     tagline: "EXPEDIENTE DESCLASIFICADO",
                     infoTitle: "ARCHIVO RECIENTE",
-                    infoText: `Nuevas evidencias aportadas al Búnker.`,
+                    infoText: item.cuerpo ? item.cuerpo.replace(/<[^>]+>/g, '').substring(0, 100) + '...' : `Nuevas evidencias aportadas al Búnker.`,
                     highlight: "NUEVA EVIDENCIA DISPONIBLE",
                     btnText: t('heroExpBtn') || 'VER EXPEDIENTE',
-                    btnLink: "/expedientes"
+                    btnLink: `/leer-historia/${item.id}`
                 });
             } else if (item.type === 'noticia') {
                 alertasRecientes.push({
@@ -130,7 +118,7 @@ const Hero = ({ userAuth }) => {
                     infoText: item.cuerpo ? item.cuerpo.replace(/<[^>]+>/g, '').substring(0, 100) + '...' : "Nueva información desclasificada.",
                     highlight: "INFORMACIÓN DE ALTO NIVEL",
                     btnText: "LEER NOTICIA",
-                    btnLink: "/noticias"
+                    btnLink: `/leer-historia/${item.id}`
                 });
             } else if (item.type === 'video') {
                 // El campo capturas puede mezclar: URL de youtube, archivo local y URL de imagen real
@@ -178,7 +166,7 @@ const Hero = ({ userAuth }) => {
                     infoText: language === 'en' ? "A new true crime dossier has been opened." : "Se ha abierto un nuevo dossier de un crimen o misterio sin resolver.",
                     highlight: language === 'en' ? "CLASSIFIED FILE" : "ARCHIVO CLASIFICADO",
                     btnText: language === 'en' ? "ENTER DOSSIER" : "ENTRAR AL DOSSIER",
-                    btnLink: "/casos-abiertos"
+                    btnLink: `/leer-historia/${item.id}`
                 });
             } else if (item.type === 'misterio') {
                 alertasRecientes.push({
@@ -191,12 +179,12 @@ const Hero = ({ userAuth }) => {
                     infoText: item.contenido ? item.contenido.replace(/<[^>]+>/g, '').substring(0, 100) + '...' : (language === 'en' ? "New historical enigma cataloged." : "Nuevo enigma histórico catalogado."),
                     highlight: language === 'en' ? "ANCIENT SECRETS" : "SECRETOS DEL PASADO",
                     btnText: language === 'en' ? "EXPLORE ENIGMAS" : "EXPLORAR ENIGMAS",
-                    btnLink: "/misterios-historicos"
+                    btnLink: `/leer-historia/${item.id}`
                 });
             }
         });
 
-        // Prepend a los slides originales
+        // 3 slides dinámicos + Ruleta al final
         setSlides([...alertasRecientes, ...getSlides()]);
         
     }, [novedadesGlobales, language]);

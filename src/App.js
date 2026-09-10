@@ -6,6 +6,9 @@ import axios from 'axios';
 // Estilos del Mapa
 import 'leaflet/dist/leaflet.css';
 
+// TEMA EXPEDIENTE CLÁSICO — pergamino editorial
+import './styles/expediente-clasico.css';
+
 // Componentes del Búnker
 import Indice from './components/Indice';
 import Hero from './components/Hero';

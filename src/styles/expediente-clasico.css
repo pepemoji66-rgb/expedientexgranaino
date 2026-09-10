@@ -1,0 +1,105 @@
+/* ================================================================
+   TEMA EXPEDIENTE CLASICO - Estilo Periodico / Pergamino Editorial
+   ================================================================ */
+
+body, #root, .App {
+    background-color: #F5F0E8 !important;
+}
+
+/* === INICIO (Indice.css) === */
+.indice-container { color: #1F2421; }
+.monitoring-header { border-bottom-color: #d8d0c4; color: #888; }
+.intel-ticker { background: #EBE6DB; border-top-color: #d8d0c4; border-bottom-color: #d8d0c4; }
+.ticker-label { background: #EBE6DB; color: #999; border-right-color: #d8d0c4; }
+.ticker-content { color: #999; }
+.radar-section { background: rgba(45,90,67,0.04); border-color: #d8d0c4; }
+.intel-status-value { color: #1F2421; }
+.intel-item { border-bottom-color: #d8d0c4; }
+
+.gate-card { background: #FFFFFF; border-color: #d8d0c4; box-shadow: 0 2px 12px rgba(45,90,67,0.07); }
+.gate-card::before { background: radial-gradient(circle at 10% 20%, rgba(45,90,67,0.06) 0%, transparent 60%); }
+.gate-card:hover { border-color: #2D5A43; box-shadow: 0 8px 24px rgba(45,90,67,0.15); }
+.gate-content h3 { color: #1F2421 !important; }
+.gate-card:hover .gate-content h3 { color: #2D5A43 !important; text-shadow: none !important; }
+.gate-content p { color: #5a5a5a; }
+.gate-action-btn { color: #2D5A43; }
+
+.home-card { background: #FFFFFF; border-color: #d8d0c4; box-shadow: 0 2px 12px rgba(45,90,67,0.07); }
+.home-card:hover { border-color: #2D5A43; box-shadow: 0 6px 24px rgba(45,90,67,0.15); background: #FFFFFF; }
+.card-image-placeholder-home { background: #EBE6DB; color: #999; }
+.caso-image-placeholder-home { background: #F5EAEA; color: #aa6666; }
+.card-image-wrap { background: #EBE6DB; }
+.card-info-wrap h3 { color: #1F2421 !important; }
+.home-card:hover h3 { color: #2D5A43 !important; text-shadow: none !important; }
+.card-snippet { color: #5a5a5a; }
+.card-footer-info { border-top-color: #d8d0c4; color: #999; }
+
+.home-sections-divider { color: #999; border-bottom-color: #d8d0c4; }
+.section-title-neon { color: #1F2421 !important; text-shadow: none !important; }
+.section-title-wrap { border-bottom-color: #d8d0c4; }
+.section-view-all { color: #888; }
+.section-view-all:hover { color: #2D5A43; text-shadow: none; }
+
+.btn-tactical { background: #FFFFFF; border-color: #d8d0c4; }
+.btn-tactical:hover { border-color: #2D5A43; background: rgba(45,90,67,0.03); box-shadow: none; }
+.btn-tactical .btn-text { color: #1F2421; }
+
+.protocol-link { color: #5a5a5a; border-color: #d8d0c4; background: transparent; }
+.protocol-link:hover { color: #fff; background: #2D5A43; border-color: #2D5A43; box-shadow: none; }
+.cases-disclaimer-box { background: rgba(45,90,67,0.05); }
+.disclaimer-body p { color: #5a5a5a; }
+.no-content-indicator { color: #999; border-color: #d8d0c4; }
+.dossier-content-tech { background: rgba(45,90,67,0.05); border-color: rgba(45,90,67,0.2); }
+.dossier-content-tech h3 { color: #1F2421; }
+.dossier-content-tech p { color: #5a5a5a; }
+
+/* === EXPEDIENTES === */
+.expedientes-page { color: #1F2421; }
+.card-expediente-mobile { background: #FFFFFF !important; border-color: rgba(45,90,67,0.4) !important; box-shadow: 0 2px 12px rgba(45,90,67,0.08) !important; }
+.card-expediente-mobile:hover { box-shadow: 0 8px 24px rgba(45,90,67,0.2) !important; border-color: #2D5A43 !important; }
+.card-title-mobile { color: #1F2421 !important; text-shadow: none !important; }
+.card-footer-mobile { border-top-color: #d8d0c4; }
+.card-footer-mobile small { color: #888; }
+
+.buscador-wrapper { background: #FFFFFF !important; border-color: rgba(45,90,67,0.3) !important; box-shadow: 0 2px 8px rgba(45,90,67,0.05) !important; }
+.buscador-wrapper:focus-within { border-color: #2D5A43 !important; box-shadow: 0 4px 16px rgba(45,90,67,0.15) !important; }
+.input-buscador-neon { color: #1F2421 !important; }
+.input-buscador-neon::placeholder { color: #aaa !important; }
+
+.pill-filtro { background: #FFFFFF !important; border-color: rgba(45,90,67,0.3) !important; color: #5a5a5a !important; }
+.pill-filtro:hover { border-color: #2D5A43 !important; color: #2D5A43 !important; box-shadow: 0 2px 8px rgba(45,90,67,0.12) !important; }
+.pill-filtro.active { background: #2D5A43 !important; border-color: #2D5A43 !important; color: #fff !important; box-shadow: 0 4px 12px rgba(45,90,67,0.3) !important; }
+.pill-filtro.active .pill-count { background: rgba(255,255,255,0.2) !important; color: #fff !important; }
+.pill-count { background: rgba(45,90,67,0.1) !important; color: #2D5A43 !important; }
+
+.tabla-container-pro { background: #FFFFFF !important; border-color: #2D5A43 !important; box-shadow: 0 2px 12px rgba(45,90,67,0.1) !important; }
+.tabla-pro td { color: #1F2421 !important; border-bottom-color: #e8e3d8 !important; text-shadow: none !important; }
+.tabla-pro th { color: #2D5A43 !important; border-bottom-color: #2D5A43 !important; }
+
+.btn-main { background: rgba(45,90,67,0.05) !important; border-color: #2D5A43 !important; color: #2D5A43 !important; }
+.btn-main:hover, .btn-main.active { background: #2D5A43 !important; color: #fff !important; box-shadow: 0 4px 12px rgba(45,90,67,0.3) !important; }
+
+.modal-content { background: #FFFFFF !important; border-color: #2D5A43 !important; }
+.texto-relato-modal { color: #1F2421 !important; }
+
+/* === TRUE CRIME === */
+.casos-container { background: #F5F0E8 !important; }
+.casos-subtitulo { color: #666 !important; }
+.caso-card { background: #FFFFFF !important; border-color: rgba(180,30,30,0.2) !important; box-shadow: 0 2px 12px rgba(180,30,30,0.07) !important; }
+.caso-card:hover { border-color: rgba(180,30,30,0.5) !important; box-shadow: 0 8px 24px rgba(180,30,30,0.15) !important; }
+
+/* === NOTICIAS y MISTERIOS === */
+.noticias-container, .noticias-page, .misterios-container, .misterios-page, .misterios-historicos-page {
+    background: #F5F0E8 !important;
+    color: #1F2421 !important;
+}
+.noticia-card, .misterio-card, .card-noticia, .card-misterio {
+    background: #FFFFFF !important;
+    border-color: #d8d0c4 !important;
+    box-shadow: 0 2px 12px rgba(45,90,67,0.07) !important;
+    color: #1F2421 !important;
+}
+.noticia-card:hover, .misterio-card:hover, .card-noticia:hover, .card-misterio:hover {
+    border-color: #2D5A43 !important;
+    box-shadow: 0 8px 24px rgba(45,90,67,0.15) !important;
+}
