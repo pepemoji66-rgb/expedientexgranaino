@@ -6,6 +6,7 @@ import axios from 'axios';
 import Forms from './Forms';
 import { useLanguage } from '../context/LanguageContext';
 import AdSlot from './AdSlot';
+import Paginacion from './Paginacion';
 import './videos.css';
 import API_BASE_URL, { ADMIN_EMAIL } from '../config';
 
@@ -35,10 +36,9 @@ const Videos = ({ userAuth }) => {
     const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
     const getYoutubeId = (url) => {
-        if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
+        if (!url || typeof url !== 'string') return null;
+        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/|v\/))([\w-]{11})/i);
+        return match ? match[1] : null;
     };
 
     useEffect(() => {
@@ -239,22 +239,24 @@ const Videos = ({ userAuth }) => {
         }}>
             <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
             <h1 style={{
-                textAlign: 'center', color: '#fff', 
-                fontFamily: 'Inter, sans-serif', textTransform: 'uppercase',
-                letterSpacing: '8px', fontWeight: '900', margin: '40px 0'
+                textAlign: 'center', color: '#9c4221', 
+                fontFamily: "'Merriweather', Georgia, serif", textTransform: 'uppercase',
+                letterSpacing: '3px', fontWeight: '800', margin: '40px 0 25px',
+                fontSize: '2.2rem'
             }}>
-                VÍDEOS
+                VÍDEOS Y EVIDENCIAS
             </h1>
 
             <AdSlot id="videos-top" />
 
             {userAuth && (
-                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                <div style={{ textAlign: 'center', marginBottom: '35px' }}>
                     <a href="#formulario-subida" style={{
-                        textDecoration: 'none', fontSize: '0.75rem', color: 'var(--color-principal)',
-                        border: '1px solid var(--color-principal)', padding: '10px 20px', borderRadius: '5px',
-                        background: 'rgba(var(--rgb-principal), 0.05)', fontFamily: 'monospace',
-                        letterSpacing: '2px'
+                        textDecoration: 'none', fontSize: '0.8rem', color: '#9c4221',
+                        border: '1px solid #fed7aa', padding: '12px 24px', borderRadius: '6px',
+                        background: '#FFF7ED', fontFamily: 'monospace',
+                        letterSpacing: '1px', fontWeight: 'bold', display: 'inline-block',
+                        boxShadow: '0 2px 8px rgba(156,66,33,0.08)'
                     }}>
                         ⬇️ APORTAR NUEVO MATERIAL
                     </a>
@@ -263,7 +265,7 @@ const Videos = ({ userAuth }) => {
 
             {/* SECCIÓN DE EVIDENCIAS ORIGINALES (ZONA ESPECIAL) */}
             <div className="evidencias-originales-section" style={{ marginBottom: '60px' }}>
-                <div className="titulo-seccion-pro" style={{ fontSize: '1rem', marginBottom: '30px', color: '#fff', borderLeft: '3px solid #fff', paddingLeft: '15px' }}>
+                <div className="titulo-seccion-pro" style={{ fontSize: '1.05rem', marginBottom: '30px', color: '#9c4221', borderLeft: '3px solid #9c4221', paddingLeft: '15px', textAlign: 'left', fontWeight: 'bold' }}>
                     EVIDENCIAS DE ALTA PRIORIDAD
                 </div>
                 
@@ -322,8 +324,8 @@ const Videos = ({ userAuth }) => {
             </div>
 
             {/* RESTO DEL ARCHIVO (RADAR PÚBLICO) */}
-            <div className="titulo-seccion-pro" style={{ fontSize: '1.2rem', marginBottom: '40px' }}>
-                📡 REGISTROS DESCLASIFICADOS DEL RADAR
+            <div className="titulo-seccion-pro" style={{ fontSize: '1.2rem', marginBottom: '40px', color: '#9c4221', fontWeight: 'bold' }}>
+                REGISTROS Y VÍDEOS DESCLASIFICADOS
             </div>
 
             <div className="grid-videos-pro-premium">
@@ -477,29 +479,12 @@ const Videos = ({ userAuth }) => {
                 )}
             </div>
 
-            {totalPaginas > 1 && (
-                <div className="paginacion-radar" style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '40px', marginBottom: '20px' }}>
-                    <button 
-                        onClick={() => { setPaginaActual(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                        disabled={paginaActual === 1}
-                        className="btn-mando-pro btn-secondary-pro"
-                        style={{ opacity: paginaActual === 1 ? 0.5 : 1, cursor: paginaActual === 1 ? 'not-allowed' : 'pointer' }}
-                    >
-                        ANTERIOR
-                    </button>
-                    <span style={{ color: 'var(--color-principal)', alignSelf: 'center', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                        PÁG {paginaActual} / {totalPaginas}
-                    </span>
-                    <button 
-                        onClick={() => { setPaginaActual(p => Math.min(totalPaginas, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                        disabled={paginaActual === totalPaginas}
-                        className="btn-mando-pro btn-secondary-pro"
-                        style={{ opacity: paginaActual === totalPaginas ? 0.5 : 1, cursor: paginaActual === totalPaginas ? 'not-allowed' : 'pointer' }}
-                    >
-                        SIGUIENTE
-                    </button>
-                </div>
-            )}
+            <Paginacion 
+                paginaActual={paginaActual} 
+                totalPaginas={totalPaginas} 
+                onChange={setPaginaActual} 
+                storageKey="page_videos" 
+            />
 
             {/* FORMULARIO DE CARGA */}
             <div id="formulario-subida" style={{

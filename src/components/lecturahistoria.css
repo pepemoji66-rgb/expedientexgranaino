@@ -3,29 +3,35 @@
   margin: 0 auto;
   text-align: left;
   padding: 40px !important;
-  background: rgba(0, 0, 0, 0.8) !important;
+  background: #FFFFFF !important;
+  color: #1E293B !important;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .lectura-titulo {
-  color: var(--color-principal);
+  color: #9c4221 !important;
+  font-family: 'Merriweather', Georgia, serif;
   text-transform: uppercase;
-  border-bottom: 2px solid var(--color-principal);
+  border-bottom: 2px solid #fed7aa !important;
   padding-bottom: 10px;
 }
 
 .lectura-autor {
-  color: #888;
+  color: #64748B;
   margin-top: 10px;
 }
 
 .lectura-autor span {
-  color: gold;
+  color: #9c4221;
+  font-weight: bold;
 }
 
 .lectura-contenido {
-  color: white;
-  line-height: 1.8;
-  font-size: 1.2rem;
+  color: #1E293B !important;
+  line-height: 1.85;
+  font-size: 1.15rem;
   margin-top: 30px;
   white-space: pre-wrap;
 }

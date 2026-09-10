@@ -845,49 +845,48 @@ const LecturaHistoria = ({ userAuth }) => {
     );
 
     return (
-        <div className="admin-dashboard fade-in lectura-page-wrapper">
-            <div className="glass-card full-width lectura-card-centered" style={{ textAlign: 'left', marginTop: '30px', maxWidth: '820px', margin: '30px auto 40px', background: 'rgba(18, 21, 24, 0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '30px 24px', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
+        <div className="admin-dashboard fade-in lectura-page-wrapper" style={{ background: '#F8F9FA', minHeight: '100vh', padding: '20px 10px' }}>
+            <div className="glass-card full-width lectura-card-centered" style={{ textAlign: 'left', marginTop: '20px', maxWidth: '840px', margin: '20px auto 40px', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '35px 30px', boxShadow: '0 4px 25px rgba(0,0,0,0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <button
                             onClick={() => navigate(-1)}
                             className="btn-nav-tactico"
-                            style={{ background: '#2D5A43', color: '#fff', padding: '7px 14px', cursor: 'pointer', border: '1px solid #3a7a5a', borderRadius: '4px', fontWeight: '600', fontSize: '0.78rem', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: '0.2s ease' }}
+                            style={{ background: '#FFF7ED', color: '#9c4221', padding: '8px 16px', cursor: 'pointer', border: '1px solid #fed7aa', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.78rem', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: '0.2s ease' }}
                         >
                             ⬅ {t('readBack')}
                         </button>
                         <button
                             onClick={() => navigate('/')}
                             className="btn-nav-tactico"
-                            style={{ background: '#2D5A43', color: '#fff', padding: '7px 14px', cursor: 'pointer', border: '1px solid #3a7a5a', borderRadius: '4px', fontWeight: '600', fontSize: '0.78rem', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: '0.2s ease' }}
+                            style={{ background: '#FFF7ED', color: '#9c4221', padding: '8px 16px', cursor: 'pointer', border: '1px solid #fed7aa', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.78rem', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: '0.2s ease' }}
                         >
-                            🏠 {language === 'en' ? 'BUNKER HOME' : 'VOLVER A INICIO'}
+                            🏠 {language === 'en' ? 'HOME' : 'VOLVER A INICIO'}
                         </button>
                     </div>
                 </div>
 
-
-                <h2 className="admin-title" style={{ textAlign: 'left', color: 'var(--color-principal)', borderBottom: '1px solid rgba(0,255,65,0.3)', paddingBottom: '15px' }}>
+                <h1 style={{ textAlign: 'left', color: '#9c4221', borderBottom: '2px solid #9c4221', paddingBottom: '15px', fontFamily: "'Merriweather', Georgia, serif", fontSize: '1.85rem', fontWeight: '800', letterSpacing: '-0.5px', margin: '15px 0' }}>
                     {historia.titulo ? historia.titulo.toUpperCase() : t('readNoTitle')}
-                </h2>
+                </h1>
 
-                <div className="meta-lectura" style={{ color: '#aaa', fontFamily: 'Courier New', marginBottom: '25px', fontSize: '0.9rem' }}>
-                    <p>ID_SERIAL: <span style={{ color: 'var(--color-principal)' }}>#{historia.id}</span></p>
-                    <p>CLASIFICACIÓN: <span style={{ color: esRelatoAdmin ? 'var(--color-principal)' : esCaso ? '#ff3333' : esMisterio ? '#a855f7' : esNoticia ? '#f59e0b' : '#ff9900' }}>
-                        {esRelatoAdmin ? t('readAdminStory') : esCaso ? '🔴 CASO REAL / TRUE CRIME' : esMisterio ? '👽 MISTERIO HISTÓRICO' : esNoticia ? '📰 NOTICIA' : t('readAgentRegistry')}
+                <div className="meta-lectura" style={{ color: '#64748B', fontFamily: 'monospace', marginBottom: '25px', fontSize: '0.85rem', lineHeight: '1.8' }}>
+                    <p style={{ margin: '4px 0' }}>EXPEDIENTE: <span style={{ color: '#9c4221', fontWeight: 'bold' }}>#{historia.id}</span></p>
+                    <p style={{ margin: '4px 0' }}>SECCIÓN: <span style={{ color: '#9c4221', fontWeight: 'bold' }}>
+                        {esRelatoAdmin ? t('readAdminStory') : esCaso ? 'CASO REAL / TRUE CRIME' : esMisterio ? 'MISTERIO HISTÓRICO' : esNoticia ? 'NOTICIA' : t('readAgentRegistry')}
                     </span></p>
-                    <p>ORIGEN: <span style={{ color: '#fff' }}>
+                    <p style={{ margin: '4px 0' }}>REDACCIÓN / ARCHIVO: <span style={{ color: '#1E293B', fontWeight: 'bold' }}>
                         {(historia.usuario_nombre || historia.agente || t('readSystemCentral')).toUpperCase()}
                     </span></p>
                     {comentarios.length > 0 && (
-                        <p style={{ marginTop: '10px' }}>
+                        <p style={{ marginTop: '8px' }}>
                             <span 
                                 onClick={() => {
                                     const el = document.querySelector('.comentarios-container');
                                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                                 }} 
                                 style={{ 
-                                    color: '#00d4ff', 
+                                    color: '#9c4221', 
                                     cursor: 'pointer', 
                                     textDecoration: 'underline',
                                     fontWeight: 'bold',
@@ -896,7 +895,7 @@ const LecturaHistoria = ({ userAuth }) => {
                                     gap: '6px'
                                 }}
                             >
-                                💬 {language === 'en' ? 'TRANSMISSIONS RECEIVED:' : 'TRANSMISIONES RECIBIDAS:'} {comentarios.length} {comentarios.length === 1 ? (language === 'en' ? 'Comment' : 'Comentario') : (language === 'en' ? 'Comments' : 'Comentarios')} ({language === 'en' ? 'Click to read' : 'Pulsar para leer'})
+                                💬 {language === 'en' ? 'ARCHIVED COMMENTS:' : 'COMUNICACIONES REGISTRADAS:'} {comentarios.length}
                             </span>
                         </p>
                     )}
@@ -984,7 +983,7 @@ const LecturaHistoria = ({ userAuth }) => {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '10px',
-                                background: '#2D5A43',
+                                background: '#9c4221',
                                 color: '#fff',
                                 fontWeight: '700',
                                 fontFamily: "'Merriweather', Georgia, serif",
@@ -993,12 +992,12 @@ const LecturaHistoria = ({ userAuth }) => {
                                 padding: '12px 28px',
                                 borderRadius: '4px',
                                 textDecoration: 'none',
-                                border: '1px solid #3a7a5a',
+                                border: '1px solid #7a3319',
                                 transition: 'all 0.2s ease',
                                 textTransform: 'uppercase'
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.background='#3a7a5a'; e.currentTarget.style.transform='scale(1.02)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background='#2D5A43'; e.currentTarget.style.transform='scale(1)'; }}
+                            onMouseEnter={e => { e.currentTarget.style.background='#7a3319'; e.currentTarget.style.transform='scale(1.02)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background='#9c4221'; e.currentTarget.style.transform='scale(1)'; }}
                         >
                             📚 <span>{language === 'en' ? 'RECOMMENDED BOOK — VIEW DETAILS' : 'LIBRO RECOMENDADO — VER DETALLES'}</span>
                         </a>
@@ -1006,22 +1005,20 @@ const LecturaHistoria = ({ userAuth }) => {
                 )}
 
                 <div className="cuerpo-historia" style={{
-                    color: '#1F2421',
-                    lineHeight: '1.75',
-                    fontSize: '1.125rem',
+                    color: '#1E293B',
+                    lineHeight: '1.85',
+                    fontSize: '1.15rem',
                     whiteSpace: 'pre-wrap',
                     fontFamily: "'Merriweather', Georgia, serif",
-                    background: '#F5F5F0',
-                    padding: '40px 32px',
-                    borderRadius: '6px',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
-                    maxWidth: '760px',
+                    background: '#FFFFFF',
+                    padding: '20px 0',
+                    maxWidth: '100%',
                     margin: '0 auto'
                 }}>
 
 
                     {/* BOTÓN ROBOCOP (TTS) */}
-                    <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                    <div style={{ marginBottom: '25px', textAlign: 'center' }}>
                         <button
                             onClick={() => {
                                 if (!window.speechSynthesis) {
@@ -1057,9 +1054,9 @@ const LecturaHistoria = ({ userAuth }) => {
                                 }
                             }}
                             style={{
-                                background: reproduciendoAudio ? '#fff0f0' : '#EAEAE5',
-                                color: reproduciendoAudio ? '#cc0000' : '#333',
-                                border: reproduciendoAudio ? '1px solid #cc0000' : '1px solid #D0D0C8',
+                                background: reproduciendoAudio ? '#fee2e2' : '#FFF7ED',
+                                color: reproduciendoAudio ? '#dc2626' : '#9c4221',
+                                border: reproduciendoAudio ? '1px solid #dc2626' : '1px solid #fed7aa',
                                 padding: '10px 20px',
                                 fontWeight: 'bold',
                                 cursor: 'pointer',
