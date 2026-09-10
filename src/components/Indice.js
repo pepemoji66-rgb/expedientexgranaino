@@ -7,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { API_BASE_URL } from '../config';
 import './Indice.css';
 
-const Indice = ({ userAuth, stats, setTema }) => {
+const Indice = ({ userAuth, stats, setTema, tema }) => {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [showDossier, setShowDossier] = useState(false);
@@ -23,11 +23,11 @@ const Indice = ({ userAuth, stats, setTema }) => {
     const [filtroTematico, setFiltroTematico] = useState('todos');
 
     const coloresDisponibles = [
-        { hex: '#00d4ff', label: 'CIAN' },
+        { hex: '#2D5A43', label: 'MILITAR' },
         { hex: '#00ff41', label: 'VERDE' },
-        { hex: '#ff4444', label: 'ROJO' },
-        { hex: '#ffb100', label: 'ORO' },
-        { hex: '#ff00ff', label: 'ACENTO' }
+        { hex: '#d4a373', label: 'ÁMBAR' },
+        { hex: '#00d4ff', label: 'CIAN' },
+        { hex: '#ff4444', label: 'ROJO' }
     ];
 
     useEffect(() => {
@@ -137,13 +137,13 @@ const Indice = ({ userAuth, stats, setTema }) => {
                         <span className="gate-action-btn">{language === 'en' ? 'OPEN DOSSIERS ➔' : 'ABRIR EXPEDIENTES ➔'}</span>
                     </div>
                 </Link>
-                <Link to="/biblioteca" className="gate-card" style={{borderColor: '#ffb100'}}>
-                    <div className="gate-glow" style={{background: 'radial-gradient(circle at 50% 50%, rgba(255, 177, 0, 0.15) 0%, transparent 60%)'}}></div>
-                    <div className="gate-icon" style={{color: '#ffb100'}}>📚</div>
+                <Link to="/biblioteca" className="gate-card library-gate">
+                    <div className="gate-glow"></div>
+                    <div className="gate-icon">📚</div>
                     <div className="gate-content">
-                        <h3 style={{color: '#ffb100'}}>{language === 'en' ? 'RECOMMENDED BIBLIOGRAPHY' : 'BIBLIOTECA DEL BÚNKER'}</h3>
+                        <h3>{language === 'en' ? 'RECOMMENDED BIBLIOGRAPHY' : 'BIBLIOTECA DEL BÚNKER'}</h3>
                         <p>{language === 'en' ? 'Discover our selection of essential books to investigate anomalous phenomena and historical mysteries.' : 'Descubre nuestra selección de libros imprescindibles para investigar fenómenos anómalos y misterios históricos.'}</p>
-                        <span className="gate-action-btn" style={{color: '#ffb100', borderTopColor: 'rgba(255, 177, 0, 0.2)'}}>{language === 'en' ? 'ENTER LIBRARY ➔' : 'ENTRAR A LA BIBLIOTECA ➔'}</span>
+                        <span className="gate-action-btn">{language === 'en' ? 'ENTER LIBRARY ➔' : 'ENTRAR A LA BIBLIOTECA ➔'}</span>
                     </div>
                 </Link>
             </div>
@@ -177,17 +177,17 @@ const Indice = ({ userAuth, stats, setTema }) => {
                                             height: '125px',
                                             borderRadius: '6px',
                                             objectFit: 'cover',
-                                            border: '2px solid var(--color-principal, #00ff41)',
-                                            boxShadow: '0 0 15px rgba(0, 255, 65, 0.3)',
+                                            border: '2px solid var(--color-principal)',
+                                            boxShadow: '0 0 15px rgba(var(--rgb-principal), 0.25)',
                                             display: 'block'
                                         }} 
                                     />
-                                    <span style={{ fontSize: '0.65rem', color: 'var(--color-principal, #00ff41)', fontFamily: 'monospace', fontWeight: 'bold', display: 'block', marginTop: '4px' }}>
+                                    <span style={{ fontSize: '0.65rem', color: 'var(--color-principal)', fontFamily: 'monospace', fontWeight: 'bold', display: 'block', marginTop: '4px' }}>
                                         JOSÉ MORENO
                                     </span>
                                 </div>
                                 <div style={{ flex: '1', minWidth: '240px' }}>
-                                    <h3>{t('dossierTitle')}</h3>
+                                    <h3 style={{ color: 'var(--color-principal)' }}>{t('dossierTitle')}</h3>
                                     <p style={{ margin: '8px 0' }}>
                                         {t('dossierDesc1')}
                                     </p>
@@ -529,7 +529,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
                         <div 
                             key={c.hex}
                             onClick={() => setTema(c.hex)}
-                            className={`calib-dot ${c.hex === stats.tema ? 'active' : ''}`}
+                            className={`calib-dot ${c.hex === tema ? 'active' : ''}`}
                             style={{ backgroundColor: c.hex }}
                             title={c.label}
                         ></div>
@@ -538,9 +538,9 @@ const Indice = ({ userAuth, stats, setTema }) => {
             </div>
 
             {/* GAMIFICACIÓN DE RANGOS */}
-            <div className="gamification-banner" style={{ background: 'rgba(0, 212, 255, 0.05)', border: '1px solid var(--color-principal)', padding: '15px', marginBottom: '20px', textAlign: 'center', borderRadius: '5px' }}>
-                <h3 style={{ color: 'var(--color-principal)', margin: '0 0 10px 0', fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 0 5px var(--color-principal)' }}>{t('rankSystemTitle')}</h3>
-                <p style={{ color: '#fff', fontSize: '0.9rem', margin: '0 0 10px 0' }}>
+            <div className="gamification-banner" style={{ background: 'rgba(var(--rgb-principal), 0.08)', border: '1px solid rgba(var(--rgb-principal), 0.25)', padding: '18px 20px', marginBottom: '24px', textAlign: 'center', borderRadius: '8px' }}>
+                <h3 style={{ color: 'var(--color-principal)', margin: '0 0 10px 0', fontSize: '1.05rem', textTransform: 'uppercase', letterSpacing: '2px' }}>{t('rankSystemTitle')}</h3>
+                <p style={{ color: '#cbd5e1', fontSize: '0.88rem', margin: '0 0 12px 0' }}>
                     {t('rankSystemDesc')}
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', fontSize: '0.8rem', color: '#ccc' }}>
@@ -570,8 +570,8 @@ const Indice = ({ userAuth, stats, setTema }) => {
 
             {/* TARJETA DESTACADA DEL FUNDADOR / INVESTIGADOR JEFE */}
             <div className="home-fundador-card" style={{
-                background: 'rgba(5, 12, 18, 0.85)',
-                border: '1px solid var(--color-principal, #00ff41)',
+                background: 'rgba(16, 22, 30, 0.75)',
+                border: '1px solid rgba(var(--rgb-principal), 0.25)',
                 borderRadius: '8px',
                 padding: '20px',
                 marginBottom: '35px',
@@ -579,7 +579,7 @@ const Indice = ({ userAuth, stats, setTema }) => {
                 alignItems: 'center',
                 gap: '20px',
                 flexWrap: 'wrap',
-                boxShadow: '0 0 20px rgba(0, 255, 65, 0.15)'
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
             }}>
                 <img 
                     src="/jose-moreno-investigador.jpg" 
@@ -589,20 +589,20 @@ const Indice = ({ userAuth, stats, setTema }) => {
                         height: '80px',
                         borderRadius: '50%',
                         objectFit: 'cover',
-                        border: '2px solid var(--color-principal, #00ff41)',
-                        boxShadow: '0 0 10px rgba(0, 255, 65, 0.4)'
+                        border: '2px solid var(--color-principal)',
+                        boxShadow: '0 0 10px rgba(var(--rgb-principal), 0.3)'
                     }} 
                 />
                 <div style={{ flex: '1', minWidth: '220px' }}>
-                    <h4 style={{ color: 'var(--color-principal, #00ff41)', margin: '0 0 5px 0', fontSize: '1rem', letterSpacing: '1px' }}>
+                    <h4 style={{ color: 'var(--color-principal)', margin: '0 0 5px 0', fontSize: '1rem', letterSpacing: '1px' }}>
                         🕵️ {language === 'en' ? 'FOUNDER & CHIEF INVESTIGATOR' : 'FUNDADOR E INVESTIGADOR JEFE'}
                     </h4>
-                    <p style={{ color: '#ccc', margin: '0 0 8px 0', fontSize: '0.85rem', lineHeight: '1.4' }}>
-                        <strong>José Moreno Jiménez</strong> — {language === 'en' 
+                    <p style={{ color: '#94a3b8', margin: '0 0 8px 0', fontSize: '0.85rem', lineHeight: '1.4' }}>
+                        <strong style={{ color: '#f1f5f9' }}>José Moreno Jiménez</strong> — {language === 'en' 
                             ? 'Exploring UAPs, paranormal phenomena, and unexplained mysteries in Granada and worldwide.' 
                             : 'Documentando fenómenos anómalos, avistamientos OVNI y misterios sin resolver en Granada y el resto del mundo.'}
                     </p>
-                    <Link to="/sobre-nosotros" style={{ color: '#00d4ff', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                    <Link to="/sobre-nosotros" style={{ color: 'var(--color-principal)', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'monospace' }}>
                         {language === 'en' ? 'READ FULL BIO & DOSSIER ➔' : 'VER BIOGRAFÍA Y DOSSIER COMPLETO ➔'}
                     </Link>
                 </div>

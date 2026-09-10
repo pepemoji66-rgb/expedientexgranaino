@@ -91,37 +91,48 @@
 
 /* BOTONES ESTILO MUFON */
 .btn-mufon-red {
-    background: #e60012;
+    background: var(--color-principal);
     color: #fff;
-    padding: 10px 18px;
+    padding: 8px 18px;
     text-decoration: none;
     font-weight: 700;
     font-size: 0.75rem;
     text-transform: uppercase;
-    border-radius: 2px;
+    letter-spacing: 0.5px;
+    border-radius: 4px;
     transition: 0.3s;
-    border: none;
+    border: 1px solid var(--color-principal);
     text-align: center;
     white-space: nowrap;
 }
 
 .btn-mufon-red:hover {
-    background: #c00010;
+    background: #fff;
+    color: #0b0e14;
+    border-color: #fff;
     transform: translateY(-1px);
 }
 
 .btn-mufon-black {
-    background: #000;
-    color: #fff;
-    padding: 10px 18px;
+    background: rgba(16, 22, 30, 0.7);
+    color: #cbd5e1;
+    padding: 8px 18px;
     text-decoration: none;
     font-weight: 700;
     font-size: 0.75rem;
     text-transform: uppercase;
-    border-radius: 2px;
+    letter-spacing: 0.5px;
+    border-radius: 4px;
     transition: 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
     white-space: nowrap;
+}
+
+.btn-mufon-black:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .btn-mufon-black:hover {
@@ -174,50 +185,51 @@
 }
 
 .mufon-subtitle {
-    font-size: 1.1rem;
-    letter-spacing: 10px;
+    font-size: 1rem;
+    letter-spacing: 6px;
     color: #fff;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     font-weight: 700;
     text-transform: uppercase;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.7);
-    background: rgba(230, 0, 18, 0.75);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    background: rgba(var(--rgb-principal), 0.85);
     display: inline-block;
     padding: 4px 14px;
     border-left: 3px solid #fff;
+    border-radius: 3px;
 }
 
 .mufon-title {
-    font-size: 4rem;
+    font-size: 3.5rem;
     font-weight: 900;
     letter-spacing: 2px;
     margin: 10px 0;
     color: #fff;
     text-shadow: 
-        0 0 40px rgba(0,0,0,1),
+        0 0 30px rgba(0,0,0,1),
         2px 2px 0px rgba(0,0,0,0.8),
         0 4px 20px rgba(0,0,0,0.9);
-    /* Sin gradient clip para máxima legibilidad sobre imágenes */
-    line-height: 1.1;
+    line-height: 1.15;
 }
 
 .mufon-tagline {
-    font-size: 1.1rem;
-    letter-spacing: 6px;
-    color: #e0e0e0;
+    font-size: 1rem;
+    letter-spacing: 4px;
+    color: #cbd5e1;
     font-weight: 600;
     text-shadow: 0 2px 10px rgba(0,0,0,0.9);
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     display: inline-block;
-    padding: 3px 12px;
+    padding: 4px 14px;
     margin-top: 6px;
+    border-radius: 3px;
 }
 
 .mufon-glow {
     position: absolute;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(var(--rgb-principal), 0.2) 0%, transparent 70%);
     top: 50%;
     left: 20%;
     transform: translate(-50%, -50%);
@@ -231,46 +243,53 @@
 }
 
 .info-title {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: 800;
-    margin-bottom: 20px;
-    color: #fff;
+    margin-bottom: 16px;
+    color: #f1f5f9;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .info-text {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 30px;
-    color: #ccc;
+    font-size: 1rem;
+    line-height: 1.65;
+    margin-bottom: 25px;
+    color: #cbd5e1;
     font-weight: 400;
 }
 
 .highlight-mufon {
-    color: #e60012;
+    color: var(--color-principal);
     font-weight: 800;
     display: block;
     margin-top: 10px;
+    letter-spacing: 1px;
 }
 
 .btn-explore-mufon {
     display: inline-block;
-    background: #666;
+    background: var(--color-principal);
     color: #fff;
-    padding: 15px 40px;
+    padding: 12px 32px;
     text-decoration: none;
-    font-weight: 600;
-    text-transform: none;
-    border-radius: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
     transition: 0.3s;
     border: none;
     cursor: pointer;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(var(--rgb-principal), 0.3);
 }
 
 .btn-explore-mufon:hover {
-    background: #888;
+    background: #fff;
+    color: #0b0e14;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
 }
 
 /* FLECHAS DE NAVEGACIÓN MANUAL */

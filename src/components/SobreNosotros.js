@@ -12,9 +12,9 @@ const SobreNosotros = () => {
                 <button
                     onClick={() => navigate('/')}
                     style={{
-                        background: 'rgba(0, 212, 255, 0.1)',
-                        color: '#00d4ff',
-                        border: '1px solid #00d4ff',
+                        background: 'rgba(var(--rgb-principal), 0.1)',
+                        color: 'var(--color-principal)',
+                        border: '1px solid var(--color-principal)',
                         padding: '8px 18px',
                         cursor: 'pointer',
                         borderRadius: '4px',

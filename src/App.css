@@ -2,14 +2,14 @@
     VARIABLES Y TEMA TÁCTICO
    ============================================= */
 :root {
-    --color-principal: #00d4ff;
-    --rgb-principal: 0, 212, 255;
-    --color-acento: #ff00ff;
-    --bg-bunker: #020406;
-    --bg-glass: rgba(10, 15, 20, 0.7);
-    --border-subtle: rgba(255, 255, 255, 0.1);
-    --glow-subtle: 0 0 20px rgba(0, 212, 255, 0.2);
-    --glow-strong: 0 0 35px rgba(0, 212, 255, 0.4);
+    --color-principal: #2D5A43;
+    --rgb-principal: 45, 90, 67;
+    --color-acento: #d4a373;
+    --bg-bunker: #0b0e14;
+    --bg-glass: rgba(16, 22, 30, 0.75);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --glow-subtle: 0 0 15px rgba(var(--rgb-principal), 0.2);
+    --glow-strong: 0 0 30px rgba(var(--rgb-principal), 0.35);
 }
 
 @keyframes slideInRight {
@@ -28,7 +28,7 @@ body, html {
     padding: 0;
     min-height: 100vh;
     overflow-x: hidden;
-    background-color: #000;
+    background-color: #0b0e14;
 }
 
 .App {
@@ -38,7 +38,7 @@ body, html {
     position: relative;
     color: #e0e6ed;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #020408;
+    background: #0b0e14;
     overflow-x: hidden;
 }
 
@@ -513,35 +513,36 @@ input, textarea, select {
     max-width: 900px;
     margin: 40px auto 20px auto;
     padding: 28px 32px;
-    background: rgba(0, 15, 20, 0.85);
-    border: 1px solid rgba(0, 212, 255, 0.2);
-    border-left: 3px solid rgba(0, 212, 255, 0.6);
+    background: rgba(16, 22, 30, 0.75);
+    border: 1px solid rgba(var(--rgb-principal), 0.2);
+    border-left: 3px solid var(--color-principal);
     font-family: 'Courier New', Courier, monospace;
-    color: rgba(200, 220, 230, 0.85);
-    font-size: 0.83rem;
+    color: #cbd5e1;
+    font-size: 0.85rem;
     line-height: 1.8;
     letter-spacing: 0.3px;
+    border-radius: 6px;
 }
 
 .seo-bunker-title {
-    font-size: 0.75rem !important;
+    font-size: 0.8rem !important;
     letter-spacing: 3px !important;
     text-transform: uppercase;
-    color: rgba(0, 212, 255, 0.7) !important;
-    text-shadow: 0 0 8px rgba(0, 212, 255, 0.2) !important;
+    color: var(--color-principal) !important;
+    text-shadow: none !important;
     margin-bottom: 14px !important;
     font-family: 'Courier New', Courier, monospace !important;
-    border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+    border-bottom: 1px solid rgba(var(--rgb-principal), 0.2);
     padding-bottom: 10px;
 }
 
 .seo-bunker-block p {
     margin-bottom: 12px;
-    color: rgba(190, 210, 220, 0.82);
+    color: #94a3b8;
 }
 
 .seo-bunker-block strong {
-    color: rgba(0, 212, 255, 0.9);
+    color: #f1f5f9;
     font-weight: 700;
 }
 
@@ -553,11 +554,12 @@ input, textarea, select {
     margin: 0 auto;
     width: 100%;
     max-width: 100%;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(11, 14, 20, 0.92);
     border: none;
-    border-top: 1px solid rgba(0, 212, 255, 0.15);
+    border-top: 1px solid rgba(var(--rgb-principal), 0.25);
     border-left: none;
     padding: 24px 10%;
+    border-radius: 0;
 }
 
 /* Variante chat: fuera del contenedor con overflow */

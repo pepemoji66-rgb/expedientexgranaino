@@ -6,9 +6,6 @@ import axios from 'axios';
 // Estilos del Mapa
 import 'leaflet/dist/leaflet.css';
 
-// TEMA EXPEDIENTE CLÁSICO — pergamino editorial
-import './styles/expediente-clasico.css';
-
 // Componentes del Búnker
 import Indice from './components/Indice';
 import Hero from './components/Hero';
@@ -82,7 +79,9 @@ function App() {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [userAuth, setUserAuth] = useState(null);
-  const [tema, setTema] = useState('#ffffff');
+  const [tema, setTema] = useState(() => {
+    return safeLocalStorage.getItem('bunker_tema') || '#2D5A43';
+  });
   const [visitasTotales, setVisitasTotales] = useState(0);
   const [comentariosNuevos, setComentariosNuevos] = useState(0);
   const [ultimoComentario, setUltimoComentario] = useState(null);
@@ -200,6 +199,7 @@ function App() {
     // Aplicar el color del tema globalmente (Hex y RGB)
     document.documentElement.style.setProperty('--color-principal', tema);
     document.documentElement.style.setProperty('--rgb-principal', hexToRgb(tema));
+    safeLocalStorage.setItem('bunker_tema', tema);
   }, [tema]);
 
   const actualizarAuth = (datos) => {
@@ -349,7 +349,7 @@ function App() {
 
               <p className="sidebar-footer-label" style={{ marginBottom: '8px', fontSize: '10px', color: '#666' }}>{t('sysVisualFreq')}</p>
               <div className="theme-selector" style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                {['#00d4ff', '#00ff41', '#ff4444', '#ffb100', '#ff00ff'].map(c => (
+                {['#2D5A43', '#00ff41', '#d4a373', '#00d4ff', '#ff4444'].map(c => (
                   <div key={c} onClick={() => setTema(c)} className={`theme-dot ${tema === c ? 'active' : ''}`} style={{ 
                     width: '18px', height: '18px', borderRadius: '50%', background: c, cursor: 'pointer', border: tema === c ? '2px solid #fff' : '1px solid transparent' 
                   }}></div>
@@ -366,7 +366,7 @@ function App() {
               <Route path="/" element={
                 <div className="home-layout">
                   <Hero userAuth={userAuth} />
-                  <Indice userAuth={userAuth} stats={stats} setTema={setTema} />
+                  <Indice userAuth={userAuth} stats={stats} setTema={setTema} tema={tema} />
                 </div>
               } />
               <Route path="/acceso" element={<SeccionUsuarios setAuth={actualizarAuth} />} />
