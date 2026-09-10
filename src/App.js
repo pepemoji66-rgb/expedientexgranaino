@@ -76,7 +76,7 @@ const FooterCondicional = (props) => {
 
 
 function App() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [userAuth, setUserAuth] = useState(null);
   const [tema, setTema] = useState(() => {
