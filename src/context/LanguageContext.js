@@ -125,7 +125,7 @@ const translations = {
         aboutValuesDesc: "Veracidad, Neutralidad y Comunidad.",
         aboutContact: "¿TIENES INFORMACIÓN CLASIFICADA? O SÍGUENOS EN REDES:",
         // Expedientes
-        expTitle: "EXPEDIENTEXGRANAINO Y MUNDIAL",
+        expTitle: "EXPEDIENTES Y CASOS CLASIFICADOS",
         expProtocol: "🛡️ PROTOCOLO DE VERACIDAD: Priorizamos informes basados en sucesos reales, testimonios directos y evidencias de campo. Aunque permitimos la reconstrucción narrativa, la fidelidad a los hechos es nuestro estandarte. Documenta con responsabilidad.",
         expAgentReports: "INFORMES DE AGENTES",
         expAdminStories: "RELATOS DEL ADMINISTRADOR",
@@ -300,8 +300,8 @@ const translations = {
         heroObserverText: "Forma parte del próximo gran acontecimiento. Una red exclusiva para entusiastas de los OVNIS y la ufología técnica.",
         heroObserverHighlight: "¡SOLO PARA MIEMBROS DEL BÚNKER!",
         // Noticias
-        newsSystemScanning: "SINTONIZANDO FRECUENCIAS DEL SECTOR X...",
-        newsGlobalAlerts: "📡 TELETIPO DE ALERTAS GLOBALES (MUNDIAL)",
+        newsSystemScanning: "SINTONIZANDO ARCHIVO DE NOTICIAS...",
+        newsGlobalAlerts: "NOTICIAS Y CRÓNICAS DE ACTUALIDAD",
         newsNoImage: "ARCHIVO SIN IMAGEN",
         newsNoAlerts: "SIN ALERTAS LOCALES ACTIVAS. RASTREANDO FRECUENCIAS SECUNDARIAS...",
         newsExternalIntel: "🌐 INTELIGENCIA EXTERNA (CANALES RECOMENDADOS)",
@@ -520,7 +520,7 @@ const translations = {
         aboutValuesDesc: "Veracity, Neutrality, and Community.",
         aboutContact: "DO YOU HAVE CLASSIFIED INFORMATION? OR FOLLOW US ON SOCIAL MEDIA:",
         // Expedientes
-        expTitle: "EXPEDIENTEXGRANAINO AND WORLDWIDE",
+        expTitle: "DOSSIERS & CLASSIFIED CASES",
         expProtocol: "🛡️ VERACITY PROTOCOL: We prioritize reports based on real events, direct testimonies, and field evidence. Although we allow narrative reconstruction, fidelity to facts is our standard. Document responsibly.",
         expAgentReports: "AGENT REPORTS",
         expAdminStories: "ADMINISTRATOR STORIES",
@@ -695,8 +695,8 @@ const translations = {
         heroObserverText: "Be part of the next big event. An exclusive network for UFO and technical ufology enthusiasts.",
         heroObserverHighlight: "ONLY FOR BUNKER MEMBERS!",
         // Noticias
-        newsSystemScanning: "TUNING X-SECTOR FREQUENCIES...",
-        newsGlobalAlerts: "📡 GLOBAL ALERTS TICKER (WORLDWIDE)",
+        newsSystemScanning: "TUNING NEWS ARCHIVE...",
+        newsGlobalAlerts: "NEWS & CURRENT CHRONICLES",
         newsNoImage: "ARCHIVE WITHOUT IMAGE",
         newsNoAlerts: "NO ACTIVE LOCAL ALERTS. SCANNING SECONDARY FREQUENCIES...",
         newsExternalIntel: "🌐 EXTERNAL INTELLIGENCE (RECOMMENDED CHANNELS)",

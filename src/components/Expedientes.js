@@ -503,7 +503,23 @@ const Expedientes = () => {
                                             </div>
                                         )}
                                         <div className="card-body-mobile">
-                                            <span className="card-tag">{item.tipo === 'jefe' ? '🛡️ JEFE' : `👤 ${t('accessLevelAgent')}`}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                                                <span className="card-tag">{item.tipo === 'jefe' ? '🛡️ JEFE' : `👤 ${t('accessLevelAgent')}`}</span>
+                                                {(item.youtube_url || (item.fuente_url && /youtu/i.test(item.fuente_url))) && (
+                                                    <span style={{
+                                                        background: '#FFF7ED',
+                                                        color: '#9c4221',
+                                                        border: '1px solid #fed7aa',
+                                                        borderRadius: '3px',
+                                                        padding: '2px 7px',
+                                                        fontSize: '0.68rem',
+                                                        fontWeight: 'bold',
+                                                        fontFamily: 'monospace'
+                                                    }}>
+                                                        🎬 VÍDEO
+                                                    </span>
+                                                )}
+                                            </div>
                                             <h3 className="card-title-mobile">{item.titulo?.toUpperCase()}</h3>
 
                                             <div style={{ marginBottom: '15px', color: '#00d4ff', fontSize: '0.75rem', fontFamily: 'monospace' }}>
@@ -530,140 +546,7 @@ const Expedientes = () => {
                 )}
             </div>
 
-            {/* Formulario público de envío de expedientes y experiencias */}
-            <div className="contenedor-envio-expediente">
-                <div style={{ background: 'rgba(0,255,65,0.08)', border: '1px solid var(--color-principal)', padding: '15px', marginBottom: '20px', borderRadius: '5px', textAlign: 'center' }}>
-                    <p style={{ color: 'var(--color-principal)', fontSize: '0.8rem', fontFamily: 'monospace', margin: 0, fontWeight: 'bold' }}>
-                        📡 ARCHIVO ABIERTO DE ATARFE Y GLOBAL: Puedes enviar tu testimonio o expediente sin necesidad de registrarte. Todas las evidencias se revisan por el Alto Mando antes de su desclasificación.
-                    </p>
-                </div>
-                <h2 className="titulo-neon-p">
-                    {tipoRegistro === 'jefe' ? t('expWriteAdmin') : t('expWriteReport')}
-                </h2>
-                <form onSubmit={enviarExpediente} className="form-expediente">
-                    {/* Selector de Categoría Multisección */}
-                    <div className="selector-tipo-registro" style={{ marginBottom: '20px', background: 'rgba(0, 212, 255, 0.08)', padding: '15px', borderRadius: '6px', border: '1px solid rgba(0, 212, 255, 0.4)' }}>
-                        <label style={{ color: 'var(--color-principal)', fontSize: '0.78rem', display: 'block', marginBottom: '8px', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                            🎯 ¿QUÉ TIPO DE EVIDENCIA O APORTACIÓN DESEAS SUBIR?
-                        </label>
-                        <select
-                            value={categoriaAportacion}
-                            onChange={(e) => setCategoriaAportacion(e.target.value)}
-                            className="input-bunker-exp"
-                            style={{ marginBottom: 0, fontWeight: 'bold', color: '#00d4ff', background: '#050c12', cursor: 'pointer', border: '1px solid #00d4ff' }}
-                        >
-                            <option value="expediente">📁 EXPEDIENTE OVNI / UAP (Relatos e Investigaciones)</option>
-                            <option value="noticia">📰 NOTICIA PARANORMAL (Alertas y Novedades)</option>
-                            <option value="caso">💀 TRUE CRIME / CASO ABIERTO (Crímenes Reales sin Resolver)</option>
-                            <option value="misterio">👁️ MISTERIO HISTÓRICO (Enigmas Ancestrales)</option>
-                            <option value="video">🎬 VÍDEO CLASIFICADO (Evidencia Audiovisual)</option>
-                        </select>
-                    </div>
 
-                    {/* Selector para administradores */}
-                    {isAdmin && (
-                        <div className="selector-tipo-registro" style={{ marginBottom: '20px', background: 'rgba(0, 212, 255, 0.05)', padding: '15px', borderRadius: '6px', border: '1px dashed rgba(0, 212, 255, 0.3)' }}>
-                            <label style={{ color: 'var(--color-principal)', fontSize: '0.75rem', display: 'block', marginBottom: '10px', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                                📡 RANGO DE PUBLICACIÓN (ALTO MANDO DETECTADO):
-                            </label>
-                            <div style={{ display: 'flex', gap: '20px' }}>
-                                <label style={{ color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                    <input
-                                        type="radio"
-                                        name="tipo_registro"
-                                        value="agente"
-                                        checked={tipoRegistro === 'agente'}
-                                        onChange={() => setTipoRegistro('agente')}
-                                        style={{ cursor: 'pointer', accentColor: 'var(--color-principal)' }}
-                                    />
-                                    👤 {t('expFilterAgent')}
-                                </label>
-                                <label style={{ color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                    <input
-                                        type="radio"
-                                        name="tipo_registro"
-                                        value="jefe"
-                                        checked={tipoRegistro === 'jefe'}
-                                        onChange={() => setTipoRegistro('jefe')}
-                                        style={{ cursor: 'pointer', accentColor: 'var(--color-principal)' }}
-                                    />
-                                    🛡️ {t('expFilterAdmin')}
-                                </label>
-                            </div>
-                        </div>
-                    )}
-
-                    {!userAuth && (
-                        <input
-                            type="text"
-                            className="input-bunker-exp"
-                            placeholder="Tu Nombre o Apodo de Testigo (Opcional - por defecto: Testigo Anónimo)..."
-                            value={nombreTestigo}
-                            onChange={(e) => setNombreTestigo(e.target.value)}
-                        />
-                    )}
-
-                    <input
-                        type="text"
-                        className="input-bunker-exp"
-                        placeholder={`${t('findingTitle')}...`}
-                        value={nuevoTitulo}
-                        onChange={(e) => setNuevoTitulo(e.target.value)}
-                        required
-                    />
-                    <textarea
-                        className="textarea-bunker-exp"
-                        placeholder={`${t('newsDesc')}...`}
-                        value={nuevoContenido}
-                        onChange={(e) => setNuevoContenido(e.target.value)}
-                        required
-                    ></textarea>
-
-                        {/* BUSCADOR DE COORDENADAS */}
-                        <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid #222' }}>
-                            <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px' }}>{t('expRadarSearch')}</label>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <input
-                                    type="text"
-                                    value={busquedaLugar}
-                                    onChange={e => setBusquedaLugar(e.target.value)}
-                                    placeholder={t('newsLocationPlaceholder')}
-                                    className="input-bunker-exp"
-                                    style={{ flex: 1, marginBottom: 0 }}
-                                />
-                                <button type="button" onClick={buscarCoordenadas} style={{ padding: '10px', background: 'var(--color-principal)', color: '#000', border: 'none', padding: '0 15px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                    📍 AUTO-DETECTAR COORDENADAS
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', alignItems: 'end', marginBottom: '15px' }}>
-                            <div>
-                                <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>{t('latLong')}</label>
-                                <input type="number" step="any" className="input-bunker-exp" value={latitud} onChange={e => setLatitud(e.target.value)} />
-                            </div>
-                            <div>
-                                <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem' }}>{t('latLong')}</label>
-                                <input type="number" step="any" className="input-bunker-exp" value={longitud} onChange={e => setLongitud(e.target.value)} />
-                            </div>
-                            <button type="button" onClick={obtenerUbicacion} style={{
-                                padding: '10px', background: 'transparent', border: '1px solid var(--color-principal)', color: 'var(--color-principal)',
-                                fontFamily: 'monospace', fontSize: '0.65rem', cursor: 'pointer', marginBottom: '10px'
-                            }}>
-                                {t('expPosicion')}
-                            </button>
-                        </div>
-
-                        <div className="form-group-exp">
-                            <label style={{ color: 'var(--color-principal)', fontSize: '0.7rem', display: 'block', marginBottom: '5px' }}>IMAGEN DE EVIDENCIA (OPCIONAL)</label>
-                            <input type="file" id="archivo-expediente" className="input-file-exp" style={{ color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '15px' }} />
-                        </div>
-
-                        <button type="submit" className="btn-enviar-expediente">
-                            {tipoRegistro === 'jefe' ? t('expPublish') : t('expUpload')}
-                        </button>
-                    </form>
-                </div>
 
             {/* MODAL PARA LEER EL ARCHIVO */}
             {relatoAbierto && (

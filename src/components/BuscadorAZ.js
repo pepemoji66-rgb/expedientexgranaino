@@ -98,10 +98,10 @@ const BuscadorAZ = ({
                 </div>
 
                 <div className="buscador-counter-badge">
-                    <span>📡 {totalResultados} {totalResultados === 1 ? 'EVIDENCIA' : 'EVIDENCIAS'}</span>
+                    <span>{totalResultados} {totalResultados === 1 ? 'ARTÍCULO' : 'ARTÍCULOS'}</span>
                     {hayFiltroActivo && (
                         <button type="button" className="btn-reset-filtros" onClick={handleReset}>
-                            🔄 LIMPIAR FILTROS
+                            LIMPIAR FILTROS
                         </button>
                     )}
                 </div>

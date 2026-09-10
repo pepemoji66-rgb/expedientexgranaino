@@ -337,11 +337,63 @@
         display: none;
     }
     
+    .header-top-actions {
+        min-width: auto;
+        gap: 8px;
+    }
+
     .brand-title {
-        font-size: 1.4rem;
+        font-size: 1.35rem;
+        letter-spacing: 1px;
     }
     
     .brand-tagline {
         display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .header-top-container {
+        padding: 0 12px;
+        gap: 8px;
+    }
+
+    .brand-link {
+        gap: 8px;
+    }
+
+    .brand-logo-img {
+        height: 36px;
+        width: 36px;
+    }
+
+    .brand-title {
+        font-size: 1.05rem;
+        letter-spacing: 0.5px;
+        line-height: 1.1;
+    }
+
+    .editorial-lang-switch {
+        padding: 2px 4px;
+    }
+
+    .lang-btn {
+        font-size: 0.68rem;
+        padding: 2px;
+    }
+
+    .btn-login-header, .btn-account-header {
+        padding: 5px 8px;
+        font-size: 0.7rem;
+    }
+
+    .btn-admin-header {
+        padding: 4px 6px;
+        font-size: 0.65rem;
+    }
+
+    .editorial-hamburger {
+        padding: 4px;
+        margin-left: 4px;
     }
 }

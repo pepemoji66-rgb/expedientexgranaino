@@ -54,6 +54,13 @@ const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
     );
 };
 
+// Helper para extraer ID de YouTube soportando formatos normales, shorts, youtu.be, etc.
+const extractYouTubeId = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/|v\/))([\w-]{11})/i);
+    return match ? match[1] : null;
+};
+
 // Divide el texto en oraciones/chunks más cortos para que no falle en iOS/Safari móvil
 const splitText = (text, maxLen = 180) => {
     const sentences = text.split(/([.!?])/g);
@@ -689,55 +696,30 @@ const LecturaHistoria = ({ userAuth }) => {
         }
     };
 
-    const renderComentariosBox = (isSideBySide = false) => (
-        <div className="comentarios-container" style={isSideBySide ? {
-            flex: '1.5 1 400px',
-            minWidth: '300px',
-            margin: 0,
-            maxWidth: 'none',
-            width: '100%',
-            boxSizing: 'border-box'
-        } : {
-            marginTop: '50px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-            paddingTop: '40px'
-        }}>
-            <h3 className="titulo-seccion-bunker">📡 {language === 'en' ? 'AGENT COMMUNICATIONS' : 'COMUNICACIONES DE AGENTES'}</h3>
-            
-            <p style={{ color: 'var(--color-principal)', fontSize: '0.8rem', opacity: 0.8, marginBottom: '15px', fontFamily: 'monospace', textAlign: 'left' }}>
-                💬 {language === 'en' 
-                    ? 'Contribute your data, theories, or comments on this file. Free access (no registration required).' 
-                    : 'Aporta tus datos, teorías o comentarios sobre este expediente. Libre acceso (no requiere registro).'}
-            </p>
+    const renderComentariosBox = (isSideBySide = false) => {
+        if (!comentarios || comentarios.length === 0) return null;
+        return (
+            <div className="comentarios-container" style={isSideBySide ? {
+                flex: '1.5 1 400px',
+                minWidth: '300px',
+                margin: 0,
+                maxWidth: 'none',
+                width: '100%',
+                boxSizing: 'border-box'
+            } : {
+                marginTop: '40px',
+                borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+                paddingTop: '25px'
+            }}>
+                <h4 style={{ fontSize: '0.85rem', color: '#9c4221', fontFamily: 'monospace', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '15px' }}>
+                    💬 {language === 'en' ? 'ARCHIVED COMMUNICATIONS' : 'COMUNICACIONES DEL EXPEDIENTE'}
+                </h4>
 
-            <form onSubmit={enviarComentario} className="form-comentario">
-                <input
-                    type="text"
-                    value={nick}
-                    onChange={(e) => setNick(e.target.value)}
-                    placeholder={language === 'en' ? "Your Nick / Agent Name..." : "Tu Nick / Nombre de Agente..."}
-                    className="input-bunker-nick"
-                    required
-                    style={{ marginBottom: '10px' }}
-                />
-                <textarea
-                    value={nuevoComentario}
-                    onChange={(e) => setNuevoComentario(e.target.value)}
-                    placeholder={language === 'en' ? "Write your comment or report here..." : "Escribe tu informe o comentario aquí..."}
-                    className="input-bunker-comentario"
-                    required
-                ></textarea>
-                <button type="submit" disabled={enviando} className="btn-enviar-comentario">
-                    {enviando ? (language === 'en' ? 'TRANSMITTING...' : 'TRANSMITIENDO...') : (language === 'en' ? 'SEND TO FILE' : 'ENVIAR AL ARCHIVO')}
-                </button>
-            </form>
-
-            <div className="lista-comentarios">
-                {comentarios.length > 0 ? (
-                    comentarios.map((c) => (
+                <div className="lista-comentarios">
+                    {comentarios.map((c) => (
                         <div key={c.id} className="comentario-card fade-in">
                             <div className="comentario-header">
-                                <span className="comentario-agente">👤 AGENTE: {c.agente?.toUpperCase()}</span>
+                                <span className="comentario-agente">👤 {c.agente?.toUpperCase()}</span>
                                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                                     <span className="comentario-fecha">{new Date(c.fecha).toLocaleString()}</span>
                                     {isAdmin && (
@@ -746,20 +728,14 @@ const LecturaHistoria = ({ userAuth }) => {
                                         </button>
                                     )}
                                 </div>
-                           </div>
+                            </div>
                             <p className="comentario-mensaje">{c.mensaje}</p>
                         </div>
-                    ))
-                ) : (
-                    <p className="no-comentarios">
-                        {language === 'en' 
-                            ? 'FREQUENCY CLEAR. BE THE FIRST TO REPORT ON THIS FILE...' 
-                            : 'FRECUENCIA LIMPIA. SÉ EL PRIMERO EN APORTAR INFORMACIÓN SOBRE ESTE EXPEDIENTE...'}
-                    </p>
-                )}
+                    ))}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const compartirHistoria = (red) => {
         if (!historia) return;
@@ -1110,69 +1086,88 @@ const LecturaHistoria = ({ userAuth }) => {
 
                     {renderizarTextoConMedios(historia.contenido || historia.cuerpo || t('readNoContent'))}
                     
-                    {historia.fuente_url && (
-                        <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                    {/* ENLACE A FUENTE ORIGINAL (si no es enlace de youtube) */}
+                    {historia.fuente_url && !extractYouTubeId(historia.fuente_url) && (
+                        <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid rgba(0,0,0,0.08)', textAlign: 'center' }}>
                             <a 
                                 href={historia.fuente_url} 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
                                 className="btn-technical-link highlight"
-                                style={{ display: 'inline-block', textDecoration: 'none', padding: '10px 22px', background: '#EAEAE5', border: '1px solid #D0D0C8', color: '#1a5235', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '0.5px', borderRadius: '4px' }}
+                                style={{ display: 'inline-block', textDecoration: 'none', padding: '10px 22px', background: '#FFF7ED', border: '1px solid #fed7aa', color: '#9c4221', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '0.5px', borderRadius: '4px' }}
                             >
                                 🌐 {t('readSource')}
                             </a>
                         </div>
                     )}
                     
-                    {historia.youtube_url && (() => {
-                        // Extract video ID from YouTube URL
-                        const extractYouTubeId = (url) => {
-                            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-                            return match ? match[1] : null;
-                        };
-                        const videoId = extractYouTubeId(historia.youtube_url);
+                    {/* REPRODUCTOR DE VÍDEO YOUTUBE OFICIAL */}
+                    {(() => {
+                        const ytCandidate = historia.youtube_url || 
+                                           (historia.fuente_url && /youtu/i.test(historia.fuente_url) ? historia.fuente_url : null) ||
+                                           (historia.video_url && /youtu/i.test(historia.video_url) ? historia.video_url : null) ||
+                                           (historia.url && /youtu/i.test(historia.url) ? historia.url : null);
+                        const videoId = extractYouTubeId(ytCandidate);
                         if (!videoId) return null;
                         return (
-                            <div style={{ margin: '25px 0', textAlign: 'center' }}>
-                                <div style={{ border: '1px solid rgba(0,0,0,0.15)', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.15)', maxWidth: '560px', margin: '0 auto' }}>
+                            <div style={{ margin: '30px 0', textAlign: 'center' }}>
+                                <div style={{
+                                    position: 'relative',
+                                    paddingBottom: '56.25%',
+                                    height: 0,
+                                    overflow: 'hidden',
+                                    borderRadius: '8px',
+                                    border: '1px solid #E2E8F0',
+                                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                                    maxWidth: '680px',
+                                    margin: '0 auto',
+                                    background: '#000'
+                                }}>
                                     <iframe 
-                                        width="100%" height="315"
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            border: 0
+                                        }}
                                         src={`https://www.youtube.com/embed/${videoId}`}
-                                        title="Video YouTube"
-                                        frameBorder="0"
+                                        title="Video YouTube - Expediente X Granaíno"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         allowFullScreen
-                                        style={{ display: 'block' }}
                                     />
                                 </div>
-                                <p style={{ color: '#555', fontSize: '0.75rem', marginTop: '8px', fontFamily: 'monospace', letterSpacing: '1px' }}>📺 VER EN YOUTUBE</p>
+                                <p style={{ color: '#9c4221', fontSize: '0.8rem', marginTop: '10px', fontFamily: 'monospace', letterSpacing: '1px', fontWeight: 'bold' }}>
+                                    🎬 VÍDEO DEL EXPEDIENTE (CANAL OFICIAL)
+                                </p>
                             </div>
                         );
                     })()}
 
                     {/* SECCIÓN DE APOYO / PROPINA KO-FI */}
-                    <div style={{ marginTop: '35px', padding: '22px 24px', background: 'rgba(45,90,67,0.07)', border: '1px solid rgba(45,90,67,0.2)', borderRadius: '8px', textAlign: 'center' }}>
-                        <p style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#1F2421', fontFamily: 'Merriweather, serif' }}>
+                    <div style={{ marginTop: '35px', padding: '22px 24px', background: '#FFF7ED', border: '1px solid #fed7aa', borderRadius: '8px', textAlign: 'center' }}>
+                        <p style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#9c4221', fontFamily: 'Merriweather, serif' }}>
                             ☕ ¿Te ha gustado este artículo?
                         </p>
                         <p style={{ margin: '0 0 16px 0', fontSize: '0.88rem', color: '#444', fontFamily: 'Merriweather, serif', lineHeight: '1.6' }}>
-                            Si puedes y quieres, una pequeña propina ayuda mucho a mantener el servidor y seguir investigando. ¡Gracias agente! 🛸
+                            Si puedes y quieres, una pequeña propina ayuda mucho a mantener el servidor y seguir investigando. ¡Gracias por tu apoyo!
                         </p>
                         <a
                             href="https://ko-fi.com/expedientexgranaino"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn-kofi-cafe"
-                            style={{ display: 'inline-block', background: '#2D5A43', color: '#fff', padding: '10px 24px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem', letterSpacing: '0.5px', textDecoration: 'none' }}
+                            style={{ display: 'inline-block', background: '#9c4221', color: '#fff', padding: '10px 24px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem', letterSpacing: '0.5px', textDecoration: 'none' }}
                         >
                             ☕ INVÍTANOS A UN CAFÉ
                         </a>
                     </div>
 
-                    {/* SECCIÓN DE COMPARTIR TÁCTICO */}
-                    <div style={{ marginTop: '35px', paddingTop: '25px', borderTop: '1px solid rgba(0,0,0,0.1)', textAlign: 'center' }}>
-                        <p style={{ color: '#2D5A43', fontSize: '0.85rem', marginBottom: '15px', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '0.5px' }}>
-                            📡 {language === 'en' ? 'SHARE / COMPARTIR EN REDES' : 'DIFUNDIR EVIDENCIA / COMPARTIR EN REDES'}
+                    {/* SECCIÓN DE COMPARTIR */}
+                    <div style={{ marginTop: '35px', paddingTop: '25px', borderTop: '1px solid rgba(0,0,0,0.08)', textAlign: 'center' }}>
+                        <p style={{ color: '#9c4221', fontSize: '0.82rem', marginBottom: '15px', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                            {language === 'en' ? 'SHARE THIS INVESTIGATION' : 'DIFUNDIR ESTA INVESTIGACIÓN'}
                         </p>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                             <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>💬 WHATSAPP</button>
@@ -1185,26 +1180,18 @@ const LecturaHistoria = ({ userAuth }) => {
                     </div>
                 </div>
                 
-                {/* LAYOUT DE PIE DE EXPEDIENTE: LIBROS + COMENTARIOS AL LADO */}
-                {biblioData ? (
+                {/* LAYOUT DE PIE DE EXPEDIENTE: LIBROS RECOMENDADOS */}
+                {biblioData && (
                     <div className="lectura-historia-footer-layout" style={{
-                        display: 'flex',
-                        gap: '40px',
-                        marginTop: '50px',
-                        alignItems: 'flex-start',
+                        marginTop: '40px',
                         width: '100%',
-                        flexWrap: 'wrap',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                        paddingTop: '30px'
+                        borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+                        paddingTop: '25px'
                     }}>
-                        <div style={{ flex: '1 1 300px', minWidth: '280px' }}>
-                            <ReferenceBibliography libros={biblioData} customStyle={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }} />
-                        </div>
-                        {renderComentariosBox(true)}
+                        <ReferenceBibliography libros={biblioData} customStyle={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }} />
                     </div>
-                ) : (
-                    renderComentariosBox(false)
                 )}
+                {renderComentariosBox(false)}
 
                 {/* SI TE GUSTÓ ESTE MISTERIO... ARTÍCULOS RELACIONADOS */}
                 <ArticulosRelacionados currentId={id} currentSrc={src} />

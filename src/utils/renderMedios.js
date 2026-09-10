@@ -70,28 +70,44 @@ export const renderizarTextoConMedios = (texto) => {
             }
 
             if (targetUrl) {
-                // Vídeo de YouTube suelto
-                if (!htmlHref && !mdUrl && targetUrl.match(/(youtube\.com\/watch\?v=|youtu\.be\/)/)) {
-                    const videoId = targetUrl.includes('v=') 
-                        ? targetUrl.split('v=')[1]?.split('&')[0] 
-                        : targetUrl.split('youtu.be/')[1]?.split('?')[0];
-
-                    if (videoId) {
-                        componentes.push(
-                            <span key={`yt-${indexLinea}-${match.index}`} style={{ display: 'block', margin: '15px 0' }}>
+                // Vídeo de YouTube (suelto o embebido)
+                const ytMatch = targetUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/|v\/))([\w-]{11})/i);
+                if (ytMatch && ytMatch[1]) {
+                    const videoId = ytMatch[1];
+                    componentes.push(
+                        <span key={`yt-${indexLinea}-${match.index}`} style={{ display: 'block', margin: '20px 0' }}>
+                            <div style={{
+                                position: 'relative',
+                                paddingBottom: '56.25%',
+                                height: 0,
+                                overflow: 'hidden',
+                                borderRadius: '8px',
+                                border: '1px solid #E2E8F0',
+                                boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                                maxWidth: '680px',
+                                margin: '0 auto',
+                                background: '#000'
+                            }}>
                                 <iframe 
-                                    width="100%" 
-                                    height="315" 
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        border: 0
+                                    }}
                                     src={`https://www.youtube.com/embed/${videoId}`} 
+                                    title="Video YouTube"
                                     frameBorder="0" 
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowFullScreen>
-                                </iframe>
-                            </span>
-                        );
-                        lastIndex = tokenRegex.lastIndex;
-                        continue;
-                    }
+                                    allowFullScreen
+                                />
+                            </div>
+                        </span>
+                    );
+                    lastIndex = tokenRegex.lastIndex;
+                    continue;
                 }
 
                 // Imagen suelta
