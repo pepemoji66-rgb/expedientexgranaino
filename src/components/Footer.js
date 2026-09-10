@@ -58,6 +58,16 @@ const Footer = ({ visitasTotales = 0 }) => {
                     <Link to="/legal" style={{ color: '#888', marginRight: '15px', textDecoration: 'none' }}>{t('navLegal')}</Link>
                     <Link to="/sobre-nosotros" style={{ color: '#888', textDecoration: 'none' }}>{t('navAboutProject')}</Link>
                 </div>
+
+                {/* ACCESOS SECUNDARIOS — herramientas y extras */}
+                <div style={{ margin: '8px 0', fontSize: '0.68rem', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <Link to="/la-ruleta" style={{ color: '#666', textDecoration: 'none' }}>🎡 La Ruleta</Link>
+                    <Link to="/galeria" style={{ color: '#666', textDecoration: 'none' }}>🖼️ Galería</Link>
+                    <Link to="/videos" style={{ color: '#666', textDecoration: 'none' }}>📼 Vídeos</Link>
+                    <Link to="/lugares" style={{ color: '#666', textDecoration: 'none' }}>🗺️ Mapa</Link>
+                    <Link to="/especial-atarfe" style={{ color: '#666', textDecoration: 'none' }}>📂 Dossier Atarfe</Link>
+                </div>
+
                 <div className="footer-contact">
                     <span className="contact-label">{t('footerContact')}</span>
                     <a href="mailto:archipegv2@gmail.com" className="contact-link">archipegv2@gmail.com</a>
