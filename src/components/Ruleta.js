@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
@@ -363,6 +364,7 @@ const Ruleta = () => {
 
     return (
         <div className="ruleta-container">
+            <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
             {/* Navegación */}
             <div className="ruleta-nav">
                 <Link to="/" className="btn-volver-bunker-ruleta">

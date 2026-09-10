@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './galeria.css';
@@ -298,6 +299,7 @@ const Galeria = ({ userAuth }) => {
 
     return (
         <div className="galeria-page">
+            <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
             <header className="galeria-header">
                 <div className="linea-neon-superior"></div>
                 <h1 className="titulo-neon">{t('galleryTitle')}</h1>

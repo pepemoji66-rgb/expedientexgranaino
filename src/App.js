@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -215,6 +216,7 @@ function App() {
   };
 
   return (
+    <HelmetProvider>
     <Router>
       <ScrollToTop />
       <RetentionTracker userAuth={userAuth} />
@@ -242,18 +244,13 @@ function App() {
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {[
                 { path: "/", label: t('navHome') },
-                { path: "/galeria", label: t('navGallery') },
-                { path: "/videos", label: t('navVideos') },
                 { path: "/noticias", label: t('navNews') },
                 { path: "/expedientes", label: t('navFiles') },
-                { path: "/especial-atarfe", label: t('sysSidebarDossier') },
-                { path: "/lugares", label: t('navMap') },
-                { path: "/la-ruleta", label: "🎡 LA RULETA" },
                 { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
                 { path: "/misterios-historicos", label: "👁️ " + t('navMysteries') },
-                { path: "/archipeg", label: "💻 ARCHIPEG PRO" },
                 { path: "/biblioteca", label: "📚 BIBLIOTECA DEL BÚNKER" },
                 { path: "/colaboradores", label: "🏅 COLABORADORES" },
+                { path: "/archipeg", label: "💻 ARCHIPEG PRO" },
                 { path: "/privacidad", label: "🔒 PRIVACIDAD" },
                 { path: "/cookies", label: "🍪 COOKIES" },
                 { path: "/legal", label: "⚖️ AVISO LEGAL" }
@@ -423,6 +420,7 @@ function App() {
         </div>
       )}
   </Router>
+  </HelmetProvider>
 );
 
 }

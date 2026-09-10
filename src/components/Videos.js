@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 // import Zoom from 'react-medium-image-zoom';
 // import 'react-medium-image-zoom/dist/styles.css';
@@ -236,6 +237,7 @@ const Videos = ({ userAuth }) => {
         <div className="videos-container fade-in" style={{
             display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: '20px'
         }}>
+            <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
             <h1 style={{
                 textAlign: 'center', color: '#fff', 
                 fontFamily: 'Inter, sans-serif', textTransform: 'uppercase',

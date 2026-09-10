@@ -31,8 +31,6 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const evidenceMenuItems = [
-        { path: "/galeria", label: "🖼️ " + t('navGallery') },
-        { path: "/videos", label: "📼 " + t('navVideos') },
         { path: "/noticias", label: "📰 " + t('navNews') },
         { path: "/expedientes", label: "📁 " + t('navFiles') },
         { path: "/casos-abiertos", label: "💀 TRUE CRIME" },
@@ -40,16 +38,10 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     ];
 
     const otherMenuItems = [
-        { path: "/lugares", label: t('navMap') },
         { path: "/sobre-nosotros", label: "🕵️ " + (language === 'en' ? 'ABOUT ME' : 'SOBRE MÍ') },
         { path: "/biblioteca", label: "📚 " + (language === 'en' ? 'LIBRARY' : 'BIBLIOTECA') },
         { path: "/archipeg", label: language === 'en' ? "💻 SOFTWARE" : "💻 SOFTWARE" }
     ];
-
-    // La Ruleta siempre visible en el menú
-    otherMenuItems.push(
-        { path: "/la-ruleta", label: "🎡 LA RULETA" }
-    );
 
     const isAdmin = userAuth && (
         (userAuth.email && userAuth.email.toLowerCase() === (ADMIN_EMAIL || 'archipegv2@gmail.com').toLowerCase()) ||

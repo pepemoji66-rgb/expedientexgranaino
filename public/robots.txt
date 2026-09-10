@@ -1,7 +1,21 @@
+# robots.txt — Expediente X Granaíno
 # https://www.robotstxt.org/robotstxt.html
+
 User-agent: *
+Allow: /
 Disallow: /panel-mando
 Disallow: /acceso
 Disallow: /api/
+
+# Googlebot — acceso total a contenido editorial
+User-agent: Googlebot
+Allow: /
+Disallow: /panel-mando
+Disallow: /acceso
+Disallow: /api/
+
+# Mediapartners-Google (AdSense crawler) — acceso total
+User-agent: Mediapartners-Google
+Allow: /
 
 Sitemap: https://expedientexgranaino.com/sitemap.xml

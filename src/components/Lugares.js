@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
@@ -242,6 +243,7 @@ const Lugares = () => {
 
     return (
         <section className="seccion-radar-total">
+            <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
             {/* PANEL DE FILTROS TÁCTICO */}
             <div className="radar-filtros-panel">
                 <div

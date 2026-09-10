@@ -1909,25 +1909,20 @@ app.get('/sitemap.xml', async (req, res) => {
         const urls = [];
 
         // 1. URLs estáticas principales del Búnker
+        // NOTA: se excluyen páginas thin-content (videos, galería, mapa, ruleta, atarfe)
+        // para que AdSense y Google sólo auditen las 4 categorías editoriales de valor
         const estaticas = [
             { path: '/',                     priority: '1.0', changefreq: 'daily' },
             { path: '/expedientes',          priority: '0.9', changefreq: 'daily' },
             { path: '/casos-abiertos',       priority: '0.9', changefreq: 'daily' },
             { path: '/misterios-historicos', priority: '0.9', changefreq: 'daily' },
             { path: '/noticias',             priority: '0.9', changefreq: 'daily' },
-            { path: '/especial-atarfe',      priority: '0.8', changefreq: 'weekly' },
-            { path: '/videos',               priority: '0.7', changefreq: 'weekly' },
-            { path: '/galeria',              priority: '0.7', changefreq: 'weekly' },
-            { path: '/lugares',              priority: '0.7', changefreq: 'weekly' },
-            { path: '/biblioteca',           priority: '0.7', changefreq: 'weekly' },
-            { path: '/la-ruleta',            priority: '0.8', changefreq: 'daily' },
+            { path: '/biblioteca',           priority: '0.6', changefreq: 'weekly' },
             { path: '/colaboradores',        priority: '0.5', changefreq: 'monthly' },
-            { path: '/archipeg',             priority: '0.5', changefreq: 'monthly' },
             { path: '/sobre-nosotros',       priority: '0.5', changefreq: 'monthly' },
-            { path: '/acceso',               priority: '0.4', changefreq: 'monthly' },
             { path: '/privacidad',           priority: '0.3', changefreq: 'yearly' },
             { path: '/cookies',              priority: '0.3', changefreq: 'yearly' },
-            { path: '/aviso-legal',          priority: '0.3', changefreq: 'yearly' }
+            { path: '/legal',               priority: '0.3', changefreq: 'yearly' }
         ];
 
         estaticas.forEach(p => {

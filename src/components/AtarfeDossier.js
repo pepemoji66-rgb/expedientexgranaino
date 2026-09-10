@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
@@ -85,6 +86,7 @@ const AtarfeDossier = () => {
 
     return (
         <div className="atarfe-dossier-container">
+            <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px', flexWrap: 'wrap' }}>
                 <button
                     onClick={() => navigate('/')}
