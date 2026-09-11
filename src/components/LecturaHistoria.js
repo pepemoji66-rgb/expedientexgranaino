@@ -1176,9 +1176,6 @@ const LecturaHistoria = ({ userAuth }) => {
                             <button onClick={() => compartirHistoria('copiar')} className="btn-share-tactico" style={{ background: '#444', color: '#fff', border: '1px solid #666', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>🔗 COPIAR ENLACE</button>
                         </div>
                     </div>
-
-                    {/* ANUNCIO PUBLICITARIO ADSTERRA */}
-                    <AdSlot id="lectura-inline" format="banner300" />
                 </div>
                 
                 {/* LAYOUT DE PIE DE EXPEDIENTE: LIBROS RECOMENDADOS */}
