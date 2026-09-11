@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import FiltrosTematicos from './FiltrosTematicos';
+import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
 import { API_BASE_URL } from '../config';
 import './Indice.css';
@@ -352,6 +353,9 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                     </div>
                 </section>
             )}
+
+            {/* PUBLICIDAD ADSTERRA NATIVA EN PORTADA */}
+            <AdSlot id="home-feed" format="native" />
 
             {/* TARJETA EDITORIAL DEL FUNDADOR */}
             <section className="editorial-author-block">
