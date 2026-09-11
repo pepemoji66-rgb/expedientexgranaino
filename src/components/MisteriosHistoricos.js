@@ -136,8 +136,6 @@ const MisteriosHistoricos = () => {
                 </button>
             </div>
 
-            <AdSlot slotId="misterios-top" />
-
             {/* BUSCADOR Y ÍNDICE A-Z TÁCTICO */}
             <BuscadorAZ 
                 busqueda={busqueda}

@@ -275,8 +275,6 @@ const CasosAbiertos = ({ userAuth }) => {
                 {language === 'en' ? 'TRUE CRIME & UNEXPLAINED MYSTERIES' : 'TRUE CRIME & MISTERIOS SIN RESOLVER'}
             </p>
 
-            <AdSlot id="casos-top" />
-
             {/* BUSCADOR Y ÍNDICE A-Z TÁCTICO */}
             <BuscadorAZ 
                 busqueda={busqueda}

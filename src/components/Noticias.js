@@ -237,9 +237,6 @@ const Noticias = ({ userAuth }) => {
                 placeholder="Buscar noticias por alerta, titular, ubicación..."
             />
 
-            {/* PUBLICIDAD ADSTERRA NATIVA EN NOTICIAS */}
-            <AdSlot id="noticias-top" format="native" />
-
             <div className="noticias-grid">
                 {Array.isArray(noticiasPaginadas) && noticiasPaginadas.length > 0 ? (
                     noticiasPaginadas.map((item) => (
@@ -320,6 +317,9 @@ const Noticias = ({ userAuth }) => {
 
             {/* FEED RSS EN VIVO - NOTICIAS EXTERNAS */}
             <NoticiasExternas />
+
+            {/* PUBLICIDAD DISCRETA AL PIE */}
+            <AdSlot id="noticias-bottom" format="native" />
 
 
 
