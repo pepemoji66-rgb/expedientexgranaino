@@ -21,8 +21,8 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
             try {
                 setLoadingContent(true);
                 const [resExp, resNot, resCasos, resMisterios, resComs] = await Promise.allSettled([
-                    axios.get(`${API_BASE_URL}/api/expedientes/ultimos`),
-                    axios.get(`${API_BASE_URL}/api/noticias/ultimas`),
+                    axios.get(`${API_BASE_URL}/api/expedientes`),
+                    axios.get(`${API_BASE_URL}/api/galeria/noticias-publicas`),
                     axios.get(`${API_BASE_URL}/api/casos`),
                     axios.get(`${API_BASE_URL}/api/misterios-historicos`),
                     axios.get(`${API_BASE_URL}/api/comentarios/recientes`)

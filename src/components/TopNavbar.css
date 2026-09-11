@@ -3,17 +3,17 @@
    ============================================= */
 .editorial-header {
     width: 100%;
-    background: #FFFFFF;
-    border-bottom: 2px solid #1A1A1A;
+    background: #9c4221;
+    border-bottom: 2px solid #7a3319;
     position: sticky;
     top: 0;
     z-index: 1500;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* FILA 1: SUPERIOR (METADATOS, LOGO Y ACCESOS) */
 .header-top-bar {
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     padding: 12px 0;
 }
 
@@ -31,7 +31,7 @@
     display: flex;
     flex-direction: column;
     font-size: 0.75rem;
-    color: #64748B;
+    color: rgba(255, 255, 255, 0.8);
     text-transform: capitalize;
     font-family: var(--font-ui);
     min-width: 180px;
@@ -40,7 +40,7 @@
 .header-location {
     font-size: 0.7rem;
     font-weight: 600;
-    color: #1A1A1A;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 /* BRANDING CENTRAL */
@@ -61,7 +61,7 @@
     height: 46px;
     width: 46px;
     border-radius: 50%;
-    border: 1px solid #1A1A1A;
+    border: 2px solid rgba(255, 255, 255, 0.6);
     object-fit: cover;
 }
 
@@ -77,14 +77,14 @@
     font-size: 1.85rem;
     font-weight: 900;
     letter-spacing: 2px;
-    color: #1A1A1A;
+    color: #FFFFFF;
     line-height: 1.1;
 }
 
 .brand-tagline {
     font-size: 0.65rem;
     letter-spacing: 1.5px;
-    color: #64748B;
+    color: rgba(255, 255, 255, 0.75);
     font-weight: 700;
     text-transform: uppercase;
     margin-top: 3px;
@@ -104,10 +104,10 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    background: #F1F5F9;
+    background: rgba(0, 0, 0, 0.2);
     padding: 4px 8px;
     border-radius: 4px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .lang-btn {
@@ -115,35 +115,35 @@
     border: none;
     font-size: 0.75rem;
     font-weight: 700;
-    color: #64748B;
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
     padding: 2px 4px;
 }
 
 .lang-btn.active {
-    color: #1A1A1A;
+    color: #FFFFFF;
     font-weight: 900;
 }
 
 .lang-divider {
     font-size: 0.7rem;
-    color: #CBD5E1;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .btn-login-header {
     font-size: 0.75rem;
     font-weight: 800;
-    color: #1A1A1A;
+    color: #FFFFFF;
     text-decoration: none;
     letter-spacing: 1px;
-    border: 1px solid #1A1A1A;
+    border: 1px solid rgba(255, 255, 255, 0.6);
     padding: 6px 14px;
     border-radius: 3px;
     transition: 0.2s;
 }
 
 .btn-login-header:hover {
-    background: #1A1A1A;
+    background: rgba(255, 255, 255, 0.2);
     color: #FFFFFF;
 }
 
@@ -154,29 +154,30 @@
 }
 
 .btn-admin-header {
-    background: #1e3a2b;
+    background: rgba(0, 0, 0, 0.25);
     color: #fff;
     font-size: 0.7rem;
     font-weight: 800;
     text-decoration: none;
     padding: 5px 10px;
     border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .btn-account-header {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #1A1A1A;
+    color: #FFFFFF;
     text-decoration: none;
-    border: 1px solid #E2E8F0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
     padding: 5px 10px;
     border-radius: 3px;
 }
 
 .btn-logout-header {
     background: none;
-    border: 1px solid #E2E8F0;
-    color: #64748B;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.8);
     padding: 5px;
     border-radius: 3px;
     cursor: pointer;
@@ -185,15 +186,15 @@
 }
 
 .btn-logout-header:hover {
-    color: #dc2626;
-    border-color: #dc2626;
+    color: #fca5a5;
+    border-color: #fca5a5;
 }
 
 .editorial-hamburger {
-    background: #f8f9fa;
-    border: 1px solid #cbd5e1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 4px;
-    color: #1A1A1A;
+    color: #FFFFFF;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -204,8 +205,8 @@
 }
 
 .editorial-hamburger:hover {
-    background: #e2e8f0;
-    border-color: #94a3b8;
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
 }
 
 /* FILA 2: BARRA DE NAVEGACI�N INFERIOR */
@@ -374,17 +375,11 @@
     }
 
     .editorial-lang-switch {
-        padding: 2px 4px;
+        display: none;
     }
 
-    .lang-btn {
-        font-size: 0.68rem;
-        padding: 2px;
-    }
-
-    .btn-login-header, .btn-account-header {
-        padding: 5px 8px;
-        font-size: 0.7rem;
+    .btn-account-header {
+        display: none;
     }
 
     .btn-admin-header {
