@@ -176,6 +176,19 @@
     text-decoration: underline;
 }
 
+.footer-visitas {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #9c4221;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+.footer-visitas strong {
+    font-size: 1rem;
+    color: #7a3319;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
     .footer-disclaimers-grid {

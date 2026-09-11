@@ -74,6 +74,11 @@ const Footer = ({ visitasTotales = 0 }) => {
                 </div>
 
                 <div className="footer-copyright">
+                    {visitasTotales > 0 && (
+                        <p className="footer-visitas">
+                            📡 {t('footerVisits') || 'VISITAS AL BÚNKER:'} <strong>{visitasTotales.toLocaleString('es-ES')}</strong>
+                        </p>
+                    )}
                     <p>&copy; {añoActual} EXPEDIENTE X GRANAÍNO · Todos los derechos reservados · Contacto editorial: <a href="mailto:archipegv2@gmail.com">archipegv2@gmail.com</a></p>
                 </div>
             </div>
