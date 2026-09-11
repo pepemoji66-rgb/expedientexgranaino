@@ -318,11 +318,6 @@ const Noticias = ({ userAuth }) => {
             {/* FEED RSS EN VIVO - NOTICIAS EXTERNAS */}
             <NoticiasExternas />
 
-            {/* PUBLICIDAD DISCRETA AL PIE */}
-            <AdSlot id="noticias-bottom" format="native" />
-
-
-
             {userAuth && (
                 <div className="contenedor-form-noticia">
                     <Forms title={t('reportEvidence')} onSubmit={enviarPropuesta} onClear={() => { }}>

@@ -10,8 +10,6 @@ const Footer = ({ visitasTotales = 0 }) => {
 
     return (
         <footer className="footer-editorial">
-            <AdSlot id="footer-top" />
-            
             <div className="footer-editorial-container">
                 {/* BLOQUE INFORMATIVO Y DIRECTIVAS */}
                 <div className="footer-disclaimers-grid">

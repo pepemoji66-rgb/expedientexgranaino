@@ -228,8 +228,6 @@ const MisteriosHistoricos = () => {
 
             {/* PAGINACIÓN */}
             <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} onChange={setPaginaActual} storageKey="page_misterios" />
-
-            <AdSlot slotId="misterios-bottom" />
         </div>
     );
 };

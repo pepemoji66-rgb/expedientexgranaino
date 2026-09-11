@@ -354,9 +354,6 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                 </section>
             )}
 
-            {/* PUBLICIDAD ADSTERRA NATIVA EN PORTADA */}
-            <AdSlot id="home-feed" format="native" />
-
             {/* TARJETA EDITORIAL DEL FUNDADOR */}
             <section className="editorial-author-block">
                 <div className="author-block-avatar">

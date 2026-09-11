@@ -694,7 +694,6 @@ const Expedientes = () => {
                     </div>
                 </div>
             )}
-            <AdSlot id="expedientes-bottom" />
         </div>
     );
 };
