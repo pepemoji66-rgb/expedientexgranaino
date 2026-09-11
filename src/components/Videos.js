@@ -247,8 +247,6 @@ const Videos = ({ userAuth }) => {
                 VÍDEOS Y EVIDENCIAS
             </h1>
 
-            <AdSlot id="videos-top" />
-
             {userAuth && (
                 <div style={{ textAlign: 'center', marginBottom: '35px' }}>
                     <a href="#formulario-subida" style={{

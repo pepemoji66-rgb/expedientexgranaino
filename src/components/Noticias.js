@@ -9,6 +9,7 @@ import './noticias.css';
 import API_BASE_URL from '../config';
 import NoticiasExternas from './NoticiasExternas';
 import Paginacion, { getPaginaGuardada } from './Paginacion';
+import AdSlot from './AdSlot';
 
 const buildAmazonMaps = (todos) => {
     const keys = new Set();
@@ -235,6 +236,9 @@ const Noticias = ({ userAuth }) => {
                 totalResultados={noticiasFiltradas.length}
                 placeholder="Buscar noticias por alerta, titular, ubicación..."
             />
+
+            {/* PUBLICIDAD ADSTERRA NATIVA EN NOTICIAS */}
+            <AdSlot id="noticias-top" format="native" />
 
             <div className="noticias-grid">
                 {Array.isArray(noticiasPaginadas) && noticiasPaginadas.length > 0 ? (
