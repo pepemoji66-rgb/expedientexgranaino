@@ -853,9 +853,11 @@ ${articleTags}
 <meta name="twitter:title" content="${title}" />
 <meta name="twitter:description" content="${desc}" />
 <meta name="twitter:image" content="${img}" />
-<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`;
+<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>\n`;
 
-    html = html.replace('</head>', `${ogBlock}\n</head>`);
+    // Inyectamos las meta tags Open Graph inmediatamente después de <head>
+    // para que Facebook las lea en el primer bloque de bytes sin esperar a que cargue el resto del head
+    html = html.replace(/<head>/i, `<head>\n${ogBlock}`);
 
     // Eliminamos el aviso por defecto de React para que el bot de Google (y AdSense) no lo lea como prioritario
     html = html.replace(/<noscript>You need to enable JavaScript to run this app\.<\/noscript>/ig, '');
@@ -2090,63 +2092,6 @@ const limpiarTextoSnippet = (texto, maxLen = 180) => {
     const plano = texto.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     return plano.length > maxLen ? plano.substring(0, maxLen) + '...' : plano;
 };
-
-// RUTA DINÁMICA /leer-historia/:id — Inyecta Open Graph para Facebook, WhatsApp, Twitter y lectores
-app.get('/leer-historia/:id', async (req, res) => {
-    const { id } = req.params;
-    const { src } = req.query;
-
-    try {
-        let articulo = null;
-
-        // Si sabemos el origen por el parámetro ?src=
-        if (src === 'noticias') {
-            const rows = await db.query("SELECT id, titulo, cuerpo AS contenido, imagen_url FROM noticias WHERE id = ?", [id]);
-            if (rows && rows.length > 0) articulo = rows[0];
-        } else if (src === 'casos') {
-            const rows = await db.query("SELECT id, titulo, contenido, imagen_url FROM casos_abiertos WHERE id = ?", [id]);
-            if (rows && rows.length > 0) articulo = rows[0];
-        } else if (src === 'misterios') {
-            const rows = await db.query("SELECT id, titulo, contenido, imagen_url FROM misterios_historicos WHERE id = ?", [id]);
-            if (rows && rows.length > 0) articulo = rows[0];
-        } else if (src === 'expedientes') {
-            const rows = await db.query("SELECT id, titulo, contenido, imagen_url FROM expedientes WHERE id = ?", [id]);
-            if (rows && rows.length > 0) articulo = rows[0];
-        }
-
-        // Si no viene ?src= o no se encontró en la tabla indicada, buscar en cascada
-        if (!articulo) {
-            const [exp, casos, mist, noti] = await Promise.allSettled([
-                db.query("SELECT id, titulo, contenido, imagen_url FROM expedientes WHERE id = ?", [id]),
-                db.query("SELECT id, titulo, contenido, imagen_url FROM casos_abiertos WHERE id = ?", [id]),
-                db.query("SELECT id, titulo, contenido, imagen_url FROM misterios_historicos WHERE id = ?", [id]),
-                db.query("SELECT id, titulo, cuerpo AS contenido, imagen_url FROM noticias WHERE id = ?", [id])
-            ]);
-
-            if (exp.status === 'fulfilled' && exp.value.length > 0) articulo = exp.value[0];
-            else if (casos.status === 'fulfilled' && casos.value.length > 0) articulo = casos.value[0];
-            else if (mist.status === 'fulfilled' && mist.value.length > 0) articulo = mist.value[0];
-            else if (noti.status === 'fulfilled' && noti.value.length > 0) articulo = noti.value[0];
-        }
-
-        let html = getIndexHtml();
-
-        if (articulo) {
-            const tags = {
-                title: articulo.titulo || 'Expediente X Granaíno',
-                description: limpiarTextoSnippet(articulo.contenido),
-                image: formatearUrlImagen(articulo.imagen_url),
-                url: `${SITE_URL}/leer-historia/${id}${src ? `?src=${src}` : ''}`
-            };
-            html = injectOgTags(html, tags);
-        }
-
-        res.send(html);
-    } catch (err) {
-        console.error("⚠️ Error generando Open Graph dinámico para /leer-historia/:id:", err.message);
-        res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    }
-});
 
 // Redirecciones 301 limpias para URLs directas de sección hacia la ruta unificada /leer-historia/:id?src=
 app.get('/noticias/:id', (req, res) => {

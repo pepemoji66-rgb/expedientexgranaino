@@ -799,9 +799,9 @@ const LecturaHistoria = ({ userAuth }) => {
         // Enlaces directos optimizados con tags para cada plataforma
         let link = '';
         if (red === 'fbhistoria') {
-            // Historia de Facebook: usar navigator.share nativo para que aparezca la opción de Historia
+            // Historia de Facebook: pasar url para que la app de Facebook genere la tarjeta con portada
             if (navigator.share) {
-                navigator.share({ title: historia.titulo || 'Expediente X Granaíno', text: textoCompartir, url: url });
+                navigator.share({ title: historia.titulo || 'Expediente X Granaíno', url: url });
             } else {
                 window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
             }

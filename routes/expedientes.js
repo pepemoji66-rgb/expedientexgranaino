@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 module.exports = (db, upload) => {
 
@@ -149,6 +150,15 @@ module.exports = (db, upload) => {
                 } catch (galErr) {
                     console.warn('⚠️ No se pudo auto-insertar en galería:', galErr.message);
                 }
+            }
+            // 🌐 PRE-CALENTAMIENTO AUTOMÁTICO PARA FACEBOOK
+            // Avisamos al scraper de Facebook en segundo plano para que guarde la imagen y título inmediatamente
+            if (insertId) {
+                const srcParam = (catLow === 'noticia') ? 'noticias' : (catLow === 'caso' || catLow === 'cronica_negra' || catLow === 'truecrime') ? 'casos' : (catLow === 'misterio') ? 'misterios' : 'expedientes';
+                const urlArticulo = `https://expedientexgranaino.com/leer-historia/${insertId}?src=${srcParam}`;
+                axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true`, {}, { timeout: 5000 })
+                    .then(() => console.log(`📡 [FB SCRAPER] Imagen y título pre-cargados con éxito para: ${urlArticulo}`))
+                    .catch(() => {});
             }
 
             res.json({ mensaje: "✅ Registro enviado y archivado.", id: insertId });
