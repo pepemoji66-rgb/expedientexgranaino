@@ -781,9 +781,20 @@ const LecturaHistoria = ({ userAuth }) => {
             return;
         }
 
-        // Solo usar navigator.share en móviles para redes que no sean Facebook
-        // Facebook SIEMPRE usa el enlace directo para que cargue bien la vista previa con imagen
-        if (red !== 'facebook' && navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // En móviles: Si el navegador soporta navigator.share, usar el menú nativo del teléfono
+        // Esto permite compartir directamente a la APP OFICIAL de Facebook (Grupos, Feed, Historias) con imagen
+        const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (esMovil && navigator.share && (red === 'facebook' || red === 'fbhistoria')) {
+            navigator.share({
+                title: historia.titulo || 'Expediente X Granaíno',
+                url: url
+            }).catch(() => {});
+            return;
+        }
+
+        // Para el resto de redes en móvil (WhatsApp, etc.)
+        if (esMovil && navigator.share && red !== 'facebook' && red !== 'whatsapp') {
             try {
                 navigator.share({
                     title: historia.titulo || 'Expediente X Granaíno',
@@ -796,16 +807,10 @@ const LecturaHistoria = ({ userAuth }) => {
             }
         }
 
-        // Enlaces directos optimizados con tags para cada plataforma
+        // Enlaces directos para PC o navegadores sin share nativo
         let link = '';
         if (red === 'fbhistoria') {
-            // Historia de Facebook: pasar url para que la app de Facebook genere la tarjeta con portada
-            if (navigator.share) {
-                navigator.share({ title: historia.titulo || 'Expediente X Granaíno', url: url });
-            } else {
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
-            }
-            return;
+            link = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         } else if (red === 'whatsapp') {
             link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir + '\n' + url)}`;
         } else if (red === 'facebook') {
