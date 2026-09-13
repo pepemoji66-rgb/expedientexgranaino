@@ -107,7 +107,7 @@ app.use((req, res, next) => {
     if (esRecursoEstatico || req.path === '/ads.txt') return next();
 
     // Lista blanca: Buscadores, redes sociales Y Amazon (afiliados, verificación de enlaces)
-    const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot|amazonbot|amazon|ia_archiver|slurp/i.test(userAgent);
+    const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebook|facebookexternalhit|facebot|meta-externalagent|twitterbot|whatsapp|telegrambot|linkedinbot|amazonbot|amazon|ia_archiver|slurp/i.test(userAgent);
     if (isLegitBot) return next();
 
     // Lista negra por User-Agent: Firmas de bots claramente maliciosos
@@ -2039,41 +2039,114 @@ const isSocialCrawler = (ua) => {
 };
 
 const injectOgTags = (html, tags) => {
-    // Escapamos caracteres especiales para evitar problemas en los atributos HTML
     const esc = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // Inyectamos las metatags dinámicas justo después de <head>
-    // Los crawlers respetan la PRIMERA ocurrencia de cada propiedad OG,
-    // así que estas tienen prioridad sobre las estáticas que vienen después
+    // Eliminamos los meta OG y Twitter estáticos para que Facebook y WhatsApp tomen exclusivamente los del artículo
+    let cleanHtml = html
+        .replace(/<meta\s+property=["']og:[^"']*["'][^>]*>/gi, '')
+        .replace(/<meta\s+name=["']twitter:[^"']*["'][^>]*>/gi, '')
+        .replace(/<title>[^<]*<\/title>/i, '');
+
     const ogBlock = `
-  <!-- OG DINÁMICO SERVIDOR -->
-  <title>${esc(tags.title)}</title>
+  <title>${esc(tags.title)} | Expediente X Granaíno</title>
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Expediente X Granaíno" />
   <meta property="og:url" content="${esc(tags.url)}" />
   <meta property="og:title" content="${esc(tags.title)}" />
   <meta property="og:description" content="${esc(tags.description)}" />
   <meta property="og:image" content="${esc(tags.image)}" />
+  <meta property="og:image:secure_url" content="${esc(tags.image)}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${esc(tags.title)}" />
   <meta name="twitter:description" content="${esc(tags.description)}" />
-  <meta name="twitter:image" content="${esc(tags.image)}" />
-  <!-- /OG DINÁMICO -->`;
+  <meta name="twitter:image" content="${esc(tags.image)}" />`;
 
-    // Insertamos justo después de <head> (funciona aunque el HTML esté minificado)
-    return html.replace(/<head>/, `<head>${ogBlock}`);
+    return cleanHtml.replace(/<head>/i, `<head>${ogBlock}`);
 };
 
 const getIndexHtml = () => {
-
     const indexPath = path.join(__dirname, 'build', 'index.html');
     return fs.readFileSync(indexPath, 'utf-8');
 };
 
 const SITE_URL = 'https://expedientexgranaino.com';
 const DEFAULT_IMAGE = `${SITE_URL}/social-preview.png?v=7.0`;
+
+// Función auxiliar para normalizar la URL de la imagen para Facebook / WhatsApp
+const formatearUrlImagen = (img) => {
+    if (!img || typeof img !== 'string') return DEFAULT_IMAGE;
+    img = img.trim();
+    if (!img) return DEFAULT_IMAGE;
+    if (img.startsWith('http://') || img.startsWith('https://')) return img;
+    const nombreLimpio = img.split('/').pop();
+    return `${SITE_URL}/imagenes/${nombreLimpio}`;
+};
+
+// Función para limpiar texto y crear una descripción breve para Open Graph
+const limpiarTextoSnippet = (texto, maxLen = 180) => {
+    if (!texto) return 'Expediente clasificado del archivo de Expediente X Granaíno.';
+    const plano = texto.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return plano.length > maxLen ? plano.substring(0, maxLen) + '...' : plano;
+};
+
+// RUTA DINÁMICA /leer-historia/:id — Inyecta Open Graph para Facebook, WhatsApp, Twitter y lectores
+app.get('/leer-historia/:id', async (req, res) => {
+    const { id } = req.params;
+    const { src } = req.query;
+
+    try {
+        let articulo = null;
+
+        // Si sabemos el origen por el parámetro ?src=
+        if (src === 'noticias') {
+            const rows = await db.query("SELECT id, titulo, cuerpo AS contenido, imagen_url FROM noticias WHERE id = ?", [id]);
+            if (rows && rows.length > 0) articulo = rows[0];
+        } else if (src === 'casos') {
+            const rows = await db.query("SELECT id, titulo, contenido, imagen_url FROM casos_abiertos WHERE id = ?", [id]);
+            if (rows && rows.length > 0) articulo = rows[0];
+        } else if (src === 'misterios') {
+            const rows = await db.query("SELECT id, titulo, contenido, imagen_url FROM misterios_historicos WHERE id = ?", [id]);
+            if (rows && rows.length > 0) articulo = rows[0];
+        } else if (src === 'expedientes') {
+            const rows = await db.query("SELECT id, titulo, contenido, imagen_url FROM expedientes WHERE id = ?", [id]);
+            if (rows && rows.length > 0) articulo = rows[0];
+        }
+
+        // Si no viene ?src= o no se encontró en la tabla indicada, buscar en cascada
+        if (!articulo) {
+            const [exp, casos, mist, noti] = await Promise.allSettled([
+                db.query("SELECT id, titulo, contenido, imagen_url FROM expedientes WHERE id = ?", [id]),
+                db.query("SELECT id, titulo, contenido, imagen_url FROM casos_abiertos WHERE id = ?", [id]),
+                db.query("SELECT id, titulo, contenido, imagen_url FROM misterios_historicos WHERE id = ?", [id]),
+                db.query("SELECT id, titulo, cuerpo AS contenido, imagen_url FROM noticias WHERE id = ?", [id])
+            ]);
+
+            if (exp.status === 'fulfilled' && exp.value.length > 0) articulo = exp.value[0];
+            else if (casos.status === 'fulfilled' && casos.value.length > 0) articulo = casos.value[0];
+            else if (mist.status === 'fulfilled' && mist.value.length > 0) articulo = mist.value[0];
+            else if (noti.status === 'fulfilled' && noti.value.length > 0) articulo = noti.value[0];
+        }
+
+        let html = getIndexHtml();
+
+        if (articulo) {
+            const tags = {
+                title: articulo.titulo || 'Expediente X Granaíno',
+                description: limpiarTextoSnippet(articulo.contenido),
+                image: formatearUrlImagen(articulo.imagen_url),
+                url: `${SITE_URL}/leer-historia/${id}${src ? `?src=${src}` : ''}`
+            };
+            html = injectOgTags(html, tags);
+        }
+
+        res.send(html);
+    } catch (err) {
+        console.error("⚠️ Error generando Open Graph dinámico para /leer-historia/:id:", err.message);
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+});
 
 // Redirecciones 301 limpias para URLs directas de sección hacia la ruta unificada /leer-historia/:id?src=
 app.get('/noticias/:id', (req, res) => {
