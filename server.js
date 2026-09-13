@@ -80,6 +80,8 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 10000;
 
+app.set('trust proxy', 1);
+
 // --- 4. MIDDLEWARES ---
 app.use(compression()); // Gzip/Brotli — mejora TTFB y Core Web Vitals
 app.use(cors());
@@ -106,38 +108,23 @@ app.use((req, res, next) => {
     const esRecursoEstatico = /\.(js|css|png|jpg|jpeg|gif|webp|ico|svg|woff|woff2|ttf|map|json|txt)(\?.*)?$/.test(req.path);
     if (esRecursoEstatico || req.path === '/ads.txt') return next();
 
-    // Lista blanca: Buscadores, redes sociales Y Amazon (afiliados, verificación de enlaces)
-    const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebook|facebookexternalhit|facebot|meta-externalagent|twitterbot|whatsapp|telegrambot|linkedinbot|amazonbot|amazon|ia_archiver|slurp/i.test(userAgent);
+    // Lista blanca: Buscadores, redes sociales, navegadores de apps (FB, Instagram, WhatsApp) y Amazon
+    const isLegitBot = /googlebot|google-adwords|adsbot-google|mediapartners-google|bingbot|yandexbot|baiduspider|facebook|facebookexternalhit|facebot|meta-externalagent|fb_iab|fbav|fban|fbios|twitterbot|whatsapp|telegrambot|linkedinbot|amazonbot|amazon|ia_archiver|slurp/i.test(userAgent);
     if (isLegitBot) return next();
 
-    // Lista negra por User-Agent: Firmas de bots claramente maliciosos
+    // Lista negra por User-Agent: Firmas de bots claramente maliciosos o herramientas de scraping automatizado
     const isMaliciousUA = /headless|selenium|puppeteer|webdriver|scrapy|libwww|perl|python-urllib|python-requests|wget|curl\/|go-http|java\/|apachebench|mj12bot|semrushbot|ahrefsbot|dotbot|rogerbot|exabot|semrush|sogou|megaindex|semalt|uipresence|zgrab|masscan|nmap|sqlmap/i.test(userAgent);
     if (isMaliciousUA) {
         console.warn(`🛡️ ANTI-BOTS [UA]: Bloqueado -> UA: "${userAgent.substring(0, 80)}" | IP: ${ip}`);
         return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
     }
 
-    // Bloqueo por IP de datacenter SOLO si además el User-Agent está vacío o es muy genérico
-    // Así protegemos los bots legítimos de Amazon Afiliados que vienen de IPs de AWS
+    // Bloqueo estricto SOLO si el User-Agent está COMPLETAMENTE vacío
+    // (NUNCA bloquear por IP si hay un User-Agent de navegador normal, para no afectar a usuarios en 4G/5G o proxies)
     const sinUserAgent = !userAgent || userAgent.trim() === '';
-    const uaGenerico = /^mozilla\/5\.0\s*$/i.test(userAgent.trim());
-
-    if (sinUserAgent || uaGenerico) {
-        const ipPartes = ip.split('.').map(Number);
-        const primerOcteto = ipPartes[0];
-        const segundoOcteto = ipPartes[1];
-
-        const esDatacenter = (
-            (primerOcteto === 3 && segundoOcteto >= 80 && segundoOcteto <= 130) ||
-            (primerOcteto === 52 && [32, 33, 34, 35, 36, 37, 38, 39, 88, 89].includes(segundoOcteto)) ||
-            (primerOcteto === 54 && segundoOcteto >= 148) ||
-            (primerOcteto === 104 && segundoOcteto >= 16 && segundoOcteto <= 31)
-        );
-
-        if (esDatacenter) {
-            console.warn(`🛡️ ANTI-BOTS [IP+UA vacío]: Bloqueado -> IP: ${ip} | UA: "${userAgent.substring(0, 60)}"`);
-            return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
-        }
+    if (sinUserAgent) {
+        console.warn(`🛡️ ANTI-BOTS [UA vacío]: Bloqueado -> IP: ${ip}`);
+        return res.status(403).send("🔒 Acceso no autorizado por el protocolo del Búnker.");
     }
 
     next();
