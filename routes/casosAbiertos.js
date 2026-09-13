@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const axios = require('axios');
 
 module.exports = (upload) => {
     // --- OBTENER TODOS LOS CASOS (PÚBLICOS) ---
@@ -57,7 +58,8 @@ module.exports = (upload) => {
         `;
         const valores = [titulo, contenido, titulo_en || null, contenido_en || null, latitud || 0, longitud || 0, imagen_url || null, req.body.youtube_url || null];
         
-        await db.execute(query, valores);
+        const result = await db.execute(query, valores);
+        const insertId = result?.insertId || result?.[0]?.insertId;
 
         // 📸 AUTO-GALERÍA: Si hay imagen, la insertamos en la galería
         if (imagen_url) {
@@ -75,6 +77,14 @@ module.exports = (upload) => {
             } catch (galErr) {
                 console.warn('⚠️ No se pudo auto-insertar en galería (caso abierto):', galErr.message);
             }
+        }
+
+        // 🌐 PRE-CALENTAMIENTO FACEBOOK: para que la imagen aparezca en grupos inmediatamente
+        if (insertId) {
+            const urlArticulo = `https://expedientexgranaino.com/leer-historia/${insertId}?src=casos`;
+            axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true`, {}, { timeout: 5000 })
+                .then(() => console.log(`📡 [FB SCRAPER] Pre-cargado caso abierto: ${urlArticulo}`))
+                .catch(() => {});
         }
 
         res.status(201).json({ mensaje: "Caso Abierto registrado con éxito." });

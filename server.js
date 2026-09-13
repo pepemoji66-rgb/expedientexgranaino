@@ -912,7 +912,25 @@ const resolverImagenUrl = (req, rawImg) => {
         const { baseImgUrl } = obtenerUrlsRequest(req);
         url = `${baseImgUrl}/imagenes/${fileName}`;
     }
-    return url.replace(/ /g, '%20');
+    url = url.replace(/ /g, '%20');
+    return url;
+};
+
+// Optimizar imagen para OG tags (Facebook): convierte PNG/WEBP a JPEG ligero
+// f_jpg,q_85 = solo cambia formato, NO cambia dimensiones → Cache-Control: public (requerido por Facebook)
+// Reduce de ~7MB (PNG) a ~650KB (JPEG) sin perder calidad visible
+const optimizarImagenParaOG = (rawUrl) => {
+    if (!rawUrl) return rawUrl;
+    // Solo aplica a imágenes de Cloudinary
+    if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
+        // Si ya tiene transformaciones, no añadir más
+        if (/\/upload\/[a-z_,]+\//.test(rawUrl) && !rawUrl.includes('/upload/v')) {
+            return rawUrl;
+        }
+        // Insertar f_jpg,q_85 para conversión de formato (NO redimensiona → Cache-Control: public)
+        return rawUrl.replace('/upload/', '/upload/f_jpg,q_85/');
+    }
+    return rawUrl;
 };
 
 // Página de Inicio (/) - SEO enriquecido
@@ -1749,9 +1767,9 @@ app.get('/leer-historia/:id', async (req, res) => {
             cuerpoTexto = cuerpoTexto.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
             const desc = cuerpoTexto.length > 160 ? cuerpoTexto.substring(0, 157) + '...' : cuerpoTexto;
 
-            // Formar URL de la imagen
+            // Formar URL de la imagen — optimizada para OG (JPEG ligero, Cache-Control: public)
             const rawImg = historia.imagen_url || historia.url_imagen;
-            const imagenUrl = resolverImagenUrl(req, rawImg) || resolverImagenUrl(req, 'social-preview.png');
+            const imagenUrl = optimizarImagenParaOG(resolverImagenUrl(req, rawImg)) || resolverImagenUrl(req, 'social-preview.png');
             
             // Construir el parámetro src correspondiente
             const params = src ? `?src=${src}` : (esCaso ? '?src=casos' : esMisterio ? '?src=misterios' : esNoticia ? '?src=noticias' : '?src=expedientes');
