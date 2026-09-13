@@ -723,12 +723,10 @@ io.on('connection', (socket) => {
 
 // ==============================================
 // PRE-RENDER SSR PARA BOTS (AdSense / Googlebot)
-// Transforma URLs de Cloudinary para que tengan el tamaño mínimo exigido por Facebook (200x200)
-// y el tamaño óptimo para redes sociales (1200x630)
+// Preservar la URL original limpia para garantizar Cache-Control: public exigido por Facebook
 const cloudinaryOgImage = (url) => {
     if (!url) return url;
-    if (!url.includes('res.cloudinary.com')) return url;
-    return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,f_jpg,q_auto/');
+    return url;
 };
 
 // ==============================================
@@ -845,6 +843,8 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
 <meta property="og:description" content="${desc}" />
 <meta property="og:image" content="${img}" />
 <meta property="og:image:secure_url" content="${img}" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="${title}" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 ${articleTags}
