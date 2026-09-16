@@ -710,10 +710,25 @@ io.on('connection', (socket) => {
 
 // ==============================================
 // PRE-RENDER SSR PARA BOTS (AdSense / Googlebot)
-// Preservar la URL original limpia para garantizar Cache-Control: public exigido por Facebook
+// Transforma automáticamente a formato horizontal 1200x630 JPEG (~90KB) con auto-enfoque inteligente
+// y cabecera Cache-Control: public para que Facebook renderice la tarjeta grande inmediatamente
+const optimizarImagenParaOG = (rawUrl) => {
+    if (!rawUrl) return rawUrl;
+    if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
+        if (rawUrl.includes('/upload/c_fill,g_auto,w_1200,h_630')) {
+            return rawUrl;
+        }
+        if (/\/upload\/([a-z0-9_:,]+\/)?v\d+/.test(rawUrl)) {
+            return rawUrl.replace(/\/upload\/([a-z0-9_:,]+\/)?v/, '/upload/c_fill,g_auto,w_1200,h_630,f_jpg,q_85/v');
+        }
+        return rawUrl.replace('/upload/', '/upload/c_fill,g_auto,w_1200,h_630,f_jpg,q_85/');
+    }
+    return rawUrl;
+};
+
 const cloudinaryOgImage = (url) => {
     if (!url) return url;
-    return url;
+    return optimizarImagenParaOG(url);
 };
 
 // ==============================================
@@ -832,7 +847,9 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
 <meta property="og:image:secure_url" content="${img}" />
 <meta property="og:image:type" content="image/jpeg" />
 <meta property="og:image:alt" content="${title}" />
-${esHistoria ? '' : '<meta property="og:image:width" content="1200" />\n<meta property="og:image:height" content="630" />\n'}${articleTags}
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+${articleTags}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="${url}" />
 <meta name="twitter:title" content="${title}" />
@@ -899,23 +916,6 @@ const resolverImagenUrl = (req, rawImg) => {
     }
     url = url.replace(/ /g, '%20');
     return url;
-};
-
-// Optimizar imagen para OG tags (Facebook): convierte PNG/WEBP a JPEG ligero
-// f_jpg,q_85 = solo cambia formato, NO cambia dimensiones → Cache-Control: public (requerido por Facebook)
-// Reduce de ~7MB (PNG) a ~650KB (JPEG) sin perder calidad visible
-const optimizarImagenParaOG = (rawUrl) => {
-    if (!rawUrl) return rawUrl;
-    // Solo aplica a imágenes de Cloudinary
-    if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
-        // Si ya tiene transformaciones, no añadir más
-        if (/\/upload\/[a-z_,]+\//.test(rawUrl) && !rawUrl.includes('/upload/v')) {
-            return rawUrl;
-        }
-        // Insertar f_jpg,q_85 para conversión de formato (NO redimensiona → Cache-Control: public)
-        return rawUrl.replace('/upload/', '/upload/f_jpg,q_85/');
-    }
-    return rawUrl;
 };
 
 // Página de Inicio (/) - SEO enriquecido
