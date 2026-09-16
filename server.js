@@ -710,25 +710,31 @@ io.on('connection', (socket) => {
 
 // ==============================================
 // PRE-RENDER SSR PARA BOTS (AdSense / Googlebot)
-// Transforma automáticamente a formato horizontal 1200x630 JPEG (~90KB) con auto-enfoque inteligente
-// y cabecera Cache-Control: public para que Facebook renderice la tarjeta grande inmediatamente
+// Transforma automáticamente a formato horizontal 1200x630 JPEG (~90KB)
+// y cabecera Cache-Control: public para que Facebook renderice la tarjeta grande inmediatamente sin saturar Cloudinary
 const optimizarImagenParaOG = (rawUrl) => {
     if (!rawUrl) return rawUrl;
     if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
-        if (rawUrl.includes('/upload/c_fill,g_auto,w_1200,h_630')) {
+        if (rawUrl.includes('/upload/c_fill,w_1200,h_630')) {
             return rawUrl;
         }
         if (/\/upload\/([a-z0-9_:,]+\/)?v\d+/.test(rawUrl)) {
-            return rawUrl.replace(/\/upload\/([a-z0-9_:,]+\/)?v/, '/upload/c_fill,g_auto,w_1200,h_630,f_jpg,q_85/v');
+            return rawUrl.replace(/\/upload\/([a-z0-9_:,]+\/)?v/, '/upload/c_fill,w_1200,h_630,f_jpg,q_85/v');
         }
-        return rawUrl.replace('/upload/', '/upload/c_fill,g_auto,w_1200,h_630,f_jpg,q_85/');
+        return rawUrl.replace('/upload/', '/upload/c_fill,w_1200,h_630,f_jpg,q_85/');
     }
     return rawUrl;
 };
 
 const cloudinaryOgImage = (url) => {
     if (!url) return url;
-    return optimizarImagenParaOG(url);
+    const opt = optimizarImagenParaOG(url);
+    if (opt.startsWith('https://res.cloudinary.com')) {
+        try {
+            https.get(opt, () => {}).on('error', () => {});
+        } catch (e) {}
+    }
+    return opt;
 };
 
 // ==============================================
