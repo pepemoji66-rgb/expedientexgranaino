@@ -832,9 +832,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
 <meta property="og:image:secure_url" content="${img}" />
 <meta property="og:image:type" content="image/jpeg" />
 <meta property="og:image:alt" content="${title}" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-${articleTags}
+${esHistoria ? '' : '<meta property="og:image:width" content="1200" />\n<meta property="og:image:height" content="630" />\n'}${articleTags}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="${url}" />
 <meta name="twitter:title" content="${title}" />
