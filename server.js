@@ -1644,10 +1644,10 @@ app.get('/galeria', async (req, res) => {
     });
 });
 
-// Ruta para leer un expediente/noticia/misterio individual con SEO dinámico
-app.get('/leer-historia/:id', async (req, res) => {
-    const id = req.params.id;
-    const src = req.query.src; // Leer ?src= del query string
+// Controlador unificado para servir un artículo individual (noticias, expedientes, casos, misterios)
+// con Open Graph y pre-renderizado SEO sin redirecciones 301
+const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
+    const src = srcParam || req.query.src;
     const indexPath = path.join(__dirname, 'build', 'index.html');
     
     fs.readFile(indexPath, 'utf8', async (err, html) => {
@@ -1662,7 +1662,7 @@ app.get('/leer-historia/:id', async (req, res) => {
         try {
             const srcLow = (src || '').toLowerCase();
 
-            // Intentar primero búsqueda dirigida según 'src'
+            // 1. Intentar primero búsqueda dirigida según 'src'
             if (srcLow.includes('caso') || srcLow.includes('truecrime') || srcLow.includes('cronica')) {
                 const casos = await db.query("SELECT * FROM casos_abiertos WHERE id = ?", [id]);
                 if (casos && casos.length > 0) {
@@ -1700,27 +1700,27 @@ app.get('/leer-historia/:id', async (req, res) => {
                 }
             }
 
-            // Fallback inteligente: Si no se especificó src o no se encontró en la dirigida
+            // 2. Fallback inteligente: Solo si no se especificó src o no se encontró en la dirigida
             if (!historia) {
-                // 1. Buscar en casos abiertos / True Crime
+                // Buscar en casos abiertos / True Crime
                 const casos = await db.query("SELECT * FROM casos_abiertos WHERE id = ?", [id]);
                 if (casos && casos.length > 0) {
                     historia = casos[0];
                     esCaso = true;
                 } else {
-                    // 2. Buscar en noticias
+                    // Buscar en noticias
                     const noticias = await db.query("SELECT * FROM noticias WHERE id = ?", [id]);
                     if (noticias && noticias.length > 0) {
                         historia = noticias[0];
                         esNoticia = true;
                     } else {
-                        // 3. Buscar en misterios históricos
+                        // Buscar en misterios históricos
                         const misterios = await db.query("SELECT * FROM misterios_historicos WHERE id = ?", [id]);
                         if (misterios && misterios.length > 0) {
                             historia = misterios[0];
                             esMisterio = true;
                         } else {
-                            // 4. Buscar en expedientes de jefe / admin
+                            // Buscar en expedientes de jefe / admin
                             const relatosAdmin = await db.query(
                                 "SELECT * FROM expedientes WHERE id = ? AND tipo = 'jefe'",
                                 [id]
@@ -1729,7 +1729,7 @@ app.get('/leer-historia/:id', async (req, res) => {
                                 historia = relatosAdmin[0];
                                 esRelatoAdmin = true;
                             } else {
-                                // 5. Buscar en expedientes de agentes
+                                // Buscar en expedientes de agentes
                                 const expedientesPublicos = await db.query(
                                     "SELECT * FROM expedientes WHERE id = ?",
                                     [id]
@@ -1758,12 +1758,27 @@ app.get('/leer-historia/:id', async (req, res) => {
             const rawImg = historia.imagen_url || historia.url_imagen;
             const imagenUrl = optimizarImagenParaOG(resolverImagenUrl(req, rawImg)) || resolverImagenUrl(req, 'social-preview.png');
             
-            // Construir el parámetro src correspondiente
-            const params = src ? `?src=${src}` : (esCaso ? '?src=casos' : esMisterio ? '?src=misterios' : esNoticia ? '?src=noticias' : '?src=expedientes');
-            
-            // Forzar URL canónica LIMPIA PERO ÚNICA PARA CADA TIPO (usando baseImgUrl HTTPS segura)
             const { baseImgUrl } = obtenerUrlsRequest(req);
-            const paginaUrl = `${baseImgUrl}/leer-historia/${historia.id}${params}`;
+
+            // Determinar la URL canónica y limpia oficial de esta sección
+            let rutaLimpia = `/expedientes/${historia.id}`;
+            let params = '?src=expedientes';
+            if (esCaso) {
+                rutaLimpia = `/casos-abiertos/${historia.id}`;
+                params = '?src=casos';
+            } else if (esMisterio) {
+                rutaLimpia = `/misterios-historicos/${historia.id}`;
+                params = '?src=misterios';
+            } else if (esNoticia) {
+                rutaLimpia = `/noticias/${historia.id}`;
+                params = '?src=noticias';
+            }
+
+            const canonicalUrl = `${baseImgUrl}${rutaLimpia}`;
+            // Si la petición vino por /leer-historia/:id, mantenemos el og:url solicitado, pero canonical siempre apunta a la limpia
+            const paginaUrl = req.path.startsWith('/leer-historia')
+                ? `${baseImgUrl}/leer-historia/${historia.id}${params}`
+                : canonicalUrl;
 
             const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
@@ -1786,12 +1801,36 @@ app.get('/leer-historia/:id', async (req, res) => {
                 imagenUrl,
                 paginaUrl
             );
+            // Asegurar que la etiqueta canonical oficial apunte a la ruta canónica limpia
+            pagina = pagina.replace(/<link [^>]*rel=["']canonical["'][^>]*>/gi, `<link rel="canonical" href="${canonicalUrl}" />`);
             pagina = pagina.replace('</head>', `${initialScript}\n</head>`);
             res.send(pagina);
         } else {
             res.sendFile(indexPath);
         }
     });
+};
+
+// Ruta para leer un expediente/noticia/misterio individual con SEO dinámico (compatibilidad)
+app.get('/leer-historia/:id', (req, res) => {
+    renderizarArticuloSEO(req, res, req.params.id, req.query.src);
+});
+
+// Rutas directas por categoría — Entrega directa 200 OK con Open Graph para Facebook, WhatsApp, Pinterest y Google AdSense
+app.get('/noticias/:id', (req, res) => {
+    renderizarArticuloSEO(req, res, req.params.id, 'noticias');
+});
+
+app.get('/expedientes/:id', (req, res) => {
+    renderizarArticuloSEO(req, res, req.params.id, 'expedientes');
+});
+
+app.get('/casos-abiertos/:id', (req, res) => {
+    renderizarArticuloSEO(req, res, req.params.id, 'casos');
+});
+
+app.get('/misterios-historicos/:id', (req, res) => {
+    renderizarArticuloSEO(req, res, req.params.id, 'misterios');
 });
 
 // --- ENDPOINTS PARA AFILIADOS DE AMAZON (NINJA) ---
@@ -1944,70 +1983,55 @@ app.get('/sitemap.xml', async (req, res) => {
         // Consulta unificada: incluimos todos los estados activos para TODAS las tablas
         const estadosActivos = "estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'";
 
-        // Set para evitar duplicados de ID entre tablas (mismo ID puede existir en varias tablas)
-        const idsArticulosYaIncluidos = new Set();
-
-        // 2. Expedientes / Relatos — URL canónica SIN ?src= para que Google no duplique
+        // 2. Expedientes / Relatos — URL canónica limpia por categoría
         try {
             const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE ${estadosActivos}`);
             exps.forEach(e => {
-                if (!idsArticulosYaIncluidos.has(e.id)) {
-                    idsArticulosYaIncluidos.add(e.id);
-                    urls.push({
-                        loc: `${domain}/leer-historia/${e.id}`,
-                        lastmod: e.lastmod || today,
-                        changefreq: 'weekly',
-                        priority: '0.8'
-                    });
-                }
+                urls.push({
+                    loc: `${domain}/expedientes/${e.id}`,
+                    lastmod: e.lastmod || today,
+                    changefreq: 'weekly',
+                    priority: '0.8'
+                });
             });
         } catch (e) { console.error("Sitemap exps:", e.message); }
 
-        // 3. Casos Abiertos / True Crime
+        // 3. Casos Abiertos / True Crime — URL canónica limpia por categoría
         try {
             const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE ${estadosActivos}`);
             casos.forEach(c => {
-                if (!idsArticulosYaIncluidos.has(c.id)) {
-                    idsArticulosYaIncluidos.add(c.id);
-                    urls.push({
-                        loc: `${domain}/leer-historia/${c.id}`,
-                        lastmod: c.lastmod || today,
-                        changefreq: 'weekly',
-                        priority: '0.8'
-                    });
-                }
+                urls.push({
+                    loc: `${domain}/casos-abiertos/${c.id}`,
+                    lastmod: c.lastmod || today,
+                    changefreq: 'weekly',
+                    priority: '0.8'
+                });
             });
         } catch (e) { console.error("Sitemap casos:", e.message); }
 
-        // 4. Misterios Históricos
+        // 4. Misterios Históricos — URL canónica limpia por categoría
         try {
             const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE ${estadosActivos}`);
             misterios.forEach(m => {
-                if (!idsArticulosYaIncluidos.has(m.id)) {
-                    idsArticulosYaIncluidos.add(m.id);
-                    urls.push({
-                        loc: `${domain}/leer-historia/${m.id}`,
-                        lastmod: m.lastmod || today,
-                        changefreq: 'weekly',
-                        priority: '0.8'
-                    });
-                }
+                urls.push({
+                    loc: `${domain}/misterios-historicos/${m.id}`,
+                    lastmod: m.lastmod || today,
+                    changefreq: 'weekly',
+                    priority: '0.8'
+                });
             });
         } catch (e) { console.error("Sitemap misterios:", e.message); }
 
-        // 5. Noticias
+        // 5. Noticias — URL canónica limpia por categoría
         try {
             const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE ${estadosActivos}`);
             noticias.forEach(n => {
-                if (!idsArticulosYaIncluidos.has(n.id)) {
-                    idsArticulosYaIncluidos.add(n.id);
-                    urls.push({
-                        loc: `${domain}/leer-historia/${n.id}`,
-                        lastmod: n.lastmod || today,
-                        changefreq: 'weekly',
-                        priority: '0.8'
-                    });
-                }
+                urls.push({
+                    loc: `${domain}/noticias/${n.id}`,
+                    lastmod: n.lastmod || today,
+                    changefreq: 'weekly',
+                    priority: '0.8'
+                });
             });
         } catch (e) { console.error("Sitemap noticias:", e.message); }
 
@@ -2034,92 +2058,10 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 });
 
-// =====================================================================
-// OPEN GRAPH DINÁMICO — Para que Facebook/WhatsApp/Twitter muestren
-// la imagen y título correctos al compartir una página de contenido
-// =====================================================================
-const isSocialCrawler = (ua) => {
-    if (!ua) return false;
-    const bots = ['facebookexternalhit', 'twitterbot', 'whatsapp', 'telegrambot', 'linkedinbot', 'slackbot', 'discordbot', 'applebot', 'googlebot'];
-    const uaLow = ua.toLowerCase();
-    return bots.some(bot => uaLow.includes(bot));
-};
-
-const injectOgTags = (html, tags) => {
-    const esc = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-    // Eliminamos los meta OG y Twitter estáticos para que Facebook y WhatsApp tomen exclusivamente los del artículo
-    let cleanHtml = html
-        .replace(/<meta\s+property=["']og:[^"']*["'][^>]*>/gi, '')
-        .replace(/<meta\s+name=["']twitter:[^"']*["'][^>]*>/gi, '')
-        .replace(/<title>[^<]*<\/title>/i, '');
-
-    const ogBlock = `
-  <title>${esc(tags.title)} | Expediente X Granaíno</title>
-  <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="Expediente X Granaíno" />
-  <meta property="og:url" content="${esc(tags.url)}" />
-  <meta property="og:title" content="${esc(tags.title)}" />
-  <meta property="og:description" content="${esc(tags.description)}" />
-  <meta property="og:image" content="${esc(tags.image)}" />
-  <meta property="og:image:secure_url" content="${esc(tags.image)}" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${esc(tags.title)}" />
-  <meta name="twitter:description" content="${esc(tags.description)}" />
-  <meta name="twitter:image" content="${esc(tags.image)}" />`;
-
-    return cleanHtml.replace(/<head>/i, `<head>${ogBlock}`);
-};
-
-const getIndexHtml = () => {
-    const indexPath = path.join(__dirname, 'build', 'index.html');
-    return fs.readFileSync(indexPath, 'utf-8');
-};
-
-const SITE_URL = 'https://expedientexgranaino.com';
-const DEFAULT_IMAGE = `${SITE_URL}/social-preview.png?v=7.0`;
-
-// Función auxiliar para normalizar la URL de la imagen para Facebook / WhatsApp
-const formatearUrlImagen = (img) => {
-    if (!img || typeof img !== 'string') return DEFAULT_IMAGE;
-    img = img.trim();
-    if (!img) return DEFAULT_IMAGE;
-    if (img.startsWith('http://') || img.startsWith('https://')) return img;
-    const nombreLimpio = img.split('/').pop();
-    return `${SITE_URL}/imagenes/${nombreLimpio}`;
-};
-
-// Función para limpiar texto y crear una descripción breve para Open Graph
-const limpiarTextoSnippet = (texto, maxLen = 180) => {
-    if (!texto) return 'Expediente clasificado del archivo de Expediente X Granaíno.';
-    const plano = texto.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-    return plano.length > maxLen ? plano.substring(0, maxLen) + '...' : plano;
-};
-
-// Redirecciones 301 limpias para URLs directas de sección hacia la ruta unificada /leer-historia/:id?src=
-app.get('/noticias/:id', (req, res) => {
-    res.redirect(301, `/leer-historia/${req.params.id}?src=noticias`);
-});
-
-app.get('/expedientes/:id', (req, res) => {
-    res.redirect(301, `/leer-historia/${req.params.id}?src=expedientes`);
-});
-
-app.get('/casos-abiertos/:id', (req, res) => {
-    res.redirect(301, `/leer-historia/${req.params.id}?src=casos`);
-});
-
-app.get('/misterios-historicos/:id', (req, res) => {
-    res.redirect(301, `/leer-historia/${req.params.id}?src=misterios`);
-});
-
 // Ruta de captura general: el resto de páginas del SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
-
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 BÚNKER EXPEDIENTE X ABIERTO EN PUERTO ${PORT}`);

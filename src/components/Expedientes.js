@@ -357,8 +357,8 @@ const Expedientes = () => {
 
     const compartirExpediente = (red) => {
         if (!relatoAbierto) return;
-        // El ?src= es IMPRESCINDIBLE — el servidor lo usa para saber en qué tabla buscar
-        const url = `${window.location.origin}/leer-historia/${relatoAbierto.id}?src=expedientes`;
+        // URL limpia y canónica para compartir directamente
+        const url = `${window.location.origin}/expedientes/${relatoAbierto.id}`;
         const texto = `${t('expShareText')} "${relatoAbierto.titulo?.toUpperCase()}" @PEPE1318057 @MUFON #UFO #Granada #ExpedienteXGranaino`;
 
         if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {

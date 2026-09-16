@@ -81,8 +81,9 @@ module.exports = (upload) => {
 
         // 🌐 PRE-CALENTAMIENTO FACEBOOK: para que la imagen aparezca en grupos inmediatamente
         if (insertId) {
-            const urlArticulo = `https://expedientexgranaino.com/leer-historia/${insertId}?src=casos`;
-            axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true`, {}, { timeout: 5000 })
+            const urlArticulo = `https://expedientexgranaino.com/casos-abiertos/${insertId}`;
+            const fbToken = process.env.FACEBOOK_ACCESS_TOKEN ? `&access_token=${process.env.FACEBOOK_ACCESS_TOKEN}` : '';
+            axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true${fbToken}`, {}, { timeout: 5000 })
                 .then(() => console.log(`📡 [FB SCRAPER] Pre-cargado caso abierto: ${urlArticulo}`))
                 .catch(() => {});
         }

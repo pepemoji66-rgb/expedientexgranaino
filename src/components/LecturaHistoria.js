@@ -243,7 +243,16 @@ const LecturaHistoria = ({ userAuth }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const src = queryParams.get('src');
+    const srcQuery = queryParams.get('src');
+
+    // Detección inteligente de la sección por la ruta o el query string
+    const pathname = location.pathname || '';
+    const src = srcQuery || (
+        pathname.includes('/casos-abiertos') ? 'casos' :
+        pathname.includes('/noticias') ? 'noticias' :
+        pathname.includes('/misterios-historicos') ? 'misterios' :
+        pathname.includes('/expedientes') ? 'expedientes' : null
+    );
     
     const getInitialHistoria = () => {
         if (typeof window !== 'undefined' && window.__INITIAL_HISTORIA__) {
@@ -260,9 +269,9 @@ const LecturaHistoria = ({ userAuth }) => {
 
     const [historia, setHistoria] = useState(initialData);
     const [esRelatoAdmin, setEsRelatoAdmin] = useState(initialData ? !!initialTypes.esRelatoAdmin : false);
-    const [esNoticia, setEsNoticia] = useState(initialData ? !!initialTypes.esNoticia : false);
-    const [esMisterio, setEsMisterio] = useState(initialData ? !!initialTypes.esMisterio : false);
-    const [esCaso, setEsCaso] = useState(initialData ? !!initialTypes.esCaso : false);
+    const [esNoticia, setEsNoticia] = useState(initialData ? !!initialTypes.esNoticia : (src === 'noticias'));
+    const [esMisterio, setEsMisterio] = useState(initialData ? !!initialTypes.esMisterio : (src === 'misterios'));
+    const [esCaso, setEsCaso] = useState(initialData ? !!initialTypes.esCaso : (src === 'casos'));
     const [cargando, setCargando] = useState(!initialData);
     
     // ESTADO DE AUDIO (ROBOCOP) MULTICHOICE SEQUENTIAL PARA MÓVIL
@@ -741,13 +750,11 @@ const LecturaHistoria = ({ userAuth }) => {
     const compartirHistoria = (red) => {
         if (!historia) return;
 
-        // El ?src= es IMPRESCINDIBLE — el servidor lo usa para saber en qué tabla
-        // de la BD buscar el artículo (casos_abiertos, expedientes, noticias, misterios)
-        let url = `${window.location.origin}/leer-historia/${historia.id}`;
-        if (esCaso) url += '?src=casos';
-        else if (esMisterio) url += '?src=misterios';
-        else if (esNoticia) url += '?src=noticias';
-        else url += '?src=expedientes';
+        // URL limpia y canónica por sección para compartir directamente en Facebook, Pinterest, WhatsApp, etc.
+        let url = `${window.location.origin}/expedientes/${historia.id}`;
+        if (esCaso || src === 'casos') url = `${window.location.origin}/casos-abiertos/${historia.id}`;
+        else if (esMisterio || src === 'misterios') url = `${window.location.origin}/misterios-historicos/${historia.id}`;
+        else if (esNoticia || src === 'noticias') url = `${window.location.origin}/noticias/${historia.id}`;
 
         // Inteligencia de Etiquetas por Categoría
         let tagsTexto = '';

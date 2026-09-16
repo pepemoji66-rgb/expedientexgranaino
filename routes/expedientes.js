@@ -154,9 +154,10 @@ module.exports = (db, upload) => {
             // 🌐 PRE-CALENTAMIENTO AUTOMÁTICO PARA FACEBOOK
             // Avisamos al scraper de Facebook en segundo plano para que guarde la imagen y título inmediatamente
             if (insertId) {
-                const srcParam = (catLow === 'noticia') ? 'noticias' : (catLow === 'caso' || catLow === 'cronica_negra' || catLow === 'truecrime') ? 'casos' : (catLow === 'misterio') ? 'misterios' : 'expedientes';
-                const urlArticulo = `https://expedientexgranaino.com/leer-historia/${insertId}?src=${srcParam}`;
-                axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true`, {}, { timeout: 5000 })
+                const rutaBase = (catLow === 'noticia') ? 'noticias' : (catLow === 'caso' || catLow === 'cronica_negra' || catLow === 'truecrime') ? 'casos-abiertos' : (catLow === 'misterio') ? 'misterios-historicos' : 'expedientes';
+                const urlArticulo = `https://expedientexgranaino.com/${rutaBase}/${insertId}`;
+                const fbToken = process.env.FACEBOOK_ACCESS_TOKEN ? `&access_token=${process.env.FACEBOOK_ACCESS_TOKEN}` : '';
+                axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true${fbToken}`, {}, { timeout: 5000 })
                     .then(() => console.log(`📡 [FB SCRAPER] Imagen y título pre-cargados con éxito para: ${urlArticulo}`))
                     .catch(() => {});
             }
