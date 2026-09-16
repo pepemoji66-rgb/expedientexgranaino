@@ -10,6 +10,7 @@ import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
 import Paginacion, { getPaginaGuardada } from './Paginacion';
 import './expedientes.css';
 import './lecturahistoria.css';
+import { MapPin } from 'lucide-react';
 
 // ==========================================
 // COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
@@ -562,24 +563,11 @@ const Expedientes = () => {
                                 {relatoAbierto.latitud && relatoAbierto.longitud && parseFloat(relatoAbierto.latitud) !== 0 && (
                                     <button
                                         onClick={() => navigate('/lugares', { state: { lat: relatoAbierto.latitud, lng: relatoAbierto.longitud, noticiaId: `exp-${relatoAbierto.id}` } })}
-                                        style={{
-                                            position: 'absolute',
-                                            top: '15px',
-                                            right: '15px',
-                                            zIndex: 20,
-                                            background: 'rgba(0,255,65,0.9)',
-                                            color: '#000',
-                                            border: 'none',
-                                            padding: '8px 12px',
-                                            borderRadius: '4px',
-                                            fontWeight: 'bold',
-                                            cursor: 'pointer',
-                                            boxShadow: '0 0 15px rgba(0,255,65,0.5)',
-                                            fontFamily: 'monospace',
-                                            fontSize: '0.75rem'
-                                        }}
+                                        className="btn-localizar-portada"
+                                        title={t('expViewRadar') || "Localizar en el radar"}
+                                        aria-label={t('expViewRadar') || "Localizar en el radar"}
                                     >
-                                        {t('expViewRadar')}
+                                        <MapPin size={20} className="icono-pin-radar" />
                                     </button>
                                 )}
                                 <img

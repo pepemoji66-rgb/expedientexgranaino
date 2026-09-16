@@ -7,6 +7,7 @@ import './Comentarios.css';
 import API_BASE_URL from '../config';
 import { useLanguage } from '../context/LanguageContext';
 import AdSlot from './AdSlot';
+import { MapPin } from 'lucide-react';
 
 // ==========================================
 // COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
@@ -917,13 +918,15 @@ const LecturaHistoria = ({ userAuth }) => {
                 {/* IMAGEN PRINCIPAL DE LA NOTICIA / EXPEDIENTE */}
                 {(historia.imagen_url || historia.url_imagen) && (
                     <div className="portada-lectura">
-                        {/* BOTÓN FLOTANTE SOBRE IMAGEN */}
+                        {/* MARCADOR TIPO PIN / CHUPACHUPS PARA LOCALIZAR EN MAPA SIN TAPAR LA CARA */}
                         {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
                             <button
                                 onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : esCaso ? 'caso-' : 'exp-') + historia.id } })}
                                 className="btn-localizar-portada"
+                                title={t('readLocateRadar') || "Localizar en el radar"}
+                                aria-label={t('readLocateRadar') || "Localizar en el radar"}
                             >
-                                {t('readLocateRadar')}
+                                <MapPin size={20} className="icono-pin-radar" />
                             </button>
                         )}
                         <img 
