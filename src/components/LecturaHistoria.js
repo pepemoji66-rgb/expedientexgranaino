@@ -1037,10 +1037,7 @@ const LecturaHistoria = ({ userAuth }) => {
                     <div style={{ marginBottom: '25px', textAlign: 'center' }}>
                         <button
                             onClick={() => {
-                                if (!window.speechSynthesis) {
-                                    alert("🔊 El sistema de síntesis de voz no está disponible en este navegador o dispositivo.");
-                                    return;
-                                }
+                                if (!window.speechSynthesis) return;
                                 
                                 if (reproduciendoAudio) {
                                     detenerKeepAlive();

@@ -488,10 +488,7 @@ const CasosAbiertos = ({ userAuth }) => {
                             {/* BOTÓN ROBOCOP (TTS) */}
                             <button
                                 onClick={() => {
-                                    if (!window.speechSynthesis) {
-                                        alert("🔊 El sistema de síntesis de voz no está disponible en este navegador o dispositivo.");
-                                        return;
-                                    }
+                                    if (!window.speechSynthesis) return;
                                     if (window.speechSynthesis.speaking) {
                                         window.speechSynthesis.cancel();
                                     } else {
