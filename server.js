@@ -715,13 +715,14 @@ io.on('connection', (socket) => {
 const optimizarImagenParaOG = (rawUrl) => {
     if (!rawUrl) return rawUrl;
     if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
-        if (rawUrl.includes('/upload/c_fill,w_1200,h_630')) {
-            return rawUrl;
+        let url = rawUrl.replace(/\.(webp|png|jpeg)(\?.*)?$/i, '.jpg$2');
+        if (url.includes('/upload/c_fill,w_1200,h_630')) {
+            return url;
         }
-        if (/\/upload\/([a-z0-9_:,]+\/)?v\d+/.test(rawUrl)) {
-            return rawUrl.replace(/\/upload\/([a-z0-9_:,]+\/)?v/, '/upload/c_fill,w_1200,h_630,f_jpg,q_85/v');
+        if (/\/upload\/([a-z0-9_:,]+\/)?v\d+/.test(url)) {
+            return url.replace(/\/upload\/([a-z0-9_:,]+\/)?v/, '/upload/c_fill,w_1200,h_630,f_jpg,q_85/v');
         }
-        return rawUrl.replace('/upload/', '/upload/c_fill,w_1200,h_630,f_jpg,q_85/');
+        return url.replace('/upload/', '/upload/c_fill,w_1200,h_630,f_jpg,q_85/');
     }
     return rawUrl;
 };
