@@ -1785,12 +1785,20 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                 ? `${baseImgUrl}/leer-historia/${historia.id}${params}`
                 : canonicalUrl;
 
+            const fuenteReal = historia.fuente_url || historia.url_externa || null;
+            const bloqueFuenteSeo = fuenteReal ? `
+                <p style="margin-top:20px;padding:12px 16px;background:#111;border-left:3px solid #00d4ff;">
+                    <strong>Documentación y Fuente Oficial:</strong> 
+                    <a href="${fuenteReal}" target="_blank" rel="noopener noreferrer" style="color:#00d4ff;">Consultar fuente original de la investigación</a>
+                </p>` : '';
+
             const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">${historia.titulo ? historia.titulo.toUpperCase() : 'SIN TÍTULO'}</h1>
     <p><strong>Clasificación:</strong> ${esRelatoAdmin ? 'Relato del Administrador' : esNoticia ? 'Noticia de Alerta' : esMisterio ? 'Misterio Histórico' : esCaso ? 'Caso Abierto / True Crime' : 'Expediente de Agente'}</p>
     <p><strong>Autor:</strong> ${historia.usuario_nombre || historia.agente || 'Administrador'}</p>
     <div style="white-space:pre-line;">${cuerpoTexto}</div>
+    ${bloqueFuenteSeo}
 </article>`;
 
             // Sanitizar objeto para inyección en script tag de forma segura

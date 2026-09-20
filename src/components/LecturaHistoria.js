@@ -1096,20 +1096,72 @@ const LecturaHistoria = ({ userAuth }) => {
 
                     {renderizarTextoConMedios(historia.contenido || historia.cuerpo || t('readNoContent'))}
                     
-                    {/* ENLACE A FUENTE ORIGINAL (si no es enlace de youtube) */}
-                    {historia.fuente_url && !extractYouTubeId(historia.fuente_url) && (
-                        <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid rgba(0,0,0,0.08)', textAlign: 'center' }}>
-                            <a 
-                                href={historia.fuente_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="btn-technical-link highlight"
-                                style={{ display: 'inline-block', textDecoration: 'none', padding: '10px 22px', background: '#FFF7ED', border: '1px solid #fed7aa', color: '#9c4221', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '0.5px', borderRadius: '4px' }}
-                            >
-                                🌐 {t('readSource')}
-                            </a>
-                        </div>
-                    )}
+                    {/* ENLACE Y FUENTE OFICIAL DEL CASO (DOCUMENTACIÓN EXTERNA) */}
+                    {(() => {
+                        const fuenteReal = historia.fuente_url || historia.url_externa || historia.fuente || null;
+                        if (!fuenteReal) return null;
+                        const esYt = extractYouTubeId(fuenteReal);
+                        // Si es YouTube y además ya tenemos youtube_url específica diferente, podemos seguir mostrando la fuente
+                        let dominioFuente = '';
+                        try {
+                            const urlObj = new URL(fuenteReal.startsWith('http') ? fuenteReal : `https://${fuenteReal}`);
+                            dominioFuente = urlObj.hostname.replace('www.', '');
+                        } catch (e) {
+                            dominioFuente = 'Fuente oficial';
+                        }
+
+                        return (
+                            <div style={{
+                                marginTop: '35px',
+                                marginBottom: '25px',
+                                padding: '18px 22px',
+                                background: '#FFFDF9',
+                                border: '1px solid #fed7aa',
+                                borderLeft: '4px solid #9c4221',
+                                borderRadius: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                flexWrap: 'wrap',
+                                gap: '15px',
+                                boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+                            }}>
+                                <div>
+                                    <span style={{ display: 'block', color: '#9c4221', fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                        📑 DOCUMENTACIÓN Y FUENTE OFICIAL
+                                    </span>
+                                    <span style={{ color: '#555', fontSize: '0.88rem', fontFamily: 'Merriweather, Georgia, serif' }}>
+                                        {dominioFuente ? `Referencia externa verificada: ${dominioFuente}` : 'Acceso a la fuente original del informe'}
+                                    </span>
+                                </div>
+                                <a 
+                                    href={fuenteReal} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        textDecoration: 'none',
+                                        padding: '10px 20px',
+                                        background: '#9c4221',
+                                        color: '#FFFFFF',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.82rem',
+                                        letterSpacing: '0.5px',
+                                        borderRadius: '4px',
+                                        fontFamily: 'monospace',
+                                        boxShadow: '0 2px 8px rgba(156, 66, 33, 0.25)',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = '#7c3318'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = '#9c4221'; }}
+                                >
+                                    🌐 {language === 'en' ? 'VIEW ORIGINAL SOURCE ↗' : 'CONSULTAR FUENTE ORIGINAL ↗'}
+                                </a>
+                            </div>
+                        );
+                    })()}
                     
                     {/* REPRODUCTOR DE VÍDEO YOUTUBE OFICIAL */}
                     {(() => {
