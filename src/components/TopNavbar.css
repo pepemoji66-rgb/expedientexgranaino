@@ -260,6 +260,34 @@
     background: #1e3a2b;
 }
 
+/* DESTACADO ESPECIAL: BOTÓN LA RULETA EN NAVBAR */
+.nav-item-link.nav-item-ruleta {
+    color: #9c4221 !important;
+    background: #FFF7ED;
+    border: 1px solid #fed7aa;
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    transition: all 0.22s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.nav-item-link.nav-item-ruleta:hover,
+.nav-item-link.nav-item-ruleta.active {
+    background: #9c4221 !important;
+    color: #FFFFFF !important;
+    border-color: #9c4221;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(156, 66, 33, 0.25);
+}
+
+.nav-item-link.nav-item-ruleta.active::after {
+    display: none;
+}
+
 /* DROPDOWN OTRAS SECCIONES */
 .nav-item-dropdown {
     position: relative;

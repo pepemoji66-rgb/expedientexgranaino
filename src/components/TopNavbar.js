@@ -16,11 +16,11 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
         { path: "/expedientes", label: language === 'en' ? "DOSSIERS" : "EXPEDIENTES" },
         { path: "/casos-abiertos", label: "TRUE CRIME" },
         { path: "/misterios-historicos", label: language === 'en' ? "HISTORICAL MYSTERIES" : "MISTERIOS HISTÓRICOS" },
+        { path: "/la-ruleta", label: language === 'en' ? "🎰 ROULETTE" : "🎰 LA RULETA", isBadge: true },
         { path: "/sobre-nosotros", label: language === 'en' ? "ABOUT ME" : "SOBRE MÍ" }
     ];
 
     const extraSections = [
-        { path: "/la-ruleta", label: language === 'en' ? "Bunker Roulette" : "La Ruleta del Búnker" },
         { path: "/biblioteca", label: language === 'en' ? "Library" : "Biblioteca" },
         { path: "/lugares", label: language === 'en' ? "Radar Map" : "Mapa de Avistamientos" },
         { path: "/videos", label: language === 'en' ? "Videos" : "Vídeos" },
@@ -118,7 +118,7 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
                             <li key={sec.path}>
                                 <Link 
                                     to={sec.path} 
-                                    className={`nav-item-link ${location.pathname === sec.path ? 'active' : ''}`}
+                                    className={`nav-item-link ${sec.isBadge ? 'nav-item-ruleta' : ''} ${location.pathname === sec.path ? 'active' : ''}`}
                                 >
                                     {sec.label}
                                 </Link>

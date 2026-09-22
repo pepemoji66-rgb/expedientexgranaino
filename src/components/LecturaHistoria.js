@@ -1255,6 +1255,95 @@ const LecturaHistoria = ({ userAuth }) => {
                             </button>
                         </div>
                     </div>
+
+                    {/* 🎰 BLOQUE INTERACTIVO: LA RULETA DEL BÚNKER */}
+                    <div className="ruleta-promo-card" style={{
+                        marginTop: '40px',
+                        padding: '28px 24px',
+                        background: 'radial-gradient(circle at 50% 0%, #17251e 0%, #0a110d 60%, #050806 100%)',
+                        borderRadius: '10px',
+                        border: '1.5px solid #1a3a2a',
+                        color: '#FFFFFF',
+                        textAlign: 'center',
+                        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 255, 65, 0.08)',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            background: 'rgba(0, 255, 65, 0.1)',
+                            color: '#00ff41',
+                            border: '1px solid rgba(0, 255, 65, 0.35)',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            fontSize: '0.72rem',
+                            fontFamily: 'monospace',
+                            fontWeight: 'bold',
+                            letterSpacing: '1.5px',
+                            marginBottom: '12px',
+                            textTransform: 'uppercase'
+                        }}>
+                            🎰 {language === 'en' ? 'BUNKER RADAR — RANDOM ACCESS' : 'RADAR DEL BÚNKER — ACCESO ALEATORIO'}
+                        </div>
+                        <h3 style={{
+                            margin: '0 0 10px 0',
+                            fontSize: '1.35rem',
+                            fontWeight: '800',
+                            fontFamily: "'Merriweather', Georgia, serif",
+                            color: '#FFFFFF',
+                            letterSpacing: '-0.3px',
+                            lineHeight: '1.3'
+                        }}>
+                            {language === 'en' ? 'Do you dare to let the Bunker decide your next case?' : '¿Te atreves a que el Búnker elija tu próximo caso?'}
+                        </h3>
+                        <p style={{
+                            margin: '0 auto 20px auto',
+                            maxWidth: '560px',
+                            fontSize: '0.92rem',
+                            color: '#9CA3AF',
+                            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                            lineHeight: '1.55'
+                        }}>
+                            {language === 'en' 
+                                ? 'Over 150 declassified investigations on UFOs, unsolved crimes, and historical enigmas just one spin away.'
+                                : 'Desafía al azar. Dale un giro a la Ruleta y deja que nuestro radar desclasifique automáticamente un expediente secreto para ti.'}
+                        </p>
+                        <button
+                            onClick={() => {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                navigate('/la-ruleta');
+                            }}
+                            style={{
+                                background: '#00ff41',
+                                color: '#050a06',
+                                border: 'none',
+                                padding: '12px 30px',
+                                borderRadius: '6px',
+                                fontWeight: '900',
+                                fontSize: '0.86rem',
+                                fontFamily: 'monospace',
+                                letterSpacing: '1px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 0 20px rgba(0, 255, 65, 0.45)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = 'scale(1.04)';
+                                e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 255, 65, 0.75)';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = 'scale(1)';
+                                e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 65, 0.45)';
+                            }}
+                        >
+                            🎲 {language === 'en' ? 'SPIN THE ROULETTE' : 'ENTRAR Y GIRAR LA RULETA'} ➔
+                        </button>
+                    </div>
                 </div>
                 
                 {/* LAYOUT DE PIE DE EXPEDIENTE: LIBROS RECOMENDADOS */}
