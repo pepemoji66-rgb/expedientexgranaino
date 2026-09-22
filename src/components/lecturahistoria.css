@@ -74,7 +74,7 @@
 
 /* ESTILOS DE PÁGINA DE LECTURA INTEGRADA */
 .lectura-page-wrapper {
-    background: radial-gradient(circle at 50% 20%, #171b20 0%, #0c0e11 70%, #050608 100%) !important;
+    background: #F8F9FA !important;
     min-height: 100vh;
     padding-bottom: 60px;
 }
@@ -85,13 +85,73 @@
     transform: translateY(-1px);
 }
 
+/* BOTONES DE COMPARTIR EDITORIALES (MINIMALISTAS Y PROFESIONALES) */
+.btn-share-editorial {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: #FFFFFF;
+    color: #475569;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.btn-share-editorial:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.09);
+}
+
+.btn-share-editorial.share-whatsapp:hover {
+    background: #25D366;
+    color: #FFFFFF;
+    border-color: #25D366;
+}
+
+.btn-share-editorial.share-facebook:hover {
+    background: #1877F2;
+    color: #FFFFFF;
+    border-color: #1877F2;
+}
+
+.btn-share-editorial.share-fbhistoria:hover {
+    background: #0084FF;
+    color: #FFFFFF;
+    border-color: #0084FF;
+}
+
+.btn-share-editorial.share-twitter:hover {
+    background: #000000;
+    color: #FFFFFF;
+    border-color: #000000;
+}
+
+.btn-share-editorial.share-pinterest:hover {
+    background: #E60023;
+    color: #FFFFFF;
+    border-color: #E60023;
+}
+
+.btn-share-editorial.share-copiar:hover {
+    background: #334155;
+    color: #FFFFFF;
+    border-color: #334155;
+}
+
 /* ESTILOS DE PORTADA E IMAGEN RESPONSIVA */
 .portada-lectura {
     margin-bottom: 25px;
     text-align: center;
-    background: #0f1215;
+    background: #F8F9FA;
     padding: 12px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid #E2E8F0;
     border-radius: 6px;
     min-height: 180px;
     display: flex;
@@ -107,8 +167,8 @@
     max-width: 100%;
     max-height: 520px;
     object-fit: contain;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #E2E8F0;
     border-radius: 4px;
     transition: max-height 0.3s ease;
 }
@@ -318,25 +378,27 @@
 
 .book-citation-block {
     display: flex;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
     border-radius: 8px;
     overflow: hidden;
     transition: all 0.3s ease;
     text-decoration: none;
     color: inherit;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .book-citation-block:hover {
-    border-color: #3a7a5a;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    border-color: #9c4221;
+    box-shadow: 0 8px 20px rgba(156,66,33,0.12);
     transform: translateY(-3px);
 }
 
 .book-citation-cover-container {
     width: 100px;
     flex-shrink: 0;
-    background: #111;
+    background: #F8F9FA;
+    border-right: 1px solid #E2E8F0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -348,7 +410,7 @@
     height: auto;
     object-fit: contain;
     border-radius: 2px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.3s ease;
 }
 
@@ -364,16 +426,17 @@
 }
 
 .book-citation-title {
-    font-size: 1rem;
-    color: #fff;
+    font-size: 0.95rem;
+    color: #1E293B;
     font-weight: bold;
     margin: 0 0 8px 0;
-    line-height: 1.3;
+    line-height: 1.35;
+    font-family: 'Merriweather', Georgia, serif;
 }
 
 .book-citation-author {
-    font-size: 0.85rem;
-    color: #888;
+    font-size: 0.82rem;
+    color: #64748B;
     margin: 0 0 12px 0;
     font-family: monospace;
 }

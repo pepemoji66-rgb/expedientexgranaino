@@ -160,17 +160,18 @@ const ArticulosRelacionados = ({ currentId, currentSrc }) => {
         <div className="articulos-relacionados-section fade-in" style={{
             marginTop: '50px',
             paddingTop: '30px',
-            borderTop: '2px dashed rgba(0, 255, 65, 0.3)',
+            borderTop: '1px solid #E2E8F0',
             width: '100%'
         }}>
             <h3 style={{
-                color: 'var(--color-principal, #00ff41)',
-                fontFamily: 'Courier New, monospace',
-                fontSize: '1.1rem',
-                letterSpacing: '2px',
+                color: '#9c4221',
+                fontFamily: "'Merriweather', Georgia, serif",
+                fontSize: '1.05rem',
+                letterSpacing: '0.5px',
                 textAlign: 'center',
                 marginBottom: '25px',
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                fontWeight: '700'
             }}>
                 👁️ {language === 'en' ? 'IF YOU LIKED THIS MYSTERY, CONTINUE INVESTIGATING...' : 'SI TE GUSTÓ ESTE MISTERIO, CONTINÚA INVESTIGANDO...'}
             </h3>
@@ -188,30 +189,32 @@ const ArticulosRelacionados = ({ currentId, currentSrc }) => {
                             navigate(`/leer-historia/${rel.id}?src=${rel.src || rel.categoria}`);
                         }}
                         style={{
-                            background: '#0a0a0a',
-                            border: '1px solid #1a3a1a',
-                            borderRadius: '6px',
+                            background: '#FFFFFF',
+                            border: '1px solid #E2E8F0',
+                            borderRadius: '8px',
                             overflow: 'hidden',
                             cursor: 'pointer',
                             transition: 'all 0.3s ease',
                             display: 'flex',
-                            flexDirection: 'column'
+                            flexDirection: 'column',
+                            boxShadow: '0 2px 10px rgba(0,0,0,0.04)'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#00ff41'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(0,255,65,0.2)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#1a3a1a'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#9c4221'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 22px rgba(156,66,33,0.12)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.04)'; }}
                     >
-                        <div style={{ height: '140px', overflow: 'hidden', background: '#050505', position: 'relative' }}>
+                        <div style={{ height: '140px', overflow: 'hidden', background: '#F1F5F9', position: 'relative' }}>
                             <span style={{
                                 position: 'absolute',
                                 top: '8px',
                                 left: '8px',
-                                background: 'rgba(0,0,0,0.85)',
-                                color: '#00ff41',
-                                border: '1px solid #00ff41',
-                                padding: '2px 6px',
+                                background: 'rgba(255,255,255,0.95)',
+                                color: '#9c4221',
+                                border: '1px solid #fed7aa',
+                                padding: '3px 8px',
                                 fontSize: '0.65rem',
                                 fontFamily: 'monospace',
-                                borderRadius: '3px',
+                                fontWeight: 'bold',
+                                borderRadius: '4px',
                                 zIndex: 2
                             }}>
                                 {nombresCat[rel.categoria] || rel.categoria}
@@ -223,12 +226,12 @@ const ArticulosRelacionados = ({ currentId, currentSrc }) => {
                                 onError={e => { e.target.style.display = 'none'; }}
                             />
                         </div>
-                        <div style={{ padding: '15px', flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <h4 style={{ color: '#fff', fontSize: '0.9rem', fontFamily: 'Courier New, monospace', margin: '0 0 10px 0', lineHeight: '1.4' }}>
+                        <div style={{ padding: '16px', flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <h4 style={{ color: '#1E293B', fontSize: '0.92rem', fontFamily: "'Merriweather', Georgia, serif", margin: '0 0 10px 0', lineHeight: '1.45', fontWeight: '700' }}>
                                 {rel.titulo}
                             </h4>
-                            <span style={{ color: '#00d4ff', fontSize: '0.75rem', fontFamily: 'monospace', textTransform: 'uppercase' }}>
-                                📖 {language === 'en' ? 'READ DOSSIER →' : 'LEER EXPEDIENTE →'}
+                            <span style={{ color: '#9c4221', fontSize: '0.75rem', fontFamily: 'monospace', textTransform: 'uppercase', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                📄 {language === 'en' ? 'READ DOSSIER →' : 'LEER EXPEDIENTE →'}
                             </span>
                         </div>
                     </div>
@@ -1226,18 +1229,30 @@ const LecturaHistoria = ({ userAuth }) => {
                         </a>
                     </div>
 
-                    {/* SECCIÓN DE COMPARTIR */}
+                    {/* SECCIÓN DE COMPARTIR EDITORIAL */}
                     <div style={{ marginTop: '35px', paddingTop: '25px', borderTop: '1px solid rgba(0,0,0,0.08)', textAlign: 'center' }}>
-                        <p style={{ color: '#9c4221', fontSize: '0.82rem', marginBottom: '15px', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                        <p style={{ color: '#64748B', fontSize: '0.78rem', marginBottom: '14px', fontFamily: 'monospace', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase' }}>
                             {language === 'en' ? 'SHARE THIS INVESTIGATION' : 'DIFUNDIR ESTA INVESTIGACIÓN'}
                         </p>
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-tactico" style={{ background: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>💬 WHATSAPP</button>
-                            <button onClick={() => compartirHistoria('facebook')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📘 FACEBOOK</button>
-                            <button onClick={() => compartirHistoria('fbhistoria')} className="btn-share-tactico" style={{ background: '#1877F2', color: '#fff', border: '2px solid #fff', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace', opacity: 0.85 }}>📖 HISTORIA</button>
-                            <button onClick={() => compartirHistoria('twitter')} className="btn-share-tactico" style={{ background: '#000', color: '#fff', border: '1px solid #555', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>𝕏 PUBLICAR EN X</button>
-                            <button onClick={() => compartirHistoria('pinterest')} className="btn-share-tactico" style={{ background: '#E60023', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>📌 PINTEREST</button>
-                            <button onClick={() => compartirHistoria('copiar')} className="btn-share-tactico" style={{ background: '#444', color: '#fff', border: '1px solid #666', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', fontFamily: 'monospace' }}>🔗 COPIAR ENLACE</button>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <button onClick={() => compartirHistoria('whatsapp')} className="btn-share-editorial share-whatsapp" title="Compartir en WhatsApp">
+                                <span style={{ color: '#25D366', fontSize: '0.95rem' }}>💬</span> WhatsApp
+                            </button>
+                            <button onClick={() => compartirHistoria('facebook')} className="btn-share-editorial share-facebook" title="Compartir en Facebook">
+                                <span style={{ color: '#1877F2', fontSize: '0.95rem' }}>📘</span> Facebook
+                            </button>
+                            <button onClick={() => compartirHistoria('fbhistoria')} className="btn-share-editorial share-fbhistoria" title="Compartir en Historia">
+                                <span style={{ color: '#0084FF', fontSize: '0.95rem' }}>📖</span> Historia
+                            </button>
+                            <button onClick={() => compartirHistoria('twitter')} className="btn-share-editorial share-twitter" title="Publicar en X (Twitter)">
+                                <span style={{ color: '#1E293B', fontSize: '0.9rem' }}>𝕏</span> X (Twitter)
+                            </button>
+                            <button onClick={() => compartirHistoria('pinterest')} className="btn-share-editorial share-pinterest" title="Guardar en Pinterest">
+                                <span style={{ color: '#E60023', fontSize: '0.95rem' }}>📌</span> Pinterest
+                            </button>
+                            <button onClick={() => compartirHistoria('copiar')} className="btn-share-editorial share-copiar" title="Copiar enlace al portapapeles">
+                                <span style={{ color: '#64748B', fontSize: '0.95rem' }}>🔗</span> Copiar Enlace
+                            </button>
                         </div>
                     </div>
                 </div>
