@@ -353,21 +353,21 @@
 
 /* 3. Sección Bibliografía / Referencias */
 .ref-bibliography-section {
-    margin-top: 50px;
-    padding-top: 30px;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 40px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(0,0,0,0.08);
 }
 
 .ref-bibliography-header {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: var(--color-principal);
-    font-size: 1.2rem;
-    font-family: 'Courier New', monospace;
+    color: #9c4221;
+    font-size: 1.05rem;
+    font-family: 'Merriweather', Georgia, serif;
     font-weight: bold;
-    margin-bottom: 25px;
-    letter-spacing: 1px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
 }
 
 .ref-bibliography-grid {

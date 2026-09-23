@@ -28,8 +28,18 @@ const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
     if (!libros || libros.length === 0) return null;
     return (
         <div className="ref-bibliography-section fade-in" style={customStyle}>
-            <div className="ref-bibliography-header">
-                📚 <span>{tituloSeccion || "PARA SABER MÁS (BIBLIOGRAFÍA)"}</span>
+            <div className="ref-bibliography-header" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                color: '#9c4221',
+                fontSize: '1.05rem',
+                fontFamily: "'Merriweather', Georgia, serif",
+                fontWeight: 'bold',
+                marginBottom: '20px',
+                letterSpacing: '0.5px'
+            }}>
+                📚 <span>{tituloSeccion || "PARA SABER MÁS (BIBLIOGRAFÍA RECOMENDADA)"}</span>
             </div>
             <div className="ref-bibliography-grid">
                 {libros.map((libro, index) => (
@@ -45,9 +55,16 @@ const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
                         <div className="book-citation-info">
                             <div>
                                 <h5 className="book-citation-title">{libro.titulo}</h5>
-                                <p className="book-citation-author">{libro.autor}</p>
+                                <p className="book-citation-author">✍️ {libro.autor}</p>
+                                {libro.descripcion && (
+                                    <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 10px 0', lineHeight: '1.45' }}>
+                                        {libro.descripcion}
+                                    </p>
+                                )}
                             </div>
-                            <div className="btn-library-link">📖 VER DETALLES</div>
+                            <div className="btn-library-link" style={{ background: '#9c4221', borderColor: '#7a3319' }}>
+                                📖 VER EN AMAZON ↗
+                            </div>
                         </div>
                     </a>
                 ))}
@@ -411,7 +428,7 @@ const LecturaHistoria = ({ userAuth }) => {
 
     // DATOS DINÁMICOS DE AMAZON DESDE API
     useEffect(() => {
-        if (historia) {
+        if (id) {
             setAmazonConfig(null); // Limpiar datos anteriores al cambiar de artículo
             axios.get(`${API_BASE_URL}/api/amazon/${currentItemKey}`).then(res => {
                 setAmazonConfig(res.data || null);
@@ -420,26 +437,114 @@ const LecturaHistoria = ({ userAuth }) => {
                 setAmazonConfig(null);
             });
         }
-    }, [historia, id, esMisterio, esNoticia, esCaso, currentItemKey]);
+    }, [id, currentItemKey]);
+
+    // Helpers para normalizar cualquier variante de campo que venga de Amazon (retrocompatibilidad total)
+    const extraerLinkAmazon = (obj) => {
+        if (!obj || typeof obj !== 'object') return null;
+        let link = obj.amazon_url 
+            || obj.enlace 
+            || obj.enlace_amazon 
+            || obj.enlace_afiliado 
+            || obj.link 
+            || obj.url 
+            || obj.url_afiliado 
+            || obj.codigo 
+            || obj.codigo_amazon 
+            || obj.codigo_afiliado 
+            || obj.libro_enlace 
+            || null;
+        
+        if (!link && obj.id && typeof obj.id === 'string' && /^[0-9a-zA-Z_-]{6,12}$/.test(obj.id)) {
+            link = `https://amzn.to/${obj.id}`;
+        }
+        return (link && typeof link === 'string' && link.trim() !== '') ? link : null;
+    };
+
+    const extraerTituloAmazon = (obj) => {
+        if (!obj || typeof obj !== 'object') return 'Libro Recomendado';
+        return obj.titulo || obj.titulo_libro || obj.libro_titulo || obj.title || 'Libro Recomendado';
+    };
+
+    const extraerAutorAmazon = (obj) => {
+        if (!obj || typeof obj !== 'object') return 'Redacción Búnker';
+        return obj.autor || obj.autor_libro || obj.libro_autor || obj.author || 'Redacción Búnker';
+    };
+
+    const extraerImagenAmazon = (obj) => {
+        if (!obj || typeof obj !== 'object') return '/logoexpedientex.jpeg';
+        return obj.imagen_url || obj.libro_imagen || obj.image || obj.imagen || '/logoexpedientex.jpeg';
+    };
 
     let bannerData = null;
     let biblioData = null;
     try {
-        bannerData = amazonConfig?.banner || null;
-        biblioData = amazonConfig?.bibliografia;
-        if (biblioData && typeof biblioData === 'string') {
-            biblioData = JSON.parse(biblioData);
-        }
-        // Soporte para todos los formatos de campo de enlace que se han usado históricamente
-        const enlaceCualquiera = amazonConfig?.enlace_amazon || amazonConfig?.url_afiliado || amazonConfig?.link || amazonConfig?.url || amazonConfig?.codigo || amazonConfig?.codigo_afiliado || amazonConfig?.enlace_afiliado;
-        if (!biblioData && enlaceCualquiera) {
-            biblioData = [{
-                titulo: amazonConfig.titulo || amazonConfig.titulo_libro,
-                autor: amazonConfig.autor || amazonConfig.autor_libro || "Redacción Búnker",
-                descripcion: amazonConfig.descripcion || "",
-                imagen_url: amazonConfig.imagen_url,
-                link: enlaceCualquiera
-            }];
+        if (amazonConfig) {
+            // Caso 1: amazonConfig es un Array directamente [...]
+            if (Array.isArray(amazonConfig) && amazonConfig.length > 0) {
+                biblioData = amazonConfig.map(item => ({
+                    titulo: extraerTituloAmazon(item),
+                    autor: extraerAutorAmazon(item),
+                    descripcion: item.descripcion || item.sinopsis || '',
+                    imagen_url: extraerImagenAmazon(item),
+                    link: extraerLinkAmazon(item) || '#'
+                })).filter(item => item.link && item.link !== '#');
+            } else if (typeof amazonConfig === 'object') {
+                // Caso 2: Contiene campo banner
+                if (amazonConfig.banner && typeof amazonConfig.banner === 'object') {
+                    const bannerLink = extraerLinkAmazon(amazonConfig.banner) || extraerLinkAmazon(amazonConfig);
+                    if (bannerLink) {
+                        bannerData = {
+                            titulo: amazonConfig.banner.titulo || extraerTituloAmazon(amazonConfig),
+                            descripcion: amazonConfig.banner.descripcion || amazonConfig.descripcion || '',
+                            link: bannerLink
+                        };
+                    }
+                }
+
+                // Caso 3: Contiene bibliografia (array o json string)
+                let rawBiblio = amazonConfig.bibliografia;
+                if (rawBiblio && typeof rawBiblio === 'string') {
+                    try { rawBiblio = JSON.parse(rawBiblio); } catch(e) {}
+                }
+
+                if (Array.isArray(rawBiblio) && rawBiblio.length > 0) {
+                    biblioData = rawBiblio.map(item => ({
+                        titulo: extraerTituloAmazon(item),
+                        autor: extraerAutorAmazon(item),
+                        descripcion: item.descripcion || item.sinopsis || '',
+                        imagen_url: extraerImagenAmazon(item),
+                        link: extraerLinkAmazon(item) || extraerLinkAmazon(amazonConfig) || '#'
+                    })).filter(item => item.link && item.link !== '#');
+                }
+
+                // Caso 4: Contiene recomendacion_libro
+                if ((!biblioData || biblioData.length === 0) && amazonConfig.recomendacion_libro) {
+                    const rec = amazonConfig.recomendacion_libro;
+                    const recLink = extraerLinkAmazon(rec);
+                    if (recLink) {
+                        biblioData = [{
+                            titulo: extraerTituloAmazon(rec),
+                            autor: extraerAutorAmazon(rec),
+                            descripcion: rec.descripcion || '',
+                            imagen_url: extraerImagenAmazon(rec),
+                            link: recLink
+                        }];
+                    }
+                }
+
+                // Caso 5: Es un objeto directo con titulo, autor, link/enlace/amazon_url
+                const fallbackLink = extraerLinkAmazon(amazonConfig);
+                if ((!biblioData || biblioData.length === 0) && fallbackLink) {
+                    biblioData = [{
+                        titulo: extraerTituloAmazon(amazonConfig),
+                        autor: extraerAutorAmazon(amazonConfig),
+                        descripcion: amazonConfig.descripcion || amazonConfig.sinopsis || '',
+                        imagen_url: extraerImagenAmazon(amazonConfig),
+                        link: fallbackLink
+                    }];
+                }
+            }
         }
     } catch (e) {
         console.error("Error procesando datos de referencia:", e);
