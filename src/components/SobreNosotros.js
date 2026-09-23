@@ -68,7 +68,7 @@ const SobreNosotros = () => {
                             />
                             <div className="badge-fundador-bunker">
                                 <span className="badge-nombre">🛡️ JOSÉ MORENO JIMÉNEZ</span>
-                                <span className="badge-cargo">FUNDADOR E INVESTIGADOR JEFE</span>
+                                <span className="badge-cargo">CREADOR Y PROGRAMADOR (ATARFE)</span>
                             </div>
                         </div>
                     </div>

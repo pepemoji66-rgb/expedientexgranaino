@@ -43,6 +43,18 @@ const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
             }}>
                 📚 <span>{tituloSeccion || "PARA SABER MÁS (BIBLIOGRAFÍA RECOMENDADA)"}</span>
             </div>
+            <div style={{
+                background: '#f8fafc',
+                borderLeft: '3px solid #9c4221',
+                padding: '10px 14px',
+                borderRadius: '0 4px 4px 0',
+                marginBottom: '18px',
+                fontSize: '0.82rem',
+                color: '#475569',
+                lineHeight: '1.5'
+            }}>
+                📌 <strong>Índice de investigación:</strong> Este expediente resume los datos y evidencias clave de un caso real. Si deseas profundizar en la investigación forense, histórica o ufológica completa, te recomendamos consultar las obras especializadas a continuación.
+            </div>
             <div className="ref-bibliography-grid">
                 {libros.map((libro, index) => (
                     <div key={index} className="book-citation-block" style={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'default' }}>

@@ -16,7 +16,7 @@ const Footer = ({ visitasTotales = 0 }) => {
                     <div className="footer-disclaimer-col">
                         <h4>DIRECTIVA DE INVESTIGACIÓN Y ARCHIVO</h4>
                         <p>
-                            Los expedientes, crónicas y misterios documentados en este portal constituyen análisis preliminares y síntesis documentales. Este archivo independiente tiene fines de divulgación e investigación ufológica y periodística. Se recomienda a los investigadores contrastar las fuentes y participar aportando datos contrastados.
+                            Los expedientes y crónicas de este portal constituyen un índice documental y fichas de síntesis de casos reales, programado y mantenido de forma independiente por José Moreno Jiménez desde Atarfe (Granada). Este archivo tiene fines estrictamente divulgativos: su propósito no es agotar cada suceso con tratados enciclopédicos, sino presentar los hechos clave e invitar al lector a indagar y contrastar las fuentes y la bibliografía recomendada.
                         </p>
                     </div>
 
