@@ -315,19 +315,17 @@ const PanelAdmin = () => {
             // Mapeo dinámico para el backend (lugares/imagenes usan nombre/descripcion, otros titulo/contenido)
             const finalData = { ...editForm };
 
-            // Limpiar rutas locales de capturas y url para vídeos
-            if (tab === 'videos') {
-                if (finalData.capturas) {
-                    finalData.capturas = finalData.capturas
-                        .split(',')
-                        .map(u => u.trim())
-                        .filter(u => u && !(u.includes('\\') || u.startsWith('C:') || u.includes('/Users/')))
-                        .join(',');
-                }
-                if (finalData.url) {
-                    if (finalData.url.includes('\\') || finalData.url.startsWith('C:') || finalData.url.includes('/Users/')) {
-                        finalData.url = '';
-                    }
+            // Limpiar rutas locales de capturas y url
+            if (finalData.capturas) {
+                finalData.capturas = finalData.capturas
+                    .split(',')
+                    .map(u => u.trim())
+                    .filter(u => u && !(u.includes('\\') || u.startsWith('C:') || u.includes('/Users/')))
+                    .join(',');
+            }
+            if (tab === 'videos' && finalData.url) {
+                if (finalData.url.includes('\\') || finalData.url.startsWith('C:') || finalData.url.includes('/Users/')) {
+                    finalData.url = '';
                 }
             }
 
@@ -560,7 +558,7 @@ const PanelAdmin = () => {
             formData.append('tipo_relato', tipoRelatoSubida);
         }
 
-        if (tipoSubida === 'videos' && urlCapturaSubida) {
+        if ((tipoSubida === 'videos' || tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && urlCapturaSubida) {
             formData.append('capturas', urlCapturaSubida);
         }
 
@@ -1281,6 +1279,22 @@ const PanelAdmin = () => {
                             </div>
                         )}
 
+                        {(tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && (
+                            <div className="form-group-admin" style={{ marginTop: '15px' }}>
+                                <label style={{ color: '#00ff41' }}>📸 EVIDENCIAS Y CAPTURAS ADICIONALES (Separadas por comas, Opcional):</label>
+                                <textarea 
+                                    className="input-bunker" 
+                                    value={urlCapturaSubida} 
+                                    onChange={e => setUrlCapturaSubida(e.target.value)}
+                                    placeholder="https://servidor.com/evidencia1.jpg, https://servidor.com/evidencia2.jpg"
+                                    style={{ width: '100%', minHeight: '60px', padding: '10px', background: '#000', color: '#00ff41', border: '1px solid #333' }}
+                                />
+                                <small style={{ color: '#888', display: 'block', marginTop: '4px' }}>
+                                    Añade enlaces o nombres de imágenes adicionales para que el artículo tenga galería de fotos con zoom.
+                                </small>
+                            </div>
+                        )}
+
                         {tipoSubida === 'imagenes' && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '15px', background: 'rgba(0,255,65,0.05)', border: '1px solid var(--color-principal)', marginTop: '10px', marginBottom: '10px' }}>
                                 <input 
@@ -1784,6 +1798,28 @@ const PanelAdmin = () => {
                                             <input type="number" step="any" value={editForm.longitud} onChange={e => setEditForm({...editForm, longitud: e.target.value})} style={{ width: '100%', padding: '8px', background: '#000', color: 'var(--color-principal)', border: '1px solid #333', fontSize: '0.75rem' }} />
                                         </div>
                                     </div>
+                                </div>
+                            )}
+
+                            {(tab === 'expedientes' || tab === 'noticias' || tab === 'misterios_historicos' || tab === 'casos_abiertos') && (
+                                <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid rgba(0,255,65,0.25)', borderRadius: '4px' }}>
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px', fontWeight: 'bold' }}>
+                                        📸 ARCHIVO FOTOGRÁFICO Y CAPTURAS DEL CASO (SEPARADAS POR COMAS):
+                                    </label>
+                                    <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '8px' }}>
+                                        Introduce las URLs o nombres de archivo de las imágenes secundarias del caso. Se mostrarán como galería interactiva con lupa.
+                                    </p>
+                                    <textarea 
+                                        value={editForm.capturas || ''} 
+                                        onChange={e => setEditForm({...editForm, capturas: e.target.value})} 
+                                        placeholder="https://servidor.com/evidencia1.jpg, https://servidor.com/evidencia2.jpg"
+                                        style={{ width: '100%', minHeight: '70px', background: '#050505', color: '#00ff41', border: '1px solid #333', padding: '10px', fontFamily: 'monospace', fontSize: '0.78rem' }}
+                                    />
+                                    {editForm.capturas && (editForm.capturas.includes('\\') || editForm.capturas.startsWith('C:') || editForm.capturas.includes('/Users/')) && (
+                                        <small style={{ color: '#ff4444', display: 'block', marginTop: '6px', fontWeight: 'bold' }}>
+                                            ⚠️ ALERTA: Has escrito una ruta local de tu ordenador. Usa enlaces web o nombres de archivos subidos.
+                                        </small>
+                                    )}
                                 </div>
                             )}
 

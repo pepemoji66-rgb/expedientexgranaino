@@ -280,6 +280,12 @@ module.exports = async (db) => {
             console.log("🩹 PARCHE APLICADO: Columna 'fuente_url' añadida a misterios_historicos.");
         } catch (e) {}
 
+        // PARCHES PARA CAPTURAS EN ARTÍCULOS
+        try { await db.execute("ALTER TABLE expedientes ADD COLUMN capturas TEXT"); } catch (e) {}
+        try { await db.execute("ALTER TABLE casos_abiertos ADD COLUMN capturas TEXT"); } catch (e) {}
+        try { await db.execute("ALTER TABLE misterios_historicos ADD COLUMN capturas TEXT"); } catch (e) {}
+        try { await db.execute("ALTER TABLE noticias ADD COLUMN capturas TEXT"); } catch (e) {}
+
         const rowsMisterios = await db.query("SELECT COUNT(*) as total FROM misterios_historicos");
         if (rowsMisterios[0].total === 0) {
             console.log("🌱 Sembrando misterios históricos por defecto...");

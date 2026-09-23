@@ -410,6 +410,71 @@ const LecturaHistoria = ({ userAuth }) => {
     const [esCaso, setEsCaso] = useState(initialData ? !!initialTypes.esCaso : (src === 'casos'));
     const [cargando, setCargando] = useState(!initialData);
     
+    // ESTADO DE GALERÍA DE EVIDENCIAS / CAPTURAS
+    const [capturasEvidencias, setCapturasEvidencias] = useState([]);
+    const [capturaExpandida, setCapturaExpandida] = useState(null);
+
+    // Sincronización y carga de capturas fotográficas y evidencias del caso
+    useEffect(() => {
+        if (!historia) return;
+
+        // 1. Si la historia ya cuenta con capturas en su registro propio
+        if (historia.capturas && typeof historia.capturas === 'string' && historia.capturas.trim() !== '') {
+            let lista = [];
+            const raw = historia.capturas.trim();
+            if (raw.startsWith('[') && raw.endsWith(']')) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) lista = parsed;
+                } catch(e) {}
+            }
+            if (lista.length === 0) {
+                lista = raw.split(',').map(s => s.trim()).filter(Boolean);
+            }
+            if (lista.length > 0) {
+                setCapturasEvidencias(lista.map(c => c.startsWith('http') ? c : `${API_BASE_URL}/imagenes/${c}`));
+                return;
+            }
+        }
+
+        // 2. Si no tiene capturas registradas, buscar si hay vídeo asociado en la biblioteca con capturas
+        const buscarCapturasEnVideos = async () => {
+            try {
+                const resVideos = await axios.get(`${API_BASE_URL}/api/videos`);
+                if (resVideos.data && Array.isArray(resVideos.data)) {
+                    const vidsConCapturas = resVideos.data.filter(v => v.capturas && v.capturas.trim() !== '');
+                    const ytCandidate = historia.youtube_url || 
+                                       (historia.fuente_url && /youtu/i.test(historia.fuente_url) ? historia.fuente_url : null) ||
+                                       (historia.video_url && /youtu/i.test(historia.video_url) ? historia.video_url : null);
+                    const currentYtId = extractYouTubeId(ytCandidate);
+
+                    let videoEncontrado = null;
+                    if (currentYtId) {
+                        videoEncontrado = vidsConCapturas.find(v => extractYouTubeId(v.url) === currentYtId);
+                    }
+                    if (!videoEncontrado && historia.titulo) {
+                        const tituloNorm = historia.titulo.toLowerCase().trim();
+                        videoEncontrado = vidsConCapturas.find(v => {
+                            const vTit = (v.titulo || '').toLowerCase().trim();
+                            return vTit && (vTit.includes(tituloNorm) || tituloNorm.includes(vTit));
+                        });
+                    }
+
+                    if (videoEncontrado && videoEncontrado.capturas) {
+                        const caps = videoEncontrado.capturas.split(',').map(s => s.trim()).filter(Boolean);
+                        if (caps.length > 0) {
+                            setCapturasEvidencias(caps.map(c => c.startsWith('http') ? c : `${API_BASE_URL}/imagenes/${c}`));
+                        }
+                    }
+                }
+            } catch (err) {
+                // Silencioso si falla la búsqueda secundaria
+            }
+        };
+
+        buscarCapturasEnVideos();
+    }, [historia]);
+    
     // ESTADO DE AUDIO (ROBOCOP) MULTICHOICE SEQUENTIAL PARA MÓVIL
     const [reproduciendoAudio, setReproduciendoAudio] = useState(false);
     const audioIndexRef = useRef(0);
@@ -1138,38 +1203,41 @@ const LecturaHistoria = ({ userAuth }) => {
                     )}
                 </div>
 
-                {/* IMAGEN PRINCIPAL DE LA NOTICIA / EXPEDIENTE */}
-                {(historia.imagen_url || historia.url_imagen) && (
-                    <div className="portada-lectura">
-                        {/* MARCADOR TIPO PIN / CHUPACHUPS PARA LOCALIZAR EN MAPA SIN TAPAR LA CARA */}
-                        {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
-                            <button
-                                onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : esCaso ? 'caso-' : 'exp-') + historia.id } })}
-                                className="btn-localizar-portada"
-                                title={t('readLocateRadar') || "Localizar en el radar"}
-                                aria-label={t('readLocateRadar') || "Localizar en el radar"}
-                            >
-                                <MapPin size={20} className="icono-pin-radar" />
-                            </button>
-                        )}
-                        <img 
-                            src={
-                                (historia.imagen_url && historia.imagen_url.startsWith('http')) 
-                                ? historia.imagen_url 
-                                : (historia.url_imagen && historia.url_imagen.startsWith('http'))
-                                ? historia.url_imagen
-                                : `${API_BASE_URL}/imagenes/${(historia.imagen_url || historia.url_imagen || '').split('/').pop()}`
-                            } 
-                            alt="Portada de la Evidencia"
-                            className="lectura-imagen-portada"
-                            onLoad={(e) => { e.target.style.opacity = 1; }}
-                            onError={(e) => { 
-                                console.error("Fallo carga imagen:", e.target.src);
-                                e.target.style.display = 'none'; 
-                            }}
-                        />
-                    </div>
-                )}
+                {/* IMAGEN PRINCIPAL DE LA NOTICIA / EXPEDIENTE — EFECTO CINEMATOGRÁFICO AMBIENTAL */}
+                {(historia.imagen_url || historia.url_imagen) && (() => {
+                    const imgUrl = (historia.imagen_url && historia.imagen_url.startsWith('http')) 
+                        ? historia.imagen_url 
+                        : (historia.url_imagen && historia.url_imagen.startsWith('http'))
+                        ? historia.url_imagen
+                        : `${API_BASE_URL}/imagenes/${(historia.imagen_url || historia.url_imagen || '').split('/').pop()}`;
+
+                    return (
+                        <div className="portada-lectura">
+                            <div className="portada-backdrop-ambient" style={{ backgroundImage: `url(${imgUrl})` }} />
+                            {/* MARCADOR TIPO PIN / CHUPACHUPS PARA LOCALIZAR EN MAPA SIN TAPAR LA CARA */}
+                            {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
+                                <button
+                                    onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : esCaso ? 'caso-' : 'exp-') + historia.id } })}
+                                    className="btn-localizar-portada"
+                                    title={t('readLocateRadar') || "Localizar en el radar"}
+                                    aria-label={t('readLocateRadar') || "Localizar en el radar"}
+                                >
+                                    <MapPin size={20} className="icono-pin-radar" />
+                                </button>
+                            )}
+                            <img 
+                                src={imgUrl} 
+                                alt="Portada de la Evidencia"
+                                className="lectura-imagen-portada"
+                                onLoad={(e) => { e.target.style.opacity = 1; }}
+                                onError={(e) => { 
+                                    console.error("Fallo carga imagen:", e.target.src);
+                                    e.target.style.display = 'none'; 
+                                }}
+                            />
+                        </div>
+                    );
+                })()}
 
                 {/* BOTÓN AMAZON DESTACADO BAJO LA IMAGEN — SIEMPRE VISIBLE SI HAY LIBRO */}
                 {(biblioData && biblioData.length > 0) && (
@@ -1386,6 +1454,35 @@ const LecturaHistoria = ({ userAuth }) => {
                         );
                     })()}
                     
+                    {/* ARCHIVO FOTOGRÁFICO Y GALERÍA DE EVIDENCIAS DEL CASO */}
+                    {capturasEvidencias && capturasEvidencias.length > 0 && (
+                        <div className="galeria-evidencias-seccion">
+                            <div className="galeria-evidencias-header">
+                                <span>📸 {language === 'en' ? 'PHOTOGRAPHIC EVIDENCE & CASE ARCHIVE' : 'ARCHIVO FOTOGRÁFICO Y EVIDENCIAS DEL CASO'}</span>
+                                <span style={{ fontSize: '0.72rem', opacity: 0.85, color: '#aaa' }}>[{capturasEvidencias.length} {language === 'en' ? 'RECORDS' : 'EVIDENCIAS'}]</span>
+                            </div>
+                            <div className="galeria-evidencias-grid">
+                                {capturasEvidencias.map((url, idx) => (
+                                    <div 
+                                        key={idx} 
+                                        className="galeria-evidencia-item"
+                                        onClick={() => setCapturaExpandida(url)}
+                                        title={language === 'en' ? 'Click to inspect in high resolution' : 'Clic para inspeccionar en alta resolución'}
+                                    >
+                                        <img 
+                                            src={url} 
+                                            alt={`Evidencia ${idx + 1}`} 
+                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                        />
+                                        <span className="galeria-evidencia-badge">
+                                            🔍 EVIDENCIA #{idx + 1}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    
                     {/* REPRODUCTOR DE VÍDEO YOUTUBE OFICIAL */}
                     {(() => {
                         const ytCandidate = historia.youtube_url || 
@@ -1541,6 +1638,22 @@ const LecturaHistoria = ({ userAuth }) => {
                 <ArticulosRelacionados currentId={id} currentSrc={src} />
 
             </div>
+
+            {/* MODAL LIGHTBOX DE INSPECCIÓN DE EVIDENCIA */}
+            {capturaExpandida && (
+                <div className="modal-evidencia-lightbox fade-in" onClick={() => setCapturaExpandida(null)}>
+                    <div className="modal-evidencia-box" onClick={e => e.stopPropagation()}>
+                        <button 
+                            className="btn-cerrar-lightbox"
+                            onClick={() => setCapturaExpandida(null)}
+                            title={language === 'en' ? 'Close' : 'Cerrar'}
+                        >
+                            ✕
+                        </button>
+                        <img src={capturaExpandida} alt="Evidencia ampliada" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

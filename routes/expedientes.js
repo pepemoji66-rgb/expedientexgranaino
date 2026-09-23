@@ -243,14 +243,14 @@ module.exports = (db, upload) => {
     });
 
     router.put('/:id', upload.single('imagen'), async (req, res) => {
-        const { titulo, contenido, latitud, longitud, estado, tipo, fuente_url, url_externa, youtube_url } = req.body;
+        const { titulo, contenido, latitud, longitud, estado, tipo, fuente_url, url_externa, youtube_url, capturas } = req.body;
         const url_final = fuente_url || url_externa || null;
         const imagen_url = req.file ? (req.file.path || req.file.filename) : null;
         try {
             if (imagen_url) {
                 await db.execute(
-                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, imagen_url = ?, fuente_url = ?, youtube_url = ? WHERE id = ?",
-                    [titulo, contenido, latitud, longitud, estado, tipo, imagen_url, url_final, youtube_url || null, req.params.id]
+                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, imagen_url = ?, fuente_url = ?, youtube_url = ?, capturas = ? WHERE id = ?",
+                    [titulo, contenido, latitud, longitud, estado, tipo, imagen_url, url_final, youtube_url || null, capturas || null, req.params.id]
                 );
                 // 📸 AUTO-GALERÍA: nueva imagen al editar expediente
                 try {
@@ -268,8 +268,8 @@ module.exports = (db, upload) => {
                 }
             } else {
                 await db.execute(
-                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, fuente_url = ?, youtube_url = ? WHERE id = ?",
-                    [titulo, contenido, latitud, longitud, estado, tipo, url_final, youtube_url || null, req.params.id]
+                    "UPDATE expedientes SET titulo = ?, contenido = ?, latitud = ?, longitud = ?, estado = ?, tipo = ?, fuente_url = ?, youtube_url = ?, capturas = ? WHERE id = ?",
+                    [titulo, contenido, latitud, longitud, estado, tipo, url_final, youtube_url || null, capturas || null, req.params.id]
                 );
             }
             res.json({ mensaje: "Expediente actualizado con éxito." });
