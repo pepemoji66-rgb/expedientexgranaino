@@ -475,6 +475,19 @@ const LecturaHistoria = ({ userAuth }) => {
         buscarCapturasEnVideos();
     }, [historia]);
     
+    // Cerrar visor de evidencias fotográficas con tecla Escape
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setCapturaExpandida(null);
+            }
+        };
+        if (capturaExpandida) {
+            window.addEventListener('keydown', handleKeyDown);
+        }
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [capturaExpandida]);
+
     // ESTADO DE AUDIO (ROBOCOP) MULTICHOICE SEQUENTIAL PARA MÓVIL
     const [reproduciendoAudio, setReproduciendoAudio] = useState(false);
     const audioIndexRef = useRef(0);
@@ -1531,7 +1544,11 @@ const LecturaHistoria = ({ userAuth }) => {
                                         <img 
                                             src={url} 
                                             alt={`Evidencia ${idx + 1}`} 
-                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                            referrerPolicy="no-referrer"
+                                            onError={(e) => { 
+                                                console.error("Fallo carga evidencia:", e.target.src);
+                                                e.target.style.opacity = '0.3';
+                                            }}
                                         />
                                         <span className="galeria-evidencia-badge">
                                             🔍 EVIDENCIA #{idx + 1}
@@ -1700,16 +1717,75 @@ const LecturaHistoria = ({ userAuth }) => {
 
             {/* MODAL LIGHTBOX DE INSPECCIÓN DE EVIDENCIA */}
             {capturaExpandida && (
-                <div className="modal-evidencia-lightbox fade-in" onClick={() => setCapturaExpandida(null)}>
-                    <div className="modal-evidencia-box" onClick={e => e.stopPropagation()}>
-                        <button 
-                            className="btn-cerrar-lightbox"
-                            onClick={() => setCapturaExpandida(null)}
-                            title={language === 'en' ? 'Close' : 'Cerrar'}
-                        >
-                            ✕
-                        </button>
-                        <img src={capturaExpandida} alt="Evidencia ampliada" />
+                <div 
+                    className="modal-evidencia-lightbox fade-in" 
+                    onClick={() => setCapturaExpandida(null)}
+                    style={{ cursor: 'pointer' }}
+                >
+                    {/* Botón flotante siempre visible y fijo en la esquina superior derecha */}
+                    <button 
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setCapturaExpandida(null);
+                        }}
+                        style={{
+                            position: 'fixed',
+                            top: '20px',
+                            right: '25px',
+                            background: '#ef4444',
+                            color: '#ffffff',
+                            border: '2px solid #ffffff',
+                            width: '46px',
+                            height: '46px',
+                            borderRadius: '50%',
+                            fontSize: '1.4rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
+                            zIndex: 9999999,
+                            transition: 'all 0.2s ease'
+                        }}
+                        title={language === 'en' ? 'Close (Esc)' : 'Cerrar (Esc)'}
+                        aria-label="Cerrar"
+                    >
+                        ✕
+                    </button>
+
+                    <div 
+                        className="modal-evidencia-box" 
+                        onClick={e => e.stopPropagation()} 
+                        style={{ cursor: 'default', textAlign: 'center' }}
+                    >
+                        <img 
+                            src={capturaExpandida} 
+                            alt="Evidencia ampliada" 
+                            style={{ maxHeight: '78vh', maxWidth: '92vw', objectFit: 'contain', borderRadius: '6px', border: '1px solid rgba(0, 255, 65, 0.4)', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}
+                        />
+                        <div style={{ marginTop: '16px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setCapturaExpandida(null)}
+                                style={{
+                                    background: '#ef4444',
+                                    color: '#ffffff',
+                                    border: '1px solid #f87171',
+                                    padding: '10px 24px',
+                                    borderRadius: '30px',
+                                    fontWeight: '800',
+                                    fontFamily: 'monospace',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    letterSpacing: '1px',
+                                    boxShadow: '0 4px 15px rgba(239,68,68,0.4)'
+                                }}
+                            >
+                                ✕ {language === 'en' ? 'CLOSE VIEWER' : 'CERRAR VISOR'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
