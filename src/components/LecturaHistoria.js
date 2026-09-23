@@ -438,16 +438,31 @@ const LecturaHistoria = ({ userAuth }) => {
             }
         }
 
-        // 2. Si no tiene capturas registradas, buscar si hay vídeo asociado en la biblioteca con capturas
+        // 2. Si tiene vídeo de YouTube asociado, generamos de inmediato sus 4 fotogramas oficiales como evidencias
+        const ytCandidate = historia.youtube_url || 
+                           (historia.fuente_url && /youtu/i.test(historia.fuente_url) ? historia.fuente_url : null) ||
+                           (historia.video_url && /youtu/i.test(historia.video_url) ? historia.video_url : null) ||
+                           (historia.url && /youtu/i.test(historia.url) ? historia.url : null);
+        const currentYtId = extractYouTubeId(ytCandidate);
+        
+        if (currentYtId) {
+            const fotogramasYouTube = [
+                `https://img.youtube.com/vi/${currentYtId}/hqdefault.jpg`,
+                `https://img.youtube.com/vi/${currentYtId}/1.jpg`,
+                `https://img.youtube.com/vi/${currentYtId}/2.jpg`,
+                `https://img.youtube.com/vi/${currentYtId}/3.jpg`
+            ];
+            setCapturasEvidencias(fotogramasYouTube);
+        } else {
+            setCapturasEvidencias([]);
+        }
+
+        // 3. Buscar si en la base de datos de vídeos hay capturas subidas manualmente en alta resolución
         const buscarCapturasEnVideos = async () => {
             try {
                 const resVideos = await axios.get(`${API_BASE_URL}/api/videos`);
                 if (resVideos.data && Array.isArray(resVideos.data)) {
                     const vidsConCapturas = resVideos.data.filter(v => v.capturas && v.capturas.trim() !== '');
-                    const ytCandidate = historia.youtube_url || 
-                                       (historia.fuente_url && /youtu/i.test(historia.fuente_url) ? historia.fuente_url : null) ||
-                                       (historia.video_url && /youtu/i.test(historia.video_url) ? historia.video_url : null);
-                    const currentYtId = extractYouTubeId(ytCandidate);
 
                     let videoEncontrado = null;
                     if (currentYtId) {
