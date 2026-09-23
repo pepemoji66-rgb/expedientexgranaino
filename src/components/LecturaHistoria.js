@@ -415,6 +415,13 @@ const LecturaHistoria = ({ userAuth }) => {
     const [capturaExpandida, setCapturaExpandida] = useState(null);
     const [galeriaAbierta, setGaleriaAbierta] = useState(true);
 
+    // ESTADO DE ZOOM Y DESPLAZAMIENTO (PAN) EN EL VISOR DE EVIDENCIAS
+    const [zoomNivel, setZoomNivel] = useState(1);
+    const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const dragDistanceRef = useRef(0);
+
     // Sincronización y carga de capturas fotográficas y evidencias del caso
     useEffect(() => {
         if (!historia) return;
@@ -432,13 +439,17 @@ const LecturaHistoria = ({ userAuth }) => {
             if (lista.length === 0) {
                 lista = raw.split(',').map(s => s.trim()).filter(Boolean);
             }
-            if (lista.length > 0) {
-                setCapturasEvidencias(lista.map(c => c.startsWith('http') ? c : `${API_BASE_URL}/imagenes/${c}`));
+            // Filtrar enlaces a vídeos y deduplicar
+            lista = lista.filter(c => c && !c.includes('youtube.com/watch') && !c.includes('youtu.be/'));
+            const listaUnica = Array.from(new Set(lista));
+            if (listaUnica.length > 0) {
+                setCapturasEvidencias(listaUnica.map(c => c.startsWith('http') ? c : `${API_BASE_URL}/imagenes/${c}`));
                 return;
             }
         }
 
-        // 2. Si tiene vídeo de YouTube asociado, generamos de inmediato sus 4 fotogramas oficiales como evidencias
+        // 2. Si tiene vídeo de YouTube asociado, generamos sus 3 fotogramas oficiales únicos en alta resolución
+        // (momento 25%, 50% y 75% del vídeo, evitando la miniatura por defecto que suele ser repetida)
         const ytCandidate = historia.youtube_url || 
                            (historia.fuente_url && /youtu/i.test(historia.fuente_url) ? historia.fuente_url : null) ||
                            (historia.video_url && /youtu/i.test(historia.video_url) ? historia.video_url : null) ||
@@ -447,7 +458,6 @@ const LecturaHistoria = ({ userAuth }) => {
         
         if (currentYtId) {
             const fotogramasYouTube = [
-                `https://img.youtube.com/vi/${currentYtId}/maxresdefault.jpg`,
                 `https://img.youtube.com/vi/${currentYtId}/maxres1.jpg`,
                 `https://img.youtube.com/vi/${currentYtId}/maxres2.jpg`,
                 `https://img.youtube.com/vi/${currentYtId}/maxres3.jpg`
@@ -477,9 +487,12 @@ const LecturaHistoria = ({ userAuth }) => {
                     }
 
                     if (videoEncontrado && videoEncontrado.capturas) {
-                        const caps = videoEncontrado.capturas.split(',').map(s => s.trim()).filter(Boolean);
-                        if (caps.length > 0) {
-                            setCapturasEvidencias(caps.map(c => c.startsWith('http') ? c : `${API_BASE_URL}/imagenes/${c}`));
+                        const caps = videoEncontrado.capturas.split(',')
+                            .map(s => s.trim())
+                            .filter(s => s !== '' && !s.includes('youtube.com/watch') && !s.includes('youtu.be/'));
+                        const capsUnicas = Array.from(new Set(caps));
+                        if (capsUnicas.length > 0) {
+                            setCapturasEvidencias(capsUnicas.map(c => c.startsWith('http') ? c : `${API_BASE_URL}/imagenes/${c}`));
                         }
                     }
                 }
@@ -495,6 +508,8 @@ const LecturaHistoria = ({ userAuth }) => {
     const irAnteriorEvidencia = (e) => {
         if (e) e.stopPropagation();
         if (!capturasEvidencias || capturasEvidencias.length === 0) return;
+        setZoomNivel(1);
+        setPanPosition({ x: 0, y: 0 });
         const idx = capturasEvidencias.indexOf(capturaExpandida);
         const prevIdx = idx > 0 ? idx - 1 : capturasEvidencias.length - 1;
         setCapturaExpandida(capturasEvidencias[prevIdx]);
@@ -503,27 +518,138 @@ const LecturaHistoria = ({ userAuth }) => {
     const irSiguienteEvidencia = (e) => {
         if (e) e.stopPropagation();
         if (!capturasEvidencias || capturasEvidencias.length === 0) return;
+        setZoomNivel(1);
+        setPanPosition({ x: 0, y: 0 });
         const idx = capturasEvidencias.indexOf(capturaExpandida);
         const nextIdx = idx < capturasEvidencias.length - 1 ? idx + 1 : 0;
         setCapturaExpandida(capturasEvidencias[nextIdx]);
     };
 
-    // Cerrar visor o pasar fotos con teclado (Escape, Flechas Izquierda / Derecha)
+    // Control de Zoom y Panorámica en el visor
+    const handleZoomIn = (e) => {
+        if (e) e.stopPropagation();
+        setZoomNivel(prev => Math.min(Number((prev + 0.5).toFixed(2)), 3.5));
+    };
+
+    const handleZoomOut = (e) => {
+        if (e) e.stopPropagation();
+        setZoomNivel(prev => {
+            const next = Math.max(Number((prev - 0.5).toFixed(2)), 1);
+            if (next === 1) setPanPosition({ x: 0, y: 0 });
+            return next;
+        });
+    };
+
+    const handleResetZoom = (e) => {
+        if (e) e.stopPropagation();
+        setZoomNivel(1);
+        setPanPosition({ x: 0, y: 0 });
+    };
+
+    const handleToggleZoom = (e) => {
+        if (e) e.stopPropagation();
+        if (zoomNivel === 1) {
+            setZoomNivel(2);
+        } else {
+            setZoomNivel(1);
+            setPanPosition({ x: 0, y: 0 });
+        }
+    };
+
+    const handleWheelZoom = (e) => {
+        if (e.deltaY < 0) {
+            setZoomNivel(prev => Math.min(Number((prev + 0.25).toFixed(2)), 3.5));
+        } else if (e.deltaY > 0) {
+            setZoomNivel(prev => {
+                const next = Math.max(Number((prev - 0.25).toFixed(2)), 1);
+                if (next === 1) setPanPosition({ x: 0, y: 0 });
+                return next;
+            });
+        }
+    };
+
+    const handleMouseDownPan = (e) => {
+        if (zoomNivel > 1) {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDragging(true);
+            dragDistanceRef.current = 0;
+            setDragStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
+        }
+    };
+
+    const handleMouseMovePan = (e) => {
+        if (isDragging && zoomNivel > 1) {
+            e.preventDefault();
+            dragDistanceRef.current += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0);
+            setPanPosition({
+                x: e.clientX - dragStart.x,
+                y: e.clientY - dragStart.y
+            });
+        }
+    };
+
+    const handleMouseUpPan = () => {
+        setIsDragging(false);
+    };
+
+    const handleTouchStartPan = (e) => {
+        if (zoomNivel > 1 && e.touches.length === 1) {
+            setIsDragging(true);
+            dragDistanceRef.current = 0;
+            setDragStart({ x: e.touches[0].clientX - panPosition.x, y: e.touches[0].clientY - panPosition.y });
+        }
+    };
+
+    const handleTouchMovePan = (e) => {
+        if (isDragging && zoomNivel > 1 && e.touches.length === 1) {
+            dragDistanceRef.current += 5;
+            setPanPosition({
+                x: e.touches[0].clientX - dragStart.x,
+                y: e.touches[0].clientY - dragStart.y
+            });
+        }
+    };
+
+    const handleTouchEndPan = () => {
+        setIsDragging(false);
+    };
+
+    const handleImageClickZoom = (e) => {
+        e.stopPropagation();
+        if (dragDistanceRef.current > 6) {
+            return;
+        }
+        handleToggleZoom(e);
+    };
+
+    // Cerrar visor o pasar fotos / hacer zoom con teclado (Escape, Flechas, +, -, 0)
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
-                setCapturaExpandida(null);
+                if (zoomNivel > 1) {
+                    setZoomNivel(1);
+                    setPanPosition({ x: 0, y: 0 });
+                } else {
+                    setCapturaExpandida(null);
+                }
             } else if (e.key === 'ArrowLeft') {
                 irAnteriorEvidencia();
             } else if (e.key === 'ArrowRight') {
                 irSiguienteEvidencia();
+            } else if (e.key === '+' || e.key === '=') {
+                handleZoomIn();
+            } else if (e.key === '-' || e.key === '_') {
+                handleZoomOut();
+            } else if (e.key === '0') {
+                handleResetZoom();
             }
         };
         if (capturaExpandida) {
             window.addEventListener('keydown', handleKeyDown);
         }
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [capturaExpandida, capturasEvidencias]);
+    }, [capturaExpandida, capturasEvidencias, zoomNivel, panPosition]);
 
     // ESTADO DE AUDIO (ROBOCOP) MULTICHOICE SEQUENTIAL PARA MÓVIL
     const [reproduciendoAudio, setReproduciendoAudio] = useState(false);
@@ -1609,7 +1735,11 @@ const LecturaHistoria = ({ userAuth }) => {
                                             <div 
                                                 key={idx} 
                                                 className="galeria-evidencia-item"
-                                                onClick={() => setCapturaExpandida(url)}
+                                                onClick={() => {
+                                                    setZoomNivel(1);
+                                                    setPanPosition({ x: 0, y: 0 });
+                                                    setCapturaExpandida(url);
+                                                }}
                                                 title={language === 'en' ? 'Click to inspect in high resolution' : 'Clic para inspeccionar en alta resolución'}
                                             >
                                                 <img 
@@ -1822,7 +1952,11 @@ const LecturaHistoria = ({ userAuth }) => {
                 return (
                     <div 
                         className="modal-evidencia-lightbox fade-in" 
-                        onClick={() => setCapturaExpandida(null)}
+                        onClick={() => {
+                            setZoomNivel(1);
+                            setPanPosition({ x: 0, y: 0 });
+                            setCapturaExpandida(null);
+                        }}
                         style={{ cursor: 'pointer' }}
                     >
                         {/* Botón flotante siempre visible y fijo en la esquina superior derecha */}
@@ -1830,6 +1964,8 @@ const LecturaHistoria = ({ userAuth }) => {
                             type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
+                                setZoomNivel(1);
+                                setPanPosition({ x: 0, y: 0 });
                                 setCapturaExpandida(null);
                             }}
                             style={{
@@ -1931,26 +2067,148 @@ const LecturaHistoria = ({ userAuth }) => {
                             onClick={e => e.stopPropagation()} 
                             style={{ cursor: 'default', textAlign: 'center', position: 'relative' }}
                         >
-                            <img 
-                                src={capturaExpandida} 
-                                alt="Evidencia ampliada" 
-                                onError={(e) => {
-                                    if (e.target.src && e.target.src.includes('maxres')) {
-                                        e.target.src = e.target.src.replace('maxres', 'hq');
-                                    }
+                            {/* BARRA DE HERRAMIENTAS DE ZOOM */}
+                            <div 
+                                style={{
+                                    marginBottom: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    background: 'rgba(5, 15, 8, 0.9)',
+                                    padding: '6px 16px',
+                                    borderRadius: '30px',
+                                    border: '1px solid rgba(0, 255, 65, 0.4)',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+                                    backdropFilter: 'blur(8px)',
+                                    userSelect: 'none'
                                 }}
-                                style={{ 
-                                    maxHeight: '78vh', 
-                                    maxWidth: '85vw', 
-                                    width: 'auto',
-                                    height: 'auto',
-                                    objectFit: 'contain', 
-                                    borderRadius: '8px', 
-                                    border: '1.5px solid rgba(0, 255, 65, 0.45)', 
+                            >
+                                <button
+                                    type="button"
+                                    onClick={handleZoomOut}
+                                    disabled={zoomNivel <= 1}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: zoomNivel <= 1 ? '#555' : '#00ff41',
+                                        fontSize: '1.15rem',
+                                        fontWeight: 'bold',
+                                        cursor: zoomNivel <= 1 ? 'not-allowed' : 'pointer',
+                                        padding: '2px 8px',
+                                        borderRadius: '4px'
+                                    }}
+                                    title="Alejar Zoom (-)"
+                                >
+                                    🔍－
+                                </button>
+
+                                <span style={{
+                                    color: '#00ff41',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 'bold',
+                                    minWidth: '50px',
+                                    textAlign: 'center'
+                                }}>
+                                    {Math.round(zoomNivel * 100)}%
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={handleZoomIn}
+                                    disabled={zoomNivel >= 3.5}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: zoomNivel >= 3.5 ? '#555' : '#00ff41',
+                                        fontSize: '1.15rem',
+                                        fontWeight: 'bold',
+                                        cursor: zoomNivel >= 3.5 ? 'not-allowed' : 'pointer',
+                                        padding: '2px 8px',
+                                        borderRadius: '4px'
+                                    }}
+                                    title="Acercar Zoom (+)"
+                                >
+                                    🔍＋
+                                </button>
+
+                                {zoomNivel > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={handleResetZoom}
+                                        style={{
+                                            background: '#0d2215',
+                                            border: '1px solid #00ff41',
+                                            color: '#ffffff',
+                                            fontSize: '0.72rem',
+                                            fontFamily: 'monospace',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            padding: '3px 9px',
+                                            borderRadius: '12px',
+                                            marginLeft: '4px'
+                                        }}
+                                        title="Restablecer tamaño normal (100%)"
+                                    >
+                                        ↺ 100%
+                                    </button>
+                                )}
+
+                                <span style={{ color: '#888', fontSize: '0.72rem', marginLeft: '6px', fontFamily: 'monospace' }}>
+                                    {zoomNivel > 1 ? '🖱 Arrastra para mover' : '💡 Clic o rueda para lupa'}
+                                </span>
+                            </div>
+
+                            {/* CONTENEDOR DE IMAGEN CON SOPORTE DE ZOOM Y PAN */}
+                            <div
+                                style={{
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    borderRadius: '8px',
+                                    maxWidth: '86vw',
+                                    maxHeight: '74vh',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: zoomNivel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
+                                    border: '1.5px solid rgba(0, 255, 65, 0.45)',
                                     boxShadow: '0 10px 40px rgba(0,0,0,0.9), 0 0 25px rgba(0, 255, 65, 0.25)',
                                     background: '#040805'
                                 }}
-                            />
+                                onWheel={handleWheelZoom}
+                                onMouseDown={handleMouseDownPan}
+                                onMouseMove={handleMouseMovePan}
+                                onMouseUp={handleMouseUpPan}
+                                onTouchStart={handleTouchStartPan}
+                                onTouchMove={handleTouchMovePan}
+                                onTouchEnd={handleTouchEndPan}
+                                onClick={handleImageClickZoom}
+                            >
+                                <img 
+                                    src={capturaExpandida} 
+                                    alt="Evidencia ampliada" 
+                                    draggable={false}
+                                    onError={(e) => {
+                                        if (e.target.src && e.target.src.includes('maxres')) {
+                                            e.target.src = e.target.src.replace('maxres', 'hq');
+                                        }
+                                    }}
+                                    style={{ 
+                                        maxHeight: '74vh', 
+                                        maxWidth: '85vw', 
+                                        width: 'auto',
+                                        height: 'auto',
+                                        objectFit: 'contain', 
+                                        borderRadius: '6px',
+                                        transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomNivel})`,
+                                        transformOrigin: 'center center',
+                                        transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0.2, 1)',
+                                        userSelect: 'none',
+                                        pointerEvents: 'auto'
+                                    }}
+                                />
+                            </div>
                             
                             {/* INDICADOR DE FOTOGRAMA Y BOTONES INFERIORES */}
                             <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
@@ -2000,7 +2258,11 @@ const LecturaHistoria = ({ userAuth }) => {
 
                                 <button
                                     type="button"
-                                    onClick={() => setCapturaExpandida(null)}
+                                    onClick={() => {
+                                        setZoomNivel(1);
+                                        setPanPosition({ x: 0, y: 0 });
+                                        setCapturaExpandida(null);
+                                    }}
                                     style={{
                                         background: '#ef4444',
                                         color: '#ffffff',
