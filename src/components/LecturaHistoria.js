@@ -413,6 +413,7 @@ const LecturaHistoria = ({ userAuth }) => {
     // ESTADO DE GALERÍA DE EVIDENCIAS / CAPTURAS
     const [capturasEvidencias, setCapturasEvidencias] = useState([]);
     const [capturaExpandida, setCapturaExpandida] = useState(null);
+    const [galeriaAbierta, setGaleriaAbierta] = useState(true);
 
     // Sincronización y carga de capturas fotográficas y evidencias del caso
     useEffect(() => {
@@ -475,18 +476,39 @@ const LecturaHistoria = ({ userAuth }) => {
         buscarCapturasEnVideos();
     }, [historia]);
     
-    // Cerrar visor de evidencias fotográficas con tecla Escape
+    // Navegación entre evidencias en el visor (flechas)
+    const irAnteriorEvidencia = (e) => {
+        if (e) e.stopPropagation();
+        if (!capturasEvidencias || capturasEvidencias.length === 0) return;
+        const idx = capturasEvidencias.indexOf(capturaExpandida);
+        const prevIdx = idx > 0 ? idx - 1 : capturasEvidencias.length - 1;
+        setCapturaExpandida(capturasEvidencias[prevIdx]);
+    };
+
+    const irSiguienteEvidencia = (e) => {
+        if (e) e.stopPropagation();
+        if (!capturasEvidencias || capturasEvidencias.length === 0) return;
+        const idx = capturasEvidencias.indexOf(capturaExpandida);
+        const nextIdx = idx < capturasEvidencias.length - 1 ? idx + 1 : 0;
+        setCapturaExpandida(capturasEvidencias[nextIdx]);
+    };
+
+    // Cerrar visor o pasar fotos con teclado (Escape, Flechas Izquierda / Derecha)
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
                 setCapturaExpandida(null);
+            } else if (e.key === 'ArrowLeft') {
+                irAnteriorEvidencia();
+            } else if (e.key === 'ArrowRight') {
+                irSiguienteEvidencia();
             }
         };
         if (capturaExpandida) {
             window.addEventListener('keydown', handleKeyDown);
         }
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [capturaExpandida]);
+    }, [capturaExpandida, capturasEvidencias]);
 
     // ESTADO DE AUDIO (ROBOCOP) MULTICHOICE SEQUENTIAL PARA MÓVIL
     const [reproduciendoAudio, setReproduciendoAudio] = useState(false);
@@ -1273,7 +1295,7 @@ const LecturaHistoria = ({ userAuth }) => {
                     );
                 })()}
 
-                {/* BOTÓN DE ACCESO DIRECTO A LA GALERÍA DE EVIDENCIAS */}
+                {/* BOTÓN DE ACCESO DIRECTO / DESPLEGABLE A LA GALERÍA DE EVIDENCIAS */}
                 {capturasEvidencias && capturasEvidencias.length > 0 && (
                     <div style={{
                         display: 'flex',
@@ -1283,8 +1305,16 @@ const LecturaHistoria = ({ userAuth }) => {
                         <button
                             type="button"
                             onClick={() => {
-                                const el = document.querySelector('.galeria-evidencias-seccion');
-                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                setGaleriaAbierta(prev => {
+                                    const nextState = !prev;
+                                    if (nextState) {
+                                        setTimeout(() => {
+                                            const el = document.getElementById('seccion-galeria-evidencias');
+                                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                        }, 100);
+                                    }
+                                    return nextState;
+                                });
                             }}
                             style={{
                                 display: 'inline-flex',
@@ -1306,7 +1336,7 @@ const LecturaHistoria = ({ userAuth }) => {
                             onMouseEnter={e => { e.currentTarget.style.background = '#dcfce7'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                             onMouseLeave={e => { e.currentTarget.style.background = '#f0fdf4'; e.currentTarget.style.transform = 'translateY(0)'; }}
                         >
-                            📸 <span>{language === 'en' ? 'VIEW EVIDENCE PHOTO GALLERY' : 'VER GALERÍA DE FOTOS Y EVIDENCIAS'} ({capturasEvidencias.length}) ↓</span>
+                            📸 <span>{galeriaAbierta ? (language === 'en' ? 'PHOTO ARCHIVE OPEN (CLICK TO FOLD)' : 'ARCHIVO FOTOGRÁFICO ABIERTO (PULSA PARA PLEGAR)') : (language === 'en' ? 'OPEN PHOTO ARCHIVE' : 'DESPLEGAR ARCHIVO FOTOGRÁFICO')} ({capturasEvidencias.length}) {galeriaAbierta ? '▲' : '▼'}</span>
                         </button>
                     </div>
                 )}
@@ -1528,34 +1558,84 @@ const LecturaHistoria = ({ userAuth }) => {
                     
                     {/* ARCHIVO FOTOGRÁFICO Y GALERÍA DE EVIDENCIAS DEL CASO */}
                     {capturasEvidencias && capturasEvidencias.length > 0 && (
-                        <div className="galeria-evidencias-seccion">
-                            <div className="galeria-evidencias-header">
-                                <span>📸 {language === 'en' ? 'PHOTOGRAPHIC EVIDENCE & CASE ARCHIVE' : 'ARCHIVO FOTOGRÁFICO Y EVIDENCIAS DEL CASO'}</span>
-                                <span style={{ fontSize: '0.72rem', opacity: 0.85, color: '#aaa' }}>[{capturasEvidencias.length} {language === 'en' ? 'RECORDS' : 'EVIDENCIAS'}]</span>
+                        <div className="galeria-evidencias-seccion" id="seccion-galeria-evidencias">
+                            <div 
+                                className="galeria-evidencias-header" 
+                                onClick={() => setGaleriaAbierta(!galeriaAbierta)}
+                                style={{ cursor: 'pointer', userSelect: 'none' }}
+                                title="Haz clic para plegar o desplegar la galería de evidencias"
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span>📸 {language === 'en' ? 'PHOTOGRAPHIC EVIDENCE & CASE ARCHIVE' : 'ARCHIVO FOTOGRÁFICO Y EVIDENCIAS DEL CASO'}</span>
+                                    <span style={{ fontSize: '0.72rem', opacity: 0.85, color: '#aaa' }}>[{capturasEvidencias.length} {language === 'en' ? 'RECORDS' : 'EVIDENCIAS'}]</span>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    style={{ 
+                                        background: 'rgba(0, 255, 65, 0.1)', 
+                                        color: '#00ff41', 
+                                        border: '1px solid rgba(0, 255, 65, 0.35)', 
+                                        borderRadius: '4px', 
+                                        padding: '4px 12px', 
+                                        fontFamily: 'monospace', 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 'bold', 
+                                        cursor: 'pointer' 
+                                    }}
+                                >
+                                    {galeriaAbierta ? '▲ PLEGAR ARCHIVO' : '▼ DESPLEGAR ARCHIVO'}
+                                </button>
                             </div>
-                            <div className="galeria-evidencias-grid">
-                                {capturasEvidencias.map((url, idx) => (
-                                    <div 
-                                        key={idx} 
-                                        className="galeria-evidencia-item"
-                                        onClick={() => setCapturaExpandida(url)}
-                                        title={language === 'en' ? 'Click to inspect in high resolution' : 'Clic para inspeccionar en alta resolución'}
-                                    >
-                                        <img 
-                                            src={url} 
-                                            alt={`Evidencia ${idx + 1}`} 
-                                            referrerPolicy="no-referrer"
-                                            onError={(e) => { 
-                                                console.error("Fallo carga evidencia:", e.target.src);
-                                                e.target.style.opacity = '0.3';
-                                            }}
-                                        />
-                                        <span className="galeria-evidencia-badge">
-                                            🔍 EVIDENCIA #{idx + 1}
-                                        </span>
+                            
+                            {galeriaAbierta && (
+                                <>
+                                    <div className="galeria-evidencias-grid fade-in">
+                                        {capturasEvidencias.map((url, idx) => (
+                                            <div 
+                                                key={idx} 
+                                                className="galeria-evidencia-item"
+                                                onClick={() => setCapturaExpandida(url)}
+                                                title={language === 'en' ? 'Click to inspect in high resolution' : 'Clic para inspeccionar en alta resolución'}
+                                            >
+                                                <img 
+                                                    src={url} 
+                                                    alt={`Evidencia ${idx + 1}`} 
+                                                    referrerPolicy="no-referrer"
+                                                    onError={(e) => { 
+                                                        console.error("Fallo carga evidencia:", e.target.src);
+                                                        e.target.style.opacity = '0.3';
+                                                    }}
+                                                />
+                                                <span className="galeria-evidencia-badge">
+                                                    🔍 EVIDENCIA #{idx + 1}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
+                                    <div style={{ marginTop: '14px', textAlign: 'center' }}>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setGaleriaAbierta(false)}
+                                            style={{ 
+                                                background: 'rgba(0,0,0,0.5)', 
+                                                color: '#aaa', 
+                                                border: '1px dashed #444', 
+                                                borderRadius: '4px', 
+                                                padding: '6px 18px', 
+                                                fontFamily: 'monospace', 
+                                                fontSize: '0.75rem', 
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease'
+                                            }}
+                                            onMouseEnter={e => { e.currentTarget.style.color = '#ff4444'; e.currentTarget.style.borderColor = '#ff4444'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.color = '#aaa'; e.currentTarget.style.borderColor = '#444'; }}
+                                        >
+                                            ▲ CERRAR / PLEGAR GALERÍA DE FOTOS
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
                     
@@ -1715,80 +1795,199 @@ const LecturaHistoria = ({ userAuth }) => {
 
             </div>
 
-            {/* MODAL LIGHTBOX DE INSPECCIÓN DE EVIDENCIA */}
-            {capturaExpandida && (
-                <div 
-                    className="modal-evidencia-lightbox fade-in" 
-                    onClick={() => setCapturaExpandida(null)}
-                    style={{ cursor: 'pointer' }}
-                >
-                    {/* Botón flotante siempre visible y fijo en la esquina superior derecha */}
-                    <button 
-                        type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setCapturaExpandida(null);
-                        }}
-                        style={{
-                            position: 'fixed',
-                            top: '20px',
-                            right: '25px',
-                            background: '#ef4444',
-                            color: '#ffffff',
-                            border: '2px solid #ffffff',
-                            width: '46px',
-                            height: '46px',
-                            borderRadius: '50%',
-                            fontSize: '1.4rem',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
-                            zIndex: 9999999,
-                            transition: 'all 0.2s ease'
-                        }}
-                        title={language === 'en' ? 'Close (Esc)' : 'Cerrar (Esc)'}
-                        aria-label="Cerrar"
-                    >
-                        ✕
-                    </button>
+            {/* MODAL LIGHTBOX DE INSPECCIÓN DE EVIDENCIA CON NAVEGACIÓN */}
+            {capturaExpandida && (() => {
+                const indiceActual = capturasEvidencias.indexOf(capturaExpandida);
+                const total = capturasEvidencias.length;
 
+                return (
                     <div 
-                        className="modal-evidencia-box" 
-                        onClick={e => e.stopPropagation()} 
-                        style={{ cursor: 'default', textAlign: 'center' }}
+                        className="modal-evidencia-lightbox fade-in" 
+                        onClick={() => setCapturaExpandida(null)}
+                        style={{ cursor: 'pointer' }}
                     >
-                        <img 
-                            src={capturaExpandida} 
-                            alt="Evidencia ampliada" 
-                            style={{ maxHeight: '78vh', maxWidth: '92vw', objectFit: 'contain', borderRadius: '6px', border: '1px solid rgba(0, 255, 65, 0.4)', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}
-                        />
-                        <div style={{ marginTop: '16px' }}>
+                        {/* Botón flotante siempre visible y fijo en la esquina superior derecha */}
+                        <button 
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setCapturaExpandida(null);
+                            }}
+                            style={{
+                                position: 'fixed',
+                                top: '20px',
+                                right: '25px',
+                                background: '#ef4444',
+                                color: '#ffffff',
+                                border: '2px solid #ffffff',
+                                width: '46px',
+                                height: '46px',
+                                borderRadius: '50%',
+                                fontSize: '1.4rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
+                                zIndex: 9999999,
+                                transition: 'all 0.2s ease'
+                            }}
+                            title={language === 'en' ? 'Close (Esc)' : 'Cerrar (Esc)'}
+                            aria-label="Cerrar"
+                        >
+                            ✕
+                        </button>
+
+                        {/* FLECHA ANTERIOR (◀) */}
+                        {total > 1 && (
                             <button
                                 type="button"
-                                onClick={() => setCapturaExpandida(null)}
+                                onClick={irAnteriorEvidencia}
                                 style={{
-                                    background: '#ef4444',
-                                    color: '#ffffff',
-                                    border: '1px solid #f87171',
-                                    padding: '10px 24px',
-                                    borderRadius: '30px',
-                                    fontWeight: '800',
-                                    fontFamily: 'monospace',
+                                    position: 'fixed',
+                                    left: '20px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'rgba(0, 0, 0, 0.75)',
+                                    color: '#00ff41',
+                                    border: '2px solid rgba(0, 255, 65, 0.5)',
+                                    width: '54px',
+                                    height: '54px',
+                                    borderRadius: '50%',
+                                    fontSize: '1.8rem',
                                     cursor: 'pointer',
-                                    fontSize: '0.85rem',
-                                    letterSpacing: '1px',
-                                    boxShadow: '0 4px 15px rgba(239,68,68,0.4)'
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+                                    zIndex: 9999999,
+                                    transition: 'all 0.2s ease'
                                 }}
+                                onMouseEnter={e => { e.currentTarget.style.background = '#00ff41'; e.currentTarget.style.color = '#000'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0, 0, 0, 0.75)'; e.currentTarget.style.color = '#00ff41'; }}
+                                title={language === 'en' ? 'Previous evidence (←)' : 'Evidencia anterior (←)'}
+                                aria-label="Anterior"
                             >
-                                ✕ {language === 'en' ? 'CLOSE VIEWER' : 'CERRAR VISOR'}
+                                ◀
                             </button>
+                        )}
+
+                        {/* FLECHA SIGUIENTE (▶) */}
+                        {total > 1 && (
+                            <button
+                                type="button"
+                                onClick={irSiguienteEvidencia}
+                                style={{
+                                    position: 'fixed',
+                                    right: '20px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'rgba(0, 0, 0, 0.75)',
+                                    color: '#00ff41',
+                                    border: '2px solid rgba(0, 255, 65, 0.5)',
+                                    width: '54px',
+                                    height: '54px',
+                                    borderRadius: '50%',
+                                    fontSize: '1.8rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+                                    zIndex: 9999999,
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = '#00ff41'; e.currentTarget.style.color = '#000'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0, 0, 0, 0.75)'; e.currentTarget.style.color = '#00ff41'; }}
+                                title={language === 'en' ? 'Next evidence (→)' : 'Evidencia siguiente (→)'}
+                                aria-label="Siguiente"
+                            >
+                                ▶
+                            </button>
+                        )}
+
+                        <div 
+                            className="modal-evidencia-box" 
+                            onClick={e => e.stopPropagation()} 
+                            style={{ cursor: 'default', textAlign: 'center', position: 'relative' }}
+                        >
+                            <img 
+                                src={capturaExpandida} 
+                                alt="Evidencia ampliada" 
+                                style={{ maxHeight: '78vh', maxWidth: '84vw', objectFit: 'contain', borderRadius: '6px', border: '1px solid rgba(0, 255, 65, 0.4)', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}
+                            />
+                            
+                            {/* INDICADOR DE FOTOGRAMA Y BOTONES INFERIORES */}
+                            <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                                {total > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={irAnteriorEvidencia}
+                                        style={{
+                                            background: '#0d1410',
+                                            color: '#00ff41',
+                                            border: '1px solid rgba(0, 255, 65, 0.4)',
+                                            padding: '8px 18px',
+                                            borderRadius: '20px',
+                                            fontWeight: 'bold',
+                                            fontFamily: 'monospace',
+                                            cursor: 'pointer',
+                                            fontSize: '0.8rem'
+                                        }}
+                                    >
+                                        ◀ ANTERIOR
+                                    </button>
+                                )}
+
+                                <span style={{ color: '#00ff41', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '1px' }}>
+                                    EVIDENCIA {indiceActual !== -1 ? indiceActual + 1 : 1} / {total}
+                                </span>
+
+                                {total > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={irSiguienteEvidencia}
+                                        style={{
+                                            background: '#0d1410',
+                                            color: '#00ff41',
+                                            border: '1px solid rgba(0, 255, 65, 0.4)',
+                                            padding: '8px 18px',
+                                            borderRadius: '20px',
+                                            fontWeight: 'bold',
+                                            fontFamily: 'monospace',
+                                            cursor: 'pointer',
+                                            fontSize: '0.8rem'
+                                        }}
+                                    >
+                                        SIGUIENTE ▶
+                                    </button>
+                                )}
+
+                                <button
+                                    type="button"
+                                    onClick={() => setCapturaExpandida(null)}
+                                    style={{
+                                        background: '#ef4444',
+                                        color: '#ffffff',
+                                        border: '1px solid #f87171',
+                                        padding: '8px 20px',
+                                        borderRadius: '20px',
+                                        fontWeight: '800',
+                                        fontFamily: 'monospace',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem',
+                                        letterSpacing: '1px',
+                                        marginLeft: '10px'
+                                    }}
+                                >
+                                    ✕ CERRAR
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
         </div>
     );
 };
