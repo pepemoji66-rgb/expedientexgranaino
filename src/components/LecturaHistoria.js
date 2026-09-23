@@ -1201,6 +1201,27 @@ const LecturaHistoria = ({ userAuth }) => {
                             </span>
                         </p>
                     )}
+                    {capturasEvidencias && capturasEvidencias.length > 0 && (
+                        <p style={{ marginTop: '6px' }}>
+                            <span 
+                                onClick={() => {
+                                    const el = document.querySelector('.galeria-evidencias-seccion');
+                                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                }} 
+                                style={{ 
+                                    color: '#008726', 
+                                    cursor: 'pointer', 
+                                    textDecoration: 'underline',
+                                    fontWeight: 'bold',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                📸 {language === 'en' ? 'PHOTO EVIDENCE ARCHIVE:' : 'ARCHIVO FOTOGRÁFICO:'} {capturasEvidencias.length} {language === 'en' ? 'EVIDENCES' : 'EVIDENCIAS DISPONIBLES'} ↓
+                            </span>
+                        </p>
+                    )}
                 </div>
 
                 {/* IMAGEN PRINCIPAL DE LA NOTICIA / EXPEDIENTE — EFECTO CINEMATOGRÁFICO AMBIENTAL */}
@@ -1238,6 +1259,44 @@ const LecturaHistoria = ({ userAuth }) => {
                         </div>
                     );
                 })()}
+
+                {/* BOTÓN DE ACCESO DIRECTO A LA GALERÍA DE EVIDENCIAS */}
+                {capturasEvidencias && capturasEvidencias.length > 0 && (
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        margin: '14px 0 10px 0'
+                    }}>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const el = document.querySelector('.galeria-evidencias-seccion');
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                background: '#f0fdf4',
+                                color: '#166534',
+                                border: '1px solid #86efac',
+                                padding: '10px 22px',
+                                borderRadius: '30px',
+                                fontWeight: '800',
+                                fontFamily: "'Inter', sans-serif",
+                                fontSize: '0.82rem',
+                                letterSpacing: '0.3px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 2px 8px rgba(22, 101, 52, 0.08)'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#dcfce7'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#f0fdf4'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                        >
+                            📸 <span>{language === 'en' ? 'VIEW EVIDENCE PHOTO GALLERY' : 'VER GALERÍA DE FOTOS Y EVIDENCIAS'} ({capturasEvidencias.length}) ↓</span>
+                        </button>
+                    </div>
+                )}
 
                 {/* BOTÓN AMAZON DESTACADO BAJO LA IMAGEN — SIEMPRE VISIBLE SI HAY LIBRO */}
                 {(biblioData && biblioData.length > 0) && (
