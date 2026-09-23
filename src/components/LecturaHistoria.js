@@ -1458,142 +1458,56 @@ const LecturaHistoria = ({ userAuth }) => {
                             <button onClick={() => compartirHistoria('pinterest')} className="btn-share-editorial share-pinterest" title="Guardar en Pinterest">
                                 <span style={{ color: '#E60023', fontSize: '0.95rem' }}>📌</span> Pinterest
                             </button>
-                            <button onClick={() => compartirHistoria('copiar')} className="btn-share-editorial share-copiar" title="Copiar enlace al portapapeles">
-                                <span style={{ color: '#64748B', fontSize: '0.95rem' }}>🔗</span> Copiar Enlace
-                            </button>
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '14px' }}>
                             <a 
                                 href="https://www.tiktok.com/@expedientexgranaino" 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
-                                style={{ 
-                                    textDecoration: 'none', 
-                                    background: '#010101', 
-                                    color: '#ffffff', 
-                                    padding: '6px 14px', 
-                                    borderRadius: '20px', 
-                                    fontSize: '0.78rem', 
-                                    fontWeight: 'bold', 
-                                    display: 'inline-flex', 
-                                    alignItems: 'center', 
-                                    gap: '6px',
-                                    border: '1px solid #333'
-                                }}
+                                className="btn-share-editorial share-tiktok"
+                                style={{ textDecoration: 'none', color: '#1E293B' }}
+                                title="Síguenos en TikTok"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.47 6.27 6.27 0 0 0 1.96-4.47V8.52a8.27 8.27 0 0 0 4.81 1.54V6.69z"/></svg>
-                                Seguir en TikTok
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#010101"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.47 6.27 6.27 0 0 0 1.96-4.47V8.52a8.27 8.27 0 0 0 4.81 1.54V6.69z"/></svg> TikTok
                             </a>
                             <a 
                                 href="https://www.youtube.com/@expedientexgranaino" 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
-                                style={{ 
-                                    textDecoration: 'none', 
-                                    background: '#CC0000', 
-                                    color: '#ffffff', 
-                                    padding: '6px 14px', 
-                                    borderRadius: '20px', 
-                                    fontSize: '0.78rem', 
-                                    fontWeight: 'bold', 
-                                    display: 'inline-flex', 
-                                    alignItems: 'center', 
-                                    gap: '6px',
-                                    border: '1px solid #b91c1c'
-                                }}
+                                className="btn-share-editorial share-youtube"
+                                style={{ textDecoration: 'none', color: '#1E293B' }}
+                                title="Canal oficial en YouTube"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
-                                Canal YouTube
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#CC0000"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg> YouTube
                             </a>
+                            <button onClick={() => compartirHistoria('copiar')} className="btn-share-editorial share-copiar" title="Copiar enlace al portapapeles">
+                                <span style={{ color: '#64748B', fontSize: '0.95rem' }}>🔗</span> Copiar Enlace
+                            </button>
                         </div>
                     </div>
 
-                    {/* 🎰 BLOQUE INTERACTIVO: LA RULETA DEL BÚNKER */}
-                    <div className="ruleta-promo-card" style={{
-                        marginTop: '40px',
-                        padding: '28px 24px',
-                        background: 'radial-gradient(circle at 50% 0%, #17251e 0%, #0a110d 60%, #050806 100%)',
-                        borderRadius: '10px',
-                        border: '1.5px solid #1a3a2a',
-                        color: '#FFFFFF',
-                        textAlign: 'center',
-                        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 255, 65, 0.08)',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}>
-                        <div style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            background: 'rgba(0, 255, 65, 0.1)',
-                            color: '#00ff41',
-                            border: '1px solid rgba(0, 255, 65, 0.35)',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                            fontSize: '0.72rem',
-                            fontFamily: 'monospace',
-                            fontWeight: 'bold',
-                            letterSpacing: '1.5px',
-                            marginBottom: '12px',
-                            textTransform: 'uppercase'
-                        }}>
-                            🎰 {language === 'en' ? 'BUNKER RADAR — RANDOM ACCESS' : 'RADAR DEL BÚNKER — ACCESO ALEATORIO'}
+                    {/* 🎰 BANNER COMPACTO, RELATIVO Y MODERNO: LA RULETA DEL BÚNKER */}
+                    <div className="ruleta-strip-banner">
+                        <div className="ruleta-strip-info">
+                            <div className="ruleta-strip-icon">🎲</div>
+                            <div>
+                                <div className="ruleta-strip-tag">
+                                    {language === 'en' ? 'BUNKER RADAR · RANDOM ACCESS' : 'RADAR DEL BÚNKER · ACCESO ALEATORIO'}
+                                </div>
+                                <h4 className="ruleta-strip-title">
+                                    {language === 'en' ? 'Let the Bunker pick your next secret dossier' : '¿Dejar que el azar elija tu próximo misterio?'}
+                                </h4>
+                                <p className="ruleta-strip-sub">
+                                    {language === 'en' ? 'Spin the wheel and declassify an unexpected case' : 'Gira la ruleta y desclasifica un expediente al azar'}
+                                </p>
+                            </div>
                         </div>
-                        <h3 style={{
-                            margin: '0 0 10px 0',
-                            fontSize: '1.35rem',
-                            fontWeight: '800',
-                            fontFamily: "'Merriweather', Georgia, serif",
-                            color: '#FFFFFF',
-                            letterSpacing: '-0.3px',
-                            lineHeight: '1.3'
-                        }}>
-                            {language === 'en' ? 'Do you dare to let the Bunker decide your next case?' : '¿Te atreves a que el Búnker elija tu próximo caso?'}
-                        </h3>
-                        <p style={{
-                            margin: '0 auto 20px auto',
-                            maxWidth: '560px',
-                            fontSize: '0.92rem',
-                            color: '#9CA3AF',
-                            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                            lineHeight: '1.55'
-                        }}>
-                            {language === 'en' 
-                                ? 'Over 150 declassified investigations on UFOs, unsolved crimes, and historical enigmas just one spin away.'
-                                : 'Desafía al azar. Dale un giro a la Ruleta y deja que nuestro radar desclasifique automáticamente un expediente secreto para ti.'}
-                        </p>
                         <button
                             onClick={() => {
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                                 navigate('/la-ruleta');
                             }}
-                            style={{
-                                background: '#00ff41',
-                                color: '#050a06',
-                                border: 'none',
-                                padding: '12px 30px',
-                                borderRadius: '6px',
-                                fontWeight: '900',
-                                fontSize: '0.86rem',
-                                fontFamily: 'monospace',
-                                letterSpacing: '1px',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                boxShadow: '0 0 20px rgba(0, 255, 65, 0.45)',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                            }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.transform = 'scale(1.04)';
-                                e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 255, 65, 0.75)';
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                                e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 65, 0.45)';
-                            }}
+                            className="ruleta-strip-btn"
                         >
-                            🎲 {language === 'en' ? 'SPIN THE ROULETTE' : 'ENTRAR Y GIRAR LA RULETA'} ➔
+                            {language === 'en' ? 'GIRAR RULETA ➔' : 'GIRAR RULETA ➔'}
                         </button>
                     </div>
                 </div>

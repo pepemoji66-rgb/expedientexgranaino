@@ -139,10 +139,124 @@
     border-color: #E60023;
 }
 
+.btn-share-editorial.share-tiktok:hover {
+    background: #010101;
+    color: #00f2fe;
+    border-color: #fe2c55;
+    box-shadow: 0 0 10px rgba(254, 44, 85, 0.3);
+}
+
+.btn-share-editorial.share-youtube:hover {
+    background: #CC0000;
+    color: #FFFFFF;
+    border-color: #CC0000;
+    box-shadow: 0 0 10px rgba(204, 0, 0, 0.3);
+}
+
 .btn-share-editorial.share-copiar:hover {
     background: #334155;
     color: #FFFFFF;
     border-color: #334155;
+}
+
+/* BANNER DE RULETA COMPACTO Y MODERNO */
+.ruleta-strip-banner {
+    position: relative;
+    margin: 28px 0 20px 0;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, #0d1612 0%, #060b09 100%);
+    border: 1px solid rgba(0, 255, 65, 0.25);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.ruleta-strip-banner:hover {
+    border-color: rgba(0, 255, 65, 0.5);
+    box-shadow: 0 6px 20px rgba(0, 255, 65, 0.12);
+}
+
+.ruleta-strip-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+}
+
+.ruleta-strip-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.ruleta-strip-tag {
+    color: #00ff41;
+    font-size: 0.68rem;
+    font-family: monospace;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.ruleta-strip-title {
+    color: #FFFFFF;
+    font-size: 0.98rem;
+    font-weight: 700;
+    font-family: 'Merriweather', Georgia, serif;
+    margin: 0;
+    letter-spacing: -0.2px;
+}
+
+.ruleta-strip-sub {
+    color: #94A3B8;
+    font-size: 0.78rem;
+    margin: 2px 0 0 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ruleta-strip-btn {
+    background: #00ff41;
+    color: #041008;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.35);
+    flex-shrink: 0;
+}
+
+.ruleta-strip-btn:hover {
+    background: #33ff66;
+    transform: scale(1.03);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
+}
+
+@media (max-width: 768px) {
+    .ruleta-strip-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 18px 16px;
+    }
+    .ruleta-strip-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    .ruleta-strip-btn {
+        width: 100%;
+        margin-top: 6px;
+    }
 }
 
 /* ESTILOS DE PORTADA E IMAGEN RESPONSIVA */
