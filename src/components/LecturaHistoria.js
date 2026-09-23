@@ -26,6 +26,8 @@ const ReferenceBanner = ({ titulo, descripcion, link }) => (
 
 const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
     if (!libros || libros.length === 0) return null;
+    const audibleUrl = "https://www.amazon.es/hz/audible/mlp/membership/premiumplus?tag=expedientexg-21";
+
     return (
         <div className="ref-bibliography-section fade-in" style={customStyle}>
             <div className="ref-bibliography-header" style={{
@@ -43,31 +45,132 @@ const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
             </div>
             <div className="ref-bibliography-grid">
                 {libros.map((libro, index) => (
-                    <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer" className="book-citation-block">
-                        <div className="book-citation-cover-container">
-                            <img 
-                                src={libro.imagen_url || '/logoexpedientex.jpeg'} 
-                                alt={libro.titulo} 
-                                className="book-citation-cover"
-                                onError={(e) => { e.target.src = '/logoexpedientex.jpeg'; }}
-                            />
-                        </div>
-                        <div className="book-citation-info">
-                            <div>
-                                <h5 className="book-citation-title">{libro.titulo}</h5>
-                                <p className="book-citation-author">✍️ {libro.autor}</p>
-                                {libro.descripcion && (
-                                    <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 10px 0', lineHeight: '1.45' }}>
-                                        {libro.descripcion}
-                                    </p>
-                                )}
+                    <div key={index} className="book-citation-block" style={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'default' }}>
+                        <div style={{ display: 'flex', flex: '1' }}>
+                            <a 
+                                href={libro.link} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="book-citation-cover-container"
+                                style={{ display: 'flex', textDecoration: 'none' }}
+                                title="Ver en Amazon"
+                            >
+                                <img 
+                                    src={libro.imagen_url || '/logoexpedientex.jpeg'} 
+                                    alt={libro.titulo} 
+                                    className="book-citation-cover"
+                                    onError={(e) => { e.target.src = '/logoexpedientex.jpeg'; }}
+                                />
+                            </a>
+                            <div className="book-citation-info" style={{ flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                <div>
+                                    <a 
+                                        href={libro.link} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{ textDecoration: 'none', color: '#1E293B' }}
+                                    >
+                                        <h5 className="book-citation-title" style={{ transition: 'color 0.2s ease' }} onMouseEnter={e => e.currentTarget.style.color='#9c4221'} onMouseLeave={e => e.currentTarget.style.color='#1E293B'}>
+                                            {libro.titulo}
+                                        </h5>
+                                    </a>
+                                    <p className="book-citation-author">✍️ {libro.autor}</p>
+                                    {libro.descripcion && (
+                                        <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 10px 0', lineHeight: '1.45' }}>
+                                            {libro.descripcion}
+                                        </p>
+                                    )}
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                                    <a 
+                                        href={libro.link} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="btn-library-link" 
+                                        style={{ 
+                                            background: '#9c4221', 
+                                            borderColor: '#7a3319', 
+                                            textDecoration: 'none', 
+                                            display: 'inline-flex', 
+                                            alignItems: 'center', 
+                                            gap: '5px',
+                                            padding: '8px 14px',
+                                            fontSize: '0.78rem'
+                                        }}
+                                    >
+                                        📖 VER LIBRO EN AMAZON ↗
+                                    </a>
+                                    <a 
+                                        href={audibleUrl} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{ 
+                                            background: '#0f172a', 
+                                            color: '#f59e0b', 
+                                            border: '1px solid #334155', 
+                                            padding: '8px 14px', 
+                                            borderRadius: '4px', 
+                                            fontSize: '0.78rem', 
+                                            fontWeight: 'bold', 
+                                            fontFamily: "'Inter', sans-serif",
+                                            letterSpacing: '0.3px', 
+                                            textDecoration: 'none', 
+                                            display: 'inline-flex', 
+                                            alignItems: 'center', 
+                                            gap: '6px',
+                                            transition: 'all 0.2s ease' 
+                                        }}
+                                        onMouseEnter={e => { e.currentTarget.style.background='#1e293b'; e.currentTarget.style.borderColor='#f59e0b'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.background='#0f172a'; e.currentTarget.style.borderColor='#334155'; }}
+                                        title="Escuchar con la prueba gratuita de 30 días de Amazon Audible"
+                                    >
+                                        🎧 AUDIBLE (30 DÍAS GRATIS) ↗
+                                    </a>
+                                </div>
                             </div>
-                            <div className="btn-library-link" style={{ background: '#9c4221', borderColor: '#7a3319' }}>
-                                📖 VER EN AMAZON ↗
-                            </div>
                         </div>
-                    </a>
+                    </div>
                 ))}
+            </div>
+            
+            {/* DESTACADO PROMO AUDIBLE */}
+            <div style={{
+                marginTop: '16px',
+                padding: '12px 18px',
+                background: '#fffbeb',
+                border: '1px solid #fde68a',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                boxShadow: '0 2px 6px rgba(245, 158, 11, 0.08)'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.3rem' }}>🎧</span>
+                    <span style={{ fontSize: '0.85rem', color: '#92400e', lineHeight: '1.4' }}>
+                        <strong>¿Prefieres audiolibros?</strong> Disfruta de <strong>30 días de prueba GRATIS</strong> en Amazon Audible con miles de títulos y podcasts de misterio sin permanencia.
+                    </span>
+                </div>
+                <a 
+                    href={audibleUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    style={{ 
+                        background: '#f59e0b', 
+                        color: '#78350f', 
+                        fontWeight: '800', 
+                        fontSize: '0.78rem',
+                        padding: '6px 14px',
+                        borderRadius: '4px',
+                        textDecoration: 'none',
+                        border: '1px solid #d97706',
+                        whiteSpace: 'nowrap'
+                    }}
+                >
+                    PROBAR AUDIBLE GRATIS ↗
+                </a>
             </div>
         </div>
     );
@@ -1358,6 +1461,50 @@ const LecturaHistoria = ({ userAuth }) => {
                             <button onClick={() => compartirHistoria('copiar')} className="btn-share-editorial share-copiar" title="Copiar enlace al portapapeles">
                                 <span style={{ color: '#64748B', fontSize: '0.95rem' }}>🔗</span> Copiar Enlace
                             </button>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '14px' }}>
+                            <a 
+                                href="https://www.tiktok.com/@expedientexgranaino" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                style={{ 
+                                    textDecoration: 'none', 
+                                    background: '#010101', 
+                                    color: '#ffffff', 
+                                    padding: '6px 14px', 
+                                    borderRadius: '20px', 
+                                    fontSize: '0.78rem', 
+                                    fontWeight: 'bold', 
+                                    display: 'inline-flex', 
+                                    alignItems: 'center', 
+                                    gap: '6px',
+                                    border: '1px solid #333'
+                                }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.47 6.27 6.27 0 0 0 1.96-4.47V8.52a8.27 8.27 0 0 0 4.81 1.54V6.69z"/></svg>
+                                Seguir en TikTok
+                            </a>
+                            <a 
+                                href="https://www.youtube.com/@expedientexgranaino" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                style={{ 
+                                    textDecoration: 'none', 
+                                    background: '#CC0000', 
+                                    color: '#ffffff', 
+                                    padding: '6px 14px', 
+                                    borderRadius: '20px', 
+                                    fontSize: '0.78rem', 
+                                    fontWeight: 'bold', 
+                                    display: 'inline-flex', 
+                                    alignItems: 'center', 
+                                    gap: '6px',
+                                    border: '1px solid #b91c1c'
+                                }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
+                                Canal YouTube
+                            </a>
                         </div>
                     </div>
 
