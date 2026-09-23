@@ -46,6 +46,32 @@ module.exports = (db) => {
     return isNaN(parsed) ? 0 : parsed;
   };
 
+  // --- RUTA DE SUBIDA MÚLTIPLE DE EVIDENCIAS / FOTOS (DESDE EL PC) ---
+  router.post('/upload-evidencias', (req, res, next) => {
+    upload.array('evidencias', 15)(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ error: `⚠️ Límite de archivos excedido: ${err.message}` });
+      } else if (err) {
+        return res.status(500).json({ error: `⚠️ Error al subir imágenes: ${err.message}` });
+      }
+      next();
+    });
+  }, (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'No se ha seleccionado ningún archivo de imagen.' });
+      }
+      const urls = req.files.map(f => f.path || f.filename);
+      res.json({
+        mensaje: `${urls.length} imágenes subidas correctamente al búnker.`,
+        urls: urls
+      });
+    } catch (err) {
+      console.error("Error al procesar subida de evidencias:", err);
+      res.status(500).json({ error: "Fallo en el procesamiento de imágenes." });
+    }
+  });
+
   // --- RUTA DE CARGA PARA EL ADMIN ---
   router.post('/admin/upload', (req, res, next) => {
     upload.single('archivo')(req, res, function (err) {

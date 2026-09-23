@@ -60,6 +60,12 @@ const PanelAdmin = () => {
     const [archivoCapturaSubida, setArchivoCapturaSubida] = useState(null);
     const [urlCapturaSubida, setUrlCapturaSubida] = useState('');
 
+    // ESTADOS PARA SUBIDA MÚLTIPLE DE EVIDENCIAS FOTOGRÁFICAS DESDE EL PC
+    const [archivosEvidenciasSubida, setArchivosEvidenciasSubida] = useState([]);
+    const [subiendoEvidenciasSubida, setSubiendoEvidenciasSubida] = useState(false);
+    const [archivosEvidenciasEdit, setArchivosEvidenciasEdit] = useState([]);
+    const [subiendoEvidenciasEdit, setSubiendoEvidenciasEdit] = useState(false);
+
     // ESTADOS DE REDES SOCIALES
     const [modalRedes, setModalRedes] = useState(null); // item a publicar
     const [redesSeleccionadas, setRedesSeleccionadas] = useState({ instagram: true, facebook: true });
@@ -443,6 +449,56 @@ const PanelAdmin = () => {
             alert("❌ Fallo al transmitir las capturas.");
         } finally {
             setCargando(false);
+        }
+    };
+
+    // --- FUNCIONES PARA SUBIR MÚLTIPLES EVIDENCIAS DESDE EL PC A CLOUDINARY/BÚNKER ---
+    const handleSubirEvidenciasCreacion = async () => {
+        if (!archivosEvidenciasSubida || archivosEvidenciasSubida.length === 0) return;
+        setSubiendoEvidenciasSubida(true);
+        try {
+            const formData = new FormData();
+            Array.from(archivosEvidenciasSubida).forEach(file => {
+                formData.append('evidencias', file);
+            });
+            const res = await axios.post(`${API_BASE_URL}/api/admin/upload-evidencias`, formData);
+            if (res.data && res.data.urls && res.data.urls.length > 0) {
+                const nuevasUrls = res.data.urls.join(', ');
+                setUrlCapturaSubida(prev => prev && prev.trim() !== '' ? `${prev}, ${nuevasUrls}` : nuevasUrls);
+                setArchivosEvidenciasSubida([]);
+                alert(`✅ ${res.data.urls.length} imágenes subidas correctamente desde tu ordenador al búnker.`);
+            }
+        } catch (err) {
+            console.error("Error al subir evidencias:", err);
+            alert("❌ Fallo al subir imágenes desde tu PC. Comprueba el formato o tamaño.");
+        } finally {
+            setSubiendoEvidenciasSubida(false);
+        }
+    };
+
+    const handleSubirEvidenciasEdicion = async () => {
+        if (!archivosEvidenciasEdit || archivosEvidenciasEdit.length === 0) return;
+        setSubiendoEvidenciasEdit(true);
+        try {
+            const formData = new FormData();
+            Array.from(archivosEvidenciasEdit).forEach(file => {
+                formData.append('evidencias', file);
+            });
+            const res = await axios.post(`${API_BASE_URL}/api/admin/upload-evidencias`, formData);
+            if (res.data && res.data.urls && res.data.urls.length > 0) {
+                const nuevasUrls = res.data.urls.join(', ');
+                setEditForm(prev => ({
+                    ...prev,
+                    capturas: prev.capturas && prev.capturas.trim() !== '' ? `${prev.capturas}, ${nuevasUrls}` : nuevasUrls
+                }));
+                setArchivosEvidenciasEdit([]);
+                alert(`✅ ${res.data.urls.length} imágenes subidas correctamente desde tu ordenador al búnker.`);
+            }
+        } catch (err) {
+            console.error("Error al subir evidencias:", err);
+            alert("❌ Fallo al subir imágenes desde tu PC. Comprueba el formato o tamaño.");
+        } finally {
+            setSubiendoEvidenciasEdit(false);
         }
     };
 
@@ -1280,18 +1336,61 @@ const PanelAdmin = () => {
                         )}
 
                         {(tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && (
-                            <div className="form-group-admin" style={{ marginTop: '15px' }}>
-                                <label style={{ color: '#00ff41' }}>📸 EVIDENCIAS Y CAPTURAS ADICIONALES (Separadas por comas, Opcional):</label>
+                            <div className="form-group-admin" style={{ marginTop: '15px', background: 'rgba(0,255,65,0.03)', padding: '15px', border: '1px solid rgba(0,255,65,0.25)', borderRadius: '4px' }}>
+                                <label style={{ color: '#00ff41', fontWeight: 'bold' }}>📸 ARCHIVO FOTOGRÁFICO Y EVIDENCIAS ADICIONALES (Para galería con lupa):</label>
+                                
+                                <div style={{ marginTop: '10px', marginBottom: '12px', padding: '12px', background: 'rgba(0,0,0,0.5)', border: '1px dashed #00ff41', borderRadius: '4px' }}>
+                                    <label style={{ display: 'block', color: '#00ff41', fontSize: '0.78rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                                        📁 SELECCIONAR FOTOS DE TU ORDENADOR (Puedes elegir varias):
+                                    </label>
+                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <input 
+                                            type="file" 
+                                            multiple 
+                                            accept="image/*" 
+                                            onChange={e => setArchivosEvidenciasSubida(e.target.files)} 
+                                            style={{ fontSize: '0.78rem', color: '#ccc' }} 
+                                        />
+                                        <button 
+                                            type="button" 
+                                            onClick={handleSubirEvidenciasCreacion} 
+                                            disabled={subiendoEvidenciasSubida || !archivosEvidenciasSubida || archivosEvidenciasSubida.length === 0}
+                                            style={{ 
+                                                padding: '8px 16px', 
+                                                fontSize: '0.75rem', 
+                                                background: subiendoEvidenciasSubida ? '#555' : '#00ff41', 
+                                                color: '#000', 
+                                                border: 'none', 
+                                                cursor: subiendoEvidenciasSubida ? 'wait' : 'pointer', 
+                                                fontWeight: 'bold', 
+                                                borderRadius: '3px' 
+                                            }}
+                                        >
+                                            {subiendoEvidenciasSubida ? '⏳ SUBIENDO FOTOS...' : `⬆️ SUBIR AL BÚNKER ${archivosEvidenciasSubida?.length ? `(${archivosEvidenciasSubida.length} fotos)` : ''}`}
+                                        </button>
+                                    </div>
+                                    {archivosEvidenciasSubida && archivosEvidenciasSubida.length > 0 && (
+                                        <small style={{ color: '#ffb100', display: 'block', marginTop: '6px' }}>
+                                            ✓ {archivosEvidenciasSubida.length} archivo(s) seleccionado(s). Pulsa el botón verde para subirlos.
+                                        </small>
+                                    )}
+                                </div>
+
+                                <label style={{ fontSize: '0.72rem', color: '#888', display: 'block', marginBottom: '4px' }}>
+                                    Imágenes asociadas a este registro (enlaces generados o pegados manualmente):
+                                </label>
                                 <textarea 
                                     className="input-bunker" 
                                     value={urlCapturaSubida} 
                                     onChange={e => setUrlCapturaSubida(e.target.value)}
                                     placeholder="https://servidor.com/evidencia1.jpg, https://servidor.com/evidencia2.jpg"
-                                    style={{ width: '100%', minHeight: '60px', padding: '10px', background: '#000', color: '#00ff41', border: '1px solid #333' }}
+                                    style={{ width: '100%', minHeight: '60px', padding: '10px', background: '#000', color: '#00ff41', border: '1px solid #333', fontFamily: 'monospace', fontSize: '0.78rem' }}
                                 />
-                                <small style={{ color: '#888', display: 'block', marginTop: '4px' }}>
-                                    Añade enlaces o nombres de imágenes adicionales para que el artículo tenga galería de fotos con zoom.
-                                </small>
+                                {urlCapturaSubida && (urlCapturaSubida.includes('\\') || urlCapturaSubida.startsWith('C:') || urlCapturaSubida.includes('/Users/')) && (
+                                    <small style={{ color: '#ff4444', display: 'block', marginTop: '4px', fontWeight: 'bold' }}>
+                                        ⚠️ ALERTA: Has escrito una ruta local de tu ordenador. Para usar esas imágenes, usa el botón de arriba "SELECCIONAR FOTOS DE TU ORDENADOR".
+                                    </small>
+                                )}
                             </div>
                         )}
 
@@ -1803,12 +1902,50 @@ const PanelAdmin = () => {
 
                             {(tab === 'expedientes' || tab === 'noticias' || tab === 'misterios_historicos' || tab === 'casos_abiertos') && (
                                 <div style={{ background: 'rgba(0,255,65,0.05)', padding: '15px', marginBottom: '20px', border: '1px solid rgba(0,255,65,0.25)', borderRadius: '4px' }}>
-                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.8rem', marginBottom: '5px', fontWeight: 'bold' }}>
-                                        📸 ARCHIVO FOTOGRÁFICO Y CAPTURAS DEL CASO (SEPARADAS POR COMAS):
+                                    <label style={{ display: 'block', color: 'var(--color-principal)', fontSize: '0.85rem', marginBottom: '5px', fontWeight: 'bold' }}>
+                                        📸 ARCHIVO FOTOGRÁFICO Y EVIDENCIAS DEL CASO (Para galería interactiva con lupa):
                                     </label>
-                                    <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '8px' }}>
-                                        Introduce las URLs o nombres de archivo de las imágenes secundarias del caso. Se mostrarán como galería interactiva con lupa.
-                                    </p>
+                                    
+                                    <div style={{ marginTop: '10px', marginBottom: '12px', padding: '12px', background: 'rgba(0,0,0,0.5)', border: '1px dashed #00ff41', borderRadius: '4px' }}>
+                                        <label style={{ display: 'block', color: '#00ff41', fontSize: '0.78rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                                            📁 SELECCIONAR FOTOS DE TU ORDENADOR (Puedes elegir varias):
+                                        </label>
+                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                            <input 
+                                                type="file" 
+                                                multiple 
+                                                accept="image/*" 
+                                                onChange={e => setArchivosEvidenciasEdit(e.target.files)} 
+                                                style={{ fontSize: '0.78rem', color: '#ccc' }} 
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={handleSubirEvidenciasEdicion} 
+                                                disabled={subiendoEvidenciasEdit || !archivosEvidenciasEdit || archivosEvidenciasEdit.length === 0}
+                                                style={{ 
+                                                    padding: '8px 16px', 
+                                                    fontSize: '0.75rem', 
+                                                    background: subiendoEvidenciasEdit ? '#555' : '#00ff41', 
+                                                    color: '#000', 
+                                                    border: 'none', 
+                                                    cursor: subiendoEvidenciasEdit ? 'wait' : 'pointer', 
+                                                    fontWeight: 'bold', 
+                                                    borderRadius: '3px' 
+                                                }}
+                                            >
+                                                {subiendoEvidenciasEdit ? '⏳ SUBIENDO FOTOS...' : `⬆️ SUBIR AL BÚNKER ${archivosEvidenciasEdit?.length ? `(${archivosEvidenciasEdit.length} fotos)` : ''}`}
+                                            </button>
+                                        </div>
+                                        {archivosEvidenciasEdit && archivosEvidenciasEdit.length > 0 && (
+                                            <small style={{ color: '#ffb100', display: 'block', marginTop: '6px' }}>
+                                                ✓ {archivosEvidenciasEdit.length} archivo(s) seleccionado(s). Pulsa el botón verde para subirlos.
+                                            </small>
+                                        )}
+                                    </div>
+
+                                    <label style={{ fontSize: '0.72rem', color: '#888', display: 'block', marginBottom: '4px' }}>
+                                        Imágenes cargadas en este registro (enlaces generados o pegados manualmente):
+                                    </label>
                                     <textarea 
                                         value={editForm.capturas || ''} 
                                         onChange={e => setEditForm({...editForm, capturas: e.target.value})} 
@@ -1817,7 +1954,7 @@ const PanelAdmin = () => {
                                     />
                                     {editForm.capturas && (editForm.capturas.includes('\\') || editForm.capturas.startsWith('C:') || editForm.capturas.includes('/Users/')) && (
                                         <small style={{ color: '#ff4444', display: 'block', marginTop: '6px', fontWeight: 'bold' }}>
-                                            ⚠️ ALERTA: Has escrito una ruta local de tu ordenador. Usa enlaces web o nombres de archivos subidos.
+                                            ⚠️ ALERTA: Has escrito una ruta local de tu ordenador. Para usar esas imágenes, usa el botón de arriba "SELECCIONAR FOTOS DE TU ORDENADOR".
                                         </small>
                                     )}
                                 </div>
