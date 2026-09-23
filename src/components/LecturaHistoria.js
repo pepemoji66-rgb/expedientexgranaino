@@ -447,10 +447,10 @@ const LecturaHistoria = ({ userAuth }) => {
         
         if (currentYtId) {
             const fotogramasYouTube = [
-                `https://img.youtube.com/vi/${currentYtId}/hqdefault.jpg`,
-                `https://img.youtube.com/vi/${currentYtId}/1.jpg`,
-                `https://img.youtube.com/vi/${currentYtId}/2.jpg`,
-                `https://img.youtube.com/vi/${currentYtId}/3.jpg`
+                `https://img.youtube.com/vi/${currentYtId}/maxresdefault.jpg`,
+                `https://img.youtube.com/vi/${currentYtId}/maxres1.jpg`,
+                `https://img.youtube.com/vi/${currentYtId}/maxres2.jpg`,
+                `https://img.youtube.com/vi/${currentYtId}/maxres3.jpg`
             ];
             setCapturasEvidencias(fotogramasYouTube);
         } else {
@@ -1617,8 +1617,12 @@ const LecturaHistoria = ({ userAuth }) => {
                                                     alt={`Evidencia ${idx + 1}`} 
                                                     referrerPolicy="no-referrer"
                                                     onError={(e) => { 
-                                                        console.error("Fallo carga evidencia:", e.target.src);
-                                                        e.target.style.opacity = '0.3';
+                                                        if (e.target.src && e.target.src.includes('maxres')) {
+                                                            e.target.src = e.target.src.replace('maxres', 'hq');
+                                                        } else {
+                                                            console.error("Fallo carga evidencia:", e.target.src);
+                                                            e.target.style.opacity = '0.3';
+                                                        }
                                                     }}
                                                 />
                                                 <span className="galeria-evidencia-badge">
@@ -1930,7 +1934,22 @@ const LecturaHistoria = ({ userAuth }) => {
                             <img 
                                 src={capturaExpandida} 
                                 alt="Evidencia ampliada" 
-                                style={{ maxHeight: '78vh', maxWidth: '84vw', objectFit: 'contain', borderRadius: '6px', border: '1px solid rgba(0, 255, 65, 0.4)', boxShadow: '0 8px 30px rgba(0,0,0,0.8)' }}
+                                onError={(e) => {
+                                    if (e.target.src && e.target.src.includes('maxres')) {
+                                        e.target.src = e.target.src.replace('maxres', 'hq');
+                                    }
+                                }}
+                                style={{ 
+                                    maxHeight: '78vh', 
+                                    maxWidth: '85vw', 
+                                    width: 'auto',
+                                    height: 'auto',
+                                    objectFit: 'contain', 
+                                    borderRadius: '8px', 
+                                    border: '1.5px solid rgba(0, 255, 65, 0.45)', 
+                                    boxShadow: '0 10px 40px rgba(0,0,0,0.9), 0 0 25px rgba(0, 255, 65, 0.25)',
+                                    background: '#040805'
+                                }}
                             />
                             
                             {/* INDICADOR DE FOTOGRAMA Y BOTONES INFERIORES */}
