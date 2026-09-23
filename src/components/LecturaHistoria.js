@@ -413,7 +413,7 @@ const LecturaHistoria = ({ userAuth }) => {
     // ESTADO DE GALERÍA DE EVIDENCIAS / CAPTURAS
     const [capturasEvidencias, setCapturasEvidencias] = useState([]);
     const [capturaExpandida, setCapturaExpandida] = useState(null);
-    const [galeriaAbierta, setGaleriaAbierta] = useState(true);
+    const [galeriaAbierta, setGaleriaAbierta] = useState(false);
 
     // ESTADO DE ZOOM Y DESPLAZAMIENTO (PAN) EN EL VISOR DE EVIDENCIAS
     const [zoomNivel, setZoomNivel] = useState(1);
