@@ -42,6 +42,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             titulo: item.titulo || 'Sin título',
                             contenido: item.contenido || item.cuerpo || '',
                             imagen: img,
+                            imagen_posicion: item.imagen_posicion || 'center center',
                             seccion: 'expediente',
                             seccionLabel: 'EXPEDIENTE',
                             seccionColor: '#1e3a2b',
@@ -64,6 +65,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             titulo: item.titulo || 'Noticia de última hora',
                             contenido: item.cuerpo || item.contenido || '',
                             imagen: img,
+                            imagen_posicion: item.imagen_posicion || 'center center',
                             seccion: 'noticia',
                             seccionLabel: 'NOTICIA',
                             seccionColor: '#1e293b',
@@ -88,6 +90,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             titulo: tit || 'Caso Abierto',
                             contenido: desc || '',
                             imagen: img,
+                            imagen_posicion: item.imagen_posicion || 'center center',
                             seccion: 'caso',
                             seccionLabel: 'TRUE CRIME',
                             seccionColor: '#b91c1c',
@@ -112,6 +115,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             titulo: tit || 'Misterio Histórico',
                             contenido: desc || '',
                             imagen: img,
+                            imagen_posicion: item.imagen_posicion || 'center center',
                             seccion: 'misterio',
                             seccionLabel: 'MISTERIOS HISTÓRICOS',
                             seccionColor: '#9a3412',
@@ -217,6 +221,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                                             src={articuloPrincipal.imagen} 
                                             alt={articuloPrincipal.titulo} 
                                             loading="eager"
+                                            style={{ objectPosition: articuloPrincipal.imagen_posicion || 'center center' }}
                                         />
                                     ) : (
                                         <div className="lead-story-placeholder">
@@ -266,6 +271,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                                                     src={art.imagen} 
                                                     alt={art.titulo} 
                                                     loading="lazy" 
+                                                    style={{ objectPosition: art.imagen_posicion || 'center center' }}
                                                 />
                                             ) : (
                                                 <div className="editorial-card-placeholder">

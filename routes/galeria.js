@@ -207,14 +207,14 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
     });
 
     router.put('/noticias/:id', uploadGeneral.single('imagen'), async (req, res) => {
-        const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, youtube_url, capturas } = req.body;
+        const { titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, youtube_url, capturas, imagen_posicion } = req.body;
         const imagen_url = req.file ? (req.file.path || req.file.filename) : null;
         
         try {
             if (imagen_url) {
                 await db.execute(
-                    "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ?, imagen_url = ?, youtube_url = ?, capturas = ? WHERE id = ?",
-                    [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, imagen_url, youtube_url || null, capturas || null, req.params.id]
+                    "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ?, imagen_url = ?, youtube_url = ?, capturas = ?, imagen_posicion = ? WHERE id = ?",
+                    [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, imagen_url, youtube_url || null, capturas || null, imagen_posicion || null, req.params.id]
                 );
                 // 📸 AUTO-GALERÍA: nueva imagen al editar noticia
                 try {
@@ -232,8 +232,8 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
                 }
             } else {
                 await db.execute(
-                    "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ?, youtube_url = ?, capturas = ? WHERE id = ?",
-                    [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, youtube_url || null, capturas || null, req.params.id]
+                    "UPDATE noticias SET titulo = ?, cuerpo = ?, nivel_alerta = ?, ubicacion = ?, latitud = ?, longitud = ?, fuente_url = ?, estado = ?, youtube_url = ?, capturas = ?, imagen_posicion = ? WHERE id = ?",
+                    [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, youtube_url || null, capturas || null, imagen_posicion || null, req.params.id]
                 );
             }
             res.json({ mensaje: "Noticia actualizada en el búnker." });
