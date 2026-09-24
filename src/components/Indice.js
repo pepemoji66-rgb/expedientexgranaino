@@ -223,12 +223,6 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                                             <span>DOCUMENTACIÓN FOTOGRÁFICA</span>
                                         </div>
                                     )}
-                                    <span 
-                                        className="lead-story-badge"
-                                        style={{ backgroundColor: articuloPrincipal.seccionColor }}
-                                    >
-                                        {articuloPrincipal.seccionLabel}
-                                    </span>
                                 </div>
 
                                 <div className="lead-story-content">
@@ -278,12 +272,6 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                                                     <span>{art.seccionLabel}</span>
                                                 </div>
                                             )}
-                                            <span 
-                                                className="editorial-card-badge"
-                                                style={{ backgroundColor: art.seccionColor }}
-                                            >
-                                                {art.seccionLabel}
-                                            </span>
                                         </div>
 
                                         <div className="editorial-card-body">
