@@ -13,6 +13,8 @@ import { MapPin } from 'lucide-react';
 // COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
 // ==========================================
 
+const AUDIBLE_AFFILIATE_URL = "https://www.amazon.es/hz/audible/mlp/membership/premiumplus?tag=expedientexg-21";
+
 const ReferenceBanner = ({ titulo, descripcion, link }) => (
     <a href={link} target="_blank" rel="noopener noreferrer" className="reference-resource-card">
         <div className="reference-resource-icon">📖</div>
@@ -26,7 +28,7 @@ const ReferenceBanner = ({ titulo, descripcion, link }) => (
 
 const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
     if (!libros || libros.length === 0) return null;
-    const audibleUrl = "https://www.amazon.es/hz/audible/mlp/membership/premiumplus?tag=expedientexg-21";
+    const audibleUrl = AUDIBLE_AFFILIATE_URL;
 
     return (
         <div className="ref-bibliography-section fade-in" style={customStyle}>
@@ -159,10 +161,10 @@ const ReferenceBibliography = ({ libros, tituloSeccion, customStyle }) => {
                 gap: '12px',
                 boxShadow: '0 2px 6px rgba(245, 158, 11, 0.08)'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '1.3rem' }}>🎧</span>
-                    <span style={{ fontSize: '0.85rem', color: '#92400e', lineHeight: '1.4' }}>
-                        <strong>¿Prefieres audiolibros?</strong> Disfruta de <strong>30 días de prueba GRATIS</strong> en Amazon Audible con miles de títulos y podcasts de misterio sin permanencia.
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1', minWidth: '260px' }}>
+                    <span style={{ fontSize: '1.4rem', marginTop: '2px' }}>🎧</span>
+                    <span style={{ fontSize: '0.86rem', color: '#92400e', lineHeight: '1.5' }}>
+                        Si te gusta el contenido que creamos a diario, una forma enorme de ayudarnos a cubrir los gastos de la web es <strong>probar Audible totalmente gratis durante 30 días</strong>. A ti no te cuesta nada y a nosotros nos permite seguir investigando y documentando nuevos casos. <em>¡Gracias por formar parte del archivo!</em>
                     </span>
                 </div>
                 <a 
@@ -748,6 +750,15 @@ const LecturaHistoria = ({ userAuth }) => {
     const [nick, setNick] = useState('');
     const [nuevoComentario, setNuevoComentario] = useState('');
     const [enviando, setEnviando] = useState(false);
+    const [widgetAudibleVisible, setWidgetAudibleVisible] = useState(false);
+
+    // Mostrar widget Audible flotante tras 4 segundos (si no fue cerrado en esta sesión)
+    useEffect(() => {
+        const cerrado = sessionStorage.getItem('audible_widget_cerrado');
+        if (cerrado) return;
+        const timer = setTimeout(() => setWidgetAudibleVisible(true), 4000);
+        return () => clearTimeout(timer);
+    }, []);
 
     const isAdmin = userAuth && (userAuth.email === 'archipegv2@gmail.com' || userAuth.rol === 'admin');
     const currentItemKey = (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : esCaso ? 'caso-' : 'exp-') + id;
@@ -2284,6 +2295,100 @@ const LecturaHistoria = ({ userAuth }) => {
                     </div>
                 );
             })()}
+
+            {/* WIDGET FLOTANTE DE AUDIBLE (ESQUINA INFERIOR DERECHA) */}
+            {widgetAudibleVisible && (
+                <div 
+                    style={{
+                        position: 'fixed',
+                        bottom: '20px',
+                        right: '16px',
+                        zIndex: 99999,
+                        maxWidth: '380px',
+                        width: 'calc(100vw - 32px)',
+                        background: '#111827',
+                        border: '1.5px solid #f59e0b',
+                        borderRadius: '12px',
+                        padding: '16px 18px',
+                        boxShadow: '0 12px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(245, 158, 11, 0.25)',
+                        color: '#F3F4F6',
+                        fontFamily: "'Inter', sans-serif"
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '1.3rem' }}>🎧</span>
+                            <span style={{ color: '#f59e0b', fontWeight: '800', fontSize: '0.82rem', letterSpacing: '0.5px' }}>
+                                AMAZON AUDIBLE · 30 DÍAS GRATIS
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setWidgetAudibleVisible(false);
+                                sessionStorage.setItem('audible_widget_cerrado', '1');
+                            }}
+                            title="Cerrar aviso"
+                            aria-label="Cerrar aviso"
+                            style={{
+                                background: 'rgba(255,255,255,0.08)',
+                                border: 'none',
+                                color: '#9CA3AF',
+                                cursor: 'pointer',
+                                fontSize: '1rem',
+                                borderRadius: '50%',
+                                width: '26px',
+                                height: '26px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: 0
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = '#9CA3AF'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    <p style={{
+                        fontSize: '0.82rem',
+                        color: '#E5E7EB',
+                        lineHeight: '1.5',
+                        margin: '0 0 12px 0'
+                    }}>
+                        Si te gusta el contenido que creamos a diario, una forma enorme de ayudarnos a cubrir los gastos de la web es <strong>probar Audible totalmente gratis durante 30 días</strong>. A ti no te cuesta nada y a nosotros nos permite seguir investigando y documentando nuevos casos. ¡Gracias por formar parte del archivo!
+                    </p>
+
+                    <a
+                        href={AUDIBLE_AFFILIATE_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            display: 'block',
+                            textAlign: 'center',
+                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                            color: '#111827',
+                            fontWeight: '800',
+                            fontSize: '0.85rem',
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            letterSpacing: '0.5px',
+                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.45)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)'; }}
+                    >
+                        🎧 PROBAR AUDIBLE 30 DÍAS GRATIS ↗
+                    </a>
+
+                    <span style={{ display: 'block', textAlign: 'center', fontSize: '0.7rem', color: '#9CA3AF', marginTop: '6px' }}>
+                        Sin permanencia · Cancela online en 1 clic
+                    </span>
+                </div>
+            )}
         </div>
     );
 };
