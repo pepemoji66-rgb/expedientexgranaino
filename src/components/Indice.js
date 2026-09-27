@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import FiltrosTematicos from './FiltrosTematicos';
@@ -11,11 +11,46 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
 
-    // 8 artículos más recientes unificados
+    // Todos los artículos (para búsqueda global)
+    const [todosLosArticulos, setTodosLosArticulos] = useState([]);
+    // 8 artículos más recientes para portada
     const [ultimosArticulos, setUltimosArticulos] = useState([]);
     const [comentariosRecientes, setComentariosRecientes] = useState([]);
     const [loadingContent, setLoadingContent] = useState(true);
     const [filtroTematico, setFiltroTematico] = useState('todos');
+
+    // --- BUSCADOR GLOBAL ---
+    const [busquedaGlobal, setBusquedaGlobal] = useState('');
+    const [mostrarResultados, setMostrarResultados] = useState(false);
+    const buscadorRef = useRef(null);
+
+    // Cerrar resultados al hacer clic fuera
+    useEffect(() => {
+        const handleClickFuera = (e) => {
+            if (buscadorRef.current && !buscadorRef.current.contains(e.target)) {
+                setMostrarResultados(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickFuera);
+        return () => document.removeEventListener('mousedown', handleClickFuera);
+    }, []);
+
+    const resultadosBusqueda = busquedaGlobal.trim().length >= 3
+        ? todosLosArticulos.filter(art => {
+            const q = busquedaGlobal.trim().toLowerCase();
+            return (
+                (art.titulo || '').toLowerCase().includes(q) ||
+                (art.contenido || '').toLowerCase().includes(q)
+            );
+        }).slice(0, 15)
+        : [];
+
+    const seccionColors = {
+        expediente: { bg: '#1e3a2b', label: 'EXPEDIENTE' },
+        noticia: { bg: '#1e293b', label: 'NOTICIA' },
+        caso: { bg: '#7f1d1d', label: 'TRUE CRIME' },
+        misterio: { bg: '#7c2d12', label: 'MIST. HIST.' },
+    };
 
     useEffect(() => {
         const fetchHomeData = async () => {
@@ -130,6 +165,9 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                 // Ordenar por fecha cronológica descendente (los más recientes primero)
                 articulosUnificados.sort((a, b) => b.timestamp - a.timestamp);
 
+                // Guardar TODOS para el buscador global
+                setTodosLosArticulos(articulosUnificados);
+
                 // Tomar los 8 más recientes para la portada principal
                 setUltimosArticulos(articulosUnificados.slice(0, 8));
 
@@ -172,6 +210,77 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
         <div className="indice-editorial-container">
             {/* BARRA DE FILTROS TEMÁTICOS EDITORIAL (ARRIBA DEL TODO) */}
             <FiltrosTematicos filtroActivo={filtroTematico} onFiltroChange={setFiltroTematico} />
+
+            {/* ── BUSCADOR GLOBAL DE ARTÍCULOS ── */}
+            <div className="buscador-global-wrap" ref={buscadorRef}>
+                <div className="buscador-global-inner">
+                    <span className="buscador-global-icon">🔍</span>
+                    <input
+                        className="buscador-global-input"
+                        type="text"
+                        placeholder={language === 'en' ? 'Search all articles... (poltergeist, OVNI, atarfe...)' : 'Buscar en todos los artículos... (poltergeist, OVNI, Atarfe...)'}
+                        value={busquedaGlobal}
+                        onChange={e => {
+                            setBusquedaGlobal(e.target.value);
+                            setMostrarResultados(true);
+                        }}
+                        onFocus={() => setMostrarResultados(true)}
+                    />
+                    {busquedaGlobal && (
+                        <button
+                            className="buscador-global-clear"
+                            onClick={() => { setBusquedaGlobal(''); setMostrarResultados(false); }}
+                            type="button"
+                        >✖</button>
+                    )}
+                </div>
+
+                {/* DROPDOWN DE RESULTADOS */}
+                {mostrarResultados && busquedaGlobal.trim().length >= 3 && (
+                    <div className="buscador-global-results">
+                        {resultadosBusqueda.length === 0 ? (
+                            <div className="buscador-global-empty">
+                                {language === 'en' ? 'No results found for' : 'Sin resultados para'} "<strong>{busquedaGlobal}</strong>"
+                            </div>
+                        ) : (
+                            <>
+                                <div className="buscador-global-count">
+                                    {resultadosBusqueda.length} {resultadosBusqueda.length === 1 ? (language === 'en' ? 'result' : 'resultado') : (language === 'en' ? 'results' : 'resultados')} para "<strong>{busquedaGlobal}</strong>"
+                                </div>
+                                {resultadosBusqueda.map(art => (
+                                    <div
+                                        key={`${art.seccion}-${art.id}`}
+                                        className="buscador-global-item"
+                                        onClick={() => {
+                                            navigate(art.link);
+                                            setBusquedaGlobal('');
+                                            setMostrarResultados(false);
+                                        }}
+                                    >
+                                        {art.imagen && (
+                                            <img
+                                                src={art.imagen}
+                                                alt=""
+                                                className="buscador-global-thumb"
+                                                onError={e => { e.target.style.display = 'none'; }}
+                                            />
+                                        )}
+                                        <div className="buscador-global-item-info">
+                                            <span
+                                                className="buscador-global-badge"
+                                                style={{ background: (seccionColors[art.seccion] || {}).bg || '#333' }}
+                                            >
+                                                {(seccionColors[art.seccion] || {}).label || art.seccionLabel}
+                                            </span>
+                                            <span className="buscador-global-title">{art.titulo}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
 
             {/* BARRA DE FECHA Y EDICIÓN */}
             <div className="editorial-edition-bar">
