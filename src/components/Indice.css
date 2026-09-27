@@ -1406,105 +1406,129 @@
 ══════════════════════════════════════════ */
 .buscador-global-wrap {
     position: relative;
-    max-width: 760px;
-    margin: 0 auto 1.5rem auto;
+    max-width: 680px;
+    width: 100%;
+    margin: 0.5rem auto 1.5rem auto;
     padding: 0 1rem;
+    box-sizing: border-box;
     z-index: 100;
 }
 
 .buscador-global-inner {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    background: #fff;
-    border: 2px solid #1A1A1A;
-    box-shadow: 4px 4px 0 #1A1A1A;
-    border-radius: 0;
+    display: flex !important;
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.buscador-global-inner:focus-within {
+    border-color: #1A1A1A !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
 }
 
 .buscador-global-icon {
-    padding: 0 12px;
-    font-size: 1rem;
-    color: #64748b;
+    padding: 0 10px 0 14px;
+    font-size: 0.95rem;
+    color: #94a3b8 !important;
     flex-shrink: 0;
+    line-height: 1;
 }
 
 .buscador-global-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    padding: 13px 4px;
-    font-family: 'Georgia', serif;
-    font-size: 0.95rem;
-    color: #1A1A1A;
-    background: transparent;
-    letter-spacing: 0.3px;
+    flex: 1 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 12px 6px !important;
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif !important;
+    font-size: 0.9rem !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    color: #1A1A1A !important;
+    background: #ffffff !important;
+    letter-spacing: 0 !important;
+    width: 100%;
+    min-width: 0;
 }
 
 .buscador-global-input::placeholder {
-    color: #94a3b8;
-    font-style: italic;
-    font-size: 0.88rem;
+    color: #94a3b8 !important;
+    font-style: normal !important;
+    font-size: 0.88rem !important;
+    font-family: 'Inter', Arial, sans-serif !important;
 }
 
 .buscador-global-clear {
-    background: none;
-    border: none;
-    border-left: 1px solid #e2e8f0;
-    padding: 0 14px;
+    background: none !important;
+    border: none !important;
+    border-left: 1px solid #e2e8f0 !important;
+    padding: 0 13px !important;
     cursor: pointer;
-    color: #94a3b8;
-    font-size: 0.75rem;
-    height: 100%;
-    min-height: 46px;
+    color: #94a3b8 !important;
+    font-size: 0.7rem !important;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
     transition: color 0.2s;
 }
 
 .buscador-global-clear:hover {
-    color: #dc2626;
+    color: #dc2626 !important;
 }
 
 /* PANEL DE RESULTADOS */
 .buscador-global-results {
     position: absolute;
-    top: calc(100% + 2px);
+    top: calc(100% + 4px);
     left: 1rem;
     right: 1rem;
-    background: #fff;
-    border: 2px solid #1A1A1A;
-    box-shadow: 6px 6px 0 rgba(0,0,0,0.12);
-    max-height: 420px;
+    background: #ffffff !important;
+    border: 1.5px solid #1A1A1A !important;
+    border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+    max-height: 400px;
     overflow-y: auto;
-    z-index: 200;
+    z-index: 300;
 }
 
 .buscador-global-count {
-    padding: 8px 14px;
-    font-size: 0.72rem;
+    padding: 7px 14px;
+    font-size: 0.7rem !important;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #64748b;
+    color: #64748b !important;
     border-bottom: 1px solid #f1f5f9;
-    background: #f8fafc;
+    background: #f8fafc !important;
+    font-family: 'Inter', Arial, sans-serif !important;
+}
+
+.buscador-global-count strong {
+    color: #1A1A1A;
 }
 
 .buscador-global-empty {
-    padding: 20px 16px;
+    padding: 22px 16px;
     text-align: center;
-    color: #94a3b8;
-    font-size: 0.88rem;
-    font-style: italic;
+    color: #94a3b8 !important;
+    font-size: 0.88rem !important;
+    font-family: 'Inter', Arial, sans-serif !important;
 }
 
 .buscador-global-item {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
     gap: 12px;
     padding: 10px 14px;
     cursor: pointer;
     border-bottom: 1px solid #f1f5f9;
-    transition: background 0.15s;
+    background: #ffffff !important;
+    transition: background 0.12s;
 }
 
 .buscador-global-item:last-child {
@@ -1512,51 +1536,92 @@
 }
 
 .buscador-global-item:hover {
-    background: #f8fafc;
+    background: #f8fafc !important;
 }
 
 .buscador-global-thumb {
-    width: 48px;
-    height: 36px;
+    width: 52px;
+    height: 38px;
     object-fit: cover;
     flex-shrink: 0;
-    border-radius: 2px;
+    border-radius: 3px;
+    border: 1px solid #e2e8f0;
 }
 
 .buscador-global-item-info {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
     min-width: 0;
+    flex: 1;
 }
 
 .buscador-global-badge {
     display: inline-block;
-    padding: 1px 6px;
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 1px;
+    padding: 2px 7px;
+    font-size: 0.58rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: #fff;
+    color: #ffffff !important;
     border-radius: 2px;
     width: fit-content;
+    font-family: 'Inter', Arial, sans-serif !important;
+    line-height: 1.6;
 }
 
 .buscador-global-title {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: #1A1A1A;
+    font-size: 0.87rem !important;
+    font-weight: 700 !important;
+    color: #1A1A1A !important;
     line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-family: 'Inter', Arial, sans-serif !important;
+    font-style: normal !important;
 }
 
-@media (max-width: 640px) {
-    .buscador-global-input {
-        font-size: 0.85rem;
+/* ── RESPONSIVE MÓVIL ── */
+@media (max-width: 768px) {
+    .buscador-global-wrap {
+        padding: 0 0.75rem;
+        margin: 0.5rem auto 1.2rem auto;
     }
+
+    .buscador-global-input {
+        font-size: 0.88rem !important;
+        padding: 11px 4px !important;
+    }
+
+    .buscador-global-results {
+        left: 0.75rem;
+        right: 0.75rem;
+        max-height: 320px;
+    }
+
+    .buscador-global-thumb {
+        width: 40px;
+        height: 30px;
+    }
+
     .buscador-global-title {
-        font-size: 0.82rem;
+        font-size: 0.82rem !important;
     }
 }
+
+@media (max-width: 480px) {
+    .buscador-global-wrap {
+        padding: 0 0.5rem;
+    }
+
+    .buscador-global-input::placeholder {
+        font-size: 0.78rem !important;
+    }
+
+    .buscador-global-thumb {
+        display: none;
+    }
+}
+
+
