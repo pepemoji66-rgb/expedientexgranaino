@@ -751,13 +751,18 @@ const LecturaHistoria = ({ userAuth }) => {
     const [nuevoComentario, setNuevoComentario] = useState('');
     const [enviando, setEnviando] = useState(false);
     const [widgetAudibleVisible, setWidgetAudibleVisible] = useState(false);
+    const [widgetAudibleMinimizado, setWidgetAudibleMinimizado] = useState(false);
 
-    // Mostrar widget Audible flotante tras 4 segundos (si no fue cerrado en esta sesión)
+    // Mostrar widget Audible flotante tras 4 segundos y minimizar suavemente a los 14s para no tapar texto
     useEffect(() => {
         const cerrado = sessionStorage.getItem('audible_widget_cerrado');
         if (cerrado) return;
-        const timer = setTimeout(() => setWidgetAudibleVisible(true), 4000);
-        return () => clearTimeout(timer);
+        const timerAparicion = setTimeout(() => setWidgetAudibleVisible(true), 4000);
+        const timerMinimizar = setTimeout(() => setWidgetAudibleMinimizado(true), 16000);
+        return () => {
+            clearTimeout(timerAparicion);
+            clearTimeout(timerMinimizar);
+        };
     }, []);
 
     const isAdmin = userAuth && (userAuth.email === 'archipegv2@gmail.com' || userAuth.rol === 'admin');
@@ -2298,96 +2303,170 @@ const LecturaHistoria = ({ userAuth }) => {
 
             {/* WIDGET FLOTANTE DE AUDIBLE (ESQUINA INFERIOR DERECHA) */}
             {widgetAudibleVisible && (
-                <div 
-                    style={{
-                        position: 'fixed',
-                        bottom: '20px',
-                        right: '16px',
-                        zIndex: 99999,
-                        maxWidth: '380px',
-                        width: 'calc(100vw - 32px)',
-                        background: '#111827',
-                        border: '1.5px solid #f59e0b',
-                        borderRadius: '12px',
-                        padding: '16px 18px',
-                        boxShadow: '0 12px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(245, 158, 11, 0.25)',
-                        color: '#F3F4F6',
-                        fontFamily: "'Inter', sans-serif"
-                    }}
-                >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '1.3rem' }}>🎧</span>
-                            <span style={{ color: '#f59e0b', fontWeight: '800', fontSize: '0.82rem', letterSpacing: '0.5px' }}>
-                                AMAZON AUDIBLE · 30 DÍAS GRATIS
-                            </span>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setWidgetAudibleVisible(false);
-                                sessionStorage.setItem('audible_widget_cerrado', '1');
-                            }}
-                            title="Cerrar aviso"
-                            aria-label="Cerrar aviso"
-                            style={{
-                                background: 'rgba(255,255,255,0.08)',
-                                border: 'none',
-                                color: '#9CA3AF',
-                                cursor: 'pointer',
-                                fontSize: '1rem',
-                                borderRadius: '50%',
-                                width: '26px',
-                                height: '26px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                padding: 0
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.color = '#9CA3AF'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
-                        >
-                            ✕
-                        </button>
-                    </div>
-
-                    <p style={{
-                        fontSize: '0.82rem',
-                        color: '#E5E7EB',
-                        lineHeight: '1.5',
-                        margin: '0 0 12px 0'
-                    }}>
-                        Si te gusta el contenido que creamos a diario, una forma enorme de ayudarnos a cubrir los gastos de la web es <strong>probar Audible totalmente gratis durante 30 días</strong>. A ti no te cuesta nada y a nosotros nos permite seguir investigando y documentando nuevos casos. ¡Gracias por formar parte del archivo!
-                    </p>
-
-                    <a
-                        href={AUDIBLE_AFFILIATE_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                widgetAudibleMinimizado ? (
+                    <button
+                        type="button"
+                        onClick={() => setWidgetAudibleMinimizado(false)}
+                        title="Ver promoción de Audible (30 días gratis)"
+                        aria-label="Ver promoción de Audible"
                         style={{
-                            display: 'block',
-                            textAlign: 'center',
-                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                            color: '#111827',
+                            position: 'fixed',
+                            bottom: '16px',
+                            right: '16px',
+                            zIndex: 99999,
+                            background: '#111827',
+                            border: '1.5px solid #f59e0b',
+                            borderRadius: '30px',
+                            padding: '8px 16px',
+                            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(245, 158, 11, 0.25)',
+                            color: '#f59e0b',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
                             fontWeight: '800',
-                            fontSize: '0.85rem',
-                            padding: '10px 14px',
-                            borderRadius: '8px',
-                            textDecoration: 'none',
-                            letterSpacing: '0.5px',
-                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                            fontSize: '0.78rem',
+                            fontFamily: "'Inter', sans-serif",
                             transition: 'all 0.2s ease'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.45)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(245, 158, 11, 0.4)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(245, 158, 11, 0.25)'; }}
                     >
-                        🎧 PROBAR AUDIBLE 30 DÍAS GRATIS ↗
-                    </a>
+                        <span style={{ fontSize: '1.1rem' }}>🎧</span>
+                        <span>AUDIBLE · 30 DÍAS GRATIS</span>
+                        <span style={{ 
+                            fontSize: '0.65rem', 
+                            background: '#f59e0b', 
+                            color: '#000', 
+                            borderRadius: '50%', 
+                            width: '18px', 
+                            height: '18px', 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            fontWeight: 'bold'
+                        }}>▲</span>
+                    </button>
+                ) : (
+                    <div 
+                        style={{
+                            position: 'fixed',
+                            bottom: '16px',
+                            right: '16px',
+                            zIndex: 99999,
+                            maxWidth: '315px',
+                            width: 'calc(100vw - 32px)',
+                            background: '#111827',
+                            border: '1.5px solid #f59e0b',
+                            borderRadius: '12px',
+                            padding: '12px 14px',
+                            boxShadow: '0 12px 35px rgba(0, 0, 0, 0.65), 0 0 20px rgba(245, 158, 11, 0.2)',
+                            color: '#F3F4F6',
+                            fontFamily: "'Inter', sans-serif"
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '1.15rem' }}>🎧</span>
+                                <span style={{ color: '#f59e0b', fontWeight: '800', fontSize: '0.78rem', letterSpacing: '0.5px' }}>
+                                    AUDIBLE · 30 DÍAS GRATIS
+                                </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {/* Botón Minimizar */}
+                                <button
+                                    type="button"
+                                    onClick={() => setWidgetAudibleMinimizado(true)}
+                                    title="Plegar / Minimizar"
+                                    aria-label="Plegar"
+                                    style={{
+                                        background: 'rgba(255,255,255,0.08)',
+                                        border: 'none',
+                                        color: '#9CA3AF',
+                                        cursor: 'pointer',
+                                        fontSize: '0.75rem',
+                                        borderRadius: '50%',
+                                        width: '24px',
+                                        height: '24px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: 0
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.color = '#9CA3AF'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                                >
+                                    —
+                                </button>
+                                {/* Botón Cerrar */}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setWidgetAudibleVisible(false);
+                                        sessionStorage.setItem('audible_widget_cerrado', '1');
+                                    }}
+                                    title="Cerrar definitivamente"
+                                    aria-label="Cerrar aviso"
+                                    style={{
+                                        background: 'rgba(255,255,255,0.08)',
+                                        border: 'none',
+                                        color: '#9CA3AF',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        borderRadius: '50%',
+                                        width: '24px',
+                                        height: '24px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: 0
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.color = '#9CA3AF'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
 
-                    <span style={{ display: 'block', textAlign: 'center', fontSize: '0.7rem', color: '#9CA3AF', marginTop: '6px' }}>
-                        Sin permanencia · Cancela online en 1 clic
-                    </span>
-                </div>
+                        <p style={{
+                            fontSize: '0.76rem',
+                            color: '#E5E7EB',
+                            lineHeight: '1.42',
+                            margin: '0 0 10px 0'
+                        }}>
+                            Si te gusta el contenido que creamos a diario, una forma enorme de ayudarnos a cubrir los gastos de la web es <strong>probar Audible totalmente gratis durante 30 días</strong>. A ti no te cuesta nada y a nosotros nos permite seguir investigando y documentando nuevos casos. ¡Gracias por formar parte del archivo!
+                        </p>
+
+                        <a
+                            href={AUDIBLE_AFFILIATE_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                display: 'block',
+                                textAlign: 'center',
+                                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                                color: '#111827',
+                                fontWeight: '800',
+                                fontSize: '0.8rem',
+                                padding: '8px 12px',
+                                borderRadius: '7px',
+                                textDecoration: 'none',
+                                letterSpacing: '0.5px',
+                                boxShadow: '0 3px 10px rgba(245, 158, 11, 0.3)',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 5px 14px rgba(245, 158, 11, 0.45)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 3px 10px rgba(245, 158, 11, 0.3)'; }}
+                        >
+                            🎧 PROBAR AUDIBLE 30 DÍAS GRATIS ↗
+                        </a>
+
+                        <span style={{ display: 'block', textAlign: 'center', fontSize: '0.67rem', color: '#9CA3AF', marginTop: '5px' }}>
+                            Sin permanencia · Cancela online en 1 clic
+                        </span>
+                    </div>
+                )
             )}
         </div>
     );
