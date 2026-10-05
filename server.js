@@ -1846,6 +1846,107 @@ app.get('/misterios-historicos/:id', (req, res) => {
     renderizarArticuloSEO(req, res, req.params.id, 'misterios');
 });
 
+// ==============================================
+// NORMALIZADOR DE ENLACES AMAZON → SIEMPRE AMAZON.ES CON TAG DE AFILIADO
+// Convierte cualquier enlace (amzn.to, amzn.eu, link.amazon, a.co, amazon.com, amazon.de...)
+// en https://www.amazon.es/dp/ASIN?tag=expedientexg-21 para que el lector de España
+// vea precios en euros, envío 24h y su cuenta Prime, y la comisión quede registrada.
+// ==============================================
+const AMAZON_TAG = 'expedientexg-21';
+const AMAZON_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36';
+const REGEX_ENLACE_CORTO_AMAZON = /^https?:\/\/(amzn\.to|amzn\.eu|link\.amazon|a\.co)\//i;
+const REGEX_DOMINIO_AMAZON = /^https?:\/\/(www\.|smile\.)?amazon\.([a-z.]{2,6})\//i;
+
+const extraerAsinAmazon = (url) => {
+    const m = String(url).match(/\/(?:dp|gp\/product|gp\/aw\/d|d|exec\/obidos\/ASIN)\/([A-Z0-9]{10})(?=[\/?&#]|$)/i);
+    return m ? m[1].toUpperCase() : null;
+};
+
+const construirEnlaceAmazonEs = (asin) => `https://www.amazon.es/dp/${asin}?tag=${AMAZON_TAG}`;
+
+// Sigue las redirecciones de un enlace corto hasta llegar a la ficha del producto
+const resolverEnlaceCortoAmazon = async (url) => {
+    let actual = url;
+    for (let i = 0; i < 8; i++) {
+        const res = await fetch(actual, {
+            method: 'GET',
+            redirect: 'manual',
+            headers: { 'User-Agent': AMAZON_UA, 'Accept-Language': 'es-ES,es;q=0.9' },
+            signal: AbortSignal.timeout(8000)
+        });
+        const loc = res.headers.get('location');
+        if (res.status >= 300 && res.status < 400 && loc) {
+            actual = new URL(loc, actual).toString();
+            if (extraerAsinAmazon(actual)) return actual;
+        } else {
+            break;
+        }
+    }
+    return actual;
+};
+
+// Devuelve { link, roto } — roto=true si el enlace no lleva a ningún libro
+const normalizarEnlaceAmazon = async (link) => {
+    if (!link || typeof link !== 'string') return { link, roto: false };
+    const limpio = link.trim();
+
+    // 1. Enlace directo a cualquier tienda Amazon con ASIN → amazon.es
+    if (REGEX_DOMINIO_AMAZON.test(limpio)) {
+        const asin = extraerAsinAmazon(limpio);
+        if (asin) return { link: construirEnlaceAmazonEs(asin), roto: false };
+        // Sin ASIN (búsquedas, Audible...): forzar dominio .es y tag
+        try {
+            const u = new URL(limpio);
+            u.hostname = 'www.amazon.es';
+            u.searchParams.set('tag', AMAZON_TAG);
+            return { link: u.toString(), roto: false };
+        } catch (e) {
+            return { link: limpio, roto: false };
+        }
+    }
+
+    // 2. Enlace corto → resolver y convertir
+    if (REGEX_ENLACE_CORTO_AMAZON.test(limpio)) {
+        try {
+            const final = await resolverEnlaceCortoAmazon(limpio);
+            const asin = extraerAsinAmazon(final);
+            if (asin) return { link: construirEnlaceAmazonEs(asin), roto: false };
+            // Acaba en la portada de amazon.com u otra página sin libro → enlace roto
+            return { link: limpio, roto: true };
+        } catch (e) {
+            // Fallo de red puntual: se deja el original sin marcarlo como roto
+            console.warn('No se pudo resolver enlace Amazon:', limpio, e.message);
+            return { link: limpio, roto: false };
+        }
+    }
+
+    return { link: limpio, roto: false };
+};
+
+// Recorre el JSON de afiliados y normaliza cada enlace (ignora las imágenes)
+const normalizarDatosAmazon = async (valor, rotos = [], clave = '') => {
+    if (typeof valor === 'string') {
+        if (/imagen|image/i.test(clave)) return valor;
+        if (/^https?:\/\//i.test(valor.trim()) && (REGEX_DOMINIO_AMAZON.test(valor.trim()) || REGEX_ENLACE_CORTO_AMAZON.test(valor.trim()))) {
+            const r = await normalizarEnlaceAmazon(valor);
+            if (r.roto) rotos.push(valor.trim());
+            return r.link;
+        }
+        return valor;
+    }
+    if (Array.isArray(valor)) {
+        const out = [];
+        for (const v of valor) out.push(await normalizarDatosAmazon(v, rotos, clave));
+        return out;
+    }
+    if (valor && typeof valor === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(valor)) out[k] = await normalizarDatosAmazon(v, rotos, k);
+        return out;
+    }
+    return valor;
+};
+
 // --- ENDPOINTS PARA AFILIADOS DE AMAZON (NINJA) ---
 app.get('/api/amazon/todos', async (req, res) => {
     try {
@@ -1916,14 +2017,16 @@ app.get('/api/amazon/:itemKey', async (req, res) => {
 app.post('/api/amazon/:itemKey', async (req, res) => {
     try {
         const itemKey = req.params.itemKey;
-        const datos_json = JSON.stringify(req.body);
+        const rotos = [];
+        const normalizado = await normalizarDatosAmazon(req.body, rotos);
+        const datos_json = JSON.stringify(normalizado);
         
         // Usamos INSERT ... ON DUPLICATE KEY UPDATE para MySQL
         await db.execute(
             "INSERT INTO amazon_afiliados (item_key, datos_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE datos_json = ?", 
             [itemKey, datos_json, datos_json]
         );
-        res.json({ success: true });
+        res.json({ success: true, rotos });
     } catch (err) {
         console.error("Error al guardar datos de amazon:", err);
         res.status(500).json({ error: "Error en el servidor" });

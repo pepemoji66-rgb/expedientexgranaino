@@ -812,6 +812,26 @@ const LecturaHistoria = ({ userAuth }) => {
     }, [id, currentItemKey]);
 
     // Helpers para normalizar cualquier variante de campo que venga de Amazon (retrocompatibilidad total)
+    const sanitizarEnlaceAmazonFrontend = (url) => {
+        if (!url || typeof url !== 'string') return url;
+        const u = url.trim();
+        const asinMatch = u.match(/\/(?:dp|gp\/product|gp\/aw\/d|d)\/([A-Z0-9]{10})(?=[\/?&#]|$)/i);
+        if (asinMatch) {
+            return `https://www.amazon.es/dp/${asinMatch[1].toUpperCase()}?tag=expedientexg-21`;
+        }
+        if (/^https?:\/\/(?:www\.)?amazon\.[a-z.]+/i.test(u)) {
+            try {
+                const parsed = new URL(u);
+                parsed.hostname = 'www.amazon.es';
+                parsed.searchParams.set('tag', 'expedientexg-21');
+                return parsed.toString();
+            } catch (e) {
+                return u;
+            }
+        }
+        return u;
+    };
+
     const extraerLinkAmazon = (obj) => {
         if (!obj || typeof obj !== 'object') return null;
         let link = obj.amazon_url 
@@ -830,7 +850,7 @@ const LecturaHistoria = ({ userAuth }) => {
         if (!link && obj.id && typeof obj.id === 'string' && /^[0-9a-zA-Z_-]{6,12}$/.test(obj.id)) {
             link = `https://amzn.to/${obj.id}`;
         }
-        return (link && typeof link === 'string' && link.trim() !== '') ? link : null;
+        return (link && typeof link === 'string' && link.trim() !== '') ? sanitizarEnlaceAmazonFrontend(link) : null;
     };
 
     const extraerTituloAmazon = (obj) => {
