@@ -709,27 +709,47 @@ io.on('connection', (socket) => {
 });
 
 // ==============================================
-// PRE-RENDER SSR PARA BOTS (AdSense / Googlebot)
+// ==============================================
+// PRE-RENDER SSR PARA BOTS (Facebook / WhatsApp / Twitter / AdSense / Googlebot)
 // Transforma automáticamente a formato horizontal 1200x630 JPEG (~90KB)
-// y cabecera Cache-Control: public para que Facebook renderice la tarjeta grande inmediatamente sin saturar Cloudinary
-const optimizarImagenParaOG = (rawUrl) => {
+// respetando el punto focal / posición elegida en el panel de administración
+// (g_north para caras/arriba, g_south para abajo, g_auto inteligente por defecto)
+// ==============================================
+const optimizarImagenParaOG = (rawUrl, posicion = null) => {
     if (!rawUrl) return rawUrl;
     if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
         let url = rawUrl.replace(/\.(webp|png|jpeg)(\?.*)?$/i, '.jpg$2');
-        if (url.includes('/upload/c_fill,w_1200,h_630')) {
-            return url;
+        
+        // Mapear posición elegida por el usuario a la gravedad de Cloudinary
+        let gravity = 'g_auto';
+        if (posicion) {
+            const p = String(posicion).toLowerCase().trim();
+            if (p.includes('top') || p === '50% 20%') {
+                gravity = 'g_north';
+            } else if (p.includes('bottom') || p === '50% 70%') {
+                gravity = 'g_south';
+            } else if (p === '50% 35%') {
+                gravity = 'g_auto';
+            }
+        }
+
+        const transform = `c_fill,${gravity},w_1200,h_630,f_jpg,q_85`;
+
+        // Si ya tenía transformación c_fill previa, reemplazarla respetando la nueva gravedad
+        if (/\/upload\/c_fill[^/]+\//.test(url)) {
+            return url.replace(/\/upload\/c_fill[^/]+\//, `/upload/${transform}/`);
         }
         if (/\/upload\/([a-z0-9_:,]+\/)?v\d+/.test(url)) {
-            return url.replace(/\/upload\/([a-z0-9_:,]+\/)?v/, '/upload/c_fill,w_1200,h_630,f_jpg,q_85/v');
+            return url.replace(/\/upload\/([a-z0-9_:,]+\/)?v/, `/upload/${transform}/v`);
         }
-        return url.replace('/upload/', '/upload/c_fill,w_1200,h_630,f_jpg,q_85/');
+        return url.replace('/upload/', `/upload/${transform}/`);
     }
     return rawUrl;
 };
 
-const cloudinaryOgImage = (url) => {
+const cloudinaryOgImage = (url, posicion = null) => {
     if (!url) return url;
-    const opt = optimizarImagenParaOG(url);
+    const opt = optimizarImagenParaOG(url, posicion);
     if (opt.startsWith('https://res.cloudinary.com')) {
         try {
             https.get(opt, () => {}).on('error', () => {});
@@ -742,7 +762,7 @@ const cloudinaryOgImage = (url) => {
 // Inyecta contenido HTML rico antes de servir el SPA
 // ==============================================
 
-const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl = null, paginaUrl = null) => {
+const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl = null, paginaUrl = null, posicion = null) => {
     // Reemplazamos el title genérico por uno específico de página
     html = html.replace(
         /<title>[^<]*<\/title>/i,
@@ -752,7 +772,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     const desc = (descripcion || '').replace(/"/g, '&quot;').replace(/\n/g, ' ').trim();
     const title = (titulo || '').replace(/"/g, '&quot;');
     const rawImg = imagenUrl || 'https://expedientexgranaino.com/social-preview.png?v=7.0';
-    const img = cloudinaryOgImage(rawImg);
+    const img = cloudinaryOgImage(rawImg, posicion);
     const url = paginaUrl || 'https://expedientexgranaino.com/';
     // URL canónica siempre sin parámetros (?src=, etc.) para evitar duplicados en SEO y AdSense
     const cleanUrl = url.split('?')[0];
@@ -1761,7 +1781,8 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
 
             // Formar URL de la imagen — optimizada para OG (JPEG ligero, Cache-Control: public)
             const rawImg = historia.imagen_url || historia.url_imagen;
-            const imagenUrl = optimizarImagenParaOG(resolverImagenUrl(req, rawImg)) || resolverImagenUrl(req, 'social-preview.png');
+            const posicion = historia.imagen_posicion || null;
+            const imagenUrl = optimizarImagenParaOG(resolverImagenUrl(req, rawImg), posicion) || resolverImagenUrl(req, 'social-preview.png');
             
             const { baseImgUrl } = obtenerUrlsRequest(req);
 
@@ -1812,7 +1833,8 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                 desc,
                 contenidoSeo,
                 imagenUrl,
-                paginaUrl
+                paginaUrl,
+                posicion
             );
             // Asegurar que la etiqueta canonical oficial apunte a la ruta canónica limpia
             pagina = pagina.replace(/<link [^>]*rel=["']canonical["'][^>]*>/gi, `<link rel="canonical" href="${canonicalUrl}" />`);
