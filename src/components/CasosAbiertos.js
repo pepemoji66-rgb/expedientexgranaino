@@ -299,6 +299,7 @@ const CasosAbiertos = ({ userAuth }) => {
                                             src={caso.imagen_url.startsWith('http') ? caso.imagen_url : `${API_BASE_URL}/imagenes/${caso.imagen_url}`}
                                             alt={tituloMostrar}
                                             className="caso-imagen"
+                                            style={{ objectPosition: caso.imagen_posicion || 'center center' }}
                                         />
                                     ) : (
                                         <div className="caso-imagen-placeholder">
@@ -470,6 +471,7 @@ const CasosAbiertos = ({ userAuth }) => {
                                 src={casoExpandido.imagen_url.startsWith('http') ? casoExpandido.imagen_url : `${API_BASE_URL}/imagenes/${casoExpandido.imagen_url}`}
                                 alt="Evidencia"
                                 className="modal-caso-imagen"
+                                style={{ objectPosition: casoExpandido.imagen_posicion || 'center center' }}
                             />
                         )}
                         <div className="modal-caso-body">

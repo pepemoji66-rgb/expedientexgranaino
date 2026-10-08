@@ -165,6 +165,7 @@ const MisteriosHistoricos = () => {
                                             src={m.imagen_url.startsWith('http') ? m.imagen_url : `${API_BASE_URL}/imagenes/${m.imagen_url}`} 
                                             alt={titulo} 
                                             className="misterio-img"
+                                            style={{ objectPosition: m.imagen_posicion || 'center center' }}
                                             onError={(e) => { e.target.src = "https://placehold.co/400x250/000/00ff41?text=ENIGMA"; }}
                                         />
                                     ) : (

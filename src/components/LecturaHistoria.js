@@ -356,7 +356,7 @@ const ArticulosRelacionados = ({ currentId, currentSrc }) => {
                             <img
                                 src={resolverImg(rel.imagen_url)}
                                 alt={rel.titulo}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: rel.imagen_posicion || 'center center' }}
                                 onError={e => { e.target.style.display = 'none'; }}
                             />
                         </div>
@@ -1462,6 +1462,7 @@ const LecturaHistoria = ({ userAuth }) => {
                                 src={imgUrl} 
                                 alt="Portada de la Evidencia"
                                 className="lectura-imagen-portada"
+                                style={{ objectPosition: historia.imagen_posicion || 'center center' }}
                                 onLoad={(e) => { e.target.style.opacity = 1; }}
                                 onError={(e) => { 
                                     console.error("Fallo carga imagen:", e.target.src);

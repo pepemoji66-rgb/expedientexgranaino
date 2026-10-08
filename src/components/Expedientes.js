@@ -469,6 +469,7 @@ const Expedientes = () => {
                                                 <img
                                                     src={item.imagen_url.startsWith('http') ? item.imagen_url : `${API_BASE_URL}/imagenes/${item.imagen_url}`}
                                                     alt="evidencia"
+                                                    style={{ objectPosition: item.imagen_posicion || 'center center' }}
                                                 />
                                                 
                                                 {/* BADGE AMAZON */}
@@ -573,6 +574,7 @@ const Expedientes = () => {
                                 <img
                                     src={relatoAbierto.imagen_url.startsWith('http') ? relatoAbierto.imagen_url : `${API_BASE_URL}/imagenes/${relatoAbierto.imagen_url}`}
                                     alt="evidencia"
+                                    style={{ objectPosition: relatoAbierto.imagen_posicion || 'center center' }}
                                 />
                             </div>
                         )}

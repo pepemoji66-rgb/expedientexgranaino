@@ -246,6 +246,7 @@ const Noticias = ({ userAuth }) => {
                                     src={getUrlImagen(item.imagen_url)}
                                     alt={item.titulo}
                                     className="noticia-miniatura"
+                                    style={{ objectPosition: item.imagen_posicion || 'center center' }}
                                     onError={(e) => { e.target.src = `https://placehold.co/400x250/000/00ff41?text=${t('newsNoImage')}`; }}
                                 />
                                 
