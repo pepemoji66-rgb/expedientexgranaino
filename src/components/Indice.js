@@ -213,6 +213,34 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
 
             {/* ── BUSCADOR GLOBAL DE ARTÍCULOS ── */}
             <div className="buscador-global-wrap" ref={buscadorRef}>
+                {/* GUIÑO PARA VISITANTES DE TIKTOK / YOUTUBE / REDES */}
+                <div
+                    style={{
+                        background: 'rgba(30, 58, 43, 0.06)',
+                        border: '1px solid rgba(30, 58, 43, 0.25)',
+                        borderLeft: '3px solid #1e3a2b',
+                        borderRadius: '4px',
+                        padding: '8px 12px',
+                        marginBottom: '8px',
+                        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                        fontSize: '0.82rem',
+                        lineHeight: 1.5,
+                        color: '#1A1A1A',
+                        textAlign: 'left'
+                    }}
+                >
+                    {language === 'en' ? (
+                        <>
+                            🔎 <strong>Coming from TikTok, YouTube or social media?</strong> Search by keyword for the case from the video or try your luck at{' '}
+                            <Link to="/la-ruleta" style={{ color: '#1e3a2b', fontWeight: 700, textDecoration: 'underline' }}>🎰 The Bunker Roulette</Link>
+                        </>
+                    ) : (
+                        <>
+                            🔎 <strong>¿Vienes de TikTok, YouTube o Redes?</strong> Busca aquí por palabra clave el expediente del vídeo o prueba suerte en{' '}
+                            <Link to="/la-ruleta" style={{ color: '#1e3a2b', fontWeight: 700, textDecoration: 'underline' }}>🎰 La Ruleta del Búnker</Link>
+                        </>
+                    )}
+                </div>
                 <div className="buscador-global-inner">
                     <span className="buscador-global-icon">🔍</span>
                     <input

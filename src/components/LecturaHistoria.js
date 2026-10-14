@@ -799,14 +799,21 @@ const LecturaHistoria = ({ userAuth }) => {
     }, [historia, id, esMisterio, esNoticia, esCaso]);
 
     // DATOS DINÁMICOS DE AMAZON DESDE API
+    // Respaldo: si el artículo no tiene libros propios, se muestran hasta 3 de la Biblioteca (/api/amazon/todos)
+    const [amazonListo, setAmazonListo] = useState(false);
+    const [librosRespaldo, setLibrosRespaldo] = useState([]);
     useEffect(() => {
         if (id) {
             setAmazonConfig(null); // Limpiar datos anteriores al cambiar de artículo
+            setAmazonListo(false);
+            setLibrosRespaldo([]);
             axios.get(`${API_BASE_URL}/api/amazon/${currentItemKey}`).then(res => {
                 setAmazonConfig(res.data || null);
+                setAmazonListo(true);
             }).catch(e => {
                 console.error("Error amazon config:", e);
                 setAmazonConfig(null);
+                setAmazonListo(true);
             });
         }
     }, [id, currentItemKey]);
@@ -942,6 +949,58 @@ const LecturaHistoria = ({ userAuth }) => {
         console.error("Error procesando datos de referencia:", e);
         bannerData = null;
         biblioData = null;
+    }
+
+    // RESPALDO AUTOMÁTICO: artículo sin libros ni banner propios -> hasta 3 libros de la Biblioteca
+    const sinLibrosPropios = amazonListo && (!biblioData || biblioData.length === 0) && !bannerData;
+    useEffect(() => {
+        if (!sinLibrosPropios) return;
+        let cancelado = false;
+        axios.get(`${API_BASE_URL}/api/amazon/todos`).then(res => {
+            if (cancelado) return;
+            const datos = Array.isArray(res.data) ? res.data : [];
+            let todos = [];
+            datos.forEach(item => {
+                let biblio = item && item.bibliografia;
+                if (biblio && typeof biblio === 'string') {
+                    try { biblio = JSON.parse(biblio); } catch (e) { biblio = null; }
+                }
+                if (Array.isArray(biblio)) {
+                    todos = todos.concat(biblio);
+                } else if (item && item.enlace_amazon) {
+                    todos.push({
+                        titulo: item.titulo,
+                        autor: item.autor || 'Redacción Búnker',
+                        link: item.enlace_amazon,
+                        imagen_url: item.imagen_url
+                    });
+                }
+            });
+            const vistos = new Set();
+            const normalizados = todos
+                .map(libro => ({
+                    titulo: extraerTituloAmazon(libro),
+                    autor: extraerAutorAmazon(libro),
+                    descripcion: (libro && (libro.descripcion || libro.sinopsis)) || '',
+                    imagen_url: extraerImagenAmazon(libro),
+                    link: extraerLinkAmazon(libro) || '#'
+                }))
+                .filter(libro => {
+                    if (!libro.link || libro.link === '#' || vistos.has(libro.link)) return false;
+                    vistos.add(libro.link);
+                    return true;
+                });
+            for (let i = normalizados.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [normalizados[i], normalizados[j]] = [normalizados[j], normalizados[i]];
+            }
+            setLibrosRespaldo(normalizados.slice(0, 3));
+        }).catch(e => console.error("Error cargando libros de respaldo:", e));
+        return () => { cancelado = true; };
+    }, [sinLibrosPropios, currentItemKey]);
+
+    if (sinLibrosPropios && librosRespaldo.length > 0) {
+        biblioData = librosRespaldo;
     }
 
     const obtenerHistoria = async () => {
@@ -1248,6 +1307,25 @@ const LecturaHistoria = ({ userAuth }) => {
         );
     };
 
+    // TÍTULO DINÁMICO: Analytics y pestaña registran el título exacto de cada artículo
+    useEffect(() => {
+        if (!historia || !historia.titulo) return;
+        document.title = `${historia.titulo} | Expediente X Granaíno`;
+        return () => {
+            document.title = 'Expediente X Granaíno | Investigación OVNI y Paranormal en Granada';
+        };
+    }, [historia]);
+
+    // AVISO VISUAL DE "ENLACE COPIADO"
+    const [avisoCopiado, setAvisoCopiado] = useState('');
+    const avisoTimerRef = useRef(null);
+    const mostrarAvisoCopiado = (mensaje) => {
+        setAvisoCopiado(mensaje);
+        if (avisoTimerRef.current) clearTimeout(avisoTimerRef.current);
+        avisoTimerRef.current = setTimeout(() => setAvisoCopiado(''), 2500);
+    };
+    useEffect(() => () => { if (avisoTimerRef.current) clearTimeout(avisoTimerRef.current); }, []);
+
     const compartirHistoria = (red) => {
         if (!historia) return;
 
@@ -1281,11 +1359,30 @@ const LecturaHistoria = ({ userAuth }) => {
 
         if (red === 'copiar') {
             try {
-                navigator.clipboard.writeText(url);
-                alert("📋 ¡Enlace copiado al portapapeles! Puedes pegarlo donde quieras.");
+                navigator.clipboard.writeText(url)
+                    .then(() => mostrarAvisoCopiado('✅ ¡Enlace copiado!'))
+                    .catch(() => mostrarAvisoCopiado('No se pudo copiar. Cópialo de la barra del navegador.'));
             } catch (err) {
-                alert("No se pudo copiar automáticamente. Cópialo de la barra del navegador.");
+                mostrarAvisoCopiado('No se pudo copiar. Cópialo de la barra del navegador.');
             }
+            return;
+        }
+
+        // Pinterest: SIEMPRE enlace directo (PC y móvil) con la imagen del expediente en URL absoluta
+        if (red === 'pinterest') {
+            const rawImg = historia.imagen_url || historia.url_imagen || '';
+            let imgAbsoluta = 'https://expedientexgranaino.com/social-preview.png';
+            if (rawImg) {
+                const rutaImg = rawImg.startsWith('http') ? rawImg : `${API_BASE_URL}/imagenes/${rawImg.split('/').pop()}`;
+                try {
+                    imgAbsoluta = new URL(rutaImg, window.location.origin).href;
+                } catch (e) {
+                    imgAbsoluta = rutaImg;
+                }
+            }
+            const descPin = `${tituloLimpio} — Expediente X Granaíno`;
+            const linkPin = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(imgAbsoluta)}&description=${encodeURIComponent(descPin)}`;
+            window.open(linkPin, '_blank', 'noopener,noreferrer');
             return;
         }
 
@@ -1933,6 +2030,32 @@ const LecturaHistoria = ({ userAuth }) => {
                                 <span style={{ color: '#64748B', fontSize: '0.95rem' }}>🔗</span> Copiar Enlace
                             </button>
                         </div>
+                        {avisoCopiado && (
+                            <div
+                                role="status"
+                                aria-live="polite"
+                                style={{
+                                    position: 'fixed',
+                                    bottom: '24px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    background: avisoCopiado.startsWith('✅') ? '#1e3a2b' : '#b91c1c',
+                                    color: '#FFFFFF',
+                                    padding: '10px 22px',
+                                    borderRadius: '4px',
+                                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                                    fontSize: '0.85rem',
+                                    fontWeight: 600,
+                                    letterSpacing: '0.3px',
+                                    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.18)',
+                                    zIndex: 10000,
+                                    maxWidth: '90vw',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                {avisoCopiado}
+                            </div>
+                        )}
                     </div>
 
                     {/* 🎰 BANNER COMPACTO, RELATIVO Y MODERNO: LA RULETA DEL BÚNKER */}
