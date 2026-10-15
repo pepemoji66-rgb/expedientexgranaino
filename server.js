@@ -1850,7 +1850,11 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">${historia.titulo ? historia.titulo.toUpperCase() : 'SIN TÍTULO'}</h1>
     <p><strong>Clasificación:</strong> ${esRelatoAdmin ? 'Relato del Administrador' : esNoticia ? 'Noticia de Alerta' : esMisterio ? 'Misterio Histórico' : esCaso ? 'Caso Abierto / True Crime' : 'Expediente de Agente'}</p>
-    <p><strong>Autor:</strong> ${historia.usuario_nombre || historia.agente || 'Administrador'}</p>
+    <p><strong>Autor e Investigación:</strong> ${(() => {
+        const a = (historia.usuario_nombre || historia.agente || '').trim();
+        return (!a || a.toLowerCase() === 'administrador' || a.toLowerCase() === 'admin' || a.toUpperCase() === 'ALTO MANDO') ? 'José Moreno Jiménez' : a;
+    })()}</p>
+    ${historia.fecha ? `<p><strong>Fecha de Documentación:</strong> ${new Date(historia.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>` : ''}
     <div style="white-space:pre-line;">${cuerpoTexto}</div>
     ${bloqueFuenteSeo}
 </article>`;

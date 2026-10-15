@@ -753,16 +753,9 @@ const LecturaHistoria = ({ userAuth }) => {
     const [widgetAudibleVisible, setWidgetAudibleVisible] = useState(false);
     const [widgetAudibleMinimizado, setWidgetAudibleMinimizado] = useState(false);
 
-    // Mostrar widget Audible flotante tras 4 segundos y minimizar suavemente a los 14s para no tapar texto
+    // Widget Audible flotante temporalmente pausado en modo revisión AdSense (el bloque fijo de Audible al pie sigue 100% activo)
     useEffect(() => {
-        const cerrado = sessionStorage.getItem('audible_widget_cerrado');
-        if (cerrado) return;
-        const timerAparicion = setTimeout(() => setWidgetAudibleVisible(true), 4000);
-        const timerMinimizar = setTimeout(() => setWidgetAudibleMinimizado(true), 16000);
-        return () => {
-            clearTimeout(timerAparicion);
-            clearTimeout(timerMinimizar);
-        };
+        // Pausado para revisión de AdSense
     }, []);
 
     const isAdmin = userAuth && (userAuth.email === 'archipegv2@gmail.com' || userAuth.rol === 'admin');
@@ -951,57 +944,9 @@ const LecturaHistoria = ({ userAuth }) => {
         biblioData = null;
     }
 
-    // RESPALDO AUTOMÁTICO: artículo sin libros ni banner propios -> hasta 3 libros de la Biblioteca
-    const sinLibrosPropios = amazonListo && (!biblioData || biblioData.length === 0) && !bannerData;
-    useEffect(() => {
-        if (!sinLibrosPropios) return;
-        let cancelado = false;
-        axios.get(`${API_BASE_URL}/api/amazon/todos`).then(res => {
-            if (cancelado) return;
-            const datos = Array.isArray(res.data) ? res.data : [];
-            let todos = [];
-            datos.forEach(item => {
-                let biblio = item && item.bibliografia;
-                if (biblio && typeof biblio === 'string') {
-                    try { biblio = JSON.parse(biblio); } catch (e) { biblio = null; }
-                }
-                if (Array.isArray(biblio)) {
-                    todos = todos.concat(biblio);
-                } else if (item && item.enlace_amazon) {
-                    todos.push({
-                        titulo: item.titulo,
-                        autor: item.autor || 'Redacción Búnker',
-                        link: item.enlace_amazon,
-                        imagen_url: item.imagen_url
-                    });
-                }
-            });
-            const vistos = new Set();
-            const normalizados = todos
-                .map(libro => ({
-                    titulo: extraerTituloAmazon(libro),
-                    autor: extraerAutorAmazon(libro),
-                    descripcion: (libro && (libro.descripcion || libro.sinopsis)) || '',
-                    imagen_url: extraerImagenAmazon(libro),
-                    link: extraerLinkAmazon(libro) || '#'
-                }))
-                .filter(libro => {
-                    if (!libro.link || libro.link === '#' || vistos.has(libro.link)) return false;
-                    vistos.add(libro.link);
-                    return true;
-                });
-            for (let i = normalizados.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [normalizados[i], normalizados[j]] = [normalizados[j], normalizados[i]];
-            }
-            setLibrosRespaldo(normalizados.slice(0, 3));
-        }).catch(e => console.error("Error cargando libros de respaldo:", e));
-        return () => { cancelado = true; };
-    }, [sinLibrosPropios, currentItemKey]);
-
-    if (sinLibrosPropios && librosRespaldo.length > 0) {
-        biblioData = librosRespaldo;
-    }
+    // RESPALDO AUTOMÁTICO DE AMAZON: En pausa temporal durante la revisión de AdSense.
+    // Los libros y bibliografías asignados a este artículo específico siguen mostrándose al 100%.
+    const sinLibrosPropios = false;
 
     const obtenerHistoria = async () => {
         try {
@@ -1486,9 +1431,20 @@ const LecturaHistoria = ({ userAuth }) => {
                     <p style={{ margin: '4px 0' }}>SECCIÓN: <span style={{ color: '#9c4221', fontWeight: 'bold' }}>
                         {esRelatoAdmin ? t('readAdminStory') : esCaso ? 'CASO REAL / TRUE CRIME' : esMisterio ? 'MISTERIO HISTÓRICO' : esNoticia ? 'NOTICIA' : t('readAgentRegistry')}
                     </span></p>
-                    <p style={{ margin: '4px 0' }}>REDACCIÓN / ARCHIVO: <span style={{ color: '#1E293B', fontWeight: 'bold' }}>
-                        {(historia.usuario_nombre || historia.agente || t('readSystemCentral')).toUpperCase()}
+                    <p style={{ margin: '4px 0' }}>INVESTIGACIÓN Y REDACCIÓN: <span style={{ color: '#1E293B', fontWeight: 'bold' }}>
+                        {(() => {
+                            const raw = (historia.usuario_nombre || historia.agente || '').trim();
+                            if (!raw || raw.toLowerCase() === 'administrador' || raw.toLowerCase() === 'admin' || raw.toUpperCase() === 'ALTO MANDO') {
+                                return 'JOSÉ MORENO JIMÉNEZ';
+                            }
+                            return raw.toUpperCase();
+                        })()}
                     </span></p>
+                    {(historia.fecha || historia.created_at) && (
+                        <p style={{ margin: '4px 0' }}>DOCUMENTADO: <span style={{ color: '#475569' }}>
+                            {new Date(historia.fecha || historia.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        </span></p>
+                    )}
                     {comentarios.length > 0 && (
                         <p style={{ marginTop: '8px' }}>
                             <span 
