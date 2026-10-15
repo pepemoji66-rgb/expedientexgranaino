@@ -2159,9 +2159,9 @@ app.get('/sitemap.xml', async (req, res) => {
         // Consulta unificada: incluimos todos los estados activos para TODAS las tablas
         const estadosActivos = "estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'";
 
-        // 2. Expedientes / Relatos — URL canónica limpia por categoría
+        // 2. Expedientes / Relatos — Solo artículos con sustancia editorial (>= 1500 caracteres)
         try {
-            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE ${estadosActivos}`);
+            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500`);
             exps.forEach(e => {
                 urls.push({
                     loc: `${domain}/expedientes/${e.id}`,
@@ -2172,9 +2172,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap exps:", e.message); }
 
-        // 3. Casos Abiertos / True Crime — URL canónica limpia por categoría
+        // 3. Casos Abiertos / True Crime — Solo artículos con sustancia editorial (>= 1500 caracteres)
         try {
-            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE ${estadosActivos}`);
+            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500`);
             casos.forEach(c => {
                 urls.push({
                     loc: `${domain}/casos-abiertos/${c.id}`,
@@ -2185,9 +2185,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap casos:", e.message); }
 
-        // 4. Misterios Históricos — URL canónica limpia por categoría
+        // 4. Misterios Históricos — Solo artículos con sustancia editorial (>= 1500 caracteres)
         try {
-            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE ${estadosActivos}`);
+            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500`);
             misterios.forEach(m => {
                 urls.push({
                     loc: `${domain}/misterios-historicos/${m.id}`,
@@ -2198,9 +2198,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap misterios:", e.message); }
 
-        // 5. Noticias — URL canónica limpia por categoría
+        // 5. Noticias — Solo noticias desarrolladas (>= 1500 caracteres)
         try {
-            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE ${estadosActivos}`);
+            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 1500`);
             noticias.forEach(n => {
                 urls.push({
                     loc: `${domain}/noticias/${n.id}`,
