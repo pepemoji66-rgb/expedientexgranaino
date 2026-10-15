@@ -33,6 +33,7 @@ import Archipeg from './components/Archipeg';
 import MisteriosHistoricos from './components/MisteriosHistoricos';
 import BibliotecaBunker from './components/BibliotecaBunker';
 import ColaboradoresBunker from './components/ColaboradoresBunker';
+import Contacto from './components/Contacto';
 import { useLanguage } from './context/LanguageContext';
 import { safeLocalStorage } from './utils/storage';
 import useRetentionTracker from './utils/useRetentionTracker';
@@ -396,6 +397,8 @@ function App() {
               <Route path="/privacidad" element={<PoliticaPrivacidad />} />
               <Route path="/cookies" element={<PoliticaCookies />} />
                <Route path="/legal" element={<AvisoLegal />} />
+               <Route path="/aviso-legal" element={<AvisoLegal />} />
+               <Route path="/contacto" element={<Contacto />} />
                <Route path="/sobre-nosotros" element={<SobreNosotros />} />
                <Route path="/especial-atarfe" element={<AtarfeDossier />} />
                <Route path="/archipeg" element={<Archipeg userAuth={userAuth} />} />

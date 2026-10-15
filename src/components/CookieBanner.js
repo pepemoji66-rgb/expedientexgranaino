@@ -16,11 +16,27 @@ const CookieBanner = () => {
 
     const aceptarCookies = () => {
         safeLocalStorage.setItem('bunker_cookie_consent', 'accepted');
+        if (typeof window.gtag === 'function') {
+            window.gtag('consent', 'update', {
+                ad_storage: 'granted',
+                ad_user_data: 'granted',
+                ad_personalization: 'granted',
+                analytics_storage: 'granted'
+            });
+        }
         setVisible(false);
     };
 
     const rechazarCookies = () => {
         safeLocalStorage.setItem('bunker_cookie_consent', 'rejected');
+        if (typeof window.gtag === 'function') {
+            window.gtag('consent', 'update', {
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                analytics_storage: 'denied'
+            });
+        }
         setVisible(false);
     };
 

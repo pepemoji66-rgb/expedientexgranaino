@@ -43,7 +43,8 @@ const Footer = ({ visitasTotales = 0 }) => {
                     <div className="footer-legal-links">
                         <Link to="/privacidad">{t('navPrivacy')}</Link>
                         <Link to="/cookies">{t('navCookies')}</Link>
-                        <Link to="/legal">{t('navLegal')}</Link>
+                        <Link to="/aviso-legal">{t('navLegal')}</Link>
+                        <Link to="/contacto">{language === 'en' ? 'Contact' : 'Contacto'}</Link>
                     </div>
                 </div>
 

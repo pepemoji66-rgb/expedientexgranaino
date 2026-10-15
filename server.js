@@ -1231,6 +1231,10 @@ app.get(['/legal', '/aviso-legal'], (req, res) => {
     <p>El titular por sí o como cesionario, es dueño de todos los derechos de propiedad intelectual e industrial de su página web, así como de los elementos contenidos en la misma (a título enunciativo, imágenes, sonido, audio, vídeo, software o textos; marcas o logotipos, combinaciones de colores, estructura y diseño, selección de materiales usados, etc.). Todos los derechos reservados. Queda expresamente prohibida la reproducción, la distribución y la comunicación pública sin la autorización del titular.</p>
     <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">4. Exclusión de Garantías y Responsabilidad</h2>
     <p>El titular no se hace responsable, en ningún caso, de los daños y perjuicios de cualquier naturaleza que pudieran ocasionar, a título enunciativo: errores u omisiones en los contenidos, falta de disponibilidad del portal o la transmisión de virus o programas maliciosos o lesivos en los contenidos, a pesar de haber adoptado todas las medidas tecnológicas necesarias para evitarlo.</p>
+    <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">5. Modificaciones</h2>
+    <p>El titular se reserva el derecho de efectuar sin previo aviso las modificaciones que considere oportunas en su portal, pudiendo cambiar, suprimir o añadir tanto los contenidos y servicios que se presten a través de la misma como la forma en la que éstos aparezcan presentados o localizados en su portal.</p>
+    <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">6. Programa de Afiliados de Amazon</h2>
+    <p>En calidad de Afiliado de Amazon, este sitio web obtiene ingresos por las compras adscritas que cumplen los requisitos aplicables de acuerdo con lo establecido en el Acuerdo Operativo del Programa de Afiliados de Amazon.</p>
 </article>`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
@@ -1243,6 +1247,35 @@ app.get(['/legal', '/aviso-legal'], (req, res) => {
             contenidoSeo,
             `${baseImgUrl}/social-preview.png?v=8.0`,
             canonicalUrl
+        );
+        res.send(pagina);
+    });
+});
+
+// Sección de Contacto (/contacto) - SEO enriquecido
+app.get('/contacto', (req, res) => {
+    const indexPath = path.join(__dirname, 'build', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) return res.sendFile(indexPath);
+
+        const contenidoSeo = `
+<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">✉️ CONTACTO — Expediente X Granaíno</h1>
+    <p>Expediente X Granaíno es un archivo de investigación independiente, mantenido desde Atarfe (Granada) por <strong>José Moreno Jiménez</strong>.</p>
+    <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">Correo editorial</h2>
+    <p>Para cualquier consulta, corrección, colaboración o solicitud, escríbenos a: <strong>archipegv2@gmail.com</strong>.</p>
+    <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">Sobre qué puedes escribirnos</h2>
+    <p>Correcciones o información adicional sobre un caso o artículo; testimonios, documentos o pistas para nuevos expedientes; colaboraciones y menciones del proyecto; solicitudes de derechos de autor o retirada de contenido; y ejercicio de tus derechos de protección de datos (acceso, rectificación, supresión).</p>
+</article>`;
+
+        const { baseImgUrl: contactoImgUrl } = obtenerUrlsRequest(req);
+        const pagina = inyectarContenidoSEO(
+            html,
+            'Contacto | Expediente X Granaíno',
+            'Contacta con Expediente X Granaíno: correo editorial, correcciones, colaboraciones y solicitudes sobre el archivo de investigación.',
+            contenidoSeo,
+            `${contactoImgUrl}/social-preview.png?v=8.0`,
+            'https://expedientexgranaino.com/contacto'
         );
         res.send(pagina);
     });
@@ -2106,7 +2139,8 @@ app.get('/sitemap.xml', async (req, res) => {
             { path: '/sobre-nosotros',       priority: '0.5', changefreq: 'monthly' },
             { path: '/privacidad',           priority: '0.3', changefreq: 'yearly' },
             { path: '/cookies',              priority: '0.3', changefreq: 'yearly' },
-            { path: '/legal',               priority: '0.3', changefreq: 'yearly' }
+            { path: '/aviso-legal',          priority: '0.3', changefreq: 'yearly' },
+            { path: '/contacto',             priority: '0.4', changefreq: 'yearly' }
         ];
 
         estaticas.forEach(p => {
