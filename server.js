@@ -762,7 +762,7 @@ const cloudinaryOgImage = (url, posicion = null) => {
 // Inyecta contenido HTML rico antes de servir el SPA
 // ==============================================
 
-const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl = null, paginaUrl = null, posicion = null) => {
+const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl = null, paginaUrl = null, posicion = null, isNoindex = false) => {
     // Reemplazamos el title genérico por uno específico de página
     html = html.replace(
         /<title>[^<]*<\/title>/i,
@@ -783,6 +783,7 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     html = html.replace(/<meta [^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
     html = html.replace(/<meta [^>]*name=["']description["'][^>]*>/gi, '');
     html = html.replace(/<meta [^>]*name=["']keywords["'][^>]*>/gi, '');
+    html = html.replace(/<meta [^>]*name=["']robots["'][^>]*>/gi, '');
     html = html.replace(/<link [^>]*rel=["']canonical["'][^>]*>/gi, '');
 
     // Generación de Datos Estructurados (JSON-LD) para SEO
@@ -860,8 +861,9 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     }
 
     // Inyectamos meta description, OG, Twitter Cards, canonical y JSON-LD
+    const robotsTag = isNoindex ? '<meta name="robots" content="noindex, follow" />\n' : '';
     const ogBlock = `
-<meta name="google-site-verification" content="wu1T4bL_7euJUjS-742pfAGN6xKEynd3X9P9BDUr0Dc" />
+${robotsTag}<meta name="google-site-verification" content="wu1T4bL_7euJUjS-742pfAGN6xKEynd3X9P9BDUr0Dc" />
 <meta name="description" content="${desc}" />
 <meta name="keywords" content="${keywordsDinamicas}" />
 <link rel="canonical" href="${url}" />
@@ -1864,6 +1866,10 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
             const jsonTypes = JSON.stringify({ esRelatoAdmin, esNoticia, esMisterio, esCaso }).replace(/</g, '\\u003c');
             const initialScript = `<script>window.__INITIAL_HISTORIA__ = ${jsonHistoria}; window.__INITIAL_HISTORIA_TYPE__ = ${jsonTypes};</script>`;
 
+            // Criterio de calidad editorial para AdSense: artículos con menos de 1500 caracteres llevan noindex
+            const rawContenidoCompleto = (historia.contenido || historia.cuerpo || '').trim();
+            const esArticuloCorto = rawContenidoCompleto.length < 1500;
+
             let pagina = inyectarContenidoSEO(
                 html,
                 titulo,
@@ -1871,7 +1877,8 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                 contenidoSeo,
                 imagenUrl,
                 paginaUrl,
-                posicion
+                posicion,
+                esArticuloCorto
             );
             // Asegurar que la etiqueta canonical oficial apunte a la ruta canónica limpia
             pagina = pagina.replace(/<link [^>]*rel=["']canonical["'][^>]*>/gi, `<link rel="canonical" href="${canonicalUrl}" />`);
