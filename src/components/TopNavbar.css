@@ -383,8 +383,8 @@
 
 @media (max-width: 640px) {
     .header-top-container {
-        padding: 0 12px;
-        gap: 8px;
+        padding: 0 10px;
+        gap: 6px;
     }
 
     .brand-link {
@@ -402,8 +402,29 @@
         line-height: 1.1;
     }
 
+    .header-top-actions {
+        min-width: auto;
+        gap: 6px;
+    }
+
     .editorial-lang-switch {
-        display: none;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        background: rgba(0, 0, 0, 0.25);
+        padding: 3px 6px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .lang-btn {
+        font-size: 0.72rem;
+        padding: 2px 3px;
+        line-height: 1;
+    }
+
+    .btn-login-header {
+        display: none; /* En móvil el acceso se gestiona dentro del menú hamburguesa */
     }
 
     .btn-account-header {
@@ -416,7 +437,33 @@
     }
 
     .editorial-hamburger {
-        padding: 4px;
-        margin-left: 4px;
+        padding: 5px;
+        margin-left: 2px;
+    }
+}
+
+@media (max-width: 420px) {
+    .header-top-container {
+        padding: 0 8px;
+        gap: 4px;
+    }
+
+    .brand-logo-img {
+        height: 32px;
+        width: 32px;
+    }
+
+    .brand-title {
+        font-size: 0.92rem;
+        letter-spacing: 0px;
+    }
+
+    .editorial-lang-switch {
+        padding: 2px 4px;
+    }
+
+    .lang-btn {
+        font-size: 0.68rem;
+        padding: 1px 2px;
     }
 }

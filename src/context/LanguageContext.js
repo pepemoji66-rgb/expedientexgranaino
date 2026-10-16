@@ -797,7 +797,21 @@ const translations = {
 };
 
 export const LanguageProvider = ({ children }) => {
-    const [language, setLanguage] = useState(safeLocalStorage.getItem('bunker_lang') || 'es');
+    const getInitialLanguage = () => {
+        try {
+            if (typeof window !== 'undefined' && window.location) {
+                const params = new URLSearchParams(window.location.search);
+                const urlLang = params.get('lang');
+                if (urlLang === 'es' || urlLang === 'en') {
+                    safeLocalStorage.setItem('bunker_lang', urlLang);
+                    return urlLang;
+                }
+            }
+        } catch (e) {}
+        return safeLocalStorage.getItem('bunker_lang') || 'es';
+    };
+
+    const [language, setLanguage] = useState(getInitialLanguage);
 
     useEffect(() => {
         safeLocalStorage.setItem('bunker_lang', language);

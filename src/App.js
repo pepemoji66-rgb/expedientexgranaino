@@ -76,7 +76,7 @@ const FooterCondicional = (props) => {
 
 
 function App() {
-  const { t, language } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [userAuth, setUserAuth] = useState(null);
   const [tema, setTema] = useState(() => {
@@ -245,7 +245,61 @@ function App() {
             <X size={24} />
           </button>
           
-          <div style={{ flexGrow: 1, paddingTop: '40px', paddingLeft: '25px', paddingRight: '25px', overflowY: 'auto' }}>
+          <div style={{ flexGrow: 1, paddingTop: '30px', paddingLeft: '25px', paddingRight: '25px', overflowY: 'auto' }}>
+            {/* SELECTOR DE IDIOMA DESTACADO PARA MÓVIL */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 14px',
+              background: '#F1F5F9',
+              borderRadius: '6px',
+              marginBottom: '20px',
+              border: '1px solid #CBD5E1'
+            }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: '800', letterSpacing: '1px', color: '#475569' }}>
+                🌐 {language === 'en' ? 'LANGUAGE' : 'IDIOMA'}
+              </span>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => language !== 'es' && toggleLanguage()}
+                  style={{
+                    background: language === 'es' ? '#9c4221' : '#FFFFFF',
+                    color: language === 'es' ? '#FFFFFF' : '#475569',
+                    border: language === 'es' ? '1px solid #7a3319' : '1px solid #CBD5E1',
+                    padding: '5px 12px',
+                    borderRadius: '4px',
+                    fontSize: '0.78rem',
+                    fontWeight: '800',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: language === 'es' ? '0 1px 3px rgba(156, 66, 33, 0.3)' : 'none'
+                  }}
+                >
+                  ES
+                </button>
+                <button
+                  type="button"
+                  onClick={() => language !== 'en' && toggleLanguage()}
+                  style={{
+                    background: language === 'en' ? '#9c4221' : '#FFFFFF',
+                    color: language === 'en' ? '#FFFFFF' : '#475569',
+                    border: language === 'en' ? '1px solid #7a3319' : '1px solid #CBD5E1',
+                    padding: '5px 12px',
+                    borderRadius: '4px',
+                    fontSize: '0.78rem',
+                    fontWeight: '800',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: language === 'en' ? '0 1px 3px rgba(156, 66, 33, 0.3)' : 'none'
+                  }}
+                >
+                  EN
+                </button>
+              </div>
+            </div>
+
             <div style={{ borderBottom: '1px solid #E2E8F0', paddingBottom: '12px', marginBottom: '20px' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', color: '#64748B', textTransform: 'uppercase' }}>
                 SECCIONES PRINCIPALES

@@ -869,6 +869,8 @@ ${robotsTag}<meta name="google-site-verification" content="wu1T4bL_7euJUjS-742pf
 <link rel="canonical" href="${url}" />
 <meta property="og:type" content="${esHistoria ? 'article' : 'website'}" />
 <meta property="og:site_name" content="Expediente X Granaíno" />
+<meta property="og:locale" content="es_ES" />
+<meta property="og:locale:alternate" content="en_US" />
 <meta property="og:url" content="${url}" />
 <meta property="og:title" content="${title}" />
 <meta property="og:description" content="${desc}" />
