@@ -386,10 +386,10 @@ const LecturaHistoria = ({ userAuth }) => {
     // Detección inteligente de la sección por la ruta o el query string
     const pathname = location.pathname || '';
     const src = srcQuery || (
-        pathname.includes('/casos-abiertos') ? 'casos' :
-        pathname.includes('/noticias') ? 'noticias' :
-        pathname.includes('/misterios-historicos') ? 'misterios' :
-        pathname.includes('/expedientes') ? 'expedientes' : null
+        pathname.includes('/casos-abiertos') || pathname.includes('/caso') ? 'casos' :
+        pathname.includes('/noticias') || pathname.includes('/noticia') ? 'noticias' :
+        pathname.includes('/misterios-historicos') || pathname.includes('/misterio') ? 'misterios' :
+        pathname.includes('/expedientes') || pathname.includes('/expediente') ? 'expedientes' : null
     );
     
     const getInitialHistoria = () => {
@@ -964,7 +964,10 @@ const LecturaHistoria = ({ userAuth }) => {
 
                 if (!objeto.titulo_en && !objeto.contenido_en) {
                     try {
-                        const resTrans = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(finalContenido)}`);
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 3500);
+                        const resTrans = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=${encodeURIComponent(finalContenido)}`, { signal: controller.signal });
+                        clearTimeout(timeoutId);
                         const dataTrans = await resTrans.json();
                         finalContenido = dataTrans[0].map(x => x[0]).join("");
 
@@ -974,7 +977,7 @@ const LecturaHistoria = ({ userAuth }) => {
                             finalTitulo = dataTit[0].map(x => x[0]).join("");
                         }
                     } catch (e) {
-                        console.error("Auto translation error:", e);
+                        console.error("Auto translation error/timeout:", e);
                     }
                 }
 

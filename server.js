@@ -1864,8 +1864,14 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
 </article>`;
 
             // Sanitizar objeto para inyección en script tag de forma segura
-            const jsonHistoria = JSON.stringify(historia).replace(/</g, '\\u003c');
-            const jsonTypes = JSON.stringify({ esRelatoAdmin, esNoticia, esMisterio, esCaso }).replace(/</g, '\\u003c');
+            const jsonHistoria = JSON.stringify(historia)
+                .replace(/</g, '\\u003c')
+                .replace(/\u2028/g, '\\u2028')
+                .replace(/\u2029/g, '\\u2029');
+            const jsonTypes = JSON.stringify({ esRelatoAdmin, esNoticia, esMisterio, esCaso })
+                .replace(/</g, '\\u003c')
+                .replace(/\u2028/g, '\\u2028')
+                .replace(/\u2029/g, '\\u2029');
             const initialScript = `<script>window.__INITIAL_HISTORIA__ = ${jsonHistoria}; window.__INITIAL_HISTORIA_TYPE__ = ${jsonTypes};</script>`;
 
             // Criterio de calidad editorial para AdSense: artículos con menos de 1500 caracteres llevan noindex
@@ -1897,20 +1903,20 @@ app.get('/leer-historia/:id', (req, res) => {
     renderizarArticuloSEO(req, res, req.params.id, req.query.src);
 });
 
-// Rutas directas por categoría — Entrega directa 200 OK con Open Graph para Facebook, WhatsApp, Pinterest y Google AdSense
-app.get('/noticias/:id', (req, res) => {
+// Rutas directas por categoría — Soporta tanto plural como singular para máxima compatibilidad al compartir
+app.get(['/noticias/:id', '/noticia/:id'], (req, res) => {
     renderizarArticuloSEO(req, res, req.params.id, 'noticias');
 });
 
-app.get('/expedientes/:id', (req, res) => {
+app.get(['/expedientes/:id', '/expediente/:id'], (req, res) => {
     renderizarArticuloSEO(req, res, req.params.id, 'expedientes');
 });
 
-app.get('/casos-abiertos/:id', (req, res) => {
+app.get(['/casos-abiertos/:id', '/caso/:id', '/caso-abierto/:id'], (req, res) => {
     renderizarArticuloSEO(req, res, req.params.id, 'casos');
 });
 
-app.get('/misterios-historicos/:id', (req, res) => {
+app.get(['/misterios-historicos/:id', '/misterio/:id', '/misterio-historico/:id', '/misterios/:id'], (req, res) => {
     renderizarArticuloSEO(req, res, req.params.id, 'misterios');
 });
 

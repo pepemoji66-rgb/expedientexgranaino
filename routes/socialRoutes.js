@@ -133,7 +133,7 @@ module.exports = (db, enviarAlertaTelegram) => {
 
 
     // --- FUNCIÓN: PUBLICAR EN FACEBOOK ---
-    const publicarEnFacebook = async (texto, enlaceImagen) => {
+    const publicarEnFacebook = async (texto, enlaceWeb, enlaceImagen) => {
         const pageId = process.env.FACEBOOK_PAGE_ID;
         const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
 
@@ -154,8 +154,10 @@ module.exports = (db, enviarAlertaTelegram) => {
                 access_token: accessToken
             };
 
-            // Si hay imagen, la adjuntamos como enlace
-            if (enlaceImagen && enlaceImagen.startsWith('http')) {
+            // El enlace debe apuntar a la web del artículo (para que Facebook genere la tarjeta y abra la web)
+            if (enlaceWeb && enlaceWeb.startsWith('http')) {
+                postData.link = enlaceWeb;
+            } else if (enlaceImagen && enlaceImagen.startsWith('http')) {
                 postData.link = enlaceImagen;
             }
 
@@ -298,7 +300,7 @@ module.exports = (db, enviarAlertaTelegram) => {
         // --- PUBLICAR EN FACEBOOK ---
         if (plataformasActivas.includes('facebook')) {
             if (hayFacebookDirecto) {
-                const resultado = await publicarEnFacebook(textoFacebook, imagen_url);
+                const resultado = await publicarEnFacebook(textoFacebook, urlFinal, imagen_url);
                 resultados.push(resultado);
             } else if (hayWebhook) {
                 console.log('📘 Facebook: Sin claves directas, se usará webhook.');

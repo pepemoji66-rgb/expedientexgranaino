@@ -435,6 +435,7 @@ function App() {
               />
               <Route path="/expedientes" element={<Expedientes userAuth={userAuth} />} />
               <Route path="/expedientes/:id" element={<LecturaHistoria userAuth={userAuth} />} />
+              <Route path="/expediente/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/lugares" element={<Lugares />} />
               <Route path="/videos" element={<Videos userAuth={userAuth} />} />
               <Route path="/horoscopo" element={<Navigate to="/la-ruleta" replace />} />
@@ -444,10 +445,16 @@ function App() {
               <Route path="/leer-historia/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/casos-abiertos" element={<CasosAbiertos userAuth={userAuth} />} />
               <Route path="/casos-abiertos/:id" element={<LecturaHistoria userAuth={userAuth} />} />
+              <Route path="/caso/:id" element={<LecturaHistoria userAuth={userAuth} />} />
+              <Route path="/caso-abierto/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/misterios-historicos" element={<MisteriosHistoricos />} />
               <Route path="/misterios-historicos/:id" element={<LecturaHistoria userAuth={userAuth} />} />
+              <Route path="/misterios/:id" element={<LecturaHistoria userAuth={userAuth} />} />
+              <Route path="/misterio/:id" element={<LecturaHistoria userAuth={userAuth} />} />
+              <Route path="/misterio-historico/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/noticias" element={<Noticias userAuth={userAuth} />} />
               <Route path="/noticias/:id" element={<LecturaHistoria userAuth={userAuth} />} />
+              <Route path="/noticia/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/privacidad" element={<PoliticaPrivacidad />} />
               <Route path="/cookies" element={<PoliticaCookies />} />
                <Route path="/legal" element={<AvisoLegal />} />
