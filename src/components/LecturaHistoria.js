@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './lecturahistoria.css';
@@ -290,25 +290,54 @@ const ArticulosRelacionados = ({ currentId, currentSrc }) => {
         noticias: language === 'en' ? 'NEWS' : 'NOTICIA'
     };
 
+    const resolverRutaCanonica = (rel) => {
+        if (rel.id === 'atarfe-dossier' || rel.src === 'especial-atarfe') return '/especial-atarfe';
+        const cat = (rel.src || rel.categoria || '').toLowerCase();
+        if (cat === 'casos' || cat === 'caso') return `/casos-abiertos/${rel.id}`;
+        if (cat === 'misterios' || cat === 'misterio') return `/misterios-historicos/${rel.id}`;
+        if (cat === 'noticias' || cat === 'noticia') return `/noticias/${rel.id}`;
+        return `/expedientes/${rel.id}`;
+    };
+
     return (
-        <div className="articulos-relacionados-section fade-in" style={{
+        <aside className="articulos-relacionados-section fade-in" style={{
             marginTop: '50px',
-            paddingTop: '30px',
-            borderTop: '1px solid #E2E8F0',
-            width: '100%'
+            padding: '28px 24px',
+            background: '#F8FAFC',
+            border: '2px solid #E2E8F0',
+            borderTop: '4px solid #9c4221',
+            borderRadius: '10px',
+            width: '100%',
+            boxSizing: 'border-box'
         }}>
-            <h3 style={{
-                color: '#9c4221',
-                fontFamily: "'Merriweather', Georgia, serif",
-                fontSize: '1.05rem',
-                letterSpacing: '0.5px',
-                textAlign: 'center',
-                marginBottom: '25px',
-                textTransform: 'uppercase',
-                fontWeight: '700'
-            }}>
-                👁️ {language === 'en' ? 'IF YOU LIKED THIS MYSTERY, CONTINUE INVESTIGATING...' : 'SI TE GUSTÓ ESTE MISTERIO, CONTINÚA INVESTIGANDO...'}
-            </h3>
+            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+                <span style={{
+                    display: 'inline-block',
+                    background: '#9c4221',
+                    color: '#FFFFFF',
+                    fontSize: '0.68rem',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                    letterSpacing: '1.5px',
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    marginBottom: '8px',
+                    textTransform: 'uppercase'
+                }}>
+                    {language === 'en' ? 'CLASSIFIED ARCHIVE — RECOMMENDED DOSSIERS' : 'ARCHIVO CLASIFICADO — EXPEDIENTES RECOMENDADOS'}
+                </span>
+                <h3 style={{
+                    color: '#1E293B',
+                    fontFamily: "'Merriweather', Georgia, serif",
+                    fontSize: '1.15rem',
+                    letterSpacing: '0.3px',
+                    margin: '0',
+                    textTransform: 'uppercase',
+                    fontWeight: '800'
+                }}>
+                    👁️ {language === 'en' ? 'CONTINUE INVESTIGATING IN THE ARCHIVE' : 'SI TE GUSTÓ ESTE CASO, CONTINÚA INVESTIGANDO'}
+                </h3>
+            </div>
 
             <div style={{
                 display: 'grid',
@@ -316,35 +345,36 @@ const ArticulosRelacionados = ({ currentId, currentSrc }) => {
                 gap: '20px'
             }}>
                 {relacionados.map((rel, idx) => (
-                    <div
+                    <Link
                         key={idx}
+                        to={resolverRutaCanonica(rel)}
                         onClick={() => {
                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                            navigate(`/leer-historia/${rel.id}?src=${rel.src || rel.categoria}`);
                         }}
                         style={{
                             background: '#FFFFFF',
-                            border: '1px solid #E2E8F0',
+                            border: '1px solid #CBD5E1',
                             borderRadius: '8px',
                             overflow: 'hidden',
                             cursor: 'pointer',
                             transition: 'all 0.3s ease',
                             display: 'flex',
                             flexDirection: 'column',
-                            boxShadow: '0 2px 10px rgba(0,0,0,0.04)'
+                            textDecoration: 'none',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#9c4221'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 22px rgba(156,66,33,0.12)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.04)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#9c4221'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(156,66,33,0.16)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)'; }}
                     >
-                        <div style={{ height: '140px', overflow: 'hidden', background: '#F1F5F9', position: 'relative' }}>
+                        <div style={{ height: '145px', overflow: 'hidden', background: '#F1F5F9', position: 'relative' }}>
                             <span style={{
                                 position: 'absolute',
                                 top: '8px',
                                 left: '8px',
-                                background: 'rgba(255,255,255,0.95)',
-                                color: '#9c4221',
-                                border: '1px solid #fed7aa',
-                                padding: '3px 8px',
+                                background: 'rgba(15,23,42,0.88)',
+                                color: '#F8FAFC',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                padding: '3px 9px',
                                 fontSize: '0.65rem',
                                 fontFamily: 'monospace',
                                 fontWeight: 'bold',
@@ -356,22 +386,44 @@ const ArticulosRelacionados = ({ currentId, currentSrc }) => {
                             <img
                                 src={resolverImg(rel.imagen_url)}
                                 alt={rel.titulo}
+                                loading="lazy"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: rel.imagen_posicion || 'center center' }}
                                 onError={e => { e.target.style.display = 'none'; }}
                             />
                         </div>
                         <div style={{ padding: '16px', flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <h4 style={{ color: '#1E293B', fontSize: '0.92rem', fontFamily: "'Merriweather', Georgia, serif", margin: '0 0 10px 0', lineHeight: '1.45', fontWeight: '700' }}>
-                                {rel.titulo}
-                            </h4>
-                            <span style={{ color: '#9c4221', fontSize: '0.75rem', fontFamily: 'monospace', textTransform: 'uppercase', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                📄 {language === 'en' ? 'READ DOSSIER →' : 'LEER EXPEDIENTE →'}
+                            <div>
+                                <h4 style={{ color: '#0F172A', fontSize: '0.95rem', fontFamily: "'Merriweather', Georgia, serif", margin: '0 0 8px 0', lineHeight: '1.45', fontWeight: '700' }}>
+                                    {rel.titulo}
+                                </h4>
+                                {rel.contenido && (
+                                    <p style={{ color: '#475569', fontSize: '0.8rem', lineHeight: '1.45', margin: '0 0 12px 0' }}>
+                                        {rel.contenido.length > 95 ? rel.contenido.substring(0, 92) + '...' : rel.contenido}
+                                    </p>
+                                )}
+                            </div>
+                            <span style={{
+                                background: '#FFF7ED',
+                                color: '#9c4221',
+                                border: '1px solid #FDBA74',
+                                padding: '6px 10px',
+                                borderRadius: '5px',
+                                fontSize: '0.75rem',
+                                fontFamily: 'monospace',
+                                textTransform: 'uppercase',
+                                fontWeight: 'bold',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px'
+                            }}>
+                                📄 {language === 'en' ? 'OPEN DOSSIER →' : 'ABRIR EXPEDIENTE →'}
                             </span>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
-        </div>
+        </aside>
     );
 };
 
@@ -1260,7 +1312,7 @@ const LecturaHistoria = ({ userAuth }) => {
         if (!historia || !historia.titulo) return;
         document.title = `${historia.titulo} | Expediente X Granaíno`;
         return () => {
-            document.title = 'Expediente X Granaíno | Investigación OVNI y Paranormal en Granada';
+            document.title = 'Expediente X Granaíno | Investigación OVNI y Fenómenos Paranormales en Granada';
         };
     }, [historia]);
 

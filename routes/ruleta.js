@@ -11,19 +11,19 @@ module.exports = (db) => {
             // Definición de tablas y sus consultas
             const tablas = {
                 expedientes: {
-                    query: "SELECT id, titulo, contenido, imagen_url, fecha, 'expedientes' AS categoria FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') ORDER BY RAND() LIMIT 1",
+                    query: "SELECT id, titulo, contenido, imagen_url, fecha, 'expedientes' AS categoria FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY RAND() LIMIT 1",
                     src: 'expedientes'
                 },
                 casos: {
-                    query: "SELECT id, titulo, contenido, imagen_url, fecha, 'casos' AS categoria FROM casos_abiertos WHERE estado = 'aprobado' ORDER BY RAND() LIMIT 1",
+                    query: "SELECT id, titulo, contenido, imagen_url, fecha, 'casos' AS categoria FROM casos_abiertos WHERE estado = 'aprobado' AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY RAND() LIMIT 1",
                     src: 'casos'
                 },
                 misterios: {
-                    query: "SELECT id, titulo, contenido, imagen_url, fecha, 'misterios' AS categoria FROM misterios_historicos WHERE estado = 'aprobado' ORDER BY RAND() LIMIT 1",
+                    query: "SELECT id, titulo, contenido, imagen_url, fecha, 'misterios' AS categoria FROM misterios_historicos WHERE estado = 'aprobado' AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY RAND() LIMIT 1",
                     src: 'misterios'
                 },
                 noticias: {
-                    query: "SELECT id, titulo, cuerpo AS contenido, imagen_url, fecha, 'noticias' AS categoria FROM noticias WHERE estado = 'aprobado' ORDER BY RAND() LIMIT 1",
+                    query: "SELECT id, titulo, cuerpo AS contenido, imagen_url, fecha, 'noticias' AS categoria FROM noticias WHERE estado = 'aprobado' AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 1500 ORDER BY RAND() LIMIT 1",
                     src: 'noticias'
                 }
             };

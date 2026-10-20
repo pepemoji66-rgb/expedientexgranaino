@@ -24,6 +24,11 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
     const [mostrarResultados, setMostrarResultados] = useState(false);
     const buscadorRef = useRef(null);
 
+    // Asegurar título unificado en la portada para Google Analytics 4 y SEO
+    useEffect(() => {
+        document.title = 'Expediente X Granaíno | Investigación OVNI y Fenómenos Paranormales en Granada';
+    }, []);
+
     // Cerrar resultados al hacer clic fuera
     useEffect(() => {
         const handleClickFuera = (e) => {
@@ -84,7 +89,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             fecha: item.fecha,
                             timestamp: new Date(item.fecha || 0).getTime(),
                             autor: item.usuario_nombre || 'José Moreno',
-                            link: `/leer-historia/${item.id}?src=expedientes`
+                            link: `/expedientes/${item.id}`
                         });
                     });
                 }
@@ -107,7 +112,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             fecha: item.fecha,
                             timestamp: new Date(item.fecha || 0).getTime(),
                             autor: 'Redacción',
-                            link: `/leer-historia/${item.id}?src=noticias`
+                            link: `/noticias/${item.id}`
                         });
                     });
                 }
@@ -132,7 +137,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             fecha: item.fecha,
                             timestamp: new Date(item.fecha || 0).getTime(),
                             autor: 'José Moreno',
-                            link: `/leer-historia/${item.id}?src=casos`
+                            link: `/casos-abiertos/${item.id}`
                         });
                     });
                 }
@@ -157,7 +162,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             fecha: item.fecha,
                             timestamp: new Date(item.fecha || 0).getTime(),
                             autor: 'José Moreno',
-                            link: `/leer-historia/${item.id}?src=misterios`
+                            link: `/misterios-historicos/${item.id}`
                         });
                     });
                 }
@@ -372,7 +377,9 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                                         {articuloPrincipal.seccionLabel} · REPORTAJE PRINCIPAL
                                     </span>
                                     <h3 className="lead-story-title">
-                                        {articuloPrincipal.titulo}
+                                        <Link to={articuloPrincipal.link} style={{ color: 'inherit', textDecoration: 'none' }} onClick={(e) => e.stopPropagation()}>
+                                            {articuloPrincipal.titulo}
+                                        </Link>
                                     </h3>
                                     <p className="lead-story-excerpt">
                                         {limpiarSnippet(articuloPrincipal.contenido, 260)}
@@ -419,7 +426,9 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
 
                                         <div className="editorial-card-body">
                                             <h4 className="editorial-card-title">
-                                                {art.titulo}
+                                                <Link to={art.link} style={{ color: 'inherit', textDecoration: 'none' }} onClick={(e) => e.stopPropagation()}>
+                                                    {art.titulo}
+                                                </Link>
                                             </h4>
                                             <p className="editorial-card-excerpt">
                                                 {limpiarSnippet(art.contenido, 110)}
@@ -455,7 +464,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                             const tipo = parts[0];
                             const id = parts[1];
                             const srcParam = tipo === 'exp' ? 'expedientes' : tipo === 'caso' ? 'casos' : tipo === 'misterio' ? 'misterios' : 'noticias';
-                            const linkUrl = `/leer-historia/${id}?src=${srcParam}`;
+                            const linkUrl = tipo === 'exp' ? `/expedientes/${id}` : tipo === 'caso' ? `/casos-abiertos/${id}` : tipo === 'misterio' ? `/misterios-historicos/${id}` : `/noticias/${id}`;
 
                             return (
                                 <div 

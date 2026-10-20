@@ -762,7 +762,7 @@ const cloudinaryOgImage = (url, posicion = null) => {
 // Inyecta contenido HTML rico antes de servir el SPA
 // ==============================================
 
-const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl = null, paginaUrl = null, posicion = null, isNoindex = false) => {
+const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl = null, paginaUrl = null, posicion = null, isNoindex = false, fechaPublicacion = null) => {
     // Reemplazamos el title genérico por uno específico de página
     html = html.replace(
         /<title>[^<]*<\/title>/i,
@@ -811,11 +811,19 @@ const inyectarContenidoSEO = (html, titulo, descripcion, contenidoSeo, imagenUrl
     };
 
     if (schemaType === "NewsArticle") {
-        jsonLd.author = {
-            "@type": "Organization",
-            "name": "Expediente X Granaíno",
-            "url": "https://expedientexgranaino.com"
-        };
+        let isoDate = new Date().toISOString();
+        if (fechaPublicacion) {
+            const parsedDate = new Date(fechaPublicacion);
+            if (!isNaN(parsedDate.getTime())) isoDate = parsedDate.toISOString();
+        }
+        jsonLd.datePublished = isoDate;
+        jsonLd.dateModified = isoDate;
+        jsonLd.image = [img];
+        jsonLd.author = [{
+            "@type": "Person",
+            "name": "José Moreno Jiménez",
+            "url": "https://expedientexgranaino.com/sobre-nosotros"
+        }];
     }
 
     // Palabras clave y etiquetas temáticas dinámicas para SEO y Redes
@@ -932,7 +940,8 @@ const obtenerUrlsRequest = (req) => {
     // Siempre forzamos https en producción (expedientexgranaino.com)
     const finalProtocol = (protocol === 'https' || req.get('host').includes('expedientexgranaino.com')) ? 'https' : protocol;
     const host = req.get('host');
-    const paginaUrl = `${finalProtocol}://${host}${req.originalUrl}`;
+    const cleanPath = (req.originalUrl || req.path || '/').split('?')[0];
+    const paginaUrl = `${finalProtocol}://${host}${cleanPath}`;
     const baseImgUrl = `${finalProtocol}://${host}`;
     return { paginaUrl, baseImgUrl };
 };
@@ -999,7 +1008,7 @@ app.get('/audios', (req, res) => {
 app.get('/casos-abiertos', async (req, res) => {
     const casoId = req.query.id;
     if (casoId) {
-        return res.redirect(301, `/leer-historia/${casoId}?src=casos`);
+        return res.redirect(301, `/casos-abiertos/${casoId}`);
     }
     const indexPath = path.join(__dirname, 'build', 'index.html');
     
@@ -1050,13 +1059,13 @@ app.get('/casos-abiertos', async (req, res) => {
             return res.send(pagina);
         }
 
-        const contenidoSeo = `
+        let contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">Casos Abiertos / Unsolved Cases — True Crime y Misterio</h1>
     <p>Adéntrate en los <strong>Casos Abiertos</strong> del Búnker. Una colección de crímenes reales, desapariciones inexplicables y misterios 
     sin resolver (True Crime) documentados en detalle. Investigaciones que desafían la lógica y donde los principales sospechosos 
     aún deambulan en las sombras.</p>
-</article>`;
+    <ul style="list-style-type:none;padding:0;">`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
         let description = 'Explora casos abiertos y misterios sin resolver. Crímenes reales y desapariciones inexplicables documentados en el Búnker de Expediente X Granaíno.';
@@ -1064,21 +1073,25 @@ app.get('/casos-abiertos', async (req, res) => {
 
         try {
             const casos = await db.query(
-                "SELECT id, titulo, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo' OR estado IS NULL) ORDER BY id DESC LIMIT 3"
+                "SELECT id, titulo, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo' OR estado IS NULL) ORDER BY id DESC LIMIT 30"
             );
             if (casos && casos.length > 0) {
                 // Generar descripción dinámica con los 3 últimos casos
-                const ultimosTres = casos.map(c => c.titulo).join(' | ');
+                const ultimosTres = casos.slice(0, 3).map(c => c.titulo).join(' | ');
                 description = `Últimos casos abiertos: ${ultimosTres}. True Crime y misterios sin resolver.`;
 
                 // Usar la imagen del caso más reciente si tiene
                 if (casos[0].imagen_url) {
                     imagenUrl = resolverImagenUrl(req, casos[0].imagen_url);
                 }
+                casos.forEach(c => {
+                    contenidoSeo += `<li style="margin-bottom:12px;"><a href="https://expedientexgranaino.com/casos-abiertos/${c.id}" style="color:#00d4ff;text-decoration:none;font-weight:bold;">${c.titulo}</a></li>`;
+                });
             }
         } catch (dbErr) {
             console.error("Error al obtener casos abiertos para SEO:", dbErr);
         }
+        contenidoSeo += `</ul></article>`;
 
         const pagina = inyectarContenidoSEO(
             html,
@@ -1095,17 +1108,17 @@ app.get('/casos-abiertos', async (req, res) => {
 // Sección de Misterios Históricos (/misterios-historicos) - SEO enriquecido
 app.get('/misterios-historicos', async (req, res) => {
     if (req.query.id) {
-        return res.redirect(301, `/leer-historia/${req.query.id}?src=misterios`);
+        return res.redirect(301, `/misterios-historicos/${req.query.id}`);
     }
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
 
-        const contenidoSeo = `
+        let contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">👁️ Misterios Históricos del Planeta — Expediente X Granaíno</h1>
     <p>Dossier enciclopédico de los enigmas más grandes de la humanidad. El manuscrito Voynich, el incidente Roswell, la colonia Roanoke, el triángulo de las Bermudas o el asesino del Zodiaco. Compilaciones detalladas con coordenadas y archivos desclasificados.</p>
-</article>`;
+    <ul style="list-style-type:none;padding:0;">`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
         let description = 'Explora los enigmas y misterios históricos desclasificados. Roswell, Triángulo de las Bermudas, Manuscrito Voynich y más.';
@@ -1113,21 +1126,25 @@ app.get('/misterios-historicos', async (req, res) => {
 
         try {
             const misterios = await db.query(
-                "SELECT id, titulo, imagen_url FROM misterios_historicos ORDER BY id DESC LIMIT 3"
+                "SELECT id, titulo, imagen_url FROM misterios_historicos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo' OR estado IS NULL) ORDER BY id DESC LIMIT 30"
             );
             if (misterios && misterios.length > 0) {
                 // Generar descripción dinámica con los 3 últimos misterios
-                const ultimosTres = misterios.map(m => m.titulo).join(' | ');
+                const ultimosTres = misterios.slice(0, 3).map(m => m.titulo).join(' | ');
                 description = `Últimos misterios: ${ultimosTres}. Grandes enigmas de la historia desclasificados.`;
 
                 // Usar la imagen del misterio más reciente si tiene
                 if (misterios[0].imagen_url) {
                     imagenUrl = resolverImagenUrl(req, misterios[0].imagen_url);
                 }
+                misterios.forEach(m => {
+                    contenidoSeo += `<li style="margin-bottom:12px;"><a href="https://expedientexgranaino.com/misterios-historicos/${m.id}" style="color:#00d4ff;text-decoration:none;font-weight:bold;">${m.titulo}</a></li>`;
+                });
             }
         } catch (dbErr) {
             console.error("Error al obtener misterios para SEO:", dbErr);
         }
+        contenidoSeo += `</ul></article>`;
 
         const pagina = inyectarContenidoSEO(
             html,
@@ -1400,7 +1417,7 @@ app.get('/la-ruleta', (req, res) => {
 // Sección de Noticias (/noticias) - SEO enriquecido
 app.get('/noticias', async (req, res) => {
     if (req.query.id) {
-        return res.redirect(301, `/leer-historia/${req.query.id}?src=noticias`);
+        return res.redirect(301, `/noticias/${req.query.id}`);
     }
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
@@ -1417,7 +1434,7 @@ app.get('/noticias', async (req, res) => {
         let imagenUrl = `${baseImgUrl}/assets/incidente-eva9-lujar.png`;
 
         try {
-            const noticias = await db.query("SELECT titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE estado = 'aprobado' ORDER BY fecha DESC LIMIT 20");
+            const noticias = await db.query("SELECT id, titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE estado = 'aprobado' ORDER BY fecha DESC LIMIT 20");
             if (noticias && noticias.length > 0) {
                 // Generar descripción dinámica con los 3 últimos titulares
                 const ultimasTres = noticias.slice(0, 3).map(n => n.titulo).join(' | ');
@@ -1432,7 +1449,7 @@ app.get('/noticias', async (req, res) => {
                     const fechaStr = n.fecha ? new Date(n.fecha).toLocaleDateString('es-ES') : '';
                     contenidoSeo += `
         <li style="margin-bottom:25px;border-bottom:1px solid #222;padding-bottom:15px;">
-            <h3 style="color:#00d4ff;margin:0 0 5px 0;">${n.titulo}</h3>
+            <h3 style="color:#00d4ff;margin:0 0 5px 0;"><a href="https://expedientexgranaino.com/noticias/${n.id}" style="color:#00d4ff;text-decoration:none;">${n.titulo}</a></h3>
             <span style="color:#666;font-size:0.75rem;">📍 Ubicación: ${n.ubicacion || 'Desconocida'} | Alerta: ${n.nivel_alerta || 'Normal'} | Fecha: ${fechaStr}</span>
             <p style="margin:8px 0 0 0;">${n.cuerpo}</p>
         </li>`;
@@ -1590,7 +1607,7 @@ app.get('/videos', async (req, res) => {
 // Sección de Expedientes (/expedientes) - SEO enriquecido
 app.get('/expedientes', async (req, res) => {
     if (req.query.id) {
-        return res.redirect(301, `/leer-historia/${req.query.id}?src=expedientes`);
+        return res.redirect(301, `/expedientes/${req.query.id}`);
     }
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
@@ -1608,7 +1625,7 @@ app.get('/expedientes', async (req, res) => {
 
         try {
             const expedientes = await db.query(
-                "SELECT titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') ORDER BY fecha DESC LIMIT 30"
+                "SELECT id, titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') ORDER BY fecha DESC LIMIT 30"
             );
             if (expedientes && expedientes.length > 0) {
                 // Generar descripción dinámica con los 3 últimos expedientes
@@ -1626,7 +1643,7 @@ app.get('/expedientes', async (req, res) => {
                     const contCorto = e.contenido && e.contenido.length > 300 ? e.contenido.substring(0, 300) + '...' : (e.contenido || '');
                     contenidoSeo += `
         <li style="margin-bottom:25px;border-bottom:1px solid #222;padding-bottom:15px;">
-            <h3 style="color:#00d4ff;margin:0 0 5px 0;">${e.titulo || 'Expediente Sin Título'}</h3>
+            <h3 style="color:#00d4ff;margin:0 0 5px 0;"><a href="https://expedientexgranaino.com/expedientes/${e.id}" style="color:#00d4ff;text-decoration:none;">${e.titulo || 'Expediente Sin Título'}</a></h3>
             <span style="color:#666;font-size:0.75rem;">👤 Autor: ${autor} | Fecha: ${fechaStr} | Tipo: ${e.tipo || 'Agente'}</span>
             <p style="margin:8px 0 0 0;white-space:pre-line;">${contCorto}</p>
         </li>`;
@@ -1886,7 +1903,8 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                 imagenUrl,
                 paginaUrl,
                 posicion,
-                esArticuloCorto
+                esArticuloCorto,
+                historia.fecha
             );
             // Asegurar que la etiqueta canonical oficial apunte a la ruta canónica limpia
             pagina = pagina.replace(/<link [^>]*rel=["']canonical["'][^>]*>/gi, `<link rel="canonical" href="${canonicalUrl}" />`);
