@@ -680,7 +680,10 @@ app.use('/videos', (req, res, next) => {
     if (req.path === '/' || req.path === '') return next();
     express.static(path.join(__dirname, 'public/videos'))(req, res, next);
 });
-app.use('/audios', express.static(path.join(__dirname, 'uploads/audios')));
+app.use('/audios', (req, res, next) => {
+    if (req.path === '/' || req.path === '') return next();
+    express.static(path.join(__dirname, 'uploads/audios'))(req, res, next);
+});
 app.use('/lugares', (req, res, next) => {
     if (req.path === '/' || req.path === '') return next();
     express.static(path.join(__dirname, 'uploads/lugares'))(req, res, next);
@@ -922,7 +925,8 @@ ${articleTags}
                         <a href="https://expedientexgranaino.com/sobre-nosotros">Sobre Nosotros</a> | 
                         <a href="https://expedientexgranaino.com/privacidad">Política de Privacidad</a> | 
                         <a href="https://expedientexgranaino.com/cookies">Política de Cookies</a> | 
-                        <a href="https://expedientexgranaino.com/aviso-legal">Aviso Legal</a>
+                        <a href="https://expedientexgranaino.com/aviso-legal">Aviso Legal</a> | 
+                        <a href="https://expedientexgranaino.com/contacto">Contacto</a>
                     </p>
                     <p>© ${new Date().getFullYear()} Expediente X Granaíno. Todos los derechos reservados.</p>
                 </footer>
@@ -1867,6 +1871,25 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                     <a href="${fuenteReal}" target="_blank" rel="noopener noreferrer" style="color:#00d4ff;">Consultar fuente original de la investigación</a>
                 </p>` : '';
 
+            let bloqueRelacionadosSeo = '';
+            const ua = (req.headers['user-agent'] || '').toLowerCase();
+            if (!ua.includes('facebookexternalhit') && !ua.includes('meta-externalagent') && !ua.includes('facebot')) {
+                try {
+                    const tablaRel = esCaso ? 'casos_abiertos' : esMisterio ? 'misterios_historicos' : esNoticia ? 'noticias' : 'expedientes';
+                    const colTexto = esNoticia ? 'cuerpo' : 'contenido';
+                    const prefijoRuta = esCaso ? '/casos-abiertos' : esMisterio ? '/misterios-historicos' : esNoticia ? '/noticias' : '/expedientes';
+                    const rels = await db.query(
+                        `SELECT id, titulo FROM ${tablaRel} WHERE id != ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(${colTexto}, '')) >= 1500 ORDER BY id DESC LIMIT 5`,
+                        [historia.id]
+                    );
+                    if (rels && rels.length > 0) {
+                        bloqueRelacionadosSeo = `<nav style="margin-top:25px;padding-top:15px;border-top:1px solid #222;"><h2 style="color:#00d4ff;font-size:0.95rem;">Expedientes Relacionados en el Archivo</h2><ul>` +
+                            rels.map(r => `<li><a href="https://expedientexgranaino.com${prefijoRuta}/${r.id}" style="color:#00d4ff;">${r.titulo}</a></li>`).join('') +
+                            `</ul></nav>`;
+                    }
+                } catch (e) {}
+            }
+
             const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">${historia.titulo ? historia.titulo.toUpperCase() : 'SIN TÍTULO'}</h1>
@@ -1878,6 +1901,7 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
     ${historia.fecha ? `<p><strong>Fecha de Documentación:</strong> ${new Date(historia.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>` : ''}
     <div style="white-space:pre-line;">${cuerpoTexto}</div>
     ${bloqueFuenteSeo}
+    ${bloqueRelacionadosSeo}
 </article>`;
 
             // Sanitizar objeto para inyección en script tag de forma segura
