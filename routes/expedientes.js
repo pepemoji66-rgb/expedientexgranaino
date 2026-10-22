@@ -272,6 +272,9 @@ module.exports = (db, upload) => {
                     [titulo, contenido, latitud, longitud, estado, tipo, url_final, youtube_url || null, capturas || null, imagen_posicion || null, req.params.id]
                 );
             }
+            const urlArticulo = `https://expedientexgranaino.com/expedientes/${req.params.id}`;
+            const fbToken = process.env.FACEBOOK_ACCESS_TOKEN ? `&access_token=${process.env.FACEBOOK_ACCESS_TOKEN}` : '';
+            axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true${fbToken}`, {}, { timeout: 5000 }).catch(() => {});
             res.json({ mensaje: "Expediente actualizado con éxito." });
         } catch (err) {
             console.error("Error al actualizar expediente:", err);

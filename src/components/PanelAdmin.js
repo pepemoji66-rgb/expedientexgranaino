@@ -1,4 +1,178 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+
+const parsearPosicionXY = (pos) => {
+    const val = (pos || 'center center').trim();
+    if (val === 'contain') return { x: 50, y: 50, isContain: true };
+    if (val === 'top center') return { x: 50, y: 0, isContain: false };
+    if (val === 'center center') return { x: 50, y: 50, isContain: false };
+    if (val === 'bottom center') return { x: 50, y: 100, isContain: false };
+    const m = val.match(/^(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%$/);
+    if (m) return { x: parseFloat(m[1]), y: parseFloat(m[2]), isContain: false };
+    return { x: 50, y: 50, isContain: false };
+};
+
+const EncuadreImagenEditor = ({ src, posicion, onChange }) => {
+    const containerRef = useRef(null);
+    const draggingRef = useRef(false);
+    const startMouseRef = useRef({ x: 0, y: 0, posX: 50, posY: 50 });
+    const [arrastrando, setArrastrando] = useState(false);
+
+    const parsed = parsearPosicionXY(posicion);
+
+    const iniciarArrastre = (clientX, clientY) => {
+        if (parsed.isContain) return;
+        draggingRef.current = true;
+        setArrastrando(true);
+        startMouseRef.current = {
+            x: clientX,
+            y: clientY,
+            posX: parsed.x,
+            posY: parsed.y
+        };
+    };
+
+    useEffect(() => {
+        if (!arrastrando) return;
+        const mover = (clientX, clientY) => {
+            if (!draggingRef.current || !containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const dx = clientX - startMouseRef.current.x;
+            const dy = clientY - startMouseRef.current.y;
+            const nuevoX = Math.max(0, Math.min(100, Math.round(startMouseRef.current.posX - (dx / rect.width) * 100)));
+            const nuevoY = Math.max(0, Math.min(100, Math.round(startMouseRef.current.posY - (dy / rect.height) * 100)));
+            onChange(`${nuevoX}% ${nuevoY}%`);
+        };
+        const onMouseMove = (e) => mover(e.clientX, e.clientY);
+        const onTouchMove = (e) => {
+            if (e.touches && e.touches[0]) mover(e.touches[0].clientX, e.touches[0].clientY);
+        };
+        const finalizar = () => {
+            draggingRef.current = false;
+            setArrastrando(false);
+        };
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', finalizar);
+        window.addEventListener('touchmove', onTouchMove);
+        window.addEventListener('touchend', finalizar);
+        return () => {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', finalizar);
+            window.removeEventListener('touchmove', onTouchMove);
+            window.removeEventListener('touchend', finalizar);
+        };
+    }, [arrastrando, onChange]);
+
+    return (
+        <div style={{ background: 'rgba(255,177,0,0.05)', border: '1px solid rgba(255,177,0,0.3)', borderRadius: '6px', padding: '14px', marginBottom: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                <label style={{ color: '#ffb100', fontWeight: 'bold', fontSize: '0.8rem', margin: 0 }}>
+                    🎯 ENCUADRE EN PORTADA Y FACEBOOK (Haz clic y arrastra la foto):
+                </label>
+                <span style={{ fontSize: '0.7rem', color: '#00ff41', background: 'rgba(0,255,65,0.1)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(0,255,65,0.3)' }}>
+                    {parsed.isContain ? '🖼️ Foto entera (Sin recorte)' : `📍 Encuadre: ${posicion || 'center center'}`}
+                </span>
+            </div>
+
+            {/* Preview simulando la miniatura de Facebook / Portada (ratio 1.91:1 / 16:9) */}
+            <div
+                ref={containerRef}
+                onMouseDown={(e) => { e.preventDefault(); iniciarArrastre(e.clientX, e.clientY); }}
+                onTouchStart={(e) => { if (e.touches && e.touches[0]) iniciarArrastre(e.touches[0].clientX, e.touches[0].clientY); }}
+                style={{
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: '1200/630',
+                    overflow: 'hidden',
+                    borderRadius: '4px',
+                    marginBottom: '10px',
+                    background: '#050811',
+                    border: arrastrando ? '2px solid #00ff41' : '1px solid #333',
+                    cursor: parsed.isContain ? 'default' : (arrastrando ? 'grabbing' : 'grab'),
+                    userSelect: 'none'
+                }}
+                title={parsed.isContain ? 'Modo foto entera activado' : 'Haz clic y arrastra con el ratón para colocar la imagen'}
+            >
+                <img
+                    src={src}
+                    alt="Preview portada y Facebook"
+                    draggable={false}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: parsed.isContain ? 'contain' : 'cover',
+                        objectPosition: parsed.isContain ? 'center center' : (posicion || 'center center'),
+                        display: 'block',
+                        pointerEvents: 'none'
+                    }}
+                    onError={e => { e.target.style.display = 'none'; }}
+                />
+                {!parsed.isContain && (
+                    <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(0,0,0,0.75)', color: '#fff', fontSize: '0.68rem', padding: '4px 8px', borderRadius: '4px', pointerEvents: 'none', border: '1px solid rgba(255,177,0,0.4)' }}>
+                        ✋ Arrastra con el ratón para mover la foto
+                    </div>
+                )}
+                <div style={{ position: 'absolute', bottom: '6px', right: '8px', background: 'rgba(0,0,0,0.8)', color: '#ffb100', fontSize: '0.65rem', padding: '2px 7px', borderRadius: '3px', fontWeight: 'bold', pointerEvents: 'none' }}>
+                    VISTA PREVIA PORTADA + FACEBOOK
+                </div>
+            </div>
+
+            {/* Botón destacado para quitar aumento / ver foto entera */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <button
+                    type="button"
+                    onClick={() => onChange(parsed.isContain ? 'center center' : 'contain')}
+                    style={{
+                        flex: 1,
+                        padding: '8px 10px',
+                        fontSize: '0.75rem',
+                        background: parsed.isContain ? '#00ff41' : 'rgba(0, 255, 65, 0.12)',
+                        color: parsed.isContain ? '#000' : '#00ff41',
+                        border: '1px solid #00ff41',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        textAlign: 'center'
+                    }}
+                >
+                    {parsed.isContain ? '✅ MODO FOTO ENTERA ACTIVADO (Pulsar para volver a rellenar)' : '➖ QUITAR AUMENTO (Ver foto entera sin recortar)'}
+                </button>
+            </div>
+
+            {/* Selector rápido de posiciones */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+                {[
+                    { val: 'top center', label: '⬆️ Arriba', desc: 'Caras / retratos' },
+                    { val: 'center center', label: '⏺ Centro real', desc: 'Recomendado' },
+                    { val: 'bottom center', label: '⬇️ Abajo', desc: 'Paisajes / suelo' },
+                    { val: '50% 20%', label: '↑ Alto', desc: 'Un poco arriba' },
+                    { val: '50% 35%', label: '↕ Medio-alto', desc: 'Centrado-alto' },
+                    { val: '50% 70%', label: '↕ Medio-bajo', desc: 'Centrado-bajo' },
+                ].map(opt => (
+                    <button
+                        key={opt.val}
+                        type="button"
+                        onClick={() => onChange(opt.val)}
+                        style={{
+                            padding: '6px 4px',
+                            fontSize: '0.7rem',
+                            background: posicion === opt.val ? '#ffb100' : 'rgba(0,0,0,0.6)',
+                            color: posicion === opt.val ? '#000' : '#ccc',
+                            border: posicion === opt.val ? '1px solid #ffb100' : '1px solid #444',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontWeight: posicion === opt.val ? 'bold' : 'normal',
+                            textAlign: 'center',
+                            lineHeight: '1.3'
+                        }}
+                    >
+                        {opt.label}<br/>
+                        <span style={{ fontSize: '0.6rem', opacity: 0.8 }}>{opt.desc}</span>
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
 import axios from 'axios';
 import './paneladmin.css';
 import { API_BASE_URL, ADMIN_EMAIL } from '../config';
@@ -48,6 +222,7 @@ const PanelAdmin = () => {
     const [contenidoSubida, setContenidoSubida] = useState('');
     const [contenidoEnSubida, setContenidoEnSubida] = useState('');
     const [archivoSubida, setArchivoSubida] = useState(null);
+    const [posicionSubida, setPosicionSubida] = useState('center center');
     const [mensajeSubida, setMensajeSubida] = useState('');
     const [busquedaLugar, setBusquedaLugar] = useState('');
     const [archivosCapturas, setArchivosCapturas] = useState([]);
@@ -592,6 +767,7 @@ const PanelAdmin = () => {
         if (urlExternaAdmin) formData.append('url_externa', urlExternaAdmin);
         formData.append('titulo', tituloSubida);
         formData.append('tipo', tipoSubida);
+        formData.append('imagen_posicion', posicionSubida || 'center center');
         if (contenidoSubida) formData.append('contenido', contenidoSubida);
         if (tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') {
             if (tituloEnSubida) formData.append('titulo_en', tituloEnSubida);
@@ -1332,7 +1508,16 @@ const PanelAdmin = () => {
                         ) : (
                             <div className="form-group-admin">
                                 <label>ARCHIVO ADJUNTO {(tipoSubida === 'expedientes' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') ? '(OPCIONAL)' : ''}:</label>
-                                <input type="file" onChange={e => setArchivoSubida(e.target.files[0])} />
+                                <input type="file" onChange={e => { setArchivoSubida(e.target.files[0]); setPosicionSubida('center center'); }} />
+                                {archivoSubida && (tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && (
+                                    <div style={{ marginTop: '12px' }}>
+                                        <EncuadreImagenEditor
+                                            src={URL.createObjectURL(archivoSubida)}
+                                            posicion={posicionSubida}
+                                            onChange={(val) => setPosicionSubida(val)}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -1582,55 +1767,11 @@ const PanelAdmin = () => {
 
                                     {/* 🎯 FOCAL POINT: PREVIEW + SELECTOR DE POSICIÓN */}
                                     {(editForm.imagen_url || archivoEdit) && (
-                                        <div style={{ background: 'rgba(255,177,0,0.05)', border: '1px solid rgba(255,177,0,0.3)', borderRadius: '6px', padding: '14px', marginBottom: '15px' }}>
-                                            <label style={{ display: 'block', color: '#ffb100', fontWeight: 'bold', fontSize: '0.8rem', marginBottom: '10px' }}>
-                                                🎯 POSICIÓN DE LA IMAGEN EN PORTADA:
-                                            </label>
-                                            {/* Preview simulando la tarjeta editorial (ratio 16:10) */}
-                                            <div style={{ position: 'relative', width: '100%', aspectRatio: '16/10', overflow: 'hidden', borderRadius: '4px', marginBottom: '12px', background: '#000' }}>
-                                                <img
-                                                    src={archivoEdit ? URL.createObjectURL(archivoEdit) : editForm.imagen_url}
-                                                    alt="Preview portada"
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: editForm.imagen_posicion || 'center center', display: 'block' }}
-                                                    onError={e => { e.target.style.display = 'none'; }}
-                                                />
-                                                <div style={{ position: 'absolute', bottom: '6px', right: '8px', background: 'rgba(0,0,0,0.7)', color: '#ffb100', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold' }}>
-                                                    PREVIEW PORTADA
-                                                </div>
-                                            </div>
-                                            {/* Selector de posición */}
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
-                                                {[
-                                                    { val: 'top center', label: '⬆️ Arriba', desc: 'Caras / retratos' },
-                                                    { val: 'center center', label: '⏺ Centro', desc: 'Por defecto' },
-                                                    { val: 'bottom center', label: '⬇️ Abajo', desc: 'Paisajes / suelo' },
-                                                    { val: '50% 20%', label: '↑ Alto', desc: 'Un poco arriba' },
-                                                    { val: '50% 35%', label: '↕ Medio-alto', desc: 'Centrado-alto' },
-                                                    { val: '50% 70%', label: '↕ Medio-bajo', desc: 'Centrado-bajo' },
-                                                ].map(opt => (
-                                                    <button
-                                                        key={opt.val}
-                                                        type="button"
-                                                        onClick={() => setEditForm({ ...editForm, imagen_posicion: opt.val })}
-                                                        style={{
-                                                            padding: '6px 4px',
-                                                            fontSize: '0.7rem',
-                                                            background: editForm.imagen_posicion === opt.val ? '#ffb100' : 'rgba(0,0,0,0.6)',
-                                                            color: editForm.imagen_posicion === opt.val ? '#000' : '#ccc',
-                                                            border: editForm.imagen_posicion === opt.val ? '1px solid #ffb100' : '1px solid #444',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer',
-                                                            fontWeight: editForm.imagen_posicion === opt.val ? 'bold' : 'normal',
-                                                            textAlign: 'center',
-                                                            lineHeight: '1.3'
-                                                        }}
-                                                    >
-                                                        {opt.label}<br/>
-                                                        <span style={{ fontSize: '0.6rem', opacity: 0.8 }}>{opt.desc}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <EncuadreImagenEditor
+                                            src={archivoEdit ? URL.createObjectURL(archivoEdit) : editForm.imagen_url}
+                                            posicion={editForm.imagen_posicion || 'center center'}
+                                            onChange={(val) => setEditForm({ ...editForm, imagen_posicion: val })}
+                                        />
                                     )}
 
                                     {/* GEOLOCALIZACIÓN ESTRATÉGICA */}
@@ -1734,53 +1875,11 @@ const PanelAdmin = () => {
 
                                     {/* 🎯 FOCAL POINT: PREVIEW + SELECTOR DE POSICIÓN */}
                                     {(editForm.imagen_url || archivoEdit) && (
-                                        <div style={{ background: 'rgba(255,177,0,0.05)', border: '1px solid rgba(255,177,0,0.3)', borderRadius: '6px', padding: '14px', marginBottom: '15px' }}>
-                                            <label style={{ display: 'block', color: '#ffb100', fontWeight: 'bold', fontSize: '0.8rem', marginBottom: '10px' }}>
-                                                🎯 POSICIÓN DE LA IMAGEN EN PORTADA:
-                                            </label>
-                                            <div style={{ position: 'relative', width: '100%', aspectRatio: '16/10', overflow: 'hidden', borderRadius: '4px', marginBottom: '12px', background: '#000' }}>
-                                                <img
-                                                    src={archivoEdit ? URL.createObjectURL(archivoEdit) : editForm.imagen_url}
-                                                    alt="Preview portada"
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: editForm.imagen_posicion || 'center center', display: 'block' }}
-                                                    onError={e => { e.target.style.display = 'none'; }}
-                                                />
-                                                <div style={{ position: 'absolute', bottom: '6px', right: '8px', background: 'rgba(0,0,0,0.7)', color: '#ffb100', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold' }}>
-                                                    PREVIEW PORTADA
-                                                </div>
-                                            </div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
-                                                {[
-                                                    { val: 'top center', label: '⬆️ Arriba', desc: 'Caras / retratos' },
-                                                    { val: 'center center', label: '⏺ Centro', desc: 'Por defecto' },
-                                                    { val: 'bottom center', label: '⬇️ Abajo', desc: 'Paisajes / suelo' },
-                                                    { val: '50% 20%', label: '↑ Alto', desc: 'Un poco arriba' },
-                                                    { val: '50% 35%', label: '↕ Medio-alto', desc: 'Centrado-alto' },
-                                                    { val: '50% 70%', label: '↕ Medio-bajo', desc: 'Centrado-bajo' },
-                                                ].map(opt => (
-                                                    <button
-                                                        key={opt.val}
-                                                        type="button"
-                                                        onClick={() => setEditForm({ ...editForm, imagen_posicion: opt.val })}
-                                                        style={{
-                                                            padding: '6px 4px',
-                                                            fontSize: '0.7rem',
-                                                            background: editForm.imagen_posicion === opt.val ? '#ffb100' : 'rgba(0,0,0,0.6)',
-                                                            color: editForm.imagen_posicion === opt.val ? '#000' : '#ccc',
-                                                            border: editForm.imagen_posicion === opt.val ? '1px solid #ffb100' : '1px solid #444',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer',
-                                                            fontWeight: editForm.imagen_posicion === opt.val ? 'bold' : 'normal',
-                                                            textAlign: 'center',
-                                                            lineHeight: '1.3'
-                                                        }}
-                                                    >
-                                                        {opt.label}<br/>
-                                                        <span style={{ fontSize: '0.6rem', opacity: 0.8 }}>{opt.desc}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <EncuadreImagenEditor
+                                            src={archivoEdit ? URL.createObjectURL(archivoEdit) : editForm.imagen_url}
+                                            posicion={editForm.imagen_posicion || 'center center'}
+                                            onChange={(val) => setEditForm({ ...editForm, imagen_posicion: val })}
+                                        />
                                     )}
 
                                     {/* BUSCADOR DE COORDENADAS PARA EDICIÓN DE RELATOS */}
@@ -1930,53 +2029,11 @@ const PanelAdmin = () => {
 
                                     {/* 🎯 FOCAL POINT: PREVIEW + SELECTOR DE POSICIÓN */}
                                     {(editForm.imagen_url || archivoEdit) && (
-                                        <div style={{ background: 'rgba(255,177,0,0.05)', border: '1px solid rgba(255,177,0,0.3)', borderRadius: '6px', padding: '14px', marginBottom: '15px' }}>
-                                            <label style={{ display: 'block', color: '#ffb100', fontWeight: 'bold', fontSize: '0.8rem', marginBottom: '10px' }}>
-                                                🎯 POSICIÓN DE LA IMAGEN EN PORTADA:
-                                            </label>
-                                            <div style={{ position: 'relative', width: '100%', aspectRatio: '16/10', overflow: 'hidden', borderRadius: '4px', marginBottom: '12px', background: '#000' }}>
-                                                <img
-                                                    src={archivoEdit ? URL.createObjectURL(archivoEdit) : editForm.imagen_url}
-                                                    alt="Preview portada"
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: editForm.imagen_posicion || 'center center', display: 'block' }}
-                                                    onError={e => { e.target.style.display = 'none'; }}
-                                                />
-                                                <div style={{ position: 'absolute', bottom: '6px', right: '8px', background: 'rgba(0,0,0,0.7)', color: '#ffb100', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold' }}>
-                                                    PREVIEW PORTADA
-                                                </div>
-                                            </div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
-                                                {[
-                                                    { val: 'top center', label: '⬆️ Arriba', desc: 'Caras / retratos' },
-                                                    { val: 'center center', label: '⏺ Centro', desc: 'Por defecto' },
-                                                    { val: 'bottom center', label: '⬇️ Abajo', desc: 'Paisajes / suelo' },
-                                                    { val: '50% 20%', label: '↑ Alto', desc: 'Un poco arriba' },
-                                                    { val: '50% 35%', label: '↕ Medio-alto', desc: 'Centrado-alto' },
-                                                    { val: '50% 70%', label: '↕ Medio-bajo', desc: 'Centrado-bajo' },
-                                                ].map(opt => (
-                                                    <button
-                                                        key={opt.val}
-                                                        type="button"
-                                                        onClick={() => setEditForm({ ...editForm, imagen_posicion: opt.val })}
-                                                        style={{
-                                                            padding: '6px 4px',
-                                                            fontSize: '0.7rem',
-                                                            background: editForm.imagen_posicion === opt.val ? '#ffb100' : 'rgba(0,0,0,0.6)',
-                                                            color: editForm.imagen_posicion === opt.val ? '#000' : '#ccc',
-                                                            border: editForm.imagen_posicion === opt.val ? '1px solid #ffb100' : '1px solid #444',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer',
-                                                            fontWeight: editForm.imagen_posicion === opt.val ? 'bold' : 'normal',
-                                                            textAlign: 'center',
-                                                            lineHeight: '1.3'
-                                                        }}
-                                                    >
-                                                        {opt.label}<br/>
-                                                        <span style={{ fontSize: '0.6rem', opacity: 0.8 }}>{opt.desc}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <EncuadreImagenEditor
+                                            src={archivoEdit ? URL.createObjectURL(archivoEdit) : editForm.imagen_url}
+                                            posicion={editForm.imagen_posicion || 'center center'}
+                                            onChange={(val) => setEditForm({ ...editForm, imagen_posicion: val })}
+                                        />
                                     )}
                                 </>
                             )}

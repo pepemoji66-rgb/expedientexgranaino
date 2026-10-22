@@ -721,26 +721,44 @@ io.on('connection', (socket) => {
 const optimizarImagenParaOG = (rawUrl, posicion = null) => {
     if (!rawUrl) return rawUrl;
     if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
-        let url = rawUrl.replace(/\.(webp|png|jpeg)(\?.*)?$/i, '.jpg$2');
+        let url = rawUrl.replace(/\.(webp|png|jpeg|avif)(\?.*)?$/i, '.jpg$2');
         
-        // Mapear posición elegida por el usuario a la gravedad de Cloudinary
-        let gravity = 'g_auto';
+        // Mapear posición elegida por el usuario (o arrastre X% Y% / modo contain sin recorte)
+        // IMPORTANTE: Usamos g_center (centro geométrico real) en vez de g_auto, porque g_auto
+        // enfocaba textos o esquinas oscuras y recortaba al sujeto central.
+        let transform = 'c_fill,g_center,w_1200,h_630,f_jpg,q_85';
         if (posicion) {
             const p = String(posicion).toLowerCase().trim();
-            if (p.includes('top') || p === '50% 20%') {
-                gravity = 'g_north';
-            } else if (p.includes('bottom') || p === '50% 70%') {
-                gravity = 'g_south';
-            } else if (p === '50% 35%') {
-                gravity = 'g_auto';
+            if (p.includes('contain') || p.includes('entera') || p.includes('completa')) {
+                // Modo sin aumento / foto entera sin recortar (relleno oscuro elegante en laterales)
+                transform = 'c_pad,b_rgb:050811,w_1200,h_630,f_jpg,q_85';
+            } else if (p.includes('top')) {
+                transform = 'c_fill,g_north,w_1200,h_630,f_jpg,q_85';
+            } else if (p.includes('bottom')) {
+                transform = 'c_fill,g_south,w_1200,h_630,f_jpg,q_85';
+            } else {
+                // Comprobar si tiene coordenadas porcentuales (ej. "50% 28%" del arrastre con ratón)
+                const matchPct = p.match(/(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%/);
+                if (matchPct) {
+                    const yPct = parseFloat(matchPct[2]);
+                    if (yPct <= 25) {
+                        transform = 'c_fill,g_north,w_1200,h_630,f_jpg,q_85';
+                    } else if (yPct < 43) {
+                        transform = 'c_crop,w_1.0,h_0.82,g_north/c_fill,g_center,w_1200,h_630,f_jpg,q_85';
+                    } else if (yPct <= 57) {
+                        transform = 'c_fill,g_center,w_1200,h_630,f_jpg,q_85';
+                    } else if (yPct < 75) {
+                        transform = 'c_crop,w_1.0,h_0.82,g_south/c_fill,g_center,w_1200,h_630,f_jpg,q_85';
+                    } else {
+                        transform = 'c_fill,g_south,w_1200,h_630,f_jpg,q_85';
+                    }
+                }
             }
         }
 
-        const transform = `c_fill,${gravity},w_1200,h_630,f_jpg,q_85`;
-
-        // Si ya tenía transformación c_fill previa, reemplazarla respetando la nueva gravedad
-        if (/\/upload\/c_fill[^/]+\//.test(url)) {
-            return url.replace(/\/upload\/c_fill[^/]+\//, `/upload/${transform}/`);
+        // Si ya tenía transformación c_fill o c_pad previa, reemplazarla respetando la nueva
+        if (/\/upload\/c_(fill|pad|crop)[^v]+\/v/.test(url)) {
+            return url.replace(/\/upload\/c_(fill|pad|crop)[^v]+\/v/, `/upload/${transform}/v`);
         }
         if (/\/upload\/([a-z0-9_:,]+\/)?v\d+/.test(url)) {
             return url.replace(/\/upload\/([a-z0-9_:,]+\/)?v/, `/upload/${transform}/v`);

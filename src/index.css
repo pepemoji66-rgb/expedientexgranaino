@@ -48,3 +48,11 @@ body {
   border: none !important;
   box-shadow: none !important;
 }
+
+
+/* MODO FOTO ENTERA (QUITAR AUMENTO) EN PORTADAS DE ARTÍCULOS */
+img[style*="contain"] {
+  object-fit: contain !important;
+  object-position: center center !important;
+  background-color: #050811;
+}

@@ -236,6 +236,9 @@ module.exports = (db, uploadArchivos, uploadGeneral) => {
                     [titulo, cuerpo, nivel_alerta, ubicacion, latitud, longitud, fuente_url, estado, youtube_url || null, capturas || null, imagen_posicion || null, req.params.id]
                 );
             }
+            const urlArticulo = `https://expedientexgranaino.com/noticias/${req.params.id}`;
+            const fbToken = process.env.FACEBOOK_ACCESS_TOKEN ? `&access_token=${process.env.FACEBOOK_ACCESS_TOKEN}` : '';
+            axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true${fbToken}`, {}, { timeout: 5000 }).catch(() => {});
             res.json({ mensaje: "Noticia actualizada en el búnker." });
         } catch (err) {
             console.error("Error al actualizar noticia:", err);

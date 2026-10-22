@@ -134,6 +134,9 @@ module.exports = (upload) => {
             }
         }
 
+        const urlArticulo = `https://expedientexgranaino.com/casos-abiertos/${id}`;
+        const fbToken = process.env.FACEBOOK_ACCESS_TOKEN ? `&access_token=${process.env.FACEBOOK_ACCESS_TOKEN}` : '';
+        axios.post(`https://graph.facebook.com/?id=${encodeURIComponent(urlArticulo)}&scrape=true${fbToken}`, {}, { timeout: 5000 }).catch(() => {});
         res.json({ mensaje: "Caso actualizado con éxito." });
     } catch (err) {
         console.error("❌ Error al actualizar Caso Abierto:", err);
