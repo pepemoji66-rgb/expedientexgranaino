@@ -12,11 +12,15 @@ import './ruleta.css';
 // ============================================
 
 const SECTORES = [
-    { id: 'expedientes', nombre: 'EXPEDIENTES', nombreEn: 'DOSSIERS', icono: '🛸', color: '#003322', colorBorde: '#00ff41' },
-    { id: 'casos', nombre: 'CRÓNICA NEGRA', nombreEn: 'TRUE CRIME', icono: '🔪', color: '#330011', colorBorde: '#ff0033' },
-    { id: 'misterios', nombre: 'MISTERIOS', nombreEn: 'MYSTERIES', icono: '🏛️', color: '#1a1a00', colorBorde: '#ffcc00' },
-    { id: 'noticias', nombre: 'NOTICIAS', nombreEn: 'NEWS', icono: '📡', color: '#001a33', colorBorde: '#00d4ff' },
-    { id: 'sorpresa', nombre: 'SORPRESA', nombreEn: 'SURPRISE', icono: '🎲', color: '#1a0033', colorBorde: '#aa00ff' }
+    { id: 'expedientes', nombre: 'EXPEDIENTES', nombreEn: 'DOSSIERS', icono: '🛸', color: '#1E3A2F', colorBorde: '#FAF8F5' },
+    { id: 'casos', nombre: 'CRÓNICA NEGRA', nombreEn: 'TRUE CRIME', icono: '🔪', color: '#7A2818', colorBorde: '#FAF8F5' },
+    { id: 'misterios', nombre: 'MISTERIOS', nombreEn: 'MYSTERIES', icono: '🏛️', color: '#8C6223', colorBorde: '#FAF8F5' },
+    { id: 'noticias', nombre: 'NOTICIAS', nombreEn: 'NEWS', icono: '📡', color: '#234059', colorBorde: '#FAF8F5' },
+    { id: 'sorpresa', nombre: 'SORPRESA', nombreEn: 'SURPRISE', icono: '🎲', color: '#3A3530', colorBorde: '#FAF8F5' }
+
+
+
+
 ];
 
 const NUM_SECTORES = SECTORES.length;
@@ -118,7 +122,7 @@ const RuletaSVG = ({ rotacion }) => {
                 <defs>
                     <radialGradient id={`grad-${sector.id}`} cx="50%" cy="50%" r="70%">
                         <stop offset="0%" stopColor={sector.color} stopOpacity="1" />
-                        <stop offset="100%" stopColor="#050505" stopOpacity="1" />
+                        <stop offset="100%" stopColor={sector.color} stopOpacity="0.92" />
                     </radialGradient>
                 </defs>
                 {/* Sector */}
@@ -166,12 +170,13 @@ const RuletaSVG = ({ rotacion }) => {
             style={{ transform: `rotate(${rotacion}deg)` }}
         >
             {/* Fondo del círculo */}
-            <circle cx={cx} cy={cy} r={r + 2} fill="#0a0a0a" stroke="#1a1a1a" strokeWidth="2" />
+            <circle cx={cx} cy={cy} r={r + 2} fill="#FAF8F5" stroke="#8B3A1E" strokeWidth="3" />
             {/* Sectores */}
             {SECTORES.map((_, i) => crearSector(i))}
             {/* Centro decorativo */}
-            <circle cx={cx} cy={cy} r="52" fill="#0a0a0a" stroke="#00ff41" strokeWidth="2" opacity="0.8" />
-            <circle cx={cx} cy={cy} r="48" fill="#050505" stroke="rgba(0,255,65,0.2)" strokeWidth="1" />
+            <circle cx={cx} cy={cy} r="54" fill="#FAF8F5" stroke="#8B3A1E" strokeWidth="2.5" opacity="1" />
+            <circle cx={cx} cy={cy} r="48" fill="#8B3A1E" stroke="#D8CFC2" strokeWidth="1.5" />
+                    {/* Eliminado círculo interior neon antiguo */}
         </svg>
     );
 };
@@ -381,7 +386,7 @@ const Ruleta = () => {
                         : '[ RADAR DE CONTENIDO ALEATORIO — GIRA Y DESCUBRE ]'}
                 </p>
                 <div className="ruleta-hero-img">
-                    <img src="/assets/ruleta_bunker.jpg" alt="La Ruleta del Búnker — Expediente X Granaíno" />
+                    {/* Imagen de ruleta de casino desactivada para mantener estética editorial seria */}
                 </div>
             </div>
 
@@ -421,7 +426,7 @@ const Ruleta = () => {
             <div className="ruleta-wheel-wrapper">
                 {/* Flecha indicadora */}
                 <svg className="ruleta-indicator" width="30" height="24" viewBox="0 0 30 24">
-                    <polygon points="15,24 0,0 30,0" fill="#ff0033" />
+                    <polygon points="15,24 0,0 30,0" fill="#8B3A1E" />
                 </svg>
 
                 <div className="ruleta-wheel-container">
@@ -541,18 +546,19 @@ const Ruleta = () => {
             </div>
 
             {/* SECCIÓN APOYO KO-FI */}
-            <div style={{ maxWidth: '600px', margin: '30px auto', padding: '22px 24px', background: 'rgba(45,90,67,0.08)', border: '1px solid rgba(45,90,67,0.2)', borderRadius: '8px', textAlign: 'center' }}>
-                <p style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#e8e8e8', fontFamily: 'monospace' }}>
+            <div style={{ maxWidth: '600px', width: '100%', margin: '30px auto 0', padding: '24px', background: '#FFFFFF', border: '1px solid #E5E0D8', borderRadius: '8px', textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
+                <p style={{ margin: '0 0 6px 0', fontSize: '1.05rem', fontWeight: 'bold', color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
+
                     ☕ ¿Te gusta el búnker?
                 </p>
-                <p style={{ margin: '0 0 16px 0', fontSize: '0.85rem', color: '#aaa', fontFamily: 'monospace', lineHeight: '1.6' }}>
+                <p style={{ margin: '0 0 16px 0', fontSize: '0.92rem', color: '#4A4A4A', lineHeight: '1.6' }}>
                     Si puedes y quieres, una pequeña propina ayuda a mantener el servidor en pie. ¡Gracias agente! 🛸
                 </p>
                 <a
                     href="https://ko-fi.com/expedientexgranaino"
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ display: 'inline-block', background: '#2D5A43', color: '#fff', padding: '10px 24px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem', letterSpacing: '0.5px', textDecoration: 'none' }}
+                    style={{ display: 'inline-block', background: '#8B3A1E', color: '#fff', padding: '10px 24px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '0.5px', textDecoration: 'none' }}
                 >
                     ☕ INVÍTANOS A UN CAFÉ
                 </a>
