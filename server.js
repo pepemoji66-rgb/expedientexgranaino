@@ -1429,7 +1429,7 @@ app.get('/la-ruleta', (req, res) => {
 </article>`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
-        const imagenUrl = `${baseImgUrl}/assets/ruleta_bunker.jpg`;
+        const imagenUrl = `${baseImgUrl}/assets/ruleta_editorial_og.jpg?v=2.0`;
 
         const pagina = inyectarContenidoSEO(
             html,
