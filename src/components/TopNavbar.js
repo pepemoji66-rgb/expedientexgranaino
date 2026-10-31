@@ -21,10 +21,10 @@ const TopNavbar = ({ userAuth, toggleMenu, isOpen, cerrarSesion }) => {
     ];
 
     const extraSections = [
-        { path: "/biblioteca", label: language === 'en' ? "Library" : "Biblioteca" },
+        // { path: "/biblioteca", label: language === 'en' ? "Library" : "Biblioteca" },
         { path: "/lugares", label: language === 'en' ? "Radar Map" : "Mapa de Avistamientos" },
         { path: "/videos", label: language === 'en' ? "Videos" : "Vídeos" },
-        { path: "/galeria", label: language === 'en' ? "Evidence Gallery" : "Galería de Evidencias" }
+        // { path: "/galeria", label: language === 'en' ? "Evidence Gallery" : "Galería de Evidencias" }
     ];
 
     const isAdmin = userAuth && (

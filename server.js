@@ -29,9 +29,9 @@ const authRoutes = require('./routes/auth');
 const expedientesRoutes = require('./routes/expedientes');
 const galeriaRoutes = require('./routes/galeria');
 const adminRoutes = require('./routes/adminRoutes');
-const horoscopoRoutes = require('./routes/horoscopo');
 
-const efemeridesRoutes = require('./routes/efemerides');
+
+
 const noticiasExternasRoutes = require('./routes/noticias_externas');
 const archipegRoutes = require('./routes/archipeg');
 const casosAbiertosRoutes = require('./routes/casosAbiertos');
@@ -560,6 +560,7 @@ db.query("ALTER TABLE casos_abiertos ADD COLUMN youtube_url VARCHAR(500) DEFAULT
 db.query("ALTER TABLE misterios_historicos ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL").catch(() => {});
 db.query("ALTER TABLE noticias ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL").catch(() => {});
 
+/* SECCIÓN COLABORADORES DESACTIVADA (sin página pública). La tabla 'colaboradores' se conserva sin uso.
 // --- COLABORADORES DEL BÚNKER ---
 // Inicializar tabla si no existe
 db.query(`CREATE TABLE IF NOT EXISTS colaboradores (
@@ -603,6 +604,8 @@ app.delete('/api/colaboradores/:id', async (req, res) => {
     }
 });
 
+*/
+/* DESACTIVADO: /api/chat-ia no usado en la web pública
 app.post('/api/chat-ia', async (req, res) => {
     const { pregunta } = req.body;
     if (!pregunta) return res.status(400).json({ respuesta: "Falta señal de entrada, hermano." });
@@ -623,6 +626,7 @@ app.post('/api/chat-ia', async (req, res) => {
     }
 });
 
+*/
 app.post('/api/traducir-tactico', async (req, res) => {
     const { texto } = req.body;
     if (!texto) return res.status(400).json({ respuesta: "Sin datos para descifrar." });
@@ -656,10 +660,10 @@ app.use('/api/galeria', galeriaRoutes(db, uploadArchivos, uploadGeneral));
 app.use('/api/auth', authRoutes(db));
 app.use('/api/expedientes', expedientesRoutes(db, uploadLugares));
 app.use('/api/admin', adminRoutes(db));
-app.use('/api/horoscopo', horoscopoRoutes(db, genAI));
 
-app.use('/api/efemerides', efemeridesRoutes(db, genAI));
-app.use('/api/noticias-externas', noticiasExternasRoutes(db, genAI));
+
+
+// app.use('/api/noticias-externas', noticiasExternasRoutes(db, genAI));
 app.use('/api/archipeg', archipegRoutes(db));
 app.use('/api/casos', casosAbiertosRoutes(uploadArchivos));
 app.use('/api/social', socialRoutes(db, enviarAlertaTelegram));
@@ -1395,6 +1399,10 @@ app.get('/cookies', (req, res) => {
 
 // Sección Horóscopo (/horoscopo) - SEO enriquecido
 // Redirección 301 del horóscopo a la ruleta (mantener SEO)
+app.get(['/archipeg', '/colaboradores'], (req, res) => {
+    res.redirect(301, '/');
+});
+
 app.get('/horoscopo', (req, res) => {
     res.redirect(301, '/la-ruleta');
 });
@@ -1695,7 +1703,8 @@ app.get('/expedientes', async (req, res) => {
 });
 
 // Sección de Galería (/galeria) - SEO enriquecido
-app.get('/galeria', async (req, res) => {
+app.get('/galeria', (req, res) => res.redirect(301, '/expedientes'));
+app.get('/galeria-legacy-disabled', async (req, res) => {
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
@@ -2168,7 +2177,9 @@ app.post('/api/amazon/:itemKey', async (req, res) => {
 });
 
 // Página de Biblioteca (/biblioteca) - SEO enriquecido
+// Página de Biblioteca (/biblioteca) - noindex para evitar penalización thin/affiliate en AdSense
 app.get('/biblioteca', (req, res) => {
+    res.set('X-Robots-Tag', 'noindex, nofollow');
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', (err, html) => {
         if (err) return res.sendFile(indexPath);
@@ -2182,6 +2193,10 @@ app.get('/biblioteca', (req, res) => {
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
         const imagenUrl = `${baseImgUrl}/imagenes/biblioteca_banner.png`;
+        return res.send(inyectarContenidoSEO(html, 'Biblioteca del Búnker | Libros recomendados de Misterio y Ufología', 'Selección de obras imprescindibles sobre OVNIs, fenómenos paranormales y misterios históricos recomendadas por el Búnker de Expediente X Granaíno.', contenidoSeo, imagenUrl, paginaUrl, null, true));
+    });
+});
+/*
 
         const pagina = inyectarContenidoSEO(
             html,
@@ -2195,6 +2210,7 @@ app.get('/biblioteca', (req, res) => {
     });
 });
 
+*/
 // --- 🗺️ GENERACIÓN DINÁMICA DE SITEMAP.XML PARA GOOGLE Y MOTORES DE BÚSQUEDA ---
 app.get('/sitemap.xml', async (req, res) => {
     try {
@@ -2213,8 +2229,8 @@ app.get('/sitemap.xml', async (req, res) => {
             { path: '/casos-abiertos',       priority: '0.9', changefreq: 'daily' },
             { path: '/misterios-historicos', priority: '0.9', changefreq: 'daily' },
             { path: '/noticias',             priority: '0.9', changefreq: 'daily' },
-            { path: '/biblioteca',           priority: '0.6', changefreq: 'weekly' },
-            { path: '/colaboradores',        priority: '0.5', changefreq: 'monthly' },
+            // { path: '/biblioteca',           priority: '0.6', changefreq: 'weekly' },
+
             { path: '/sobre-nosotros',       priority: '0.5', changefreq: 'monthly' },
             { path: '/privacidad',           priority: '0.3', changefreq: 'yearly' },
             { path: '/cookies',              priority: '0.3', changefreq: 'yearly' },
@@ -2311,6 +2327,16 @@ app.get('/sitemap.xml', async (req, res) => {
 
 // Ruta de captura general: el resto de páginas del SPA
 app.get('*', (req, res) => {
+    const cleanPath = (req.path || '/').toLowerCase();
+    const rutasClienteValidas = ['/acceso', '/panel-mando', '/legal'];
+    if (rutasClienteValidas.includes(cleanPath)) {
+        res.set('X-Robots-Tag', 'noindex, nofollow');
+        return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    }
+    res.set('X-Robots-Tag', 'noindex, nofollow');
+    return res.status(404).send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><title>404 — Archivo no encontrado | Expediente X Granaíno</title></head><body style="background:#050811;color:#ccc;font-family:sans-serif;text-align:center;padding:60px 20px;"><h1 style="color:#ffb100;">404 — Expediente no encontrado</h1><p>La ruta solicitada no existe en el archivo del Búnker.</p><p><a href="/" style="color:#00ff41;">Volver al inicio de Expediente X Granaíno</a></p></body></html>`);
+});
+app.get('/_spa_unused_fallback', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 

@@ -7,7 +7,7 @@ import BuscadorAZ, { filtrarItemsBunker } from './BuscadorAZ';
 import { renderizarTextoConMedios } from '../utils/renderMedios';
 import './noticias.css';
 import API_BASE_URL from '../config';
-import NoticiasExternas from './NoticiasExternas';
+// import NoticiasExternas from './NoticiasExternas';
 import Paginacion, { getPaginaGuardada } from './Paginacion';
 import AdSlot from './AdSlot';
 
@@ -303,7 +303,8 @@ const Noticias = ({ userAuth }) => {
             <Paginacion paginaActual={paginaActual} totalPaginas={totalPaginas} onChange={setPaginaActual} storageKey="page_noticias" />
 
             {/* SECCIÓN DE INTELIGENCIA EXTERNA (PARA QUE NO SE VEA SOLO) */}
-            <div className="inteligencia-externa-container">
+            {false && inteligenciaExterna && null}
+            <div className="inteligencia-externa-container" style={{ display: 'none' }}>
                 <h2 className="titulo-seccion-secundaria">{t('newsExternalIntel')}</h2>
                 <div className="grid-inteligencia">
                     {inteligenciaExterna.map((link, idx) => (
@@ -316,8 +317,8 @@ const Noticias = ({ userAuth }) => {
                 </div>
             </div>
 
-            {/* FEED RSS EN VIVO - NOTICIAS EXTERNAS */}
-            <NoticiasExternas />
+
+            {/* <NoticiasExternas /> */}
 
             {userAuth && (
                 <div className="contenedor-form-noticia">

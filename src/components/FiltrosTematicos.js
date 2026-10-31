@@ -7,8 +7,7 @@ const BOTONES_FILTRO = [
     { id: 'ovnis', label: 'OVNIS Y EXPEDIENTES' },
     { id: 'noticias', label: 'NOTICIAS' },
     { id: 'cronica_negra', label: 'CRÓNICA NEGRA' },
-    { id: 'misterios', label: 'MISTERIOS HISTÓRICOS' },
-    { id: 'galeria', label: 'GALERÍA VISUAL', isShortcut: true }
+    { id: 'misterios', label: 'MISTERIOS HISTÓRICOS' }
 ];
 
 const FiltrosTematicos = ({ filtroActivo = 'todos', onFiltroChange, hideShortcut = false }) => {

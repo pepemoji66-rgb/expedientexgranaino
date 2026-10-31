@@ -14,14 +14,14 @@ import PanelAdmin from './components/PanelAdmin';
 import LecturaHistoria from './components/LecturaHistoria';
 import Footer from './components/Footer';
 import Videos from './components/Videos';
-import Galeria from './components/Galeria';
+// import Galeria from './components/Galeria';
 import Lugares from './components/Lugares';
 import CasosAbiertos from './components/CasosAbiertos';
 import Noticias from './components/Noticias';
 import PoliticaPrivacidad from './components/PoliticaPrivacidad';
 import PoliticaCookies from './components/PoliticaCookies';
 import AvisoLegal from './components/AvisoLegal';
-import Horoscopo from './components/Horoscopo';
+
 import Ruleta from './components/Ruleta';
 import { X } from 'lucide-react';
 import TopNavbar from './components/TopNavbar';
@@ -29,10 +29,10 @@ import TopNavbar from './components/TopNavbar';
 import CookieBanner from './components/CookieBanner';
 import SobreNosotros from './components/SobreNosotros';
 import AtarfeDossier from './components/AtarfeDossier';
-import Archipeg from './components/Archipeg';
+
 import MisteriosHistoricos from './components/MisteriosHistoricos';
 import BibliotecaBunker from './components/BibliotecaBunker';
-import ColaboradoresBunker from './components/ColaboradoresBunker';
+
 import Contacto from './components/Contacto';
 import { useLanguage } from './context/LanguageContext';
 import { safeLocalStorage } from './utils/storage';
@@ -315,8 +315,9 @@ function App() {
                 { path: "/misterios-historicos", label: t('navMysteries') || "MISTERIOS HISTÓRICOS" },
                 { path: "/la-ruleta", label: language === 'en' ? "🎰 BUNKER ROULETTE" : "🎰 LA RULETA DEL BÚNKER" },
                 { path: "/sobre-nosotros", label: language === 'en' ? "ABOUT ME" : "SOBRE EL PROYECTO" },
-                { path: "/biblioteca", label: language === 'en' ? "LIBRARY" : "BIBLIOTECA" },
-                { path: "/colaboradores", label: language === 'en' ? "CONTRIBUTORS" : "COLABORADORES" }
+                { path: "/sobre-nosotros", label: language === 'en' ? "ABOUT ME" : "SOBRE EL PROYECTO" }
+                // { path: "/biblioteca", label: language === 'en' ? "LIBRARY" : "BIBLIOTECA" },
+                
               ].map((route) => (
                 <li key={route.path} style={{ marginBottom: '14px' }}>
                   <Link to={route.path} onClick={toggleMenu} style={{
@@ -347,7 +348,7 @@ function App() {
                   <ul style={{ listStyle: 'none', padding: '8px 0 0 10px', margin: 0 }}>
                     {[
                       { path: '/la-ruleta', label: 'La Ruleta del Búnker' },
-                      { path: '/galeria', label: 'Galería de Evidencias' },
+                      // { path: '/galeria', label: 'Galería de Evidencias' },
                       { path: '/videos', label: 'Vídeos y Reportajes' },
                       { path: '/lugares', label: 'Mapa de Avistamientos' },
                       { path: '/especial-atarfe', label: 'Dossier Especial Atarfe' },
@@ -441,7 +442,7 @@ function App() {
               <Route path="/horoscopo" element={<Navigate to="/la-ruleta" replace />} />
               <Route path="/la-ruleta" element={<Ruleta />} />
 
-              <Route path="/galeria" element={<Galeria userAuth={userAuth} />} />
+              <Route path="/galeria" element={<Navigate to="/expedientes" replace />} />
               <Route path="/leer-historia/:id" element={<LecturaHistoria userAuth={userAuth} />} />
               <Route path="/casos-abiertos" element={<CasosAbiertos userAuth={userAuth} />} />
               <Route path="/casos-abiertos/:id" element={<LecturaHistoria userAuth={userAuth} />} />
@@ -462,9 +463,9 @@ function App() {
                <Route path="/contacto" element={<Contacto />} />
                <Route path="/sobre-nosotros" element={<SobreNosotros />} />
                <Route path="/especial-atarfe" element={<AtarfeDossier />} />
-               <Route path="/archipeg" element={<Archipeg userAuth={userAuth} />} />
+               <Route path="/archipeg" element={<Navigate to="/" replace />} />
                <Route path="/biblioteca" element={<BibliotecaBunker />} />
-               <Route path="/colaboradores" element={<ColaboradoresBunker userAuth={userAuth} />} />
+               <Route path="/colaboradores" element={<Navigate to="/" replace />} />
 
             </Routes>
           </div>

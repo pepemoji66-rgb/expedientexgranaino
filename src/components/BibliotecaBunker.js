@@ -48,6 +48,17 @@ const BibliotecaBunker = () => {
         };
 
         fetchLibros();
+        let metaRobots = document.querySelector('meta[name="robots"]');
+        const prevContent = metaRobots ? metaRobots.getAttribute('content') : null;
+        if (!metaRobots) {
+            metaRobots = document.createElement('meta');
+            metaRobots.setAttribute('name', 'robots');
+            document.head.appendChild(metaRobots);
+        }
+        metaRobots.setAttribute('content', 'noindex, nofollow');
+        return () => {
+            if (metaRobots && prevContent) metaRobots.setAttribute('content', prevContent);
+        };
     }, []);
 
     // Resetear a página 1 cuando se busca algo
@@ -104,7 +115,7 @@ const BibliotecaBunker = () => {
                     <div className="biblioteca-grid">
                         {librosPaginados.length > 0 ? (
                             librosPaginados.map((libro, index) => (
-                                <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer" className="amazon-book-card biblioteca-card">
+                                <a key={index} href={libro.link} target="_blank" rel="noopener noreferrer sponsored" className="amazon-book-card biblioteca-card">
                                     <div className="amazon-book-cover-container">
                                         <img src={libro.imagen_url} alt={libro.titulo} className="amazon-book-cover" />
                                     </div>

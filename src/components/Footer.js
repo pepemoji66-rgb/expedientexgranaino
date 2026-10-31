@@ -36,8 +36,8 @@ const Footer = ({ visitasTotales = 0 }) => {
                         <Link to="/casos-abiertos">True Crime</Link>
                         <Link to="/misterios-historicos">Misterios Históricos</Link>
                         <Link to="/sobre-nosotros">Sobre el Proyecto</Link>
-                        <Link to="/biblioteca">Biblioteca</Link>
-                        <Link to="/colaboradores">Colaboradores</Link>
+                        {/* <Link to="/biblioteca">Biblioteca</Link> */}
+                        
                     </div>
 
                     <div className="footer-legal-links">
@@ -53,7 +53,7 @@ const Footer = ({ visitasTotales = 0 }) => {
                     <div className="footer-extras">
                         <span className="extras-title">ARCHIVO GENERAL:</span>
                         <Link to="/la-ruleta">La Ruleta</Link>
-                        <Link to="/galeria">Galería</Link>
+                        {/* <Link to="/galeria">Galería</Link> */}
                         <Link to="/videos">Vídeos</Link>
                         <Link to="/lugares">Mapa de Casos</Link>
                         <Link to="/especial-atarfe">Dossier Atarfe</Link>

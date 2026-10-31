@@ -153,7 +153,7 @@ const Hero = ({ userAuth }) => {
                     infoText: language === 'en' ? "New classified video added to the central archive." : "Nuevo vídeo desclasificado añadido al archivo general. Revisa el material.",
                     highlight: language === 'en' ? "SENSITIVE FOOTAGE" : "IMÁGENES SENSIBLES",
                     btnText: language === 'en' ? "WATCH VIDEO" : "VER VÍDEO",
-                    btnLink: "/galeria"
+                    btnLink: "/videos"
                 });
             } else if (item.type === 'caso') {
                 alertasRecientes.push({
@@ -231,7 +231,7 @@ const Hero = ({ userAuth }) => {
                         <Link to="/expedientes" className="btn-mufon-red">
                             {t('heroNavReport')}
                         </Link>
-                        <Link to="/galeria" className="btn-mufon-black">
+                        <Link to="/lugares" className="btn-mufon-black">
                             {t('heroNavMedia')}
                         </Link>
                     </div>
