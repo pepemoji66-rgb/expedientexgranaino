@@ -750,10 +750,27 @@
         object-fit: contain;
         width: 100%;
     }
+    /* Móvil: aprovechar todo el ancho para que el texto fluya natural */
+    .lectura-page-wrapper {
+        padding: 12px 6px !important;
+    }
+    .lectura-card-centered {
+        padding: 22px 14px !important;
+        margin: 10px auto 30px !important;
+    }
     .cuerpo-historia {
-        padding: 24px 18px !important;
-        font-size: 1.05rem !important;
+        padding: 16px 0 !important;
+        font-size: 1.02rem !important;
         line-height: 1.7 !important;
+        white-space: normal !important;
+        text-align: left !important;
+        overflow-wrap: break-word;
+        word-break: normal;
+        -webkit-hyphens: auto;
+        hyphens: auto;
+    }
+    .cuerpo-historia p {
+        margin-bottom: 1.1rem !important;
     }
     .cuerpo-historia img {
         max-height: 260px !important;
