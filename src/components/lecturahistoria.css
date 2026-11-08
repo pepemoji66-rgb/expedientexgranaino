@@ -763,7 +763,8 @@
         font-size: 1.02rem !important;
         line-height: 1.7 !important;
         white-space: normal !important;
-        text-align: left !important;
+        text-align: justify !important;
+        text-justify: inter-word;
         overflow-wrap: break-word;
         word-break: normal;
         -webkit-hyphens: auto;
@@ -779,3 +780,12 @@
     }
 }
 
+
+/* Texto justificado en PC y móvil: ocupa todo el ancho de la columna sin margen derecho irregular */
+.cuerpo-historia p {
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    overflow-wrap: break-word;
+}
