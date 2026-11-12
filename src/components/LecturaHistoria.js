@@ -1850,27 +1850,29 @@ const LecturaHistoria = ({ userAuth }) => {
                                 className="galeria-evidencias-header" 
                                 onClick={() => setGaleriaAbierta(!galeriaAbierta)}
                                 style={{ cursor: 'pointer', userSelect: 'none' }}
-                                title="Haz clic para plegar o desplegar la galería de evidencias"
+                                title="Haz clic para plegar o desplegar la galería fotográfica"
                             >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span>📸 {language === 'en' ? 'PHOTOGRAPHIC EVIDENCE & CASE ARCHIVE' : 'ARCHIVO FOTOGRÁFICO Y EVIDENCIAS DEL CASO'}</span>
-                                    <span style={{ fontSize: '0.72rem', opacity: 0.85, color: '#aaa' }}>[{capturasEvidencias.length} {language === 'en' ? 'RECORDS' : 'EVIDENCIAS'}]</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                                    <span style={{ color: '#9c4221' }}>📷 {language === 'en' ? 'PHOTOGRAPHIC ARCHIVE OF THE CASE' : 'ARCHIVO FOTOGRÁFICO Y DOCUMENTAL'}</span>
+                                    <span style={{ fontSize: '0.75rem', color: '#64748B', fontFamily: 'monospace', fontWeight: 'bold', background: '#F1F5F9', padding: '2px 8px', borderRadius: '4px', border: '1px solid #E2E8F0' }}>
+                                        {capturasEvidencias.length} {language === 'en' ? 'PHOTOS' : 'FOTOGRAFÍAS'}
+                                    </span>
                                 </div>
                                 <button 
                                     type="button" 
                                     style={{ 
-                                        background: 'rgba(0, 255, 65, 0.1)', 
-                                        color: '#00ff41', 
-                                        border: '1px solid rgba(0, 255, 65, 0.35)', 
+                                        background: '#9c4221', 
+                                        color: '#FFFFFF', 
+                                        border: '1px solid #7c3318', 
                                         borderRadius: '4px', 
-                                        padding: '4px 12px', 
+                                        padding: '6px 14px', 
                                         fontFamily: 'monospace', 
                                         fontSize: '0.75rem', 
                                         fontWeight: 'bold', 
                                         cursor: 'pointer' 
                                     }}
                                 >
-                                    {galeriaAbierta ? '▲ PLEGAR ARCHIVO' : '▼ DESPLEGAR ARCHIVO'}
+                                    {galeriaAbierta ? (language === 'en' ? '▲ FOLD ARCHIVE' : '▲ PLEGAR ARCHIVO') : (language === 'en' ? '▼ VIEW PHOTOS' : '▼ VER FOTOGRAFÍAS')}
                                 </button>
                             </div>
                             
@@ -1886,11 +1888,11 @@ const LecturaHistoria = ({ userAuth }) => {
                                                     setPanPosition({ x: 0, y: 0 });
                                                     setCapturaExpandida(url);
                                                 }}
-                                                title={language === 'en' ? 'Click to inspect in high resolution' : 'Clic para inspeccionar en alta resolución'}
+                                                title={language === 'en' ? 'Click to enlarge photograph' : 'Clic para ampliar fotografía'}
                                             >
                                                 <img 
                                                     src={url} 
-                                                    alt={`Evidencia ${idx + 1}`} 
+                                                    alt={`Fotografía documental ${idx + 1}`} 
                                                     referrerPolicy="no-referrer"
                                                     onError={(e) => { 
                                                         if (e.target.src && e.target.src.includes('maxres')) {
@@ -1902,31 +1904,31 @@ const LecturaHistoria = ({ userAuth }) => {
                                                     }}
                                                 />
                                                 <span className="galeria-evidencia-badge">
-                                                    🔍 EVIDENCIA #{idx + 1}
+                                                    🔍 {language === 'en' ? `PHOTO #${idx + 1} · ENLARGE` : `FOTOGRAFÍA #${idx + 1} · AMPLIAR`}
                                                 </span>
                                             </div>
                                         ))}
                                     </div>
-                                    <div style={{ marginTop: '14px', textAlign: 'center' }}>
+                                    <div style={{ marginTop: '18px', textAlign: 'center' }}>
                                         <button 
                                             type="button" 
                                             onClick={() => setGaleriaAbierta(false)}
                                             style={{ 
-                                                background: 'rgba(0,0,0,0.5)', 
-                                                color: '#aaa', 
-                                                border: '1px dashed #444', 
+                                                background: '#FFFFFF', 
+                                                color: '#475569', 
+                                                border: '1px solid #CBD5E1', 
                                                 borderRadius: '4px', 
-                                                padding: '6px 18px', 
+                                                padding: '7px 18px', 
                                                 fontFamily: 'monospace', 
                                                 fontSize: '0.75rem', 
                                                 fontWeight: 'bold',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.2s ease'
                                             }}
-                                            onMouseEnter={e => { e.currentTarget.style.color = '#ff4444'; e.currentTarget.style.borderColor = '#ff4444'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.color = '#aaa'; e.currentTarget.style.borderColor = '#444'; }}
+                                            onMouseEnter={e => { e.currentTarget.style.color = '#9c4221'; e.currentTarget.style.borderColor = '#9c4221'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
                                         >
-                                            ▲ CERRAR / PLEGAR GALERÍA DE FOTOS
+                                            ▲ {language === 'en' ? 'FOLD PHOTO GALLERY' : 'PLEGAR GALERÍA DE FOTOS'}
                                         </button>
                                     </div>
                                 </>
@@ -2144,13 +2146,13 @@ const LecturaHistoria = ({ userAuth }) => {
                                 position: 'fixed',
                                 top: '20px',
                                 right: '25px',
-                                background: '#ef4444',
+                                background: '#9c4221',
                                 color: '#ffffff',
                                 border: '2px solid #ffffff',
                                 width: '46px',
                                 height: '46px',
                                 borderRadius: '50%',
-                                fontSize: '1.4rem',
+                                fontSize: '1.3rem',
                                 fontWeight: 'bold',
                                 cursor: 'pointer',
                                 display: 'flex',
@@ -2176,13 +2178,13 @@ const LecturaHistoria = ({ userAuth }) => {
                                     left: '20px',
                                     top: '50%',
                                     transform: 'translateY(-50%)',
-                                    background: 'rgba(0, 0, 0, 0.75)',
-                                    color: '#00ff41',
-                                    border: '2px solid rgba(0, 255, 65, 0.5)',
+                                    background: 'rgba(15, 23, 42, 0.85)',
+                                    color: '#FFFFFF',
+                                    border: '2px solid rgba(255, 255, 255, 0.4)',
                                     width: '54px',
                                     height: '54px',
                                     borderRadius: '50%',
-                                    fontSize: '1.8rem',
+                                    fontSize: '1.6rem',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -2191,9 +2193,9 @@ const LecturaHistoria = ({ userAuth }) => {
                                     zIndex: 9999999,
                                     transition: 'all 0.2s ease'
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.background = '#00ff41'; e.currentTarget.style.color = '#000'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0, 0, 0, 0.75)'; e.currentTarget.style.color = '#00ff41'; }}
-                                title={language === 'en' ? 'Previous evidence (←)' : 'Evidencia anterior (←)'}
+                                onMouseEnter={e => { e.currentTarget.style.background = '#9c4221'; e.currentTarget.style.borderColor = '#FFFFFF'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'; }}
+                                title={language === 'en' ? 'Previous photo (←)' : 'Fotografía anterior (←)'}
                                 aria-label="Anterior"
                             >
                                 ◀
@@ -2210,13 +2212,13 @@ const LecturaHistoria = ({ userAuth }) => {
                                     right: '20px',
                                     top: '50%',
                                     transform: 'translateY(-50%)',
-                                    background: 'rgba(0, 0, 0, 0.75)',
-                                    color: '#00ff41',
-                                    border: '2px solid rgba(0, 255, 65, 0.5)',
+                                    background: 'rgba(15, 23, 42, 0.85)',
+                                    color: '#FFFFFF',
+                                    border: '2px solid rgba(255, 255, 255, 0.4)',
                                     width: '54px',
                                     height: '54px',
                                     borderRadius: '50%',
-                                    fontSize: '1.8rem',
+                                    fontSize: '1.6rem',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -2225,9 +2227,9 @@ const LecturaHistoria = ({ userAuth }) => {
                                     zIndex: 9999999,
                                     transition: 'all 0.2s ease'
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.background = '#00ff41'; e.currentTarget.style.color = '#000'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0, 0, 0, 0.75)'; e.currentTarget.style.color = '#00ff41'; }}
-                                title={language === 'en' ? 'Next evidence (→)' : 'Evidencia siguiente (→)'}
+                                onMouseEnter={e => { e.currentTarget.style.background = '#9c4221'; e.currentTarget.style.borderColor = '#FFFFFF'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'; }}
+                                title={language === 'en' ? 'Next photo (→)' : 'Fotografía siguiente (→)'}
                                 aria-label="Siguiente"
                             >
                                 ▶
@@ -2242,16 +2244,16 @@ const LecturaHistoria = ({ userAuth }) => {
                             {/* BARRA DE HERRAMIENTAS DE ZOOM */}
                             <div 
                                 style={{
-                                    marginBottom: '10px',
+                                    marginBottom: '12px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: '8px',
-                                    background: 'rgba(5, 15, 8, 0.9)',
-                                    padding: '6px 16px',
+                                    gap: '10px',
+                                    background: 'rgba(15, 23, 42, 0.92)',
+                                    padding: '7px 18px',
                                     borderRadius: '30px',
-                                    border: '1px solid rgba(0, 255, 65, 0.4)',
-                                    boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
                                     backdropFilter: 'blur(8px)',
                                     userSelect: 'none'
                                 }}
@@ -2263,8 +2265,8 @@ const LecturaHistoria = ({ userAuth }) => {
                                     style={{
                                         background: 'transparent',
                                         border: 'none',
-                                        color: zoomNivel <= 1 ? '#555' : '#00ff41',
-                                        fontSize: '1.15rem',
+                                        color: zoomNivel <= 1 ? '#64748B' : '#F8FAFC',
+                                        fontSize: '1.1rem',
                                         fontWeight: 'bold',
                                         cursor: zoomNivel <= 1 ? 'not-allowed' : 'pointer',
                                         padding: '2px 8px',
@@ -2276,7 +2278,7 @@ const LecturaHistoria = ({ userAuth }) => {
                                 </button>
 
                                 <span style={{
-                                    color: '#00ff41',
+                                    color: '#FDBA74',
                                     fontFamily: 'monospace',
                                     fontSize: '0.85rem',
                                     fontWeight: 'bold',
@@ -2293,8 +2295,8 @@ const LecturaHistoria = ({ userAuth }) => {
                                     style={{
                                         background: 'transparent',
                                         border: 'none',
-                                        color: zoomNivel >= 3.5 ? '#555' : '#00ff41',
-                                        fontSize: '1.15rem',
+                                        color: zoomNivel >= 3.5 ? '#64748B' : '#F8FAFC',
+                                        fontSize: '1.1rem',
                                         fontWeight: 'bold',
                                         cursor: zoomNivel >= 3.5 ? 'not-allowed' : 'pointer',
                                         padding: '2px 8px',
@@ -2310,8 +2312,8 @@ const LecturaHistoria = ({ userAuth }) => {
                                         type="button"
                                         onClick={handleResetZoom}
                                         style={{
-                                            background: '#0d2215',
-                                            border: '1px solid #00ff41',
+                                            background: '#9c4221',
+                                            border: '1px solid #FDBA74',
                                             color: '#ffffff',
                                             fontSize: '0.72rem',
                                             fontFamily: 'monospace',
@@ -2327,8 +2329,8 @@ const LecturaHistoria = ({ userAuth }) => {
                                     </button>
                                 )}
 
-                                <span style={{ color: '#888', fontSize: '0.72rem', marginLeft: '6px', fontFamily: 'monospace' }}>
-                                    {zoomNivel > 1 ? '🖱 Arrastra para mover' : '💡 Clic o rueda para lupa'}
+                                <span style={{ color: '#CBD5E1', fontSize: '0.75rem', marginLeft: '6px', fontFamily: "'Inter', sans-serif" }}>
+                                    {zoomNivel > 1 ? '🖱 Arrastra para mover' : '💡 Clic o rueda para ampliar'}
                                 </span>
                             </div>
 
@@ -2338,15 +2340,15 @@ const LecturaHistoria = ({ userAuth }) => {
                                     position: 'relative',
                                     overflow: 'hidden',
                                     borderRadius: '8px',
-                                    maxWidth: '86vw',
-                                    maxHeight: '74vh',
+                                    maxWidth: '90vw',
+                                    maxHeight: '80vh',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: zoomNivel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
-                                    border: '1.5px solid rgba(0, 255, 65, 0.45)',
-                                    boxShadow: '0 10px 40px rgba(0,0,0,0.9), 0 0 25px rgba(0, 255, 65, 0.25)',
-                                    background: '#040805'
+                                    border: '1px solid rgba(255, 255, 255, 0.22)',
+                                    boxShadow: '0 15px 50px rgba(0,0,0,0.85)',
+                                    background: '#0F172A'
                                 }}
                                 onWheel={handleWheelZoom}
                                 onMouseDown={handleMouseDownPan}
@@ -2359,7 +2361,7 @@ const LecturaHistoria = ({ userAuth }) => {
                             >
                                 <img 
                                     src={capturaExpandida} 
-                                    alt="Evidencia ampliada" 
+                                    alt="Fotografía ampliada" 
                                     draggable={false}
                                     onError={(e) => {
                                         if (e.target.src && e.target.src.includes('maxres')) {
@@ -2367,8 +2369,8 @@ const LecturaHistoria = ({ userAuth }) => {
                                         }
                                     }}
                                     style={{ 
-                                        maxHeight: '74vh', 
-                                        maxWidth: '85vw', 
+                                        maxHeight: '80vh', 
+                                        maxWidth: '88vw', 
                                         width: 'auto',
                                         height: 'auto',
                                         objectFit: 'contain', 
@@ -2383,15 +2385,15 @@ const LecturaHistoria = ({ userAuth }) => {
                             </div>
                             
                             {/* INDICADOR DE FOTOGRAMA Y BOTONES INFERIORES */}
-                            <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                            <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
                                 {total > 1 && (
                                     <button
                                         type="button"
                                         onClick={irAnteriorEvidencia}
                                         style={{
-                                            background: '#0d1410',
-                                            color: '#00ff41',
-                                            border: '1px solid rgba(0, 255, 65, 0.4)',
+                                            background: '#1E293B',
+                                            color: '#FFFFFF',
+                                            border: '1px solid rgba(255, 255, 255, 0.3)',
                                             padding: '8px 18px',
                                             borderRadius: '20px',
                                             fontWeight: 'bold',
@@ -2404,8 +2406,8 @@ const LecturaHistoria = ({ userAuth }) => {
                                     </button>
                                 )}
 
-                                <span style={{ color: '#00ff41', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '1px' }}>
-                                    EVIDENCIA {indiceActual !== -1 ? indiceActual + 1 : 1} / {total}
+                                <span style={{ color: '#F8FAFC', fontFamily: "'Merriweather', Georgia, serif", fontSize: '0.88rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                                    Fotografía {indiceActual !== -1 ? indiceActual + 1 : 1} de {total}
                                 </span>
 
                                 {total > 1 && (
@@ -2413,9 +2415,9 @@ const LecturaHistoria = ({ userAuth }) => {
                                         type="button"
                                         onClick={irSiguienteEvidencia}
                                         style={{
-                                            background: '#0d1410',
-                                            color: '#00ff41',
-                                            border: '1px solid rgba(0, 255, 65, 0.4)',
+                                            background: '#1E293B',
+                                            color: '#FFFFFF',
+                                            border: '1px solid rgba(255, 255, 255, 0.3)',
                                             padding: '8px 18px',
                                             borderRadius: '20px',
                                             fontWeight: 'bold',
@@ -2436,17 +2438,17 @@ const LecturaHistoria = ({ userAuth }) => {
                                         setCapturaExpandida(null);
                                     }}
                                     style={{
-                                        background: '#ef4444',
+                                        background: '#9c4221',
                                         color: '#ffffff',
-                                        border: '1px solid #f87171',
+                                        border: '1px solid #FDBA74',
                                         padding: '8px 20px',
                                         borderRadius: '20px',
                                         fontWeight: '800',
                                         fontFamily: 'monospace',
                                         cursor: 'pointer',
                                         fontSize: '0.8rem',
-                                        letterSpacing: '1px',
-                                        marginLeft: '10px'
+                                        letterSpacing: '0.5px',
+                                        marginLeft: '6px'
                                     }}
                                 >
                                     ✕ CERRAR
