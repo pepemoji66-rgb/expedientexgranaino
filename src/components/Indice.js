@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import FiltrosTematicos from './FiltrosTematicos';
 import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
 import { API_BASE_URL } from '../config';
@@ -17,7 +16,6 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
     const [ultimosArticulos, setUltimosArticulos] = useState([]);
     const [comentariosRecientes, setComentariosRecientes] = useState([]);
     const [loadingContent, setLoadingContent] = useState(true);
-    const [filtroTematico, setFiltroTematico] = useState('todos');
 
     // --- BUSCADOR GLOBAL ---
     const [busquedaGlobal, setBusquedaGlobal] = useState('');
@@ -188,18 +186,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
         fetchHomeData();
     }, [language]);
 
-    // Filtrar si el usuario pulsa algún filtro temático
-    const articulosAMostrar = filtroTematico === 'todos'
-        ? ultimosArticulos
-        : filtroTematico === 'ovnis'
-            ? ultimosArticulos.filter(a => a.seccion === 'expediente')
-            : filtroTematico === 'noticias'
-                ? ultimosArticulos.filter(a => a.seccion === 'noticia')
-                : filtroTematico === 'cronica_negra'
-                    ? ultimosArticulos.filter(a => a.seccion === 'caso')
-                    : filtroTematico === 'misterios'
-                        ? ultimosArticulos.filter(a => a.seccion === 'misterio')
-                        : ultimosArticulos;
+    const articulosAMostrar = ultimosArticulos;
 
     const articuloPrincipal = articulosAMostrar.length > 0 ? articulosAMostrar[0] : null;
     const articulosSecundarios = articulosAMostrar.length > 1 ? articulosAMostrar.slice(1, 8) : [];
@@ -213,8 +200,6 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
 
     return (
         <div className="indice-editorial-container">
-            {/* BARRA DE FILTROS TEMÁTICOS EDITORIAL (ARRIBA DEL TODO) */}
-            <FiltrosTematicos filtroActivo={filtroTematico} onFiltroChange={setFiltroTematico} />
 
             {/* ── BUSCADOR GLOBAL DE ARTÍCULOS ── */}
             <div className="buscador-global-wrap" ref={buscadorRef}>
