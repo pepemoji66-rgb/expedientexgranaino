@@ -36,7 +36,7 @@ const PoliticaPrivacidad = () => {
                 <h2 style={{ color: 'var(--color-principal)', fontSize: '1.2rem' }}>3. PUBLICIDAD DE TERCEROS (GOOGLE ADSENSE)</h2>
                 <p>Este sitio web utiliza <strong>Google AdSense</strong> para mostrar anuncios. Google utiliza cookies para mostrar anuncios basados en las visitas anteriores de un usuario a este sitio web o a otros sitios web de Internet.</p>
                 <p><strong>Cookies de publicidad:</strong> El uso de cookies de publicidad permite a Google y a sus socios mostrar anuncios basados en las visitas de los usuarios a sus sitios o a otros sitios de Internet.</p>
-                <p>Usted puede inhabilitar la publicidad personalizada visitando <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>Configuración de anuncios</a>. Alternativamente, puede inhabilitar el uso de cookies de un tercero para la publicidad personalizada visitando <a href="http://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>www.aboutads.info</a>.</p>
+                <p>Usted puede inhabilitar la publicidad personalizada visitando <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>Configuración de anuncios</a>. Alternativamente, puede inhabilitar el uso de cookies de un tercero para la publicidad personalizada visitando <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-principal)' }}>www.aboutads.info</a>.</p>
             </section>
 
             <section style={{ marginBottom: '30px' }}>

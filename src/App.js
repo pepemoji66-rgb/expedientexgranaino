@@ -314,7 +314,6 @@ function App() {
                 { path: "/casos-abiertos", label: "TRUE CRIME" },
                 { path: "/misterios-historicos", label: t('navMysteries') || "MISTERIOS HISTÓRICOS" },
                 { path: "/la-ruleta", label: language === 'en' ? "🎰 BUNKER ROULETTE" : "🎰 LA RULETA DEL BÚNKER" },
-                { path: "/sobre-nosotros", label: language === 'en' ? "ABOUT ME" : "SOBRE EL PROYECTO" },
                 { path: "/sobre-nosotros", label: language === 'en' ? "ABOUT ME" : "SOBRE EL PROYECTO" }
                 // { path: "/biblioteca", label: language === 'en' ? "LIBRARY" : "BIBLIOTECA" },
                 

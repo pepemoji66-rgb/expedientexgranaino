@@ -1071,7 +1071,7 @@ app.get('/casos-abiertos', async (req, res) => {
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#ffb100;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">[CASO CLASIFICADO #${caso.id}] ${caso.titulo ? caso.titulo.toUpperCase() : 'SIN TÍTULO'}</h1>
     <p><strong>Estado:</strong> Bajo investigación del búnker</p>
-    <div style="white-space:pre-line;">${cuerpoTexto}</div>
+    <div style="white-space:pre-line;">${cuerpoSeoParrafos}</div>
 </article>`;
 
             const pagina = inyectarContenidoSEO(
@@ -1343,7 +1343,7 @@ app.get('/privacidad', (req, res) => {
     <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">2. Finalidad y Legitimación</h2>
     <p>Tratamos sus datos para gestionar su registro como agente/colaborador, mantener la seguridad del búnker digital y prevenir accesos no autorizados, analizar el tráfico mediante herramientas estadísticas y mostrar publicidad personalizada basada en sus intereses (Google AdSense).</p>
     <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">3. Publicidad de Terceros (Google AdSense)</h2>
-    <p>Este sitio web utiliza Google AdSense para mostrar anuncios. Google utiliza cookies para mostrar anuncios basados en las visitas anteriores de un usuario a este sitio web o a otros sitios web de Internet. Usted puede inhabilitar la publicidad personalizada visitando la Configuración de anuncios de Google.</p>
+    <p>Este sitio web utiliza Google AdSense para mostrar anuncios. Google utiliza cookies para mostrar anuncios basados en las visitas anteriores de un usuario a este sitio web o a otros sitios web de Internet. Usted puede inhabilitar la publicidad personalizada visitando <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style="color:#00d4ff;">Configuración de anuncios de Google</a> o visitando <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" style="color:#00d4ff;">www.aboutads.info</a>.</p>
     <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">4. Análisis de Datos (Google Analytics)</h2>
     <p>Utilizamos Google Analytics para entender cómo interactúan los usuarios con el búnker. Esta herramienta utiliza cookies para recopilar información de forma anónima y elaborar informes de tendencias del sitio web sin identificar a usuarios individuales.</p>
     <h2 style="color:#00d4ff;font-size:0.95rem;margin-top:20px">5. Derechos ARCO</h2>
@@ -1860,8 +1860,16 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
             const titulo = `${historia.titulo ? historia.titulo.toUpperCase() : 'EXPEDIENTE'} | Expediente X Granaíno`;
             
             // Truncar contenido para la descripción (máximo 160 caracteres)
-            let cuerpoTexto = historia.contenido || historia.cuerpo || 'Sin contenido adicional.';
-            cuerpoTexto = cuerpoTexto.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+            const rawCuerpo = historia.contenido || historia.cuerpo || 'Sin contenido adicional.';
+            const cuerpoSeoParrafos = rawCuerpo
+                .replace(/<\/(p|div|h[1-6]|li|blockquote)>/gi, '\n\n')
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<[^>]*>?/gm, '')
+                .replace(/\r\n/g, '\n')
+                .replace(/[ \t]+/g, ' ')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+            const cuerpoTexto = cuerpoSeoParrafos.replace(/\s+/g, ' ').trim();
             const desc = cuerpoTexto.length > 160 ? cuerpoTexto.substring(0, 157) + '...' : cuerpoTexto;
 
             // Formar URL de la imagen — optimizada para OG (JPEG ligero, Cache-Control: public)
@@ -1926,7 +1934,7 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
         return (!a || a.toLowerCase() === 'administrador' || a.toLowerCase() === 'admin' || a.toUpperCase() === 'ALTO MANDO') ? 'José Moreno Jiménez' : a;
     })()}</p>
     ${historia.fecha ? `<p><strong>Fecha de Documentación:</strong> ${new Date(historia.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>` : ''}
-    <div style="white-space:pre-line;">${cuerpoTexto}</div>
+    <div style="white-space:pre-line;">${cuerpoSeoParrafos}</div>
     ${bloqueFuenteSeo}
     ${bloqueRelacionadosSeo}
 </article>`;
