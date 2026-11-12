@@ -6,6 +6,7 @@ Allow: /
 Disallow: /panel-mando
 Disallow: /acceso
 Disallow: /api/
+Disallow: /promo/
 
 # Googlebot — acceso total a contenido editorial
 User-agent: Googlebot
@@ -13,6 +14,7 @@ Allow: /
 Disallow: /panel-mando
 Disallow: /acceso
 Disallow: /api/
+Disallow: /promo/
 
 # Mediapartners-Google (AdSense crawler) — acceso total
 User-agent: Mediapartners-Google

@@ -984,30 +984,48 @@ const resolverImagenUrl = (req, rawImg) => {
     return url;
 };
 
-// Página de Inicio (/) - SEO enriquecido
-app.get('/', (req, res) => {
+// Página de Inicio (/) - SEO enriquecido con últimos reportajes editoriales
+app.get('/', async (req, res) => {
     const indexPath = path.join(__dirname, 'build', 'index.html');
-    fs.readFile(indexPath, 'utf8', (err, html) => {
+    fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
+
+        let listaArticulosHtml = '';
+        try {
+            const condActivos = "(estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo')";
+            const [exps, casos, mists, nots] = await Promise.all([
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Expediente OVNI' AS cat, '/expedientes/' AS pref FROM expedientes WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'True Crime / Caso Abierto' AS cat, '/casos-abiertos/' AS pref FROM casos_abiertos WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Misterio Histórico' AS cat, '/misterios-historicos/' AS pref FROM misterios_historicos WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, cuerpo AS texto, fecha, 'Noticia y Actualidad' AS cat, '/noticias/' AS pref FROM noticias WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 1500 ORDER BY fecha DESC LIMIT 5`).catch(() => [])
+            ]);
+            const combinados = [...(exps || []), ...(casos || []), ...(mists || []), ...(nots || [])]
+                .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0))
+                .slice(0, 12);
+
+            if (combinados.length > 0) {
+                listaArticulosHtml = '<h2 style="color:#00d4ff;font-size:1rem;margin-top:28px;margin-bottom:15px;">Últimas Investigaciones y Reportajes Publicados</h2><ul style="list-style-type:none;padding:0;">' +
+                    combinados.map(item => {
+                        const fechaStr = item.fecha ? new Date(item.fecha).toLocaleDateString('es-ES') : '';
+                        const extracto = (item.texto || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim().substring(0, 320);
+                        return `<li style="margin-bottom:22px;border-bottom:1px solid #222;padding-bottom:14px;">
+                            <h3 style="color:#00d4ff;margin:0 0 5px 0;"><a href="https://expedientexgranaino.com${item.pref}${item.id}" style="color:#00d4ff;text-decoration:none;">${item.titulo}</a></h3>
+                            <span style="color:#888;font-size:0.75rem;">Categoría: ${item.cat} | Autor: José Moreno Jiménez | Fecha: ${fechaStr}</span>
+                            <p style="margin:8px 0 0 0;">${extracto}...</p>
+                        </li>`;
+                    }).join('') +
+                    '</ul>';
+            }
+        } catch (e) {
+            console.error("Error cargando artículos SEO en portada:", e.message);
+        }
 
         const contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
-    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">EXPEDIENTE X GRANAÍNO — Investigación OVNI y Fenómenos Paranormales en Granada</h1>
-    <p><strong>Expediente X Granaíno</strong> es la plataforma líder de investigación ufológica y fenómenos paranormales del sur de España.
-    Desde nuestro búnker digital monitorizamos en <strong>tiempo real alertas OVNI</strong>, avistamientos aéreos no identificados,
-    crónicas del misterio y eventos inexplicables que ocurren en la provincia de Granada y su área de influencia.
-    Nuestros agentes sobre el terreno documentan cada caso con coordenadas GPS, fotografías de evidencia y relatos detallados
-    para construir el mayor archivo de <strong>casos históricos en Granada</strong> jamás compilado por una red civil de investigadores.</p>
-    <p>La red de observadores analiza constantemente el espacio aéreo, las anomalías electromagnéticas
-    y los fenómenos de energía anómala registrados en Sierra Nevada, la Vega de Granada, la Costa Tropical y la comarca de Guadix.
-    Cada expediente clasificado recibe una valoración de relevancia táctica por parte de la comunidad,
-    asegurando que los <strong>fenómenos paranormales</strong> más significativos queden debidamente registrados.
-    Únete a nuestra red y contribuye con tus propios avistamientos, fotografías y testimonios anónimos.</p>
-    <p>Explora nuestra galería de evidencias clasificadas, escucha las frecuencias de radio del búnker donde se registran
-    <strong>psicofonías</strong> y comunicaciones anómalas, y consulta nuestros expedientes históricos sobre
-    los casos más relevantes de <strong>ufología en Andalucía</strong>. La verdad está ahí fuera, y nosotros la documentamos.
-    Alertas OVNI en tiempo real, análisis de ondas paranormales, dossiers sobre lugares de poder en Granada y
-    crónicas del misterio que desafían cualquier explicación convencional. Bienvenido al archivo más oscuro de la red.</p>
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">EXPEDIENTE X GRANAÍNO — Archivo Documental de Investigación OVNI, Crónica Negra y Misterios Históricos</h1>
+    <p><strong>Expediente X Granaíno</strong> es un archivo digital independiente dirigido desde Atarfe (Granada) por <strong>José Moreno Jiménez</strong>, dedicado a la investigación documental de fenómenos aéreos no identificados (OVNI / UAP), crónica negra (True Crime) y grandes enigmas históricos tanto de Andalucía como a escala internacional.</p>
+    <p>Cada expediente publicado en este portal se elabora a partir de fuentes hemerográficas, archivos desclasificados, bibliografía especializada y testimonios directos, estructurando los hechos de forma rigurosa con su contexto histórico, cronología detallada, hipótesis de investigación y referencias documentales.</p>
+    ${listaArticulosHtml}
 </article>`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
@@ -1015,8 +1033,8 @@ app.get('/', (req, res) => {
 
         const pagina = inyectarContenidoSEO(
             html,
-            'Expediente X Granaíno | Investigación OVNI y Fenómenos Paranormales en Granada',
-            'La plataforma de investigación ufológica más completa del sur de España. Alertas OVNI en tiempo real, psicofonías, casos históricos en Granada y crónicas del misterio.',
+            'Expediente X Granaíno | Investigación OVNI, Crónica Negra y Misterios Históricos',
+            'Archivo documental independiente de investigación ufológica, crónica negra (True Crime) y misterios históricos dirigido por José Moreno Jiménez desde Granada.',
             contenidoSeo,
             imagenUrl,
             paginaUrl
@@ -1041,56 +1059,10 @@ app.get('/casos-abiertos', async (req, res) => {
     fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
 
-        let caso = null;
-        if (casoId) {
-            try {
-                const results = await db.query(
-                    "SELECT * FROM casos_abiertos WHERE id = ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo' OR estado IS NULL OR estado = 'pendiente')", 
-                    [casoId]
-                );
-                if (results && results.length > 0) {
-                    caso = results[0];
-                }
-            } catch (dbErr) {
-                console.error("Error al buscar caso abierto para SEO:", dbErr);
-            }
-        }
-
-        if (caso) {
-            const titulo = `${caso.titulo ? caso.titulo.toUpperCase() : 'CASO ABIERTO'} | Casos Abiertos — Expediente X Granaíno`;
-            
-            let cuerpoTexto = caso.contenido || 'Sin contenido adicional.';
-            cuerpoTexto = cuerpoTexto.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
-            const desc = cuerpoTexto.length > 160 ? cuerpoTexto.substring(0, 157) + '...' : cuerpoTexto;
-
-            const rawImg = caso.imagen_url;
-            const imagenUrl = resolverImagenUrl(req, rawImg) || resolverImagenUrl(req, 'assets/Evidencia en Soportújar.webp');
-            const { paginaUrl } = obtenerUrlsRequest(req);
-
-            const contenidoSeo = `
-<article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
-    <h1 style="color:#ffb100;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">[CASO CLASIFICADO #${caso.id}] ${caso.titulo ? caso.titulo.toUpperCase() : 'SIN TÍTULO'}</h1>
-    <p><strong>Estado:</strong> Bajo investigación del búnker</p>
-    <div style="white-space:pre-line;">${cuerpoSeoParrafos}</div>
-</article>`;
-
-            const pagina = inyectarContenidoSEO(
-                html,
-                titulo,
-                desc,
-                contenidoSeo,
-                imagenUrl,
-                paginaUrl
-            );
-            return res.send(pagina);
-        }
-
         let contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
-    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">Casos Abiertos / Unsolved Cases — True Crime y Misterio</h1>
-    <p>Adéntrate en los <strong>Casos Abiertos</strong> del Búnker. Una colección de crímenes reales, desapariciones inexplicables y misterios 
-    sin resolver (True Crime) documentados en detalle. Investigaciones que desafían la lógica y donde los principales sospechosos 
-    aún deambulan en las sombras.</p>
+    <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">Casos Abiertos / Unsolved Cases — Crónica Negra y True Crime Documentado</h1>
+    <p>Archivo de investigaciones de <strong>Crónica Negra y Casos Abiertos</strong>. Reportajes documentales sobre crímenes sin resolver, desapariciones misteriosas e investigaciones forenses e históricas analizadas en profundidad.</p>
     <ul style="list-style-type:none;padding:0;">`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
@@ -1099,19 +1071,24 @@ app.get('/casos-abiertos', async (req, res) => {
 
         try {
             const casos = await db.query(
-                "SELECT id, titulo, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo' OR estado IS NULL) ORDER BY id DESC LIMIT 30"
+                "SELECT id, titulo, contenido, fecha, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY id DESC LIMIT 30"
             );
             if (casos && casos.length > 0) {
-                // Generar descripción dinámica con los 3 últimos casos
                 const ultimosTres = casos.slice(0, 3).map(c => c.titulo).join(' | ');
                 description = `Últimos casos abiertos: ${ultimosTres}. True Crime y misterios sin resolver.`;
 
-                // Usar la imagen del caso más reciente si tiene
                 if (casos[0].imagen_url) {
                     imagenUrl = resolverImagenUrl(req, casos[0].imagen_url);
                 }
                 casos.forEach(c => {
-                    contenidoSeo += `<li style="margin-bottom:12px;"><a href="https://expedientexgranaino.com/casos-abiertos/${c.id}" style="color:#00d4ff;text-decoration:none;font-weight:bold;">${c.titulo}</a></li>`;
+                    const fechaStr = c.fecha ? new Date(c.fecha).toLocaleDateString('es-ES') : '';
+                    const contCorto = (c.contenido || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim().substring(0, 300);
+                    contenidoSeo += `
+        <li style="margin-bottom:25px;border-bottom:1px solid #222;padding-bottom:15px;">
+            <h3 style="color:#00d4ff;margin:0 0 5px 0;"><a href="https://expedientexgranaino.com/casos-abiertos/${c.id}" style="color:#00d4ff;text-decoration:none;font-weight:bold;">${c.titulo}</a></h3>
+            <span style="color:#666;font-size:0.75rem;">👤 Investigación: José Moreno Jiménez | Fecha: ${fechaStr}</span>
+            <p style="margin:8px 0 0 0;">${contCorto}...</p>
+        </li>`;
                 });
             }
         } catch (dbErr) {
@@ -1143,7 +1120,7 @@ app.get('/misterios-historicos', async (req, res) => {
         let contenidoSeo = `
 <article style="max-width:900px;margin:40px auto;padding:30px;font-family:monospace;color:#aaa;font-size:0.85rem;line-height:1.8;background:#050505;border-left:3px solid #1a4a4a">
     <h1 style="color:#00d4ff;font-size:1.1rem;letter-spacing:3px;margin-bottom:20px">👁️ Misterios Históricos del Planeta — Expediente X Granaíno</h1>
-    <p>Dossier enciclopédico de los enigmas más grandes de la humanidad. El manuscrito Voynich, el incidente Roswell, la colonia Roanoke, el triángulo de las Bermudas o el asesino del Zodiaco. Compilaciones detalladas con coordenadas y archivos desclasificados.</p>
+    <p>Dossier enciclopédico de los grandes enigmas históricos de la humanidad. Reportajes documentales sobre arqueología prohibida, desapariciones históricas, manuscritos indescifrables y archivos desclasificados.</p>
     <ul style="list-style-type:none;padding:0;">`;
 
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
@@ -1152,19 +1129,24 @@ app.get('/misterios-historicos', async (req, res) => {
 
         try {
             const misterios = await db.query(
-                "SELECT id, titulo, imagen_url FROM misterios_historicos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo' OR estado IS NULL) ORDER BY id DESC LIMIT 30"
+                "SELECT id, titulo, contenido, fecha, imagen_url FROM misterios_historicos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY id DESC LIMIT 30"
             );
             if (misterios && misterios.length > 0) {
-                // Generar descripción dinámica con los 3 últimos misterios
                 const ultimosTres = misterios.slice(0, 3).map(m => m.titulo).join(' | ');
                 description = `Últimos misterios: ${ultimosTres}. Grandes enigmas de la historia desclasificados.`;
 
-                // Usar la imagen del misterio más reciente si tiene
                 if (misterios[0].imagen_url) {
                     imagenUrl = resolverImagenUrl(req, misterios[0].imagen_url);
                 }
                 misterios.forEach(m => {
-                    contenidoSeo += `<li style="margin-bottom:12px;"><a href="https://expedientexgranaino.com/misterios-historicos/${m.id}" style="color:#00d4ff;text-decoration:none;font-weight:bold;">${m.titulo}</a></li>`;
+                    const fechaStr = m.fecha ? new Date(m.fecha).toLocaleDateString('es-ES') : '';
+                    const contCorto = (m.contenido || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim().substring(0, 300);
+                    contenidoSeo += `
+        <li style="margin-bottom:25px;border-bottom:1px solid #222;padding-bottom:15px;">
+            <h3 style="color:#00d4ff;margin:0 0 5px 0;"><a href="https://expedientexgranaino.com/misterios-historicos/${m.id}" style="color:#00d4ff;text-decoration:none;font-weight:bold;">${m.titulo}</a></h3>
+            <span style="color:#666;font-size:0.75rem;">👤 Investigación: José Moreno Jiménez | Fecha: ${fechaStr}</span>
+            <p style="margin:8px 0 0 0;">${contCorto}...</p>
+        </li>`;
                 });
             }
         } catch (dbErr) {
@@ -1409,6 +1391,7 @@ app.get('/horoscopo', (req, res) => {
 
 // Sección La Ruleta del Búnker (/la-ruleta) - SEO enriquecido
 app.get('/la-ruleta', (req, res) => {
+    res.set('X-Robots-Tag', 'noindex, nofollow');
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', (err, html) => {
         if (err) return res.sendFile(indexPath);
@@ -1464,7 +1447,7 @@ app.get('/noticias', async (req, res) => {
         let imagenUrl = `${baseImgUrl}/assets/incidente-eva9-lujar.png`;
 
         try {
-            const noticias = await db.query("SELECT id, titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE estado = 'aprobado' ORDER BY fecha DESC LIMIT 20");
+            const noticias = await db.query("SELECT id, titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 1500 ORDER BY fecha DESC LIMIT 20");
             if (noticias && noticias.length > 0) {
                 // Generar descripción dinámica con los 3 últimos titulares
                 const ultimasTres = noticias.slice(0, 3).map(n => n.titulo).join(' | ');
@@ -1510,6 +1493,7 @@ app.get('/noticias', async (req, res) => {
 
 // Sección de Lugares del Misterio (/lugares) - SEO enriquecido
 app.get('/lugares', (req, res) => {
+    res.set('X-Robots-Tag', 'noindex, nofollow');
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', (err, html) => {
         if (err) return res.sendFile(indexPath);
@@ -1545,6 +1529,7 @@ function extraerYoutubeId(url) {
 
 // Sección de Vídeos (/videos) - SEO enriquecido
 app.get('/videos', async (req, res) => {
+    res.set('X-Robots-Tag', 'noindex, nofollow');
     const indexPath = path.join(__dirname, 'build', 'index.html');
     fs.readFile(indexPath, 'utf8', async (err, html) => {
         if (err) return res.sendFile(indexPath);
@@ -1655,7 +1640,7 @@ app.get('/expedientes', async (req, res) => {
 
         try {
             const expedientes = await db.query(
-                "SELECT id, titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') ORDER BY fecha DESC LIMIT 30"
+                "SELECT id, titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY fecha DESC LIMIT 30"
             );
             if (expedientes && expedientes.length > 0) {
                 // Generar descripción dinámica con los 3 últimos expedientes

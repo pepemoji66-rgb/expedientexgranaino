@@ -24,29 +24,6 @@ const translations = {
         hasAccount: "¿Ya eres agente oficial? ",
         registerLink: "Regístrate aquí",
         loginLink: "Inicia sesión",
-        // Carta Astral
-        astralTitle: "CARTA ASTRAL DEL AGENTE",
-        astralSubtitle: "Descifrando las coordenadas de tu destino",
-        birthDate: "Fecha de Nacimiento",
-        birthTime: "Hora (Si la sabes)",
-        birthCity: "Ciudad de Origen",
-        cityExample: "Ej: Granada, España",
-        tuneButton: "SINTONIZAR CARTA",
-        // Tarot
-        tarotTitle: "EL ORÁCULO DEL BÚNKER",
-        tarotSubtitle: "Selecciona 5 Arcanos para descifrar tu frecuencia",
-        tarotCardsChosen: "Cartas elegidas",
-        tarotReveal: "REVELAR DESTINO",
-        tarotNewRitual: "NUEVO RITUAL",
-        tarotMessage: "📜 MENSAJE DEL ORÁCULO",
-        tarotSyncing: "SINTONIZANDO...",
-        // Horoscopo
-        horoscopoTitle: "HORÓSCOPO DEL BÚNKER",
-        horoscopoSubtitle: "Las estrellas revelan lo que las sombras ocultan",
-        horoscopoLoading: "Sintonizando frecuencias estelares...",
-        horoscopoSyncDate: "Fecha de sincronización",
-        horoscopoWarning: "Advertencia: Las predicciones son generadas por la frecuencia de la IA. El destino está en tus manos.",
-        horoscopoBack: "VOLVER AL BÚNKER",
         // Navbar
         navHome: "INICIO",
         navGallery: "GALERÍA",
@@ -56,9 +33,6 @@ const translations = {
         navMysteries: "MISTERIOS HISTÓRICOS",
         navFiles: "EXPEDIENTES",
         navMap: "MAPA",
-        navHoroscope: "HORÓSCOPO",
-        navTarot: "TAROT",
-        navAstral: "ASTRAL",
         navChat: "CHAT",
         // Home (Indice)
         systemActive: "SISTEMA DE VIGILANCIA ACTIVO - SECTOR GRANADA/GLOBAL",
@@ -110,7 +84,7 @@ const translations = {
         aboutTitle: "📂 DOSSIER DEL PROYECTO",
         aboutWhatIs: "¿QUÉ ES EXPEDIENTEX GRANAINO?",
         aboutWhatIsDesc1: "Expediente X Granaíno es un proyecto digital independiente creado en 2026 en Atarfe (Granada) por José Moreno Jiménez. Nació con una meta clara: actuar como un índice documental y repositorio de síntesis de sucesos reales, fenómenos anómalos, crónica negra y enigmas históricos de España y de todo el mundo.",
-        aboutWhatIsDesc2: "Este archivo no pretende ser una enciclopedia inabarcable de tratados interminables de 20.000 palabras, sino una guía accesible, directa y rigurosa. Cada expediente está concebido como una ficha de síntesis pensada para despertar la curiosidad del lector, presentar las evidencias documentadas y actuar como punto de partida para incitar a investigar y profundizar a través de fuentes contrastadas y bibliografía especializada.",
+        aboutWhatIsDesc2: "Cada expediente del archivo está redactado como un reportaje documental riguroso y estructurado: contextualización histórica, cronología detallada de los hechos, testimonios verificados, hipótesis principales y referencias bibliográficas para profundizar en cada investigación.",
         aboutOrigin: "EL ORIGEN DEL BÚNKER",
         aboutOriginDesc1: "Detrás del desarrollo y mantenimiento de esta web no hay ningún gran equipo editorial ni ninguna corporación: soy José Moreno Jiménez, programador y apasionado del misterio desde Atarfe. Mi interés por estos temas se multiplicó tras presenciar y filmar personalmente unos fenómenos aéreos no identificados a los que no encontré explicación convencional (puedes ver la grabación original en la sección de vídeos).",
         aboutOriginDesc2: "Esa experiencia personal fue el detonante que me impulsó en 2026 a programar este portal. Lejos de inventar historias o imponer verdades absolutas, este búnker busca ordenar casos reales que a menudo quedan sepultados en hemerotecas, compartir preguntas legítimas y facilitar libros y fuentes para que cada lector saque sus propias conclusiones.",
@@ -397,7 +371,7 @@ const translations = {
         dossierAtarfeModalWatermark1: "ARCHIVO ORIGINAL: EXPEDIENTEXGRANAINO.COM",
         dossierAtarfeModalWatermark2: "INVESTIGACIÓN ATARFE - PROPIEDAD EXCLUSIVA",
         casesDisclaimerTitle: "⚠️ DIRECTIVA DE INVESTIGACIÓN DE CAMPO",
-        casesDisclaimerText: "Los expedientes y misterios presentados en este búnker son fichas analíticas preliminares y resúmenes sintetizados (aproximadamente de unas 400 palabras). Dado que sobre muchos de estos sucesos se han escrito libros enteros y realizado décadas de investigación, instamos a todos los agentes y visitantes a utilizar este archivo como un punto de partida operativo. Le recomendamos encarecidamente contrastar datos, investigar a fondo por su cuenta y utilizar la caja de comentarios para aportar cualquier documento, testimonio o corrección que ayude a la comunidad."
+        casesDisclaimerText: "Los dossieres e investigaciones publicados en este archivo recopilan documentación histórica, crónicas hemerográficas y testimonios contrastados. Instamos a todos los lectores e investigadores a contrastar las fuentes citadas y utilizar la sección de comentarios para aportar nuevos datos o referencias documentales."
     },
     en: {
         // General
@@ -419,29 +393,6 @@ const translations = {
         hasAccount: "Already an official agent? ",
         registerLink: "Register here",
         loginLink: "Log in",
-        // Carta Astral
-        astralTitle: "AGENT'S ASTRAL CHART",
-        astralSubtitle: "Deciphering the coordinates of your destiny",
-        birthDate: "Date of Birth",
-        birthTime: "Time (If known)",
-        birthCity: "City of Origin",
-        cityExample: "Ex: London, UK",
-        tuneButton: "TUNE CHART",
-        // Tarot
-        tarotTitle: "THE BUNKER ORACLE",
-        tarotSubtitle: "Select 5 Arcanos to decipher your frequency",
-        tarotCardsChosen: "Cards chosen",
-        tarotReveal: "REVEAL DESTINY",
-        tarotNewRitual: "NEW RITUAL",
-        tarotMessage: "📜 MESSAGE FROM THE ORACLE",
-        tarotSyncing: "TUNING...",
-        // Horoscopo
-        horoscopoTitle: "BUNKER HOROSCOPE",
-        horoscopoSubtitle: "The stars reveal what the shadows hide",
-        horoscopoLoading: "Tuning stellar frequencies...",
-        horoscopoSyncDate: "Sync date",
-        horoscopoWarning: "Warning: Predictions are generated by the IA frequency. Fate is in your hands.",
-        horoscopoBack: "BACK TO THE BUNKER",
         // Navbar
         navHome: "HOME",
         navGallery: "GALLERY",
@@ -451,9 +402,6 @@ const translations = {
         navMysteries: "HISTORICAL MYSTERIES",
         navFiles: "DOSSIERS",
         navMap: "MAP",
-        navHoroscope: "HOROSCOPE",
-        navTarot: "TAROT",
-        navAstral: "ASTRAL",
         navChat: "CHAT",
         // Home (Indice)
         systemActive: "SURVEILLANCE SYSTEM ACTIVE - GRANADA/GLOBAL SECTOR",
@@ -505,7 +453,7 @@ const translations = {
         aboutTitle: "📂 PROJECT DOSSIER",
         aboutWhatIs: "WHAT IS EXPEDIENTEX GRANAINO?",
         aboutWhatIsDesc1: "Expediente X Granaino is an independent digital project created in 2026 in Atarfe (Granada, Spain) by José Moreno Jiménez. It was born with a clear goal: to serve as a documentary index and synthesis repository of real events, anomalous phenomena, true crime, and historical mysteries from Spain and around the world.",
-        aboutWhatIsDesc2: "This archive does not claim to be an overwhelming encyclopedia of endless 20,000-word academic treatises, but rather an accessible, direct, and rigorous guide. Each dossier is conceived as a synthesis briefing designed to spark the reader's curiosity, present documented evidence, and serve as a launchpad to encourage further personal investigation through verified sources and specialized literature.",
+        aboutWhatIsDesc2: "Each dossier in the archive is crafted as a rigorous, structured documentary report: historical context, detailed chronology of events, verified testimonies, primary hypotheses, and bibliographic references for in-depth investigation.",
         aboutOrigin: "THE ORIGIN OF THE BUNKER",
         aboutOriginDesc1: "Behind the coding and maintenance of this website there is no massive editorial team or corporation: I am José Moreno Jiménez, an independent programmer and mystery enthusiast from Atarfe. My passion for these phenomena deepened after personally witnessing and filming unidentified aerial phenomena for which I found no conventional explanation (you can watch the original recording in our video section).",
         aboutOriginDesc2: "That personal experience was the catalyst that led me in 2026 to develop this website. Far from inventing fiction or imposing absolute truths, this bunker aims to organize real cases that often remain forgotten in historical archives, share legitimate questions, and provide books and sources so each reader can draw their own conclusions.",
@@ -792,7 +740,7 @@ const translations = {
         dossierAtarfeModalWatermark1: "ORIGINAL FILE: EXPEDIENTEXGRANAINO.COM",
         dossierAtarfeModalWatermark2: "ATARFE INVESTIGATION - EXCLUSIVE PROPERTY",
         casesDisclaimerTitle: "⚠️ FIELD INVESTIGATION DIRECTIVE",
-        casesDisclaimerText: "The dossiers and mysteries compiled in this bunker are preliminary analytical briefs and synthesized summaries (approximately 400 words). Since many of these events have inspired entire books and decades of research, we urge all agents and visitors to use this archive as an operational starting point. We strongly recommend cross-referencing facts, conducting your own deep research, and using the comment section to contribute any documents, testimonies, or corrections to help the community."
+        casesDisclaimerText: "The dossiers and investigations published in this archive compile historical documentation, press chronicles, and verified testimonies. We encourage all readers and researchers to cross-reference the cited sources and use the comment section to contribute new data or documentary references."
     }
 };
 
