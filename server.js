@@ -994,10 +994,10 @@ app.get('/', async (req, res) => {
         try {
             const condActivos = "(estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo')";
             const [exps, casos, mists, nots] = await Promise.all([
-                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Expediente OVNI' AS cat, '/expedientes/' AS pref FROM expedientes WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
-                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'True Crime / Caso Abierto' AS cat, '/casos-abiertos/' AS pref FROM casos_abiertos WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
-                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Misterio Histórico' AS cat, '/misterios-historicos/' AS pref FROM misterios_historicos WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
-                db.query(`SELECT id, titulo, cuerpo AS texto, fecha, 'Noticia y Actualidad' AS cat, '/noticias/' AS pref FROM noticias WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 1500 ORDER BY fecha DESC LIMIT 5`).catch(() => [])
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Expediente OVNI' AS cat, '/expedientes/' AS pref FROM expedientes WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'True Crime / Caso Abierto' AS cat, '/casos-abiertos/' AS pref FROM casos_abiertos WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Misterio Histórico' AS cat, '/misterios-historicos/' AS pref FROM misterios_historicos WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, cuerpo AS texto, fecha, 'Noticia y Actualidad' AS cat, '/noticias/' AS pref FROM noticias WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 2500 ORDER BY fecha DESC LIMIT 5`).catch(() => [])
             ]);
             const combinados = [...(exps || []), ...(casos || []), ...(mists || []), ...(nots || [])]
                 .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0))
@@ -1071,7 +1071,7 @@ app.get('/casos-abiertos', async (req, res) => {
 
         try {
             const casos = await db.query(
-                "SELECT id, titulo, contenido, fecha, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY id DESC LIMIT 30"
+                "SELECT id, titulo, contenido, fecha, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY id DESC LIMIT 30"
             );
             if (casos && casos.length > 0) {
                 const ultimosTres = casos.slice(0, 3).map(c => c.titulo).join(' | ');
@@ -1129,7 +1129,7 @@ app.get('/misterios-historicos', async (req, res) => {
 
         try {
             const misterios = await db.query(
-                "SELECT id, titulo, contenido, fecha, imagen_url FROM misterios_historicos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY id DESC LIMIT 30"
+                "SELECT id, titulo, contenido, fecha, imagen_url FROM misterios_historicos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY id DESC LIMIT 30"
             );
             if (misterios && misterios.length > 0) {
                 const ultimosTres = misterios.slice(0, 3).map(m => m.titulo).join(' | ');
@@ -1447,7 +1447,7 @@ app.get('/noticias', async (req, res) => {
         let imagenUrl = `${baseImgUrl}/assets/incidente-eva9-lujar.png`;
 
         try {
-            const noticias = await db.query("SELECT id, titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 1500 ORDER BY fecha DESC LIMIT 20");
+            const noticias = await db.query("SELECT id, titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 2500 ORDER BY fecha DESC LIMIT 20");
             if (noticias && noticias.length > 0) {
                 // Generar descripción dinámica con los 3 últimos titulares
                 const ultimasTres = noticias.slice(0, 3).map(n => n.titulo).join(' | ');
@@ -1640,7 +1640,7 @@ app.get('/expedientes', async (req, res) => {
 
         try {
             const expedientes = await db.query(
-                "SELECT id, titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500 ORDER BY fecha DESC LIMIT 30"
+                "SELECT id, titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY fecha DESC LIMIT 30"
             );
             if (expedientes && expedientes.length > 0) {
                 // Generar descripción dinámica con los 3 últimos expedientes
@@ -1899,7 +1899,7 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                     const colTexto = esNoticia ? 'cuerpo' : 'contenido';
                     const prefijoRuta = esCaso ? '/casos-abiertos' : esMisterio ? '/misterios-historicos' : esNoticia ? '/noticias' : '/expedientes';
                     const rels = await db.query(
-                        `SELECT id, titulo FROM ${tablaRel} WHERE id != ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(${colTexto}, '')) >= 1500 ORDER BY id DESC LIMIT 5`,
+                        `SELECT id, titulo FROM ${tablaRel} WHERE id != ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(${colTexto}, '')) >= 2500 ORDER BY id DESC LIMIT 5`,
                         [historia.id]
                     );
                     if (rels && rels.length > 0) {
@@ -1935,9 +1935,10 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                 .replace(/\u2029/g, '\\u2029');
             const initialScript = `<script>window.__INITIAL_HISTORIA__ = ${jsonHistoria}; window.__INITIAL_HISTORIA_TYPE__ = ${jsonTypes};</script>`;
 
-            // Criterio de calidad editorial para AdSense: artículos con menos de 1500 caracteres llevan noindex
+            // Criterio de calidad editorial para AdSense: artículos con menos de 2500 caracteres llevan noindex
             const rawContenidoCompleto = (historia.contenido || historia.cuerpo || '').trim();
-            const esArticuloCorto = rawContenidoCompleto.length < 1500;
+            const esArticuloCorto = rawContenidoCompleto.length < 2500;
+            if (esArticuloCorto) res.set('X-Robots-Tag', 'noindex, nofollow');
 
             let pagina = inyectarContenidoSEO(
                 html,
@@ -2243,9 +2244,9 @@ app.get('/sitemap.xml', async (req, res) => {
         // Consulta unificada: incluimos todos los estados activos para TODAS las tablas
         const estadosActivos = "estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'";
 
-        // 2. Expedientes / Relatos — Solo artículos con sustancia editorial (>= 1500 caracteres)
+        // 2. Expedientes / Relatos — Solo artículos con sustancia editorial (>= 2500 caracteres)
         try {
-            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500`);
+            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500`);
             exps.forEach(e => {
                 urls.push({
                     loc: `${domain}/expedientes/${e.id}`,
@@ -2256,9 +2257,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap exps:", e.message); }
 
-        // 3. Casos Abiertos / True Crime — Solo artículos con sustancia editorial (>= 1500 caracteres)
+        // 3. Casos Abiertos / True Crime — Solo artículos con sustancia editorial (>= 2500 caracteres)
         try {
-            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500`);
+            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500`);
             casos.forEach(c => {
                 urls.push({
                     loc: `${domain}/casos-abiertos/${c.id}`,
@@ -2269,9 +2270,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap casos:", e.message); }
 
-        // 4. Misterios Históricos — Solo artículos con sustancia editorial (>= 1500 caracteres)
+        // 4. Misterios Históricos — Solo artículos con sustancia editorial (>= 2500 caracteres)
         try {
-            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 1500`);
+            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500`);
             misterios.forEach(m => {
                 urls.push({
                     loc: `${domain}/misterios-historicos/${m.id}`,
@@ -2282,9 +2283,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap misterios:", e.message); }
 
-        // 5. Noticias — Solo noticias desarrolladas (>= 1500 caracteres)
+        // 5. Noticias — Solo noticias desarrolladas (>= 2500 caracteres)
         try {
-            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 1500`);
+            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 2500`);
             noticias.forEach(n => {
                 urls.push({
                     loc: `${domain}/noticias/${n.id}`,
