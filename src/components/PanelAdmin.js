@@ -524,6 +524,22 @@ const PanelAdmin = () => {
                 setArchivosCapturas([]);
             }
 
+            // AUTO-UPLOAD EVIDENCIAS FOTOGRÁFICAS EN ARTÍCULOS: si seleccionó archivos en el selector y pulsó Guardar directamente
+            if (esTabEditorial && archivosEvidenciasEdit && archivosEvidenciasEdit.length > 0) {
+                const formEv = new FormData();
+                Array.from(archivosEvidenciasEdit).forEach(file => {
+                    formEv.append('evidencias', file);
+                });
+                const resEv = await axios.post(`${API_BASE_URL}/api/admin/upload-evidencias`, formEv);
+                if (resEv.data && resEv.data.urls && resEv.data.urls.length > 0) {
+                    const nuevasUrls = resEv.data.urls.join(',');
+                    finalData.capturas = finalData.capturas && finalData.capturas.trim() !== ''
+                        ? `${finalData.capturas},${nuevasUrls}`
+                        : nuevasUrls;
+                }
+                setArchivosEvidenciasEdit([]);
+            }
+
             if (tab === 'lugares' || tab === 'imagenes' || tab === 'noticias' || tab === 'videos') {
                 if (tab === 'lugares') finalData.nombre = finalData.titulo;
                 if (tab === 'noticias') finalData.cuerpo = finalData.contenido;
@@ -567,9 +583,14 @@ const PanelAdmin = () => {
                 // Si lo vacían, en el futuro se podría borrar de la bd, pero por ahora lo dejamos así.
             }
 
+            if (typeof window !== 'undefined' && window.__INITIAL_HISTORIA__) {
+                delete window.__INITIAL_HISTORIA__;
+            }
+
             alert("✅ REGISTRO ACTUALIZADO CORRECTAMENTE");
             setItemParaEditar(null);
             setArchivoEdit(null);
+            setArchivosEvidenciasEdit([]);
             setAmazonJson('');
             cargarDatos();
         } catch (err) {
@@ -801,6 +822,24 @@ const PanelAdmin = () => {
         try {
             setCargando(true);
             setMensajeSubida("🛰️ Transmitiendo al búnker...");
+
+            // Si seleccionó fotos de galería desde el PC y pulsó Subir directamente sin dar al botón intermedio, las subimos automáticamente
+            if ((tipoSubida === 'expedientes' || tipoSubida === 'noticias' || tipoSubida === 'casos_abiertos' || tipoSubida === 'misterios_historicos') && archivosEvidenciasSubida && archivosEvidenciasSubida.length > 0) {
+                const formEv = new FormData();
+                Array.from(archivosEvidenciasSubida).forEach(file => {
+                    formEv.append('evidencias', file);
+                });
+                const resEv = await axios.post(`${API_BASE_URL}/api/admin/upload-evidencias`, formEv);
+                if (resEv.data && resEv.data.urls && resEv.data.urls.length > 0) {
+                    const nuevasUrls = resEv.data.urls.join(', ');
+                    const capturasCombinadas = urlCapturaSubida && urlCapturaSubida.trim() !== ''
+                        ? `${urlCapturaSubida}, ${nuevasUrls}`
+                        : nuevasUrls;
+                    formData.set('capturas', capturasCombinadas);
+                }
+                setArchivosEvidenciasSubida([]);
+            }
+
             const resUpload = await axios.post(`${API_BASE_URL}/api/admin/admin/upload`, formData);
             const urlImagenCargada = resUpload.data?.ruta || '';
             const newRecordId = resUpload.data?.id;
@@ -2301,6 +2340,58 @@ const PanelAdmin = () => {
                                         placeholder="https://servidor.com/evidencia1.jpg, https://servidor.com/evidencia2.jpg"
                                         style={{ width: '100%', minHeight: '70px', background: '#050505', color: '#00ff41', border: '1px solid #333', padding: '10px', fontFamily: 'monospace', fontSize: '0.78rem' }}
                                     />
+                                    {editForm.capturas && editForm.capturas.trim() !== '' && (() => {
+                                        const listaUrls = editForm.capturas.split(',').map(u => u.trim()).filter(Boolean);
+                                        if (listaUrls.length === 0) return null;
+                                        return (
+                                            <div style={{ marginTop: '10px' }}>
+                                                <small style={{ color: '#00ff41', display: 'block', marginBottom: '6px', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                                    🖼️ {listaUrls.length} fotografía(s) en la galería de este expediente:
+                                                </small>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(95px, 1fr))', gap: '8px' }}>
+                                                    {listaUrls.map((u, idx) => {
+                                                        const imgSrc = u.startsWith('http') ? u : `${API_BASE_URL}/imagenes/${u}`;
+                                                        return (
+                                                            <div key={idx} style={{ position: 'relative', border: '1px solid #00ff41', borderRadius: '4px', overflow: 'hidden', background: '#000', height: '72px' }}>
+                                                                <img
+                                                                    src={imgSrc}
+                                                                    alt={`Foto ${idx + 1}`}
+                                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                                                    onError={e => { e.target.style.opacity = '0.3'; }}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    title="Quitar esta foto de la galería"
+                                                                    onClick={() => {
+                                                                        const restantes = listaUrls.filter((_, i) => i !== idx).join(', ');
+                                                                        setEditForm(prev => ({ ...prev, capturas: restantes }));
+                                                                    }}
+                                                                    style={{
+                                                                        position: 'absolute',
+                                                                        top: '3px',
+                                                                        right: '3px',
+                                                                        background: 'rgba(220, 38, 38, 0.9)',
+                                                                        color: '#fff',
+                                                                        border: 'none',
+                                                                        borderRadius: '50%',
+                                                                        width: '20px',
+                                                                        height: '20px',
+                                                                        fontSize: '0.7rem',
+                                                                        fontWeight: 'bold',
+                                                                        cursor: 'pointer',
+                                                                        lineHeight: '20px',
+                                                                        padding: 0
+                                                                    }}
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
                                     {editForm.capturas && (editForm.capturas.includes('\\') || editForm.capturas.startsWith('C:') || editForm.capturas.includes('/Users/')) && (
                                         <small style={{ color: '#ff4444', display: 'block', marginTop: '6px', fontWeight: 'bold' }}>
                                             ⚠️ ALERTA: Has escrito una ruta local de tu ordenador. Para usar esas imágenes, usa el botón de arriba "SELECCIONAR FOTOS DE TU ORDENADOR".

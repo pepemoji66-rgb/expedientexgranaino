@@ -467,7 +467,7 @@ const LecturaHistoria = ({ userAuth }) => {
     // ESTADO DE GALERÍA DE EVIDENCIAS / CAPTURAS
     const [capturasEvidencias, setCapturasEvidencias] = useState([]);
     const [capturaExpandida, setCapturaExpandida] = useState(null);
-    const [galeriaAbierta, setGaleriaAbierta] = useState(false);
+    const [galeriaAbierta, setGaleriaAbierta] = useState(true);
 
     // ESTADO DE ZOOM Y DESPLAZAMIENTO (PAN) EN EL VISOR DE EVIDENCIAS
     const [zoomNivel, setZoomNivel] = useState(1);
@@ -1000,9 +1000,9 @@ const LecturaHistoria = ({ userAuth }) => {
     // Los libros y bibliografías asignados a este artículo específico siguen mostrándose al 100%.
     const sinLibrosPropios = false;
 
-    const obtenerHistoria = async () => {
+    const obtenerHistoria = async (silencioso = false) => {
         try {
-            setCargando(true);
+            if (!silencioso) setCargando(true);
             console.log(`📡 ESCANEANDO ARCHIVO ID: ${id}...`);
 
             const traducirAlVuelo = async (objeto, campoContenido = 'contenido') => {
@@ -1218,9 +1218,12 @@ const LecturaHistoria = ({ userAuth }) => {
         window.scrollTo(0, 0); // SUBIDA AUTOMÁTICA AL CARGAR
         const initialH = getInitialHistoria();
         if (initialH && String(initialH.id) === String(id) && language !== 'en') {
+            setHistoria(initialH);
             setCargando(false);
+            // Refrescar siempre en segundo plano desde la API para reflejar ediciones recientes del panel admin
+            obtenerHistoria(true);
         } else {
-            obtenerHistoria();
+            obtenerHistoria(false);
         }
         
         // Prime the voices database on mobile/Safari
@@ -1591,24 +1594,19 @@ const LecturaHistoria = ({ userAuth }) => {
                         <button
                             type="button"
                             onClick={() => {
-                                setGaleriaAbierta(prev => {
-                                    const nextState = !prev;
-                                    if (nextState) {
-                                        setTimeout(() => {
-                                            const el = document.getElementById('seccion-galeria-evidencias');
-                                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                                        }, 100);
-                                    }
-                                    return nextState;
-                                });
+                                setGaleriaAbierta(true);
+                                setTimeout(() => {
+                                    const el = document.getElementById('seccion-galeria-evidencias');
+                                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                }, 80);
                             }}
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                background: '#f0fdf4',
-                                color: '#166534',
-                                border: '1px solid #86efac',
+                                background: '#FFF7ED',
+                                color: '#9c4221',
+                                border: '1px solid #FDBA74',
                                 padding: '10px 22px',
                                 borderRadius: '30px',
                                 fontWeight: '800',
@@ -1617,12 +1615,12 @@ const LecturaHistoria = ({ userAuth }) => {
                                 letterSpacing: '0.3px',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
-                                boxShadow: '0 2px 8px rgba(22, 101, 52, 0.08)'
+                                boxShadow: '0 2px 8px rgba(156, 66, 33, 0.12)'
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.background = '#dcfce7'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = '#f0fdf4'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#FFEDD5'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.transform = 'translateY(0)'; }}
                         >
-                            📸 <span>{galeriaAbierta ? (language === 'en' ? 'PHOTO ARCHIVE OPEN (CLICK TO FOLD)' : 'ARCHIVO FOTOGRÁFICO ABIERTO (PULSA PARA PLEGAR)') : (language === 'en' ? 'OPEN PHOTO ARCHIVE' : 'DESPLEGAR ARCHIVO FOTOGRÁFICO')} ({capturasEvidencias.length}) {galeriaAbierta ? '▲' : '▼'}</span>
+                            📷 <span>{language === 'en' ? 'VIEW PHOTO ARCHIVE OF THE CASE' : 'VER ARCHIVO FOTOGRÁFICO DEL CASO'} ({capturasEvidencias.length} {language === 'en' ? 'PHOTOS' : 'FOTOS'}) ↓</span>
                         </button>
                     </div>
                 )}
