@@ -178,6 +178,7 @@ import './paneladmin.css';
 import { API_BASE_URL, ADMIN_EMAIL } from '../config';
 import { safeLocalStorage } from '../utils/storage';
 import Paginacion from './Paginacion';
+import { calcularRelevanciaBusqueda } from './BuscadorAZ';
 
 const PanelAdmin = () => {
     const [tab, setTab] = useState('inicio');
@@ -214,6 +215,7 @@ const PanelAdmin = () => {
     const [paginaActual, setPaginaActual] = useState(1); // Se resetea a 1 al cambiar de pestaña
     const itemsPorPagina = 10;
     const [filtroBusqueda, setFiltroBusqueda] = useState('');
+    const [ordenAdmin, setOrdenAdmin] = useState('recientes'); // 'recientes' | 'antiguos' | 'cortos' | 'largos'
 
     // ESTADOS DE FORMULARIO DE SUBIDA
     const [tipoSubida, setTipoSubida] = useState('imagenes');
@@ -864,20 +866,62 @@ const PanelAdmin = () => {
         }
     };
 
+    const obtenerLongitudTexto = (item) => {
+        const raw = item?.contenido || item?.cuerpo || item?.descripcion || '';
+        return String(raw).replace(/<[^>]+>/g, '').trim().length;
+    };
+
+    const esTabEditorial = ['expedientes', 'casos_abiertos', 'misterios_historicos', 'noticias'].includes(tab);
+
     const listaBase = datos[tab] || [];
-    const listaActiva = listaBase.filter(item => {
-        if (!filtroBusqueda) return true;
-        const query = filtroBusqueda.toLowerCase();
-        return (
-            (item.titulo && item.titulo.toLowerCase().includes(query)) ||
-            (item.nombre && item.nombre.toLowerCase().includes(query)) ||
-            (item.email && item.email.toLowerCase().includes(query)) ||
-            (item.mensaje && item.mensaje.toLowerCase().includes(query)) ||
-            (item.nombre_usuario && item.nombre_usuario.toLowerCase().includes(query)) ||
-            (item.contenido && item.contenido.toLowerCase().includes(query)) ||
-            (item.descripcion && item.descripcion.toLowerCase().includes(query))
-        );
-    });
+    const queryLimpia = (filtroBusqueda || '').trim();
+
+    const listaActiva = listaBase
+        .map((item, index) => ({
+            item,
+            index,
+            relevancia: queryLimpia ? calcularRelevanciaBusqueda(item, queryLimpia) : 1,
+            longitud: obtenerLongitudTexto(item)
+        }))
+        .filter(entry => entry.relevancia > 0)
+        .sort((a, b) => {
+            // 1. Si hay búsqueda activa, priorizar siempre por relevancia (ID exacto -> Título -> Cuerpo)
+            if (queryLimpia && b.relevancia !== a.relevancia) {
+                return b.relevancia - a.relevancia;
+            }
+            // 2. Orden seleccionado en el panel
+            if (ordenAdmin === 'antiguos') {
+                const idA = Number(a.item.id || a.item._id) || 0;
+                const idB = Number(b.item.id || b.item._id) || 0;
+                if (idA !== idB) return idA - idB;
+                return b.index - a.index;
+            }
+            if (ordenAdmin === 'cortos') {
+                if (a.longitud !== b.longitud) return a.longitud - b.longitud;
+            }
+            if (ordenAdmin === 'largos') {
+                if (b.longitud !== a.longitud) return b.longitud - a.longitud;
+            }
+            // Por defecto ('recientes'): orden original (más recientes primero)
+            return a.index - b.index;
+        })
+        .map(entry => entry.item);
+
+    // Detectar coincidencias en otras secciones cuando el administrador busca un expediente
+    const coincidenciasOtrasSecciones = queryLimpia
+        ? [
+            { key: 'expedientes', label: '📁 RELATOS' },
+            { key: 'casos_abiertos', label: '💀 CASOS ABIERTOS' },
+            { key: 'misterios_historicos', label: '👁️ MISTERIOS' },
+            { key: 'noticias', label: '📰 NOTICIAS' }
+        ]
+            .filter(sec => sec.key !== tab)
+            .map(sec => ({
+                ...sec,
+                total: (datos[sec.key] || []).filter(it => calcularRelevanciaBusqueda(it, queryLimpia) > 0).length
+            }))
+            .filter(sec => sec.total > 0)
+        : [];
     
     const itemsPaginados = listaActiva.slice((paginaActual - 1) * itemsPorPagina, paginaActual * itemsPorPagina);
     const totalPaginas = Math.ceil(listaActiva.length / itemsPorPagina);
@@ -1145,12 +1189,12 @@ const PanelAdmin = () => {
                 </div>
             ) : tab !== 'subir' ? (
                 <>
-                    <div className="admin-actions-bar">
-                        <div className="buscador-admin">
+                    <div className="admin-actions-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div className="buscador-admin" style={{ flex: '1 1 320px' }}>
                             <span className="search-icon">🔍</span>
                             <input 
                                 type="text" 
-                                placeholder={`Buscar en ${tab}...`} 
+                                placeholder={`Buscar en ${tab} por título, palabra clave o #ID (ej: #45)...`} 
                                 value={filtroBusqueda}
                                 onChange={(e) => {
                                     setFiltroBusqueda(e.target.value);
@@ -1162,8 +1206,81 @@ const PanelAdmin = () => {
                                 <button className="btn-clear-search" onClick={() => { setFiltroBusqueda(''); setPaginaActual(1); }}>✕</button>
                             )}
                         </div>
-                        {filtroBusqueda && <div className="conteo-resultados">Detectados: {listaActiva.length} registros</div>}
+
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <label style={{ color: '#aaa', fontSize: '0.75rem', fontFamily: 'monospace' }}>ORDENAR:</label>
+                            <select
+                                value={ordenAdmin}
+                                onChange={(e) => {
+                                    setOrdenAdmin(e.target.value);
+                                    setPaginaActual(1);
+                                }}
+                                style={{
+                                    background: '#050a0e',
+                                    color: 'var(--color-principal)',
+                                    border: '1px solid var(--color-principal)',
+                                    padding: '8px 10px',
+                                    borderRadius: '4px',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.78rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <option value="recientes">🆕 Más recientes primero</option>
+                                <option value="antiguos">🕰️ Más antiguos primero (ID 1, 2...)</option>
+                                {esTabEditorial && (
+                                    <>
+                                        <option value="cortos">📏 Más cortos primero (&lt; 2.500 caract.)</option>
+                                        <option value="largos">📚 Más extensos primero</option>
+                                    </>
+                                )}
+                            </select>
+
+                            {filtroBusqueda && <div className="conteo-resultados">Detectados: {listaActiva.length} registros</div>}
+                        </div>
                     </div>
+
+                    {coincidenciasOtrasSecciones.length > 0 && (
+                        <div style={{
+                            background: 'rgba(0, 212, 255, 0.08)',
+                            border: '1px solid rgba(0, 212, 255, 0.35)',
+                            borderRadius: '6px',
+                            padding: '10px 14px',
+                            marginBottom: '15px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            flexWrap: 'wrap',
+                            fontFamily: 'monospace',
+                            fontSize: '0.8rem'
+                        }}>
+                            <span style={{ color: '#00d4ff', fontWeight: 'bold' }}>
+                                💡 "{filtroBusqueda}" también aparece en otras secciones:
+                            </span>
+                            {coincidenciasOtrasSecciones.map(sec => (
+                                <button
+                                    key={sec.key}
+                                    type="button"
+                                    onClick={() => {
+                                        setTab(sec.key);
+                                        setPaginaActual(1);
+                                    }}
+                                    style={{
+                                        background: '#00d4ff',
+                                        color: '#000',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        padding: '4px 10px',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {sec.label} ({sec.total}) ➔
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     
                     <div className="table-responsive">
                         <table className="tabla-admin">
@@ -1215,7 +1332,26 @@ const PanelAdmin = () => {
                                             </td>
                                             <td>
                                                 <div className="texto-verde">{item.titulo || item.nombre || item.nombre_usuario || "Sin título"}</div>
-                                                <small className="id-tag">ID: #{id}</small>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                                    <small className="id-tag">ID: #{id}</small>
+                                                    {esTabEditorial && (() => {
+                                                        const len = obtenerLongitudTexto(item);
+                                                        const esLargo = len >= 2500;
+                                                        return (
+                                                            <small style={{
+                                                                fontSize: '0.68rem',
+                                                                padding: '1px 6px',
+                                                                borderRadius: '3px',
+                                                                fontFamily: 'monospace',
+                                                                background: esLargo ? 'rgba(0, 255, 65, 0.1)' : 'rgba(255, 177, 0, 0.15)',
+                                                                color: esLargo ? '#00ff41' : '#ffb100',
+                                                                border: `1px solid ${esLargo ? 'rgba(0, 255, 65, 0.35)' : 'rgba(255, 177, 0, 0.45)'}`
+                                                            }}>
+                                                                {esLargo ? `✅ ${len.toLocaleString('es-ES')} caract.` : `⚠️ ${len.toLocaleString('es-ES')} caract. (Corto)`}
+                                                            </small>
+                                                        );
+                                                    })()}
+                                                </div>
                                             </td>
                                             <td>
                                                 {tab === 'usuarios' && (

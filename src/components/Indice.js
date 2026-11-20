@@ -4,6 +4,7 @@ import axios from 'axios';
 import AdSlot from './AdSlot';
 import { useLanguage } from '../context/LanguageContext';
 import { API_BASE_URL } from '../config';
+import { calcularRelevanciaBusqueda } from './BuscadorAZ';
 import './Indice.css';
 
 const Indice = ({ userAuth, stats, setTema, tema }) => {
@@ -38,14 +39,21 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
         return () => document.removeEventListener('mousedown', handleClickFuera);
     }, []);
 
-    const resultadosBusqueda = busquedaGlobal.trim().length >= 3
-        ? todosLosArticulos.filter(art => {
-            const q = busquedaGlobal.trim().toLowerCase();
-            return (
-                (art.titulo || '').toLowerCase().includes(q) ||
-                (art.contenido || '').toLowerCase().includes(q)
-            );
-        }).slice(0, 15)
+    const consultaGlobalActiva = busquedaGlobal.trim().length >= 2 || /^\s*#?\d+\s*$/.test(busquedaGlobal);
+
+    const resultadosBusqueda = consultaGlobalActiva
+        ? todosLosArticulos
+            .map(art => ({
+                art,
+                relevancia: calcularRelevanciaBusqueda(art, busquedaGlobal)
+            }))
+            .filter(entry => entry.relevancia > 0)
+            .sort((a, b) => {
+                if (b.relevancia !== a.relevancia) return b.relevancia - a.relevancia;
+                return (b.art.timestamp || 0) - (a.art.timestamp || 0);
+            })
+            .slice(0, 20)
+            .map(entry => entry.art)
         : [];
 
     const seccionColors = {
@@ -236,13 +244,20 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                     <input
                         className="buscador-global-input"
                         type="text"
-                        placeholder={language === 'en' ? 'Search all articles... (poltergeist, OVNI, atarfe...)' : 'Buscar en todos los artículos... (poltergeist, OVNI, Atarfe...)'}
+                        placeholder={language === 'en' ? 'Search by title, keyword or dossier #ID (e.g. #125, OVNI, Chamberí...)' : 'Buscar por título, palabra clave o nº de expediente (ej: #125, Chamberí, OVNI...)'}
                         value={busquedaGlobal}
                         onChange={e => {
                             setBusquedaGlobal(e.target.value);
                             setMostrarResultados(true);
                         }}
                         onFocus={() => setMostrarResultados(true)}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' && resultadosBusqueda.length > 0) {
+                                navigate(resultadosBusqueda[0].link);
+                                setBusquedaGlobal('');
+                                setMostrarResultados(false);
+                            }
+                        }}
                     />
                     {busquedaGlobal && (
                         <button
@@ -254,7 +269,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                 </div>
 
                 {/* DROPDOWN DE RESULTADOS */}
-                {mostrarResultados && busquedaGlobal.trim().length >= 3 && (
+                {mostrarResultados && consultaGlobalActiva && (
                     <div className="buscador-global-results">
                         {resultadosBusqueda.length === 0 ? (
                             <div className="buscador-global-empty">
@@ -288,7 +303,7 @@ const Indice = ({ userAuth, stats, setTema, tema }) => {
                                                 className="buscador-global-badge"
                                                 style={{ background: (seccionColors[art.seccion] || {}).bg || '#333' }}
                                             >
-                                                {(seccionColors[art.seccion] || {}).label || art.seccionLabel}
+                                                {(seccionColors[art.seccion] || {}).label || art.seccionLabel} · #{art.id}
                                             </span>
                                             <span className="buscador-global-title">{art.titulo}</span>
                                         </div>
