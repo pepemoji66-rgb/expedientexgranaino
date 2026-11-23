@@ -326,28 +326,11 @@ app.put('/api/usuarios/aprobar/:id', async (req, res) => {
 
         await db.execute("UPDATE usuarios SET aprobado = 1 WHERE id = ?", [req.params.id]);
 
-        // Notificación automática al canal táctico para que el usuario sepa que está aprobado
-        const msgData = {
-            nombre_usuario: 'SISTEMA',
-            mensaje: `🚀 ¡ALERTA DE SEGURIDAD! El agente ${nombreAgente.toUpperCase()} ha sido validado y ya tiene acceso total al búnker.`,
-            rol_usuario: 'admin',
-            tipo: 'publico',
-            fecha: new Date()
-        };
-
-        await db.execute("INSERT INTO chat_mensajes (nombre_usuario, mensaje, rol_usuario, tipo, fecha) VALUES (?, ?, ?, ?, NOW())",
-            [msgData.nombre_usuario, msgData.mensaje, msgData.rol_usuario, msgData.tipo]);
-
-        // También lo publicamos en Comentarios (Página Principal) para máxima visibilidad
+        // Publicamos aviso en Comentarios (Página Principal) para visibilidad
         await db.execute("INSERT INTO comentarios (agente, mensaje, fecha, aprobado) VALUES (?, ?, NOW(), 1)",
             ['SISTEMA', `🛡️ NUEVO AGENTE: El investigador ${nombreAgente.toUpperCase()} ha sido validado para el acceso al búnker.`]);
 
-        // Emitimos por socket para tiempo real si está disponible
-        if (typeof io !== 'undefined') {
-            io.emit('recibir_mensaje', { ...msgData, id: Date.now() });
-        }
-
-        res.json({ mensaje: "Agente autorizado y notificado en todos los canales." });
+        res.json({ mensaje: "Agente autorizado correctamente." });
     } catch (err) {
         console.error("Error al aprobar agente:", err);
         res.status(500).json({ error: "No se pudo autorizar al agente" });
@@ -560,6 +543,30 @@ db.query("ALTER TABLE casos_abiertos ADD COLUMN youtube_url VARCHAR(500) DEFAULT
 db.query("ALTER TABLE misterios_historicos ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL").catch(() => {});
 db.query("ALTER TABLE noticias ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL").catch(() => {});
 
+// Migraciones para añadir contenido_propio a las tablas editoriales
+db.query("ALTER TABLE expedientes ADD COLUMN contenido_propio TINYINT(1) NOT NULL DEFAULT 0").catch(() => {});
+db.query("ALTER TABLE casos_abiertos ADD COLUMN contenido_propio TINYINT(1) NOT NULL DEFAULT 0").catch(() => {});
+db.query("ALTER TABLE misterios_historicos ADD COLUMN contenido_propio TINYINT(1) NOT NULL DEFAULT 0").catch(() => {});
+db.query("ALTER TABLE noticias ADD COLUMN contenido_propio TINYINT(1) NOT NULL DEFAULT 0").catch(() => {});
+
+const TABLAS_EDITORIALES = ['expedientes', 'casos_abiertos', 'misterios_historicos', 'noticias'];
+let cacheModoPropio = { valor: false, ts: 0 };
+
+async function modoPropioActivo() {
+    if (Date.now() - cacheModoPropio.ts < 60000) return cacheModoPropio.valor;
+    try {
+        const r = await db.query(
+            `SELECT (SELECT COUNT(*) FROM expedientes WHERE contenido_propio = 1) + (SELECT COUNT(*) FROM casos_abiertos WHERE contenido_propio = 1) + (SELECT COUNT(*) FROM misterios_historicos WHERE contenido_propio = 1) + (SELECT COUNT(*) FROM noticias WHERE contenido_propio = 1) AS total`
+        );
+        cacheModoPropio = { valor: Number(r[0]?.total || 0) > 0, ts: Date.now() };
+    } catch (e) {
+        cacheModoPropio = { valor: false, ts: Date.now() };
+    }
+    return cacheModoPropio.valor;
+}
+
+const condCalidad = (colTexto, modo) => modo ? 'contenido_propio = 1' : `CHAR_LENGTH(COALESCE(${colTexto}, '')) >= 2500`;
+
 /* SECCIÓN COLABORADORES DESACTIVADA (sin página pública). La tabla 'colaboradores' se conserva sin uso.
 // --- COLABORADORES DEL BÚNKER ---
 // Inicializar tabla si no existe
@@ -605,28 +612,6 @@ app.delete('/api/colaboradores/:id', async (req, res) => {
 });
 
 */
-/* DESACTIVADO: /api/chat-ia no usado en la web pública
-app.post('/api/chat-ia', async (req, res) => {
-    const { pregunta } = req.body;
-    if (!pregunta) return res.status(400).json({ respuesta: "Falta señal de entrada, hermano." });
-
-    const modelosAProbar = ["gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.0-pro"];
-    for (const modName of modelosAProbar) {
-        try {
-            const targetModel = genAI.getGenerativeModel({ model: modName });
-            const result = await targetModel.generateContent(`Eres el Archivero del Búnker de ExpedienteX. Responde brevemente (máximo 50 palabras) y con misterio a: "${pregunta}"`);
-            const responseData = await result.response;
-            return res.json({ respuesta: responseData.text() });
-        } catch (error) {
-            console.error(`❌ Fallo con modelo ${modName}:`, error.message);
-            if (modName === modelosAProbar[modelosAProbar.length - 1]) {
-                return res.status(500).json({ respuesta: "SISTEMA INESTABLE: El Archivero no puede descifrar los archivos ahora mismo." });
-            }
-        }
-    }
-});
-
-*/
 app.post('/api/traducir-tactico', async (req, res) => {
     const { texto } = req.body;
     if (!texto) return res.status(400).json({ respuesta: "Sin datos para descifrar." });
@@ -659,6 +644,31 @@ app.use('/api/audios', audiosRoutes(db, uploadAudios));
 app.use('/api/galeria', galeriaRoutes(db, uploadArchivos, uploadGeneral));
 app.use('/api/auth', authRoutes(db));
 app.use('/api/expedientes', expedientesRoutes(db, uploadLugares));
+// Marcar o desmarcar artículos como contenido propio desde el Panel de Mando
+app.post('/api/admin/contenido-propio', async (req, res) => {
+    const { tabla, ids, valor } = req.body || {};
+    if (!TABLAS_EDITORIALES.includes(tabla)) {
+        return res.status(400).json({ error: 'Tabla editorial no válida.' });
+    }
+    const idsLimpios = Array.isArray(ids)
+        ? [...new Set(ids.map(Number).filter(n => Number.isInteger(n) && n > 0))]
+        : [];
+    if (idsLimpios.length === 0) {
+        return res.status(400).json({ error: 'Lista de IDs vacía o no válida.' });
+    }
+    const valorNum = (valor === 1 || valor === '1' || valor === true) ? 1 : (valor === 0 || valor === '0' || valor === false) ? 0 : null;
+    if (valorNum === null) {
+        return res.status(400).json({ error: 'El campo valor debe ser 0 o 1.' });
+    }
+    try {
+        const result = await db.query(`UPDATE ${tabla} SET contenido_propio = ? WHERE id IN (?)`, [valorNum, idsLimpios]);
+        cacheModoPropio.ts = 0;
+        res.json({ ok: true, actualizados: Number(result?.affectedRows ?? idsLimpios.length) });
+    } catch (err) {
+        console.error('Error al actualizar contenido_propio:', err);
+        res.status(500).json({ error: 'Error al actualizar el estado de contenido propio.' });
+    }
+});
 app.use('/api/admin', adminRoutes(db));
 
 
@@ -992,12 +1002,13 @@ app.get('/', async (req, res) => {
 
         let listaArticulosHtml = '';
         try {
+            const modo = await modoPropioActivo();
             const condActivos = "(estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo')";
             const [exps, casos, mists, nots] = await Promise.all([
-                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Expediente OVNI' AS cat, '/expedientes/' AS pref FROM expedientes WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
-                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'True Crime / Caso Abierto' AS cat, '/casos-abiertos/' AS pref FROM casos_abiertos WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
-                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Misterio Histórico' AS cat, '/misterios-historicos/' AS pref FROM misterios_historicos WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY fecha DESC LIMIT 5`).catch(() => []),
-                db.query(`SELECT id, titulo, cuerpo AS texto, fecha, 'Noticia y Actualidad' AS cat, '/noticias/' AS pref FROM noticias WHERE ${condActivos} AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 2500 ORDER BY fecha DESC LIMIT 5`).catch(() => [])
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Expediente OVNI' AS cat, '/expedientes/' AS pref FROM expedientes WHERE ${condActivos} AND ${condCalidad('contenido', modo)} ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'True Crime / Caso Abierto' AS cat, '/casos-abiertos/' AS pref FROM casos_abiertos WHERE ${condActivos} AND ${condCalidad('contenido', modo)} ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, contenido AS texto, fecha, 'Misterio Histórico' AS cat, '/misterios-historicos/' AS pref FROM misterios_historicos WHERE ${condActivos} AND ${condCalidad('contenido', modo)} ORDER BY fecha DESC LIMIT 5`).catch(() => []),
+                db.query(`SELECT id, titulo, cuerpo AS texto, fecha, 'Noticia y Actualidad' AS cat, '/noticias/' AS pref FROM noticias WHERE ${condActivos} AND ${condCalidad('cuerpo', modo)} ORDER BY fecha DESC LIMIT 5`).catch(() => [])
             ]);
             const combinados = [...(exps || []), ...(casos || []), ...(mists || []), ...(nots || [])]
                 .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0))
@@ -1070,8 +1081,9 @@ app.get('/casos-abiertos', async (req, res) => {
         let imagenUrl = `${baseImgUrl}/assets/Evidencia%20en%20Soportújar.webp`;
 
         try {
+            const modo = await modoPropioActivo();
             const casos = await db.query(
-                "SELECT id, titulo, contenido, fecha, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY id DESC LIMIT 30"
+                `SELECT id, titulo, contenido, fecha, imagen_url FROM casos_abiertos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND ${condCalidad('contenido', modo)} ORDER BY id DESC LIMIT 30`
             );
             if (casos && casos.length > 0) {
                 const ultimosTres = casos.slice(0, 3).map(c => c.titulo).join(' | ');
@@ -1128,8 +1140,9 @@ app.get('/misterios-historicos', async (req, res) => {
         let imagenUrl = `${baseImgUrl}/promo/img/mysterious_granada.png`;
 
         try {
+            const modo = await modoPropioActivo();
             const misterios = await db.query(
-                "SELECT id, titulo, contenido, fecha, imagen_url FROM misterios_historicos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY id DESC LIMIT 30"
+                `SELECT id, titulo, contenido, fecha, imagen_url FROM misterios_historicos WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND ${condCalidad('contenido', modo)} ORDER BY id DESC LIMIT 30`
             );
             if (misterios && misterios.length > 0) {
                 const ultimosTres = misterios.slice(0, 3).map(m => m.titulo).join(' | ');
@@ -1414,14 +1427,17 @@ app.get('/la-ruleta', (req, res) => {
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
         const imagenUrl = `${baseImgUrl}/assets/ruleta_editorial_og.jpg?v=2.0`;
 
-        const pagina = inyectarContenidoSEO(
+        let pagina = inyectarContenidoSEO(
             html,
             'La Ruleta del Búnker — Descubre Contenido Aleatorio | Expediente X Granaíno',
             'Gira la ruleta del búnker y descubre expedientes OVNI, crónica negra, misterios históricos y noticias paranormales al azar. Exploración interactiva de Expediente X Granaíno.',
             contenidoSeo,
             imagenUrl,
-            paginaUrl
+            paginaUrl,
+            null,
+            true
         );
+        pagina = pagina.replace(/<script[^>]*adsbygoogle\.js[^>]*><\/script>/i, '');
         res.send(pagina);
     });
 });
@@ -1447,7 +1463,8 @@ app.get('/noticias', async (req, res) => {
         let imagenUrl = `${baseImgUrl}/assets/incidente-eva9-lujar.png`;
 
         try {
-            const noticias = await db.query("SELECT id, titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 2500 ORDER BY fecha DESC LIMIT 20");
+            const modo = await modoPropioActivo();
+            const noticias = await db.query(`SELECT id, titulo, cuerpo, nivel_alerta, ubicacion, fecha, imagen_url FROM noticias WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo') AND ${condCalidad('cuerpo', modo)} ORDER BY fecha DESC LIMIT 20`);
             if (noticias && noticias.length > 0) {
                 // Generar descripción dinámica con los 3 últimos titulares
                 const ultimasTres = noticias.slice(0, 3).map(n => n.titulo).join(' | ');
@@ -1637,10 +1654,11 @@ app.get('/expedientes', async (req, res) => {
         const { paginaUrl, baseImgUrl } = obtenerUrlsRequest(req);
         let description = 'Informes detallados y crónicas de campo sobre avistamientos de OVNIS y misterios sin resolver.';
         let imagenUrl = `${baseImgUrl}/assets/ovni-mulhacen-1958.png`;
+        const modo = await modoPropioActivo();
 
         try {
             const expedientes = await db.query(
-                "SELECT id, titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500 ORDER BY fecha DESC LIMIT 30"
+                `SELECT id, titulo, contenido, usuario_nombre, tipo, fecha, imagen_url FROM expedientes WHERE (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND ${condCalidad('contenido', modo)} ORDER BY fecha DESC LIMIT 30`
             );
             if (expedientes && expedientes.length > 0) {
                 // Generar descripción dinámica con los 3 últimos expedientes
@@ -1891,6 +1909,7 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                     <a href="${fuenteReal}" target="_blank" rel="noopener noreferrer" style="color:#00d4ff;">Consultar fuente original de la investigación</a>
                 </p>` : '';
 
+            const modo = await modoPropioActivo();
             let bloqueRelacionadosSeo = '';
             const ua = (req.headers['user-agent'] || '').toLowerCase();
             if (!ua.includes('facebookexternalhit') && !ua.includes('meta-externalagent') && !ua.includes('facebot')) {
@@ -1899,7 +1918,7 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                     const colTexto = esNoticia ? 'cuerpo' : 'contenido';
                     const prefijoRuta = esCaso ? '/casos-abiertos' : esMisterio ? '/misterios-historicos' : esNoticia ? '/noticias' : '/expedientes';
                     const rels = await db.query(
-                        `SELECT id, titulo FROM ${tablaRel} WHERE id != ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND CHAR_LENGTH(COALESCE(${colTexto}, '')) >= 2500 ORDER BY id DESC LIMIT 5`,
+                        `SELECT id, titulo FROM ${tablaRel} WHERE id != ? AND (estado = 'aprobado' OR estado = 'publicado' OR estado = 'publicada' OR estado = 'activo') AND ${condCalidad(colTexto, modo)} ORDER BY id DESC LIMIT 5`,
                         [historia.id]
                     );
                     if (rels && rels.length > 0) {
@@ -1935,10 +1954,11 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                 .replace(/\u2029/g, '\\u2029');
             const initialScript = `<script>window.__INITIAL_HISTORIA__ = ${jsonHistoria}; window.__INITIAL_HISTORIA_TYPE__ = ${jsonTypes};</script>`;
 
-            // Criterio de calidad editorial para AdSense: artículos con menos de 2500 caracteres llevan noindex
+            // Criterio de calidad editorial para AdSense: en modo contenido propio solo se indexa contenido_propio = 1 (fallback >= 2500 caract.)
             const rawContenidoCompleto = (historia.contenido || historia.cuerpo || '').trim();
-            const esArticuloCorto = rawContenidoCompleto.length < 2500;
-            if (esArticuloCorto) res.set('X-Robots-Tag', 'noindex, nofollow');
+            const esIndexable = modo ? Number(historia.contenido_propio) === 1 : rawContenidoCompleto.length >= 2500;
+            const esNoIndex = !esIndexable;
+            if (esNoIndex) res.set('X-Robots-Tag', 'noindex, follow');
 
             let pagina = inyectarContenidoSEO(
                 html,
@@ -1948,9 +1968,12 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
                 imagenUrl,
                 paginaUrl,
                 posicion,
-                esArticuloCorto,
+                esNoIndex,
                 historia.fecha
             );
+            if (modo && esNoIndex) {
+                pagina = pagina.replace(/<script[^>]*adsbygoogle\.js[^>]*><\/script>/i, '');
+            }
             // Asegurar que la etiqueta canonical oficial apunte a la ruta canónica limpia
             pagina = pagina.replace(/<link [^>]*rel=["']canonical["'][^>]*>/gi, `<link rel="canonical" href="${canonicalUrl}" />`);
             pagina = pagina.replace('</head>', `${initialScript}\n</head>`);
@@ -2243,10 +2266,11 @@ app.get('/sitemap.xml', async (req, res) => {
 
         // Consulta unificada: incluimos todos los estados activos para TODAS las tablas
         const estadosActivos = "estado = 'aprobado' OR estado = 'publicado' OR estado = 'activo'";
+        const modo = await modoPropioActivo();
 
-        // 2. Expedientes / Relatos — Solo artículos con sustancia editorial (>= 2500 caracteres)
+        // 2. Expedientes / Relatos — Solo artículos indexables según criterio editorial
         try {
-            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500`);
+            const exps = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM expedientes WHERE (${estadosActivos}) AND ${condCalidad('contenido', modo)}`);
             exps.forEach(e => {
                 urls.push({
                     loc: `${domain}/expedientes/${e.id}`,
@@ -2257,9 +2281,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap exps:", e.message); }
 
-        // 3. Casos Abiertos / True Crime — Solo artículos con sustancia editorial (>= 2500 caracteres)
+        // 3. Casos Abiertos / True Crime — Solo artículos indexables según criterio editorial
         try {
-            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500`);
+            const casos = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM casos_abiertos WHERE (${estadosActivos}) AND ${condCalidad('contenido', modo)}`);
             casos.forEach(c => {
                 urls.push({
                     loc: `${domain}/casos-abiertos/${c.id}`,
@@ -2270,9 +2294,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap casos:", e.message); }
 
-        // 4. Misterios Históricos — Solo artículos con sustancia editorial (>= 2500 caracteres)
+        // 4. Misterios Históricos — Solo artículos indexables según criterio editorial
         try {
-            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(contenido, '')) >= 2500`);
+            const misterios = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM misterios_historicos WHERE (${estadosActivos}) AND ${condCalidad('contenido', modo)}`);
             misterios.forEach(m => {
                 urls.push({
                     loc: `${domain}/misterios-historicos/${m.id}`,
@@ -2283,9 +2307,9 @@ app.get('/sitemap.xml', async (req, res) => {
             });
         } catch (e) { console.error("Sitemap misterios:", e.message); }
 
-        // 5. Noticias — Solo noticias desarrolladas (>= 2500 caracteres)
+        // 5. Noticias — Solo noticias indexables según criterio editorial
         try {
-            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE (${estadosActivos}) AND CHAR_LENGTH(COALESCE(cuerpo, '')) >= 2500`);
+            const noticias = await db.query(`SELECT id, COALESCE(DATE_FORMAT(fecha, '%Y-%m-%d'), '${today}') AS lastmod FROM noticias WHERE (${estadosActivos}) AND ${condCalidad('cuerpo', modo)}`);
             noticias.forEach(n => {
                 urls.push({
                     loc: `${domain}/noticias/${n.id}`,

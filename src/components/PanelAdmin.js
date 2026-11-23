@@ -180,6 +180,19 @@ import { safeLocalStorage } from '../utils/storage';
 import Paginacion from './Paginacion';
 import { calcularRelevanciaBusqueda } from './BuscadorAZ';
 
+// Selección editorial propuesta (análisis del backup 2026-11-09): contenido propio, testimonios y temas locales de Granada
+const SUGERIDOS_PROPIOS = {
+    expedientes: [3, 7, 10, 23, 25, 28, 36, 39, 40, 52, 164, 172, 26, 35, 50, 53, 62, 66, 67, 99],
+    noticias: [7, 8, 43, 25, 27, 83],
+    casos_abiertos: [5, 31],
+    misterios_historicos: [54, 55, 112, 120]
+};
+const DUDOSOS_PROPIOS = {
+    expedientes: [13, 20, 21, 46, 47, 74, 157, 158, 159]
+};
+const esSugeridoPropio = (tab, item) => (SUGERIDOS_PROPIOS[tab] || []).includes(Number(item.id || item._id));
+const esDudosoPropio = (tab, item) => (DUDOSOS_PROPIOS[tab] || []).includes(Number(item.id || item._id));
+
 const PanelAdmin = () => {
     const [tab, setTab] = useState('inicio');
     const [datos, setDatos] = useState({
@@ -912,7 +925,36 @@ const PanelAdmin = () => {
 
     const esTabEditorial = ['expedientes', 'casos_abiertos', 'misterios_historicos', 'noticias'].includes(tab);
 
+    const toggleContenidoPropio = async (tablaTab, ids, valor) => {
+        const idsLimpios = [...new Set((ids || []).map(Number).filter(n => Number.isInteger(n) && n > 0))];
+        if (idsLimpios.length === 0) return;
+        try {
+            await axios.post(`${API_BASE_URL}/api/admin/contenido-propio`, {
+                tabla: tablaTab,
+                ids: idsLimpios,
+                valor
+            });
+            setDatos(prev => ({
+                ...prev,
+                [tablaTab]: (prev[tablaTab] || []).map(it =>
+                    idsLimpios.includes(Number(it.id || it._id)) ? { ...it, contenido_propio: valor } : it
+                )
+            }));
+        } catch (err) {
+            console.error('Error al actualizar contenido_propio:', err);
+            alert(err.response?.data?.error || '❌ No se pudo actualizar el estado de contenido propio.');
+        }
+    };
+
     const listaBase = datos[tab] || [];
+    const totalArticulosEditorial = esTabEditorial ? listaBase.length : 0;
+    const totalPropiosEditorial = esTabEditorial ? listaBase.filter(it => Number(it.contenido_propio) === 1).length : 0;
+    const idsSugeridosPendientes = esTabEditorial
+        ? listaBase
+            .filter(it => Number(it.contenido_propio) !== 1 && esSugeridoPropio(tab, it))
+            .map(it => Number(it.id || it._id))
+            .filter(n => Number.isInteger(n) && n > 0)
+        : [];
     const queryLimpia = (filtroBusqueda || '').trim();
 
     const listaActiva = listaBase
@@ -1320,6 +1362,51 @@ const PanelAdmin = () => {
                             ))}
                         </div>
                     )}
+
+                    {esTabEditorial && (
+                        <div style={{
+                            background: 'rgba(0, 255, 65, 0.06)',
+                            border: '1px solid rgba(0, 255, 65, 0.3)',
+                            borderRadius: '6px',
+                            padding: '12px 14px',
+                            marginBottom: '15px',
+                            fontFamily: 'monospace',
+                            fontSize: '0.78rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                                <span style={{ color: '#00ff41', fontWeight: 'bold' }}>
+                                    🟢 Contenido propio e indexación: {totalPropiosEditorial} propios / {totalArticulosEditorial} total
+                                </span>
+                                <button
+                                    type="button"
+                                    disabled={idsSugeridosPendientes.length === 0}
+                                    onClick={() => {
+                                        if (window.confirm(`¿Marcar ${idsSugeridosPendientes.length} artículos sugeridos de esta sección como PROPIOS (indexados en Google, portada y sitemap)?`)) {
+                                            toggleContenidoPropio(tab, idsSugeridosPendientes, 1);
+                                        }
+                                    }}
+                                    style={{
+                                        background: idsSugeridosPendientes.length > 0 ? '#ffd166' : '#333',
+                                        color: idsSugeridosPendientes.length > 0 ? '#000' : '#888',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        padding: '6px 12px',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.75rem',
+                                        cursor: idsSugeridosPendientes.length > 0 ? 'pointer' : 'not-allowed'
+                                    }}
+                                >
+                                    💡 Marcar sugeridos como propios ({idsSugeridosPendientes.length})
+                                </button>
+                            </div>
+                            <div style={{ color: '#bbb', fontSize: '0.73rem', lineHeight: '1.45' }}>
+                                Solo los artículos PROPIOS (tu investigación, tus visitas, testimonios recibidos) aparecen en Google, el sitemap y la portada. El resto sigue publicado pero con noindex y sin anuncios.
+                            </div>
+                        </div>
+                    )}
                     
                     <div className="table-responsive">
                         <table className="tabla-admin">
@@ -1376,18 +1463,51 @@ const PanelAdmin = () => {
                                                     {esTabEditorial && (() => {
                                                         const len = obtenerLongitudTexto(item);
                                                         const esLargo = len >= 2500;
+                                                        const esPropio = Number(item.contenido_propio) === 1;
+                                                        const esSugerido = !esPropio && esSugeridoPropio(tab, item);
+                                                        const esDudoso = !esPropio && esDudosoPropio(tab, item);
                                                         return (
-                                                            <small style={{
-                                                                fontSize: '0.68rem',
-                                                                padding: '1px 6px',
-                                                                borderRadius: '3px',
-                                                                fontFamily: 'monospace',
-                                                                background: esLargo ? 'rgba(0, 255, 65, 0.1)' : 'rgba(255, 177, 0, 0.15)',
-                                                                color: esLargo ? '#00ff41' : '#ffb100',
-                                                                border: `1px solid ${esLargo ? 'rgba(0, 255, 65, 0.35)' : 'rgba(255, 177, 0, 0.45)'}`
-                                                            }}>
-                                                                {esLargo ? `✅ ${len.toLocaleString('es-ES')} caract.` : `⚠️ ${len.toLocaleString('es-ES')} caract. (Corto)`}
-                                                            </small>
+                                                            <>
+                                                                <small style={{
+                                                                    fontSize: '0.68rem',
+                                                                    padding: '1px 6px',
+                                                                    borderRadius: '3px',
+                                                                    fontFamily: 'monospace',
+                                                                    background: esLargo ? 'rgba(0, 255, 65, 0.1)' : 'rgba(255, 177, 0, 0.15)',
+                                                                    color: esLargo ? '#00ff41' : '#ffb100',
+                                                                    border: `1px solid ${esLargo ? 'rgba(0, 255, 65, 0.35)' : 'rgba(255, 177, 0, 0.45)'}`
+                                                                }}>
+                                                                    {esLargo ? `✅ ${len.toLocaleString('es-ES')} caract.` : `⚠️ ${len.toLocaleString('es-ES')} caract. (Corto)`}
+                                                                </small>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleContenidoPropio(tab, [id], esPropio ? 0 : 1)}
+                                                                    title={esPropio ? 'Pulsa para dejarlo en noindex y sacarlo del sitemap' : 'Pulsa para marcar como contenido propio e indexar'}
+                                                                    style={{
+                                                                        fontSize: '0.68rem',
+                                                                        padding: '2px 7px',
+                                                                        borderRadius: '3px',
+                                                                        fontFamily: 'monospace',
+                                                                        fontWeight: 'bold',
+                                                                        cursor: 'pointer',
+                                                                        background: esPropio ? 'rgba(0, 255, 65, 0.16)' : 'rgba(180, 180, 180, 0.12)',
+                                                                        color: esPropio ? '#00ff41' : '#bbb',
+                                                                        border: `1px solid ${esPropio ? 'rgba(0, 255, 65, 0.5)' : 'rgba(180, 180, 180, 0.35)'}`
+                                                                    }}
+                                                                >
+                                                                    {esPropio ? '🟢 PROPIO (indexado)' : '⚪ NO INDEXADO'}
+                                                                </button>
+                                                                {esSugerido && (
+                                                                    <small style={{ fontSize: '0.68rem', color: '#ffd166', fontFamily: 'monospace' }}>
+                                                                        💡 sugerido
+                                                                    </small>
+                                                                )}
+                                                                {esDudoso && (
+                                                                    <small style={{ fontSize: '0.68rem', color: '#74c0fc', fontFamily: 'monospace' }}>
+                                                                        ❓ revisar
+                                                                    </small>
+                                                                )}
+                                                            </>
                                                         );
                                                     })()}
                                                 </div>
