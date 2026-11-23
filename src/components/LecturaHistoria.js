@@ -19,7 +19,35 @@ const IDS_IMAGEN_REAL = {
     noticias: [8, 25, 27, 28, 29, 30, 31, 32, 34, 36, 38, 39, 40, 41, 43, 44, 45, 46, 47, 49, 51, 52, 53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 74, 75, 76, 83, 85, 86]
 };
 
+const esUrlCapturaIA = (rawUrl) => {
+    const decoded = decodeURIComponent(String(rawUrl || '').trim());
+    const fileName = (decoded.split('/').pop() || '').replace(/^\d{10,14}[-_]/, '').replace(/^\d{10,14}[-_]/, '');
+    const low = fileName.toLowerCase();
+    if (/(?:^|[-_\s.])(real|archivo|captura|screenshot|whatsapp|pexels|unsplash|getty|gettyimages|wikimedia|wikipedia|hemeroteca|prensa)(?:$|[-_\s.\d])/i.test(fileName)) {
+        return false;
+    }
+    if (/gemini_generated_image|google\s*flow|fotorcreated|chatgpt|dalle|midjourney|leonardo|ideogram|flux/i.test(low)) {
+        return true;
+    }
+    if (/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(fileName) && !/aspect-ratio|resize-\d+/i.test(fileName)) {
+        return true;
+    }
+    if (/_[0-9a-f]{8}\.(jpg|jpeg|png|webp|avif)$/i.test(fileName)) {
+        return true;
+    }
+    if (/^watermarked_img_\d+/i.test(fileName) || /^\d{4}(\s*\(\d+\))?-cover\./i.test(fileName) || /^unnamed(\s*\(\d+\))?\.(jpg|jpeg|png|webp)$/i.test(fileName)) {
+        return true;
+    }
+    if (/^[a-z0-9]{20}\.(jpg|jpeg|png|webp)$/i.test(fileName)) {
+        return true;
+    }
+    return false;
+};
+
 const esImagenRealOArchivo = (seccionKey, itemId, rawUrl) => {
+    if (esUrlCapturaIA(rawUrl)) {
+        return false;
+    }
     if ((IDS_IMAGEN_REAL[seccionKey] || []).includes(Number(itemId))) {
         return true;
     }
@@ -1562,7 +1590,7 @@ const LecturaHistoria = ({ userAuth }) => {
                                     gap: '6px'
                                 }}
                             >
-                                📸 {language === 'en' ? 'PHOTO EVIDENCE ARCHIVE:' : 'ARCHIVO FOTOGRÁFICO:'} {capturasEvidencias.length} {language === 'en' ? 'EVIDENCES' : 'EVIDENCIAS DISPONIBLES'} ↓
+                                📸 {language === 'en' ? 'VISUAL GALLERY:' : 'GALERÍA VISUAL:'} {capturasEvidencias.length} {language === 'en' ? 'IMAGES' : 'IMÁGENES DISPONIBLES'} ↓
                             </span>
                         </p>
                     )}
@@ -1659,7 +1687,7 @@ const LecturaHistoria = ({ userAuth }) => {
                             onMouseEnter={e => { e.currentTarget.style.background = '#FFEDD5'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                             onMouseLeave={e => { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.transform = 'translateY(0)'; }}
                         >
-                            📷 <span>{language === 'en' ? 'VIEW PHOTO ARCHIVE OF THE CASE' : 'VER ARCHIVO FOTOGRÁFICO DEL CASO'} ({capturasEvidencias.length} {language === 'en' ? 'PHOTOS' : 'FOTOS'}) ↓</span>
+                            📷 <span>{language === 'en' ? 'VIEW VISUAL GALLERY OF THE CASE' : 'VER GALERÍA VISUAL DEL CASO'} ({capturasEvidencias.length} {language === 'en' ? 'IMAGES' : 'IMÁGENES'}) ↓</span>
                         </button>
                     </div>
                 )}
@@ -1890,9 +1918,9 @@ const LecturaHistoria = ({ userAuth }) => {
                                 title="Haz clic para plegar o desplegar la galería fotográfica"
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                    <span style={{ color: '#9c4221' }}>📷 {language === 'en' ? 'PHOTOGRAPHIC ARCHIVE OF THE CASE' : 'ARCHIVO FOTOGRÁFICO Y DOCUMENTAL'}</span>
+                                    <span style={{ color: '#9c4221' }}>📷 {language === 'en' ? 'VISUAL GALLERY AND CASE ARCHIVE' : 'GALERÍA VISUAL Y ARCHIVO DEL CASO'}</span>
                                     <span style={{ fontSize: '0.75rem', color: '#64748B', fontFamily: 'monospace', fontWeight: 'bold', background: '#F1F5F9', padding: '2px 8px', borderRadius: '4px', border: '1px solid #E2E8F0' }}>
-                                        {capturasEvidencias.length} {language === 'en' ? 'PHOTOS' : 'FOTOGRAFÍAS'}
+                                        {capturasEvidencias.length} {language === 'en' ? 'IMAGES' : 'IMÁGENES'}
                                     </span>
                                 </div>
                                 <button 
@@ -1909,42 +1937,51 @@ const LecturaHistoria = ({ userAuth }) => {
                                         cursor: 'pointer' 
                                     }}
                                 >
-                                    {galeriaAbierta ? (language === 'en' ? '▲ FOLD ARCHIVE' : '▲ PLEGAR ARCHIVO') : (language === 'en' ? '▼ VIEW PHOTOS' : '▼ VER FOTOGRAFÍAS')}
+                                    {galeriaAbierta ? (language === 'en' ? '▲ FOLD GALLERY' : '▲ PLEGAR GALERÍA') : (language === 'en' ? '▼ VIEW IMAGES' : '▼ VER IMÁGENES')}
                                 </button>
                             </div>
                             
                             {galeriaAbierta && (
                                 <>
                                     <div className="galeria-evidencias-grid fade-in">
-                                        {capturasEvidencias.map((url, idx) => (
-                                            <div 
-                                                key={idx} 
-                                                className="galeria-evidencia-item"
-                                                onClick={() => {
-                                                    setZoomNivel(1);
-                                                    setPanPosition({ x: 0, y: 0 });
-                                                    setCapturaExpandida(url);
-                                                }}
-                                                title={language === 'en' ? 'Click to enlarge photograph' : 'Clic para ampliar fotografía'}
-                                            >
-                                                <img 
-                                                    src={url} 
-                                                    alt={`Fotografía documental ${idx + 1}`} 
-                                                    referrerPolicy="no-referrer"
-                                                    onError={(e) => { 
-                                                        if (e.target.src && e.target.src.includes('maxres')) {
-                                                            e.target.src = e.target.src.replace('maxres', 'hq');
-                                                        } else {
-                                                            console.error("Fallo carga evidencia:", e.target.src);
-                                                            e.target.style.opacity = '0.3';
-                                                        }
+                                        {capturasEvidencias.map((url, idx) => {
+                                            const esCapIA = esUrlCapturaIA(url);
+                                            return (
+                                                <figure 
+                                                    key={idx} 
+                                                    className="galeria-evidencia-item"
+                                                    style={{ margin: 0 }}
+                                                    onClick={() => {
+                                                        setZoomNivel(1);
+                                                        setPanPosition({ x: 0, y: 0 });
+                                                        setCapturaExpandida(url);
                                                     }}
-                                                />
-                                                <span className="galeria-evidencia-badge">
-                                                    🔍 {language === 'en' ? `PHOTO #${idx + 1} · ENLARGE` : `FOTOGRAFÍA #${idx + 1} · AMPLIAR`}
-                                                </span>
-                                            </div>
-                                        ))}
+                                                    title={language === 'en' ? 'Click to enlarge image' : 'Clic para ampliar imagen'}
+                                                >
+                                                    <img 
+                                                        src={url} 
+                                                        alt={esCapIA ? `Imagen recreada por IA ${idx + 1}` : `Fotografía documental ${idx + 1}`} 
+                                                        referrerPolicy="no-referrer"
+                                                        onError={(e) => { 
+                                                            if (e.target.src && e.target.src.includes('maxres')) {
+                                                                e.target.src = e.target.src.replace('maxres', 'hq');
+                                                            } else {
+                                                                console.error("Fallo carga evidencia:", e.target.src);
+                                                                e.target.style.opacity = '0.3';
+                                                            }
+                                                        }}
+                                                    />
+                                                    <figcaption className="galeria-evidencia-badge" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                        <span>🔍 {language === 'en' ? `IMAGE #${idx + 1} · ENLARGE` : `IMAGEN #${idx + 1} · AMPLIAR`}</span>
+                                                        {esCapIA && (
+                                                            <span style={{ fontSize: '0.68rem', color: '#6b7280', fontStyle: 'italic', fontWeight: 'normal', textTransform: 'none' }}>
+                                                                {language === 'en' ? 'Image recreated by AI' : 'Imagen recreada por IA'}
+                                                            </span>
+                                                        )}
+                                                    </figcaption>
+                                                </figure>
+                                            );
+                                        })}
                                     </div>
                                     <div style={{ marginTop: '18px', textAlign: 'center' }}>
                                         <button 
@@ -2460,9 +2497,18 @@ const LecturaHistoria = ({ userAuth }) => {
                                     </button>
                                 )}
 
-                                <span style={{ color: '#F8FAFC', fontFamily: "'Merriweather', Georgia, serif", fontSize: '0.88rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>
-                                    Fotografía {indiceActual !== -1 ? indiceActual + 1 : 1} de {total}
-                                </span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
+                                    <span style={{ color: '#F8FAFC', fontFamily: "'Merriweather', Georgia, serif", fontSize: '0.88rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                                        {esUrlCapturaIA(capturaExpandida)
+                                            ? `${language === 'en' ? 'Image' : 'Imagen'} ${indiceActual !== -1 ? indiceActual + 1 : 1} de ${total}`
+                                            : `${language === 'en' ? 'Photograph' : 'Fotografía'} ${indiceActual !== -1 ? indiceActual + 1 : 1} de ${total}`}
+                                    </span>
+                                    {esUrlCapturaIA(capturaExpandida) && (
+                                        <span style={{ color: '#94A3B8', fontFamily: "'Merriweather', Georgia, serif", fontSize: '0.73rem', fontStyle: 'italic' }}>
+                                            {language === 'en' ? 'Image recreated by AI' : 'Imagen recreada por IA'}
+                                        </span>
+                                    )}
+                                </div>
 
                                 {total > 1 && (
                                     <button
