@@ -183,7 +183,7 @@ import { calcularRelevanciaBusqueda } from './BuscadorAZ';
 // Selección editorial propuesta (análisis del backup 2026-11-09): contenido propio, testimonios y temas locales de Granada
 const SUGERIDOS_PROPIOS = {
     expedientes: [3, 7, 10, 23, 25, 28, 36, 39, 40, 52, 164, 172, 26, 35, 50, 53, 62, 66, 67, 99],
-    noticias: [7, 8, 43, 25, 27, 83],
+    noticias: [8, 43, 25, 83],
     casos_abiertos: [5, 31],
     misterios_historicos: [54, 55, 112, 120]
 };

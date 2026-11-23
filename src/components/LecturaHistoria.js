@@ -502,24 +502,14 @@ const LecturaHistoria = ({ userAuth }) => {
             }
         }
 
-        // 2. Si tiene vídeo de YouTube asociado, generamos sus 3 fotogramas oficiales únicos en alta resolución
-        // (momento 25%, 50% y 75% del vídeo, evitando la miniatura por defecto que suele ser repetida)
+        // 2. Evitamos generar fotogramas automáticos de YouTube (maxres1/2/3) para no duplicar contenido
+        // cuando el vídeo ya está incrustado. Solo se muestran fotos/evidencias subidas manualmente.
         const ytCandidate = historia.youtube_url || 
                            (historia.fuente_url && /youtu/i.test(historia.fuente_url) ? historia.fuente_url : null) ||
                            (historia.video_url && /youtu/i.test(historia.video_url) ? historia.video_url : null) ||
                            (historia.url && /youtu/i.test(historia.url) ? historia.url : null);
         const currentYtId = extractYouTubeId(ytCandidate);
-        
-        if (currentYtId) {
-            const fotogramasYouTube = [
-                `https://img.youtube.com/vi/${currentYtId}/maxres1.jpg`,
-                `https://img.youtube.com/vi/${currentYtId}/maxres2.jpg`,
-                `https://img.youtube.com/vi/${currentYtId}/maxres3.jpg`
-            ];
-            setCapturasEvidencias(fotogramasYouTube);
-        } else {
-            setCapturasEvidencias([]);
-        }
+        setCapturasEvidencias([]);
 
         // 3. Buscar si en la base de datos de vídeos hay capturas subidas manualmente en alta resolución
         const buscarCapturasEnVideos = async () => {
@@ -996,8 +986,14 @@ const LecturaHistoria = ({ userAuth }) => {
         biblioData = null;
     }
 
+    // PAUSA TEMPORAL AMAZON / AUDIBLE DURANTE REVISIÓN ADSENSE (cambiar a false cuando aprueben AdSense)
+    const PAUSAR_AFILIADOS_ADSENSE = true;
+    if (PAUSAR_AFILIADOS_ADSENSE) {
+        bannerData = null;
+        biblioData = null;
+    }
+
     // RESPALDO AUTOMÁTICO DE AMAZON: En pausa temporal durante la revisión de AdSense.
-    // Los libros y bibliografías asignados a este artículo específico siguen mostrándose al 100%.
     const sinLibrosPropios = false;
 
     const obtenerHistoria = async (silencioso = false) => {
