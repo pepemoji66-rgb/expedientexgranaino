@@ -10,6 +10,31 @@ import AdSlot from './AdSlot';
 import { MapPin } from 'lucide-react';
 
 // ==========================================
+// DETECCIÓN DE FOTOGRAFÍAS REALES / ARCHIVO VS RECREACIONES IA
+// ==========================================
+const IDS_IMAGEN_REAL = {
+    expedientes: [3, 23, 27, 28, 32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 45, 48, 49, 50, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 63, 64, 66, 67, 68, 69, 70, 71, 72, 73, 75, 76, 77, 78, 79, 80, 81, 82, 84, 85, 86, 87, 89, 90, 92, 93, 94, 95, 96, 98, 99, 101, 103, 104, 107, 111, 112, 114, 120, 122, 125, 126, 128, 130, 135, 146, 154, 155, 156, 161, 166, 171],
+    casos_abiertos: [2, 4, 5, 6, 8, 9, 11, 13, 14, 15, 16, 17, 18, 19, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 61, 63, 64],
+    misterios_historicos: [6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 30, 32, 34, 35, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 56, 57, 58, 59, 61, 63, 72, 73, 80, 84, 85, 86, 87, 93, 98, 99, 102, 110, 114, 116, 122],
+    noticias: [8, 25, 27, 28, 29, 30, 31, 32, 34, 36, 38, 39, 40, 41, 43, 44, 45, 46, 47, 49, 51, 52, 53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 74, 75, 76, 83, 85, 86]
+};
+
+const esImagenRealOArchivo = (seccionKey, itemId, rawUrl) => {
+    if ((IDS_IMAGEN_REAL[seccionKey] || []).includes(Number(itemId))) {
+        return true;
+    }
+    const decoded = decodeURIComponent(String(rawUrl || '').trim()).toLowerCase();
+    const fileName = (decoded.split('/').pop() || '').replace(/^\d{10,14}[-_]/, '');
+    if (/(?:^|[-_\s.])(real|archivo|captura|screenshot|whatsapp|pexels|unsplash|getty|gettyimages|wikimedia|wikipedia|hemeroteca|prensa)(?:$|[-_\s.\d])/i.test(fileName)) {
+        return true;
+    }
+    if (/^(img|dsc|pxl)[-_]\d+/i.test(fileName)) {
+        return true;
+    }
+    return false;
+};
+
+// ==========================================
 // COMPONENTES DEL SISTEMA DE AFILIADOS AMAZON
 // ==========================================
 
@@ -1545,38 +1570,56 @@ const LecturaHistoria = ({ userAuth }) => {
 
                 {/* IMAGEN PRINCIPAL DE LA NOTICIA / EXPEDIENTE — EFECTO CINEMATOGRÁFICO AMBIENTAL */}
                 {(historia.imagen_url || historia.url_imagen) && (() => {
+                    const rawImg = historia.imagen_url || historia.url_imagen || '';
                     const imgUrl = (historia.imagen_url && historia.imagen_url.startsWith('http')) 
                         ? historia.imagen_url 
                         : (historia.url_imagen && historia.url_imagen.startsWith('http'))
                         ? historia.url_imagen
-                        : `${API_BASE_URL}/imagenes/${(historia.imagen_url || historia.url_imagen || '').split('/').pop()}`;
+                        : `${API_BASE_URL}/imagenes/${rawImg.split('/').pop()}`;
+                    const seccionKey = esMisterio ? 'misterios_historicos' : esNoticia ? 'noticias' : esCaso ? 'casos_abiertos' : 'expedientes';
+                    const mostrarPieIA = !esImagenRealOArchivo(seccionKey, historia.id, rawImg);
 
                     return (
-                        <div className="portada-lectura">
-                            <div className="portada-backdrop-ambient" style={{ backgroundImage: `url(${imgUrl})` }} />
-                            {/* MARCADOR TIPO PIN / CHUPACHUPS PARA LOCALIZAR EN MAPA SIN TAPAR LA CARA */}
-                            {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
-                                <button
-                                    onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : esCaso ? 'caso-' : 'exp-') + historia.id } })}
-                                    className="btn-localizar-portada"
-                                    title={t('readLocateRadar') || "Localizar en el radar"}
-                                    aria-label={t('readLocateRadar') || "Localizar en el radar"}
-                                >
-                                    <MapPin size={20} className="icono-pin-radar" />
-                                </button>
+                        <figure style={{ margin: '0 auto 30px auto', maxWidth: '820px', width: '100%' }}>
+                            <div className="portada-lectura" style={{ marginBottom: mostrarPieIA ? '6px' : 0 }}>
+                                <div className="portada-backdrop-ambient" style={{ backgroundImage: `url(${imgUrl})` }} />
+                                {/* MARCADOR TIPO PIN / CHUPACHUPS PARA LOCALIZAR EN MAPA SIN TAPAR LA CARA */}
+                                {historia.latitud && historia.longitud && parseFloat(historia.latitud) !== 0 && (
+                                    <button
+                                        onClick={() => navigate('/lugares', { state: { lat: historia.latitud, lng: historia.longitud, noticiaId: (esMisterio ? 'misterio-' : esNoticia ? 'noticia-' : esCaso ? 'caso-' : 'exp-') + historia.id } })}
+                                        className="btn-localizar-portada"
+                                        title={t('readLocateRadar') || "Localizar en el radar"}
+                                        aria-label={t('readLocateRadar') || "Localizar en el radar"}
+                                    >
+                                        <MapPin size={20} className="icono-pin-radar" />
+                                    </button>
+                                )}
+                                <img 
+                                    src={imgUrl} 
+                                    alt="Portada de la Evidencia"
+                                    className="lectura-imagen-portada"
+                                    style={{ objectPosition: historia.imagen_posicion || 'center center' }}
+                                    onLoad={(e) => { e.target.style.opacity = 1; }}
+                                    onError={(e) => { 
+                                        console.error("Fallo carga imagen:", e.target.src);
+                                        e.target.style.display = 'none'; 
+                                    }}
+                                />
+                            </div>
+                            {mostrarPieIA && (
+                                <figcaption style={{
+                                    textAlign: 'right',
+                                    fontSize: '0.73rem',
+                                    color: '#6b7280',
+                                    fontStyle: 'italic',
+                                    fontFamily: "'Merriweather', Georgia, serif",
+                                    padding: '2px 4px 0 4px',
+                                    lineHeight: 1.4
+                                }}>
+                                    {language === 'en' ? 'Image recreated by AI' : 'Imagen recreada por IA'}
+                                </figcaption>
                             )}
-                            <img 
-                                src={imgUrl} 
-                                alt="Portada de la Evidencia"
-                                className="lectura-imagen-portada"
-                                style={{ objectPosition: historia.imagen_posicion || 'center center' }}
-                                onLoad={(e) => { e.target.style.opacity = 1; }}
-                                onError={(e) => { 
-                                    console.error("Fallo carga imagen:", e.target.src);
-                                    e.target.style.display = 'none'; 
-                                }}
-                            />
-                        </div>
+                        </figure>
                     );
                 })()}
 
@@ -2067,6 +2110,23 @@ const LecturaHistoria = ({ userAuth }) => {
                     </div>
 
                     {/* 🎰 BANNER COMPACTO, RELATIVO Y MODERNO: LA RULETA DEL BÚNKER */}
+                    <p style={{
+                        marginTop: '24px',
+                        marginBottom: '18px',
+                        paddingTop: '12px',
+                        borderTop: '1px dashed rgba(0, 0, 0, 0.12)',
+                        fontSize: '0.75rem',
+                        color: '#6b7280',
+                        fontStyle: 'italic',
+                        fontFamily: "'Merriweather', Georgia, serif",
+                        lineHeight: 1.5,
+                        textAlign: 'center'
+                    }}>
+                        {language === 'en'
+                            ? 'Editorial note: Some images in this archive may be illustrative AI recreations when no original photograph of the event is available.'
+                            : 'Nota editorial: Algunas imágenes de este archivo pueden ser recreaciones ilustrativas generadas por IA cuando no se dispone de fotografía original del suceso.'}
+                    </p>
+
                     <div className="ruleta-strip-banner">
                         <div className="ruleta-strip-info">
                             <div className="ruleta-strip-icon">🎲</div>

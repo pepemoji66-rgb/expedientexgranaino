@@ -1940,6 +1940,7 @@ const renderizarArticuloSEO = async (req, res, id, srcParam = null) => {
     ${historia.fecha ? `<p><strong>Fecha de Documentación:</strong> ${new Date(historia.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>` : ''}
     <div style="white-space:pre-line;">${cuerpoSeoParrafos}</div>
     ${bloqueFuenteSeo}
+    <p style="margin-top:18px;font-size:0.78rem;color:#888;font-style:italic;">Nota editorial: Algunas imágenes de este archivo pueden ser recreaciones ilustrativas generadas por IA cuando no se dispone de fotografía original del suceso.</p>
     ${bloqueRelacionadosSeo}
 </article>`;
 
