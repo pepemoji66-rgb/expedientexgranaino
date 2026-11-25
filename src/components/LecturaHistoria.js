@@ -2017,7 +2017,47 @@ const LecturaHistoria = ({ userAuth }) => {
                                            (historia.video_url && /youtu/i.test(historia.video_url) ? historia.video_url : null) ||
                                            (historia.url && /youtu/i.test(historia.url) ? historia.url : null);
                         const videoId = extractYouTubeId(ytCandidate);
-                        if (!videoId) return null;
+                        const ytSubscribeBtn = (
+                            <div style={{ marginTop: '14px' }}>
+                                <a
+                                    href="https://www.youtube.com/channel/UCmxaLFbbNA6O2FtIYvZ6yUA?sub_confirmation=1"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        background: '#CC0000',
+                                        color: '#ffffff',
+                                        padding: '11px 22px',
+                                        borderRadius: '6px',
+                                        fontFamily: 'monospace',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.84rem',
+                                        letterSpacing: '0.5px',
+                                        textDecoration: 'none',
+                                        boxShadow: '0 3px 10px rgba(204, 0, 0, 0.25)'
+                                    }}
+                                >
+                                    ▶ {language === 'en' ? 'SUBSCRIBE TO OUR OFFICIAL YOUTUBE CHANNEL' : 'SUSCRÍBETE GRATIS AL CANAL DE YOUTUBE'}
+                                </a>
+                            </div>
+                        );
+                        if (!videoId) {
+                            return (
+                                <div style={{ margin: '30px 0', padding: '18px 22px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', textAlign: 'center' }}>
+                                    <p style={{ margin: '0 0 6px 0', fontSize: '0.95rem', fontWeight: 'bold', color: '#991B1B', fontFamily: 'Merriweather, serif' }}>
+                                        🎬 {language === 'en' ? 'Expediente X Granaíno on YouTube' : 'Expediente X Granaíno en YouTube'}
+                                    </p>
+                                    <p style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: '#444', fontFamily: 'Merriweather, serif', lineHeight: '1.5' }}>
+                                        {language === 'en'
+                                            ? 'Watch our cases in video format and support the research by subscribing for free.'
+                                            : 'Descubre nuestros expedientes en vídeo y apoya la investigación suscribiéndote gratis a nuestro canal oficial.'}
+                                    </p>
+                                    {ytSubscribeBtn}
+                                </div>
+                            );
+                        }
                         return (
                             <div style={{ margin: '30px 0', textAlign: 'center' }}>
                                 <div style={{
@@ -2047,9 +2087,10 @@ const LecturaHistoria = ({ userAuth }) => {
                                         allowFullScreen
                                     />
                                 </div>
-                                <p style={{ color: '#9c4221', fontSize: '0.8rem', marginTop: '10px', fontFamily: 'monospace', letterSpacing: '1px', fontWeight: 'bold' }}>
+                                <p style={{ color: '#9c4221', fontSize: '0.8rem', marginTop: '10px', marginBottom: '4px', fontFamily: 'monospace', letterSpacing: '1px', fontWeight: 'bold' }}>
                                     🎬 VÍDEO DEL EXPEDIENTE (CANAL OFICIAL)
                                 </p>
+                                {ytSubscribeBtn}
                             </div>
                         );
                     })()}
